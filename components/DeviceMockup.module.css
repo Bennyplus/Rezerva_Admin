@@ -1,0 +1,122 @@
+.container {
+  position: relative;
+  width: 100%;
+  max-width: 320px;
+  margin: 0 auto;
+  z-index: 1;
+}
+
+.phoneFrame {
+  position: relative;
+  width: 320px;
+  height: 650px;
+  background: #000000;
+  border-radius: 44px;
+  padding: 10px;
+  box-shadow:
+    0 0 0 2px #333,
+    0 10px 40px rgba(0, 0, 0, 0.2);
+  display: flex;
+  flex-direction: column;
+}
+
+.screenContainer {
+  flex: 1;
+  background: #fff;
+  border-radius: 36px;
+  overflow: hidden;
+  position: relative;
+}
+
+.notch {
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 140px;
+  height: 28px;
+  background: #000;
+  border-bottom-left-radius: 18px;
+  border-bottom-right-radius: 18px;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+.camera {
+  width: 8px;
+  height: 8px;
+  background: #1a1a1a;
+  border-radius: 50%;
+}
+
+.speaker {
+  width: 40px;
+  height: 4px;
+  background: #1a1a1a;
+  border-radius: 2px;
+}
+
+/* Physical Buttons */
+.silent,
+.volumeUp,
+.volumeDown,
+.power {
+  position: absolute;
+  background: #222;
+  border-radius: 2px;
+}
+
+.silent {
+  left: -2px;
+  top: 80px;
+  width: 3px;
+  height: 20px;
+}
+
+.volumeUp {
+  left: -2px;
+  top: 130px;
+  width: 3px;
+  height: 40px;
+}
+
+.volumeDown {
+  left: -2px;
+  top: 180px;
+  width: 3px;
+  height: 40px;
+}
+
+.power {
+  right: -2px;
+  top: 150px;
+  width: 3px;
+  height: 60px;
+}
+
+/* Blobs */
+.blobTop,
+.blobBottom {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  filter: blur(80px);
+  z-index: -1;
+  opacity: 0.2;
+}
+
+.blobTop {
+  top: -50px;
+  right: -100px;
+  background: #722BFF;
+}
+
+.blobBottom {
+  bottom: -50px;
+  left: -100px;
+  background: #CC97F4;
+}

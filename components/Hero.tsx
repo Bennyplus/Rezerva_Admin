@@ -38,7 +38,7 @@ export default function Hero() {
               <div className="hero__blob hero__blob--bottom" />
 
               <Image
-                src="/images/iPhone.svg"
+                src="https://prosper-django-bucket.s3.us-east-2.amazonaws.com/iPhone.svg"
                 alt="Drifully app on a phone showing available cars"
                 width={580}
                 height={600}
