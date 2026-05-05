@@ -102,9 +102,9 @@ export default function Reviews() {
               className = "review-card--tall";
             }
             return (
-              <ReviewCard 
-                key={review.id} 
-                review={review} 
+              <ReviewCard
+                key={review.id}
+                review={review}
                 className={className}
               />
             );
@@ -139,8 +139,15 @@ function ReviewCard({
   review: (typeof REVIEWS)[0],
   className?: string
 }) {
+  const hasCustomBg = ["r2", "r4", "r8"].includes(review.id);
+
   return (
-    <article className={`review-card ${className}`} role="listitem" id={review.id}>
+    <article
+      className={`review-card ${className}`}
+      role="listitem"
+      id={review.id}
+      style={hasCustomBg ? { backgroundColor: "var(--color-surface)" } : undefined}
+    >
       <div className="review-card__top">
         <h3 className="review-card__title">{review.title}</h3>
         <StarRating stars={review.stars} />

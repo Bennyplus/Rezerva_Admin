@@ -42,7 +42,7 @@
 
 .footer__column__grid {
   display: flex;
-  gap: 150px;
+  gap: 90px;
 }
 
 .footer__logo {
@@ -56,10 +56,10 @@
 }
 
 .footer__tagline {
-  font-family: var(--font-body);
-  font-size: 14px;
+  font-size: 16px;
   font-style: italic;
-  line-height: 1.6;
+  line-height: 125%;
+  letter-spacing: -0.8px;
   max-width: 320px;
   margin-bottom: var(--space-10);
 }
@@ -143,13 +143,18 @@
 
 .footer__newsletter-input {
   flex: 1;
-  padding: 12px 16px;
+  padding: 10px;
   border-radius: var(--radius-md);
   border: 1px solid var(--color-border);
   background: #ffffff;
   font-size: 14px;
   color: var(--color-primary);
   letter-spacing: 0.6px;
+}
+
+.footer__newsletter-input::placeholder {
+  letter-spacing: 0.1px;
+  line-height: 170%;
 }
 
 .footer__newsletter-btn {
@@ -184,7 +189,7 @@
 .footer__copy {
   font-family: var(--font-body);
   font-size: 14px;
-  color: var(--color-muted);
+  color: var(--color-primary);
 }
 
 .footer__socials {

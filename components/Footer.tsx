@@ -19,7 +19,7 @@ export default function Footer() {
         {/* Main Grid */}
         <div className={styles['footer__grid']}>
           {/* Brand & Apps column */}
-          <div className={styles['footer__brand-col']}>
+          <div className={styles['footer__brand-col']} style={{ minWidth: "403px" }}>
             <Link href="/" className={styles['footer__logo-link']}>
               <span className={styles['footer__logo']} id="footer-logo">
                 DRIFULLY

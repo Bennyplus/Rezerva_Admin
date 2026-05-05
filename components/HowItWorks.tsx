@@ -152,13 +152,11 @@ function DatePickerMockup() {
           style={{
             display: "flex",
             justifyContent: "space-between",
+            paddingBottom: "var(--space-4)"
           }}
         >
           <span className="date-picker-mock__value">30 Mar 2025 - 11 May 2025</span>
         </div>
-        <div
-          style={{ borderBottom: "1px solid var(--color-border)", margin: "6px 0" }}
-        />
         <div style={{ display: "flex", justifyContent: "space-between" }}>
           <div style={{ width: "47%", backgroundColor: "var(--color-surface)", padding: "var(--space-2)", borderRadius: "var(--radius-md)" }}>
             <p className="date-picker-mock__label">Daily Rate</p>
@@ -211,6 +209,7 @@ export function ConfirmMockup(props: any) {
     <div className={`step-card__confirm-box ${props.className || ''}`} style={{ width: "77%", backgroundColor: "#ffffff", borderRadius: "var(--radius-xl)", ...props.style }}>
       <div className="step-card__confirm-icon-wrapper">
         <div className="step-card__confirm-pulse"></div>
+        <div className="step-card__confirm-pulse-inner"></div>
         <div className="step-card__confirm-icon">
           <img src="/images/checkmark.svg" alt="Confirmed" aria-hidden="true" />
         </div>

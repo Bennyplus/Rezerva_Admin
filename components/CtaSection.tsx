@@ -33,10 +33,10 @@ export default function CtaSection() {
           <p className={styles['cta-section__sub']}>
             Download Drifully and start your journey today.
           </p>
-          <DownloadButtons 
-            variant="cta" 
-            playIconSrc="/images/cta-google_play.png"
-            appIconSrc="/images/cta-appstore.png"
+          <DownloadButtons
+            variant="cta"
+            playIconSrc="/images/google-play.svg"
+            appIconSrc="/images/apple.svg"
           />
         </div>
 
