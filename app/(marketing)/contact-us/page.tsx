@@ -20,7 +20,7 @@ export default function ContactUsPage() {
               <p className="contact-desc">
                 Questions, issues, or special requests? Reach out and we&rsquo;ll get back to you quickly.
               </p>
-              
+
               <div className="contact-info-card">
                 <div className="contact-info-title">Chat with us directly</div>
                 <div className="contact-info-item">Email: support@drifully.com</div>
