@@ -6,6 +6,7 @@ import StatCard from "@/components/admin/StatCard";
 import Pagination from "@/components/admin/Pagination";
 import UploadMethodModal from "@/components/admin/UploadMethodModal";
 import AddVehicleForm from "@/components/admin/AddVehicleForm";
+import BulkUploadModal from "@/components/admin/BulkUploadModal";
 import { ADMIN_VEHICLES, VEHICLE_STATS_EMPTY, VEHICLE_STATS_POPULATED } from "../../../../../data/admin-vehicles";
 import styles from "./vehicles.module.css";
 
@@ -17,6 +18,7 @@ export default function VehiclesPage() {
   const [currentPage, setCurrentPage] = useState(2);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [showUploadModal, setShowUploadModal] = useState(false);
+  const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
   const [currentView, setCurrentView] = useState<"list" | "add-manual">("list");
 
   const stats = isEmpty ? VEHICLE_STATS_EMPTY : VEHICLE_STATS_POPULATED;
@@ -332,9 +334,15 @@ export default function VehiclesPage() {
           setCurrentView("add-manual");
         }}
         onSelectBulk={() => {
-          alert("Bulk upload coming soon!");
           setShowUploadModal(false);
+          setShowBulkUploadModal(true);
         }}
+      />
+
+      {/* Bulk Upload Modal */}
+      <BulkUploadModal 
+        isOpen={showBulkUploadModal}
+        onClose={() => setShowBulkUploadModal(false)}
       />
     </div>
   );

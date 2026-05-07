@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import CustomSelect from "./CustomSelect";
 import styles from "./CreateNotificationForm.module.css";
+
+const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
 interface CreateNotificationFormProps {
   onCancel: () => void;
@@ -58,6 +61,17 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
 
   const isFormValid = formData.title && formData.message && formData.recipients && formData.channel;
 
+  const editorConfig = useMemo(() => ({
+    readonly: false,
+    placeholder: "Enter message content",
+    toolbarAdaptive: false,
+    buttons: ['bold', 'italic', 'underline', 'strikethrough', '|', 'ul', 'ol', '|', 'outdent', 'indent', '|', 'undo', 'redo'],
+    showCharsCounter: false,
+    showWordsCounter: false,
+    showXPathInStatusbar: false,
+    height: 200,
+  }), []);
+
   return (
     <div className={styles.container}>
       {/* Header */}
@@ -100,13 +114,13 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
 
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Message Content</label>
-              <textarea
-                name="message"
-                placeholder="Enter message content"
-                className={styles.textarea}
-                value={formData.message}
-                onChange={handleChange}
-              />
+              <div className={styles.editorContainer}>
+                <JoditEditor
+                  value={formData.message}
+                  config={editorConfig}
+                  onChange={(newContent) => setFormData((prev) => ({ ...prev, message: newContent }))}
+                />
+              </div>
             </div>
 
             <div className={styles.fieldGroup}>
@@ -282,41 +296,32 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
             </div>
             <div className={styles.previewBody}>
               <h3 className={styles.previewTitle}>
-                {formData.title ? `You're Invited: ${formData.title} Is Here!` : "You're Invited: [Event Name] Is Here!"}
+                {formData.title}
               </h3>
-              
+
               <div className={styles.previewTextWrapper}>
-                <p className={styles.previewSubtitle}>Something exciting is coming your way!</p>
-                <p className={styles.previewMainText}>
-                  {formData.message || "Join us at the Drifully Fun Fair for a day packed with fun, entertainment, exclusive offers, and unforgettable experiences. Whether you're a loyal customer or discovering Drifully for the first time, this is the perfect opportunity to connect, celebrate, and enjoy everything we have in store. Expect exciting activities, amazing giveaways, special discounts, live entertainment, and a chance to explore our premium fleet up close."}
-                </p>
+                <p className={styles.previewSubtitle}></p>
+                <div
+                  className={styles.previewMainText}
+                  dangerouslySetInnerHTML={{
+                    __html: formData.message
+                  }}
+                />
               </div>
 
               <div className={styles.previewDetails}>
+                <div className={styles.detailItem}></div>
                 <div className={styles.detailItem}>
-                  <span className={styles.detailIcon}>📍</span>
-                  <span className={styles.detailLabel}>Venue:</span>
-                  <span className={styles.detailValue}>[Event Location]</span>
+                  <span className={styles.detailIcon}></span>
+                  <span className={styles.detailLabel}></span>
+                  <span className={styles.detailValue}></span>
                 </div>
                 <div className={styles.detailItem}>
-                  <span className={styles.detailIcon}>📅</span>
-                  <span className={styles.detailLabel}>Date:</span>
-                  <span className={styles.detailValue}>{formData.date || "[Event Date]"}</span>
-                </div>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailIcon}>⏰</span>
-                  <span className={styles.detailLabel}>Time:</span>
-                  <span className={styles.detailValue}>[Event Time]</span>
+                  <span className={styles.detailIcon}></span>
+                  <span className={styles.detailLabel}></span>
+                  <span className={styles.detailValue}></span>
                 </div>
               </div>
-
-              <p className={styles.previewClosing}>
-                Bring your friends and family—there's something for everyone.<br />
-                We can't wait to see you there!<br />
-                Best regards,<br />
-                <strong>The Drifully Team</strong>
-              </p>
-
               {formData.cta && (
                 <button className={styles.previewCTA}>{formData.cta}</button>
               )}

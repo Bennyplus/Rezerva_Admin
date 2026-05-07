@@ -41,7 +41,8 @@
   position: absolute;
   top: calc(100% + 4px);
   left: 0;
-  right: 0;
+  min-width: 100%;
+  white-space: nowrap;
   background: #ffffff;
   border: 1px solid #E2E4E9;
   border-radius: 12px;
@@ -123,4 +124,10 @@
     opacity: 1;
     transform: translateY(0);
   }
+}
+.triggerMinimal {
+  border: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
 }
