@@ -15,6 +15,7 @@ interface CustomSelectProps {
   options: Option[];
   onChange: (name: string, value: string) => void;
   showSearch?: boolean;
+  variant?: 'default' | 'minimal';
 }
 
 export default function CustomSelect({
@@ -24,6 +25,7 @@ export default function CustomSelect({
   options,
   onChange,
   showSearch = false,
+  variant = 'default',
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -48,9 +50,9 @@ export default function CustomSelect({
   );
 
   return (
-    <div className={styles.container} ref={containerRef}>
+    <div className={styles.container} ref={containerRef} style={{ zIndex: isOpen ? 50 : 1 }}>
       <div
-        className={`${styles.trigger} ${isOpen ? styles.triggerActive : ""}`}
+        className={`${styles.trigger} ${isOpen ? styles.triggerActive : ""} ${variant === 'minimal' ? styles.triggerMinimal : ""}`}
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={selectedOption ? styles.value : styles.placeholder}>

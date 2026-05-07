@@ -150,6 +150,47 @@
   resize: vertical;
 }
 
+/* Jodit Editor Wrapper */
+.editorContainer {
+  width: 100%;
+  border-radius: 10px;
+  border: 1px solid #E2E4E9;
+  transition: border-color 0.2s;
+  overflow: hidden;
+}
+
+.editorContainer:focus-within {
+  border-color: #111111;
+}
+
+.editorContainer :global(.jodit-container) {
+  border: none !important;
+}
+
+.editorContainer :global(.jodit-wysiwyg) {
+  padding: 10px 14px !important;
+  font-size: 13.5px !important;
+  color: #111111 !important;
+  min-height: 100px !important;
+  background: transparent !important;
+}
+
+.editorContainer :global(.jodit-wysiwyg:focus) {
+  outline: none !important;
+}
+
+.editorContainer :global(.jodit-toolbar__box) {
+  border-bottom: 1px solid #E2E4E9 !important;
+  background-color: #F9FAFB !important;
+}
+
+.editorContainer :global(.jodit-placeholder) {
+  color: #868C98 !important;
+  opacity: 0.6 !important;
+  font-size: 13.5px !important;
+  padding: 10px 14px !important;
+}
+
 /* Upload Box */
 .imageSection {
   margin-top: 8px;
@@ -498,6 +539,24 @@
   color: #525866;
   line-height: 1.6;
   margin: 0;
+}
+
+.previewMainText p {
+  margin: 0 0 8px 0;
+}
+
+.previewMainText p:last-child {
+  margin-bottom: 0;
+}
+
+.previewMainText ul, 
+.previewMainText ol {
+  margin: 0 0 8px 0;
+  padding-left: 20px;
+}
+
+.previewMainText li {
+  margin-bottom: 4px;
 }
 
 .previewDetails {

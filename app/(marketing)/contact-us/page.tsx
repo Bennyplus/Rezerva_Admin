@@ -1,13 +1,36 @@
-import React from 'react';
+"use client";
+
+import React, { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
+import CustomSelect from '@/components/admin/CustomSelect';
 
-export const metadata = {
-  title: 'Contact Us | Drifully',
-  description: 'Questions, issues, or special requests? Reach out and we\'ll get back to you quickly.',
-};
+const subjectOptions = [
+  { value: "general_inquiry", label: "General Inquiry" },
+  { value: "booking_issue", label: "Booking Issue" },
+  { value: "chauffeur_service", label: "Chauffeur Service" },
+  { value: "support", label: "Support" },
+  { value: "other", label: "Other" },
+];
+
+const phonePrefixOptions = [
+  { value: "+1", label: "🇺🇸 +1" },
+  { value: "+44", label: "🇬🇧 +44" },
+  { value: "+234", label: "🇳🇬 +234" },
+];
 
 export default function ContactUsPage() {
+  const [subject, setSubject] = useState("");
+  const [phonePrefix, setPhonePrefix] = useState("+1");
+
+  const handleSelectChange = (name: string, value: string) => {
+    if (name === "subject") {
+      setSubject(value);
+    } else if (name === "phonePrefix") {
+      setPhonePrefix(value);
+    }
+  };
+
   return (
     <>
       <Navbar />
@@ -48,25 +71,29 @@ export default function ContactUsPage() {
                       Phone Number <span>(Optional)</span>
                     </label>
                     <div className="contact-phone-wrapper">
-                      <select className="contact-form-select" defaultValue="+1">
-                        <option value="+1">🇺🇸 +1</option>
-                        <option value="+44">🇬🇧 +44</option>
-                        <option value="+234">🇳🇬 +234</option>
-                      </select>
+                      <div style={{ width: '100px', borderRight: '1px solid #E2E4E9' }}>
+                        <CustomSelect
+                          name="phonePrefix"
+                          value={phonePrefix}
+                          placeholder="+1"
+                          options={phonePrefixOptions}
+                          onChange={handleSelectChange}
+                          variant="minimal"
+                        />
+                      </div>
                       <input type="tel" className="contact-form-input" placeholder="(555) 000-0000" />
                     </div>
                   </div>
 
                   <div className="contact-form-group">
                     <label className="contact-form-label">Subject</label>
-                    <select className="contact-form-select" defaultValue="">
-                      <option value="" disabled>Select a topic</option>
-                      <option value="general_inquiry">General Inquiry</option>
-                      <option value="booking_issue">Booking Issue</option>
-                      <option value="chauffeur_service">Chauffeur Service</option>
-                      <option value="support">Support</option>
-                      <option value="other">Other</option>
-                    </select>
+                    <CustomSelect
+                      name="subject"
+                      value={subject}
+                      placeholder="General Inquiry"
+                      options={subjectOptions}
+                      onChange={handleSelectChange}
+                    />
                   </div>
 
                   <div className="contact-form-group">
