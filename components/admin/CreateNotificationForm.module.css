@@ -444,10 +444,10 @@
   padding: 0 24px;
   border-radius: 10px;
   border: none;
-  background: #111111;
+  background: rgba(246, 248, 250, 1);
   font-size: 14px;
   font-weight: 600;
-  color: #ffffff;
+  color: rgba(205, 208, 213, 1);
   cursor: pointer;
   transition: opacity 0.2s;
 }
@@ -460,7 +460,7 @@
 /* ─── Preview Section ─── */
 .previewSection {
   background: #F6F8FA;
-  padding: 32px;
+  padding: 12px;
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -468,47 +468,37 @@
 
 .previewCard {
   width: 100%;
-  max-width: 460px;
-  background: #ffffff;
-  border-radius: 12px;
-  border: 1px solid #E2E4E9;
   overflow: hidden;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
 }
 
 .previewHeader {
-  padding: 24px 20px 0;
+  padding: 24px 20px 12px;
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
 }
 
 .previewLogo {
   font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 14px;
+  text-transform: uppercase;
+  font-style: italic;
+  font-weight: 600;
+  font-size: 20px;
   color: #111111;
-  letter-spacing: 0.1em;
+  line-height: 125%;
+  letter-spacing: -0.75px;
   margin: 0;
-}
-
-.previewImageContainer {
-  padding: 20px;
 }
 
 .previewImage {
   width: 100%;
-  aspect-ratio: 16 / 9;
-  border-radius: 12px;
+  height: 145px;
+  border-radius: 10px;
   overflow: hidden;
-  background: #F9FAFB;
+  background: rgba(255, 255, 255, 1);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
-}
-
-.previewBody {
-  padding: 0 20px 32px;
 }
 
 .previewTitle {
@@ -541,6 +531,11 @@
   margin: 0;
 }
 
+.previewPlaceholder {
+  color: #CDD0D5 !important;
+  font-style: italic;
+}
+
 .previewMainText p {
   margin: 0 0 8px 0;
 }
@@ -549,7 +544,7 @@
   margin-bottom: 0;
 }
 
-.previewMainText ul, 
+.previewMainText ul,
 .previewMainText ol {
   margin: 0 0 8px 0;
   padding-left: 20px;
@@ -612,16 +607,20 @@
 
 .footerBrand {
   font-family: var(--font-heading);
-  font-weight: 800;
-  font-size: 14px;
+  font-weight: 600;
+  font-size: 20px;
+  line-height: 125%;
+  letter-spacing: -0.75px;
   color: #111111;
   margin-bottom: 8px;
 }
 
 .footerText {
-  font-size: 12px;
-  color: #525866;
-  line-height: 1.6;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 170%;
+  color: #111;
+  letter-spacing: -0.3px;
   margin: 0 0 20px;
 }
 
@@ -632,10 +631,10 @@
 }
 
 .appBtn {
-  background: #ffffff;
+  background: transparent;
   border: 1px solid #E2E4E9;
-  border-radius: 8px;
-  padding: 8px;
+  border-radius: 10px;
+  padding: 10px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -659,13 +658,13 @@
 }
 
 .appBtnSub {
-  font-size: 8px;
+  font-size: 14px;
   opacity: 0.7;
 }
 
 .appBtnMain {
-  font-size: 11px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 @media (max-width: 1200px) {

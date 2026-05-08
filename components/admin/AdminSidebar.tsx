@@ -29,7 +29,6 @@ const NAV_SECTIONS = [
     label: "Users",
     items: [
       { label: "Users", href: "/admin/users", icon: "users" },
-      { label: "Reviews", href: "/admin/reviews", icon: "reviews" },
     ],
   },
   {
@@ -62,6 +61,12 @@ function NavIcon({ icon }: { icon: string }) {
       return <svg {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
     case "reviews":
       return <svg {...props}><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>;
+    case "teams":
+      return <svg {...props}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M23 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
+    case "drivers":
+      return <svg {...props}><circle cx="12" cy="8" r="4" /><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7" /><path d="M10 14l2 3 2-3" /></svg>;
+    case "customers":
+      return <svg {...props}><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>;
     case "payments":
       return <svg {...props}><rect x="1" y="4" width="22" height="16" rx="2" ry="2" /><line x1="1" y1="10" x2="23" y2="10" /><path d="M6 16h.01M10 16h4" /></svg>;
     default:
@@ -72,6 +77,7 @@ function NavIcon({ icon }: { icon: string }) {
 export default function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [usersExpanded, setUsersExpanded] = useState(true);
   const pathname = usePathname();
 
   /* Close mobile sidebar on route change */
@@ -164,19 +170,59 @@ export default function AdminSidebar() {
               <ul className={styles.navList}>
                 {section.items.map((item) => (
                   <li key={item.href}>
-                    <Link
-                      href={item.href}
-                      className={`${styles.navItem} ${isActive(item.href) ? styles.navItemActive : ""}`}
-                      id={`admin-nav-${item.icon}`}
-                    >
-                      <NavIcon icon={item.icon} />
-                      {!collapsed && <span>{item.label}</span>}
-                      {!collapsed && item.icon === "users" && (
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={styles.chevron}>
-                          <polyline points="9 18 15 12 9 6" />
-                        </svg>
-                      )}
-                    </Link>
+                    {item.icon === "users" ? (
+                      /* Users — collapsible group trigger */
+                      <>
+                        <button
+                          className={`${styles.navItem} ${styles.navItemBtn} ${isActive(item.href) ? styles.navItemActive : ""}`}
+                          id={`admin-nav-${item.icon}`}
+                          onClick={() => setUsersExpanded((v) => !v)}
+                        >
+                          <NavIcon icon={item.icon} />
+                          {!collapsed && <span>{item.label}</span>}
+                          {!collapsed && (
+                            <svg
+                              width="14" height="14" viewBox="0 0 24 24"
+                              fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round"
+                              className={`${styles.chevron} ${usersExpanded ? styles.chevronOpen : ""}`}
+                            >
+                              <polyline points="9 18 15 12 9 6" />
+                            </svg>
+                          )}
+                        </button>
+
+                        {/* Sub-items */}
+                        {usersExpanded && !collapsed && (
+                          <ul className={styles.subNavList}>
+                            {[
+                              { label: "Teams", href: "/admin/teams", icon: "teams" },
+                              { label: "Drivers", href: "/admin/drivers", icon: "drivers" },
+                              { label: "Customers", href: "/admin/customers", icon: "customers" },
+                              { label: "Reviews", href: "/admin/reviews", icon: "reviews" },
+                            ].map((sub) => (
+                              <li key={sub.href}>
+                                <Link
+                                  href={sub.href}
+                                  className={`${styles.subNavItem} ${isActive(sub.href) ? styles.navItemActive : ""}`}
+                                  id={`admin-nav-${sub.icon}`}
+                                >
+                                  {sub.label}
+                                </Link>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </>
+                    ) : (
+                      <Link
+                        href={item.href}
+                        className={`${styles.navItem} ${isActive(item.href) ? styles.navItemActive : ""}`}
+                        id={`admin-nav-${item.icon}`}
+                      >
+                        <NavIcon icon={item.icon} />
+                        {!collapsed && <span>{item.label}</span>}
+                      </Link>
+                    )}
                   </li>
                 ))}
               </ul>

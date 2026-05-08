@@ -295,33 +295,20 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
               </div>
             </div>
             <div className={styles.previewBody}>
-              <h3 className={styles.previewTitle}>
-                {formData.title}
+              <h3 className={`${styles.previewTitle} ${!formData.title ? styles.previewPlaceholder : ""}`}>
+                {formData.title || "You're Invited: Drifully Fun Fair Is Here!"}
               </h3>
 
               <div className={styles.previewTextWrapper}>
                 <p className={styles.previewSubtitle}></p>
                 <div
-                  className={styles.previewMainText}
+                  className={`${styles.previewMainText} ${!formData.message ? styles.previewPlaceholder : ""}`}
                   dangerouslySetInnerHTML={{
-                    __html: formData.message
+                    __html: formData.message || "Something exciting is coming your way! <br /><br /> Join us at the Drifully Fun Fair for a day packed with fun, entertainment, exclusive offers, and unforgettable experiences. Whether you're a loyal customer or discovering Drifully for the first time, this is the perfect opportunity to connect, celebrate, and enjoy everything we have in store.Expect exciting activities, amazing giveaways, special discounts, live entertainment, and a chance to explore our premium fleet up close. <br/><br/><br/>📍 Venue: [Event Location]<br/>📅 Date: [Event Date]<br/>⏰ Time: [Event Time]<br/><br/> <br/> Bring your friends and family—there's something for everyone.<br/>We can't wait to see you there!<br/>Best regards,<br/>The Drifully Team"
                   }}
                 />
               </div>
 
-              <div className={styles.previewDetails}>
-                <div className={styles.detailItem}></div>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailIcon}></span>
-                  <span className={styles.detailLabel}></span>
-                  <span className={styles.detailValue}></span>
-                </div>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailIcon}></span>
-                  <span className={styles.detailLabel}></span>
-                  <span className={styles.detailValue}></span>
-                </div>
-              </div>
               {formData.cta && (
                 <button className={styles.previewCTA}>{formData.cta}</button>
               )}
@@ -329,22 +316,21 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
             <div className={styles.previewFooter}>
               <p className={styles.footerBrand}>DRIFULLY</p>
               <p className={styles.footerText}>
-                Wherever you're going, start with Drifully. Download the app and take control of your next journey.
+                Wherever you're going, start with Drifully.
+                <br /> Download the app and take control of your next journey.
               </p>
               <div className={styles.appStoreButtons}>
                 <button className={`${styles.appBtn} ${styles.appBtnDark}`}>
-                  <PlayStoreIcon />
-                  <div className={styles.appBtnText}>
-                    <span className={styles.appBtnSub}>Get it on</span>
-                    <span className={styles.appBtnMain}>Google Play</span>
-                  </div>
+                  <span className={styles.appBtnText}>
+                    <span className={styles.appBtnMain}>Get it on Google Play</span>
+                  </span>
+                  <Image src="/icons/google-play.svg" alt="" width={18} height={18} />
                 </button>
                 <button className={styles.appBtn}>
-                  <AppleIcon />
-                  <div className={styles.appBtnText}>
-                    <span className={styles.appBtnSub}>Download on the</span>
-                    <span className={styles.appBtnMain}>App Store</span>
-                  </div>
+                  <span className={styles.appBtnText}>
+                    <span className={styles.appBtnMain}>Download on the App Store</span>
+                  </span>
+                  <Image src="/icons/apple.svg" alt="" width={18} height={18} />
                 </button>
               </div>
             </div>
