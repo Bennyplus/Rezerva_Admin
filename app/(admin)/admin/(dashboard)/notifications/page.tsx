@@ -5,14 +5,16 @@ import Image from "next/image";
 import StatCard from "@/components/admin/StatCard";
 import Pagination from "@/components/admin/Pagination";
 import CreateNotificationForm from "@/components/admin/CreateNotificationForm";
+import NotificationDetailsModal from "@/components/admin/NotificationDetailsModal";
 import { NOTIFICATION_STATS, ADMIN_NOTIFICATIONS } from "@/data/admin-notifications";
 import styles from "./notifications.module.css";
 
 export default function NotificationsPage() {
-  const [isEmpty, setIsEmpty] = useState(true);
+  const [isEmpty, setIsEmpty] = useState(ADMIN_NOTIFICATIONS.length === 0);
   const [currentView, setCurrentView] = useState<"list" | "create">("list");
   const [currentPage, setCurrentPage] = useState(2);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
 
   const toggleDropdown = (id: string) => {
     setActiveDropdown(activeDropdown === id ? null : id);
@@ -167,10 +169,18 @@ export default function NotificationsPage() {
                           {activeDropdown === notif.id && (
                             <div className={styles.dropdown}>
                               <button className={styles.dropdownItem}>Edit Notification</button>
-                              <button className={styles.dropdownItem}>View Details</button>
+                              <button 
+                                className={styles.dropdownItem}
+                                onClick={() => {
+                                  setSelectedNotificationId(notif.id);
+                                  setActiveDropdown(null);
+                                }}
+                              >
+                                View Details
+                              </button>
                               <button className={styles.dropdownItem}>Cancel Schedule</button>
                               <button className={styles.dropdownItem}>Duplicate</button>
-                              <button className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`}>Deactivate</button>
+                              <button className={styles.dropdownItem}>Deactivate</button>
                             </div>
                           )}
                         </div>
@@ -190,6 +200,13 @@ export default function NotificationsPage() {
             />
           </div>
         </>
+      )}
+
+      {selectedNotificationId && (
+        <NotificationDetailsModal
+          notification={ADMIN_NOTIFICATIONS.find((n) => n.id === selectedNotificationId)}
+          onClose={() => setSelectedNotificationId(null)}
+        />
       )}
     </div>
   );

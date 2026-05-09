@@ -362,20 +362,7 @@
   margin: 16px 0;
 }
 
-.dateInputWrapper {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
 
-.dateIcon {
-  position: absolute;
-  right: 14px;
-  color: #868C98;
-  display: flex;
-  align-items: center;
-  pointer-events: none;
-}
 
 .toggle {
   width: 36px;

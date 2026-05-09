@@ -4,6 +4,7 @@ import { useState, useRef, useEffect, useMemo } from "react";
 import Image from "next/image";
 import dynamic from "next/dynamic";
 import CustomSelect from "./CustomSelect";
+import CustomDateTimePicker from "./CustomDateTimePicker";
 import styles from "./CreateNotificationForm.module.css";
 
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
@@ -22,7 +23,7 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
     cta: "",
     recipients: "",
     channel: "",
-    date: "",
+    date: new Date().toISOString(),
     schedule: false,
   });
 
@@ -147,7 +148,9 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
                   options={[
                     { value: "all", label: "All Users" },
                     { value: "active", label: "Active Users" },
+                    { value: "inactive", label: "Inactive Users" },
                     { value: "new", label: "New Users" },
+                    { value: "custom", label: "Custom" },
                   ]}
                   onChange={handleSelectChange}
                 />
@@ -160,8 +163,8 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
                   placeholder="e.g Email"
                   options={[
                     { value: "email", label: "Email" },
-                    { value: "push", label: "Push Notification" },
-                    { value: "sms", label: "SMS" },
+                    { value: "push", label: "Push (In-App) Notification" },
+                    { value: "sms", label: "SMS " },
                   ]}
                   onChange={handleSelectChange}
                 />
@@ -249,19 +252,10 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
 
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Date</label>
-              <div className={styles.dateInputWrapper}>
-                <input
-                  type="text"
-                  name="date"
-                  placeholder="Select Date"
-                  className={styles.input}
-                  value={formData.date}
-                  onChange={handleChange}
-                />
-                <div className={styles.dateIcon}>
-                  <CalendarIcon />
-                </div>
-              </div>
+              <CustomDateTimePicker
+                value={formData.date ? new Date(formData.date) : new Date()}
+                onChange={(date) => setFormData(prev => ({ ...prev, date: date.toISOString() }))}
+              />
             </div>
 
             <div className={styles.formFooter}>
