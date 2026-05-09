@@ -1,0 +1,221 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.modal {
+  background: rgba(255, 255, 255, 1);
+  border-radius: 16px;
+  width: 100%;
+  max-width: 800px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: transparent;
+  border-bottom: 1px solid #E2E4E9;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  color: #868C98;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: color 0.2s;
+}
+
+.closeBtn:hover {
+  color: #111111;
+}
+
+.contentBox {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  background: #ffffff;
+}
+
+.heroImage {
+  position: relative;
+  width: 100%;
+  height: 240px;
+  border-radius: 12px;
+  overflow: hidden;
+  margin-bottom: 24px;
+}
+
+.detailsSection {
+  margin-bottom: 32px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0 0 16px 0;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 24px;
+  column-gap: 16px;
+}
+
+.detailItem {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.detailLabel {
+  font-size: 13px;
+  color: #868C98;
+}
+
+.detailValue {
+  font-size: 15px;
+  font-weight: 500;
+  color: #111111;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.viewContentBtn {
+  background: none;
+  border: none;
+  color: #868C98;
+  cursor: pointer;
+  padding: 2px;
+  display: flex;
+  align-items: center;
+  transition: color 0.2s;
+}
+
+.viewContentBtn:hover {
+  color: #111111;
+}
+
+.timelineSection {
+  background: #ffffff;
+}
+
+.timelineHeader {
+  background: #fff;
+  padding: 12px 24px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #868C98;
+  text-transform: uppercase;
+  margin: 0 -24px;
+  /* bleed to edges */
+  border-top: 1px solid #F1F2F4;
+  border-bottom: 1px solid #F1F2F4;
+}
+
+.timelineBody {
+  padding: 24px 0 0;
+}
+
+.timelineGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  row-gap: 24px;
+  column-gap: 16px;
+}
+
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  background: #F9FAFB;
+  border-top: 1px solid #E2E4E9;
+}
+
+.footerRight {
+  display: flex;
+  gap: 12px;
+}
+
+.deactivateBtn {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 10px;
+  border: 1px solid #E2E4E9;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  color: #EF4444;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.deactivateBtn:hover {
+  background: #FEF2F2;
+  border-color: #EF4444;
+}
+
+.sendBtn {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 10px;
+  border: 1px solid #E2E4E9;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  color: #868C98;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.sendBtn:hover {
+  background: #F1F2F4;
+  color: #111111;
+}
+
+.editBtn {
+  height: 44px;
+  padding: 0 24px;
+  border-radius: 10px;
+  border: none;
+  background: #111111;
+  font-size: 14px;
+  font-weight: 600;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.editBtn:hover {
+  background: #222222;
+}

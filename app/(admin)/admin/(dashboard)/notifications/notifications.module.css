@@ -149,7 +149,11 @@
   background: #ffffff;
   border: 1px solid #E2E4E9;
   border-radius: 12px;
-  overflow: hidden;
+}
+
+.tableWrap {
+  position: relative;
+  z-index: 10;
 }
 
 .table {
@@ -165,6 +169,14 @@
   font-size: 12px;
   font-weight: 500;
   color: #868C98;
+}
+
+.table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.table th:last-child {
+  border-top-right-radius: 12px;
 }
 
 .table td {
@@ -202,12 +214,21 @@
 }
 
 .moreBtn {
-  background: none;
+  background: transparent;
   border: none;
   color: #868C98;
   cursor: pointer;
-  padding: 4px;
+  padding: 8px;
   position: relative;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background-color 0.2s;
+}
+
+.moreBtn:hover {
+  background-color: #eef3f9;
 }
 
 /* ─── Dropdown Menu ─── */
@@ -215,24 +236,22 @@
   position: absolute;
   top: 100%;
   right: 0;
-  margin-top: 8px;
-  width: 180px;
+  width: 220px;
   background: #ffffff;
   border: 1px solid #E2E4E9;
-  border-radius: 12px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
   z-index: 100;
-  padding: 6px;
+  padding: 8px 0;
 }
 
 .dropdownItem {
   width: 100%;
   text-align: left;
-  padding: 10px 12px;
+  padding: 8px 12px;
   border: none;
   background: none;
-  border-radius: 8px;
-  font-size: 13.5px;
+  font-size: 14px;
   color: #111111;
   cursor: pointer;
   transition: background 0.15s;
@@ -240,14 +259,6 @@
 
 .dropdownItem:hover {
   background: #F6F8FA;
-}
-
-.dropdownItemDanger {
-  color: #EF4444;
-}
-
-.dropdownItemDanger:hover {
-  background: #FEF2F2;
 }
 
 /* ─── Pagination ─── */
@@ -263,7 +274,7 @@
   .statsGrid {
     grid-template-columns: 1fr;
   }
-  
+
   .toolbar {
     flex-direction: column;
     align-items: stretch;

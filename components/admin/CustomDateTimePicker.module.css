@@ -1,0 +1,214 @@
+.wrapper {
+  position: relative;
+  width: 100%;
+}
+
+.inputBox {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  background: #ffffff;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+
+.inputBox:hover {
+  border-color: #D1D1D6;
+}
+
+.inputText {
+  font-size: 13.5px;
+  color: #111111;
+  user-select: none;
+}
+
+.popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  left: 0;
+  width: 320px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 12px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+  z-index: 50;
+  padding: 16px 0 0 0; /* padding bottom inside timeSection */
+}
+
+.header {
+  display: flex;
+  gap: 12px;
+  padding: 0 16px;
+  margin-bottom: 20px;
+}
+
+.dropdownWrapper {
+  position: relative;
+}
+
+.selectorBtn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #E2E4E9;
+  border-radius: 8px;
+  background: transparent;
+  font-size: 14px;
+  font-weight: 500;
+  color: #525866;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.selectorBtn:hover {
+  background: #F9FAFB;
+}
+
+.dropdownMenu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 8px;
+  box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+  max-height: 200px;
+  overflow-y: auto;
+  z-index: 60;
+  min-width: 80px;
+}
+
+.dropdownItem {
+  padding: 8px 12px;
+  font-size: 13px;
+  color: #111111;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.dropdownItem:hover {
+  background: #F9FAFB;
+}
+
+.calendar {
+  padding: 0 16px;
+}
+
+.weekDays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  margin-bottom: 12px;
+}
+
+.weekDays span {
+  font-size: 11px;
+  font-weight: 500;
+  color: #868C98;
+  text-align: center;
+}
+
+.daysGrid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  row-gap: 8px;
+  margin-bottom: 16px;
+}
+
+.dayBtn {
+  background: transparent;
+  border: none;
+  height: 32px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111111;
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto;
+  width: 32px;
+  transition: all 0.2s;
+}
+
+.dayBtn:hover:not(.daySelected) {
+  background: #F6F8FA;
+}
+
+.dayOut {
+  color: #CDD0D5;
+}
+
+.daySelected {
+  background: #111111;
+  color: #ffffff;
+  font-weight: 600;
+}
+
+.timeSection {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px;
+  border-top: 1px solid #F1F2F4;
+}
+
+.timeLabel {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111111;
+}
+
+.timeControls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.timeInputWrapper {
+  background: #F6F8FA;
+  border-radius: 8px;
+  padding: 6px 12px;
+  display: flex;
+  align-items: center;
+}
+
+.timeInput {
+  background: transparent;
+  border: none;
+  font-size: 14px;
+  color: #868C98;
+  width: 44px;
+  text-align: center;
+  outline: none;
+  font-weight: 500;
+}
+
+.amPmToggle {
+  display: flex;
+  background: #F6F8FA;
+  border-radius: 8px;
+  padding: 2px;
+}
+
+.amPmBtn {
+  background: transparent;
+  border: none;
+  padding: 4px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #868C98;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s;
+}
+
+.amPmActive {
+  background: #111111;
+  color: #ffffff;
+}
