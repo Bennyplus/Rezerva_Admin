@@ -47,8 +47,8 @@ export default function RolePermissionsForm({ onBack, onSubmit }: RolePermission
 
   return (
     <div className={styles.wrapper}>
-      {/* ─── Header Row ─── */}
-      <div className={styles.headerRow}>
+      {/* ─── Top Actions ─── */}
+      <div className={styles.topActions}>
         <button
           className={styles.backBtn}
           onClick={onBack}
@@ -57,7 +57,10 @@ export default function RolePermissionsForm({ onBack, onSubmit }: RolePermission
         >
           <ArrowLeftIcon />
         </button>
+      </div>
 
+      {/* ─── Header Row ─── */}
+      <div className={styles.headerRow}>
         <div className={styles.nameField}>
           <label htmlFor="role-name-input" className={styles.nameLabel}>
             Role Name
@@ -124,7 +127,7 @@ export default function RolePermissionsForm({ onBack, onSubmit }: RolePermission
                         onChange={() => togglePermission(key)}
                         aria-label={`${group.module} — ${perm}`}
                       />
-                      <span>{perm}</span>
+                      <span style={{ color: "rgba(134, 140, 152, 1)" }}>{perm}</span>
                     </label>
                   );
                 })}
