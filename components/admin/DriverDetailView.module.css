@@ -1,0 +1,428 @@
+/* ─── Driver Detail View ─── */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Top bar */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.backBtn {
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--color-text, #111111);
+  transition: background 0.15s ease;
+}
+
+.backBtn:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+}
+
+.suspendBtn {
+  height: 38px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(223, 28, 65, 1);
+  color: #ffffff;
+  font-family: var(--font-heading);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.suspendBtn:hover {
+  opacity: 0.88;
+}
+
+/* ─── Two-column layout ─── */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-items: start;
+}
+
+/* ─── Left Panel ─── */
+.leftPanel {
+  background: var(--admin-card-bg, #ffffff);
+  padding: 20px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Driver photo */
+.photoWrap {
+  width: 100%;
+  height: 360px;
+  overflow: hidden;
+  background: var(--admin-content-bg, #F6F8FA);
+  margin-bottom: 20px;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-width: none;
+}
+
+/* Info grid */
+.infoGrid {
+  /* padding: 16px 20px; */
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 14px 12px;
+}
+
+.infoGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.infoLabel {
+  font-size: 14px;
+  color: var(--admin-section-label, #868C98);
+  font-weight: 400;
+}
+
+.infoValue {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+}
+
+.expired {
+  color: #EF4444;
+}
+
+/* Phone row with badge */
+.phoneRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Availability badge */
+.availBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.availDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.availBadgeGreen {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.availBadgeGreen .availDot {
+  background: #059669;
+}
+
+.availBadgeAmber {
+  background: #FFFBEB;
+  color: #D97706;
+}
+
+.availBadgeAmber .availDot {
+  background: #D97706;
+}
+
+.availBadgeGray {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+.availBadgeGray .availDot {
+  background: #6B7280;
+}
+
+/* Rating */
+.ratingValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+}
+
+/* Documents */
+.docsSection {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.docsGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.docTile {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  background: #FAFAFA;
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.docTile:hover {
+  border-color: #D1D1D6;
+}
+
+.docInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  min-width: 0;
+}
+
+.docName {
+  font-size: 11.5px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.docMeta {
+  font-size: 10.5px;
+  color: var(--admin-section-label, #868C98);
+}
+
+/* docBlock: label above tile */
+.docBlock {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.docBlockLabel {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--admin-section-label, #868C98);
+  padding: 0 2px;
+}
+
+/* ─── Right Panel ─── */
+.rightPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.section {
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sectionTitle {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+/* Performance grid */
+.perfGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.perfCard {
+  background: var(--admin-content-bg, #F6F8FA);
+  border-radius: 8px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perfLabel {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: var(--admin-section-label, #868C98);
+  font-weight: 400;
+}
+
+.perfValue {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--color-text, #111111);
+  font-family: var(--font-heading);
+  letter-spacing: -0.02em;
+}
+
+.perfValueMuted {
+  font-size: 15px;
+  font-weight: 500;
+  color: var(--admin-section-label, #868C98);
+}
+
+.bookingId {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Copy button */
+.copyBtn {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--admin-section-label, #868C98);
+  padding: 3px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  transition: color 0.12s ease;
+}
+
+.copyBtn:hover {
+  color: var(--color-text, #111111);
+}
+
+/* Booking history */
+.historyList {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.emptyHistory {
+  font-size: 13px;
+  color: var(--admin-section-label, #868C98);
+  text-align: center;
+  padding: 24px 0;
+  margin: 0;
+}
+
+.historyItem {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+}
+
+.historyItem:last-child {
+  border-bottom: none;
+}
+
+.historyTop {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.historyIdWrap {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.historyId {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+}
+
+.historyVehicle {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+}
+
+.historyBottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.historyDates {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12.5px;
+  color: var(--admin-section-label, #868C98);
+}
+
+/* Booking status badges */
+.bsBadge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 10px;
+  border-radius: 999px;
+  font-size: 11.5px;
+  font-weight: 500;
+}
+
+.bsBadgeGreen {
+  background: #ECFDF5;
+  color: rgba(0, 166, 62, 1);
+  border: 1px solid rgba(123, 241, 168, 1);
+}
+
+.bsBadgeAmber {
+  background: #FFFBEB;
+  color: #D97706;
+}
+
+.bsBadgeRed {
+  background: #FEF2F2;
+  color: #EF4444;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

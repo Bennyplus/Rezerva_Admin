@@ -35,6 +35,18 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Users",
     subtitle: "Manage customer accounts and access",
   },
+  "/admin/teams": {
+    title: "Team Management",
+    subtitle: "Manage administrative users and roles",
+  },
+  "/admin/drivers": {
+    title: "Drivers",
+    subtitle: "Manage driver accounts and documents",
+  },
+  "/admin/customers": {
+    title: "Users",
+    subtitle: "Manage customer accounts and activity",
+  },
   "/admin/reviews": {
     title: "Reviews",
     subtitle: "View and moderate customer reviews",
