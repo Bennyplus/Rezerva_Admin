@@ -7,6 +7,7 @@
   flex-direction: column;
   gap: 20px;
   position: relative;
+  flex: 1;
 }
 
 /* ─── Toast ─── */
@@ -180,9 +181,12 @@
   background: var(--admin-card-bg, #ffffff);
   border-radius: var(--radius-md, 10px);
   overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
-.tableWrap { overflow-x: auto; }
+.tableWrap { overflow-x: auto; flex: 1; }
 
 .table {
   width: 100%;

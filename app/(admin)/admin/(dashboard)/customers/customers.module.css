@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex: 1;
 }
 
 /* ─── Empty State ─── */
@@ -49,6 +50,9 @@
   background: var(--admin-card-bg, #ffffff);
   border-radius: var(--radius-md, 10px);
   overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 /* ─── Toolbar ─── */
@@ -153,6 +157,7 @@
 /* ─── Table ─── */
 .tableWrap {
   overflow-x: auto;
+  flex: 1;
 }
 
 .table {

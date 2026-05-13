@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex: 1;
 }
 
 /* ─── Stats Grid ─── */
@@ -254,10 +255,14 @@
   background: var(--admin-card-bg, #ffffff);
   border-radius: var(--radius-md, 10px);
   overflow: hidden;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .tableWrap {
   overflow-x: auto;
+  flex: 1;
 }
 
 .table {
