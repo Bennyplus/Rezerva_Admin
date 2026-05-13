@@ -92,7 +92,7 @@ function UploadZone({ label, id, file, onFile, accept = ".pdf,.jpg,.jpeg,.png,.w
         ) : (
           <div className={styles.dropContent}>
             <p className={styles.dropText}>
-              <strong>Choose a file</strong> or drag &amp; drop it here.
+              <strong>Choose a file or drag &amp; drop it here.</strong>
             </p>
             <p className={styles.dropHint}>JPEG, PNG and WebP formats, up to 50 MB.</p>
             <button

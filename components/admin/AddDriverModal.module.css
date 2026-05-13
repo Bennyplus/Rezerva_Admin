@@ -10,13 +10,18 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
 }
 
 .modal {
   width: 100%;
-  max-width: 480px;
+  max-width: 580px;
   max-height: 90vh;
   background: #ffffff;
   border-radius: 14px;
@@ -28,8 +33,15 @@
 }
 
 @keyframes slideUp {
-  from { transform: translateY(12px); opacity: 0; }
-  to   { transform: translateY(0);    opacity: 1; }
+  from {
+    transform: translateY(12px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 /* Header */
@@ -63,7 +75,9 @@
   transition: color 0.15s ease;
 }
 
-.closeBtn:hover { color: #111111; }
+.closeBtn:hover {
+  color: #111111;
+}
 
 /* Scrollable body */
 .body {
@@ -78,7 +92,7 @@
 /* Two-column row */
 .row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -110,8 +124,13 @@
   box-sizing: border-box;
 }
 
-.input::placeholder { color: #868C98; }
-.input:focus { border-color: #D1D1D6; }
+.input::placeholder {
+  color: #868C98;
+}
+
+.input:focus {
+  border-color: #D1D1D6;
+}
 
 /* Phone row */
 .phoneRow {
@@ -144,9 +163,13 @@
   transition: border-color 0.15s ease;
 }
 
-.countryPickerBtn:hover { border-color: #D1D1D6; }
+.countryPickerBtn:hover {
+  border-color: #D1D1D6;
+}
 
-.countryCode { font-weight: 500; }
+.countryCode {
+  font-weight: 500;
+}
 
 .countryDropdown {
   position: absolute;
@@ -156,7 +179,7 @@
   background: #ffffff;
   border: 1px solid #E2E4E9;
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   z-index: 50;
   overflow: hidden;
 }
@@ -177,9 +200,14 @@
   text-align: left;
 }
 
-.countryOption:hover { background: #F6F8FA; }
+.countryOption:hover {
+  background: #F6F8FA;
+}
 
-.countryOptionActive { background: #F6F8FA; font-weight: 600; }
+.countryOptionActive {
+  background: #F6F8FA;
+  font-weight: 600;
+}
 
 .countryOptionCode {
   margin-left: auto;
@@ -190,7 +218,7 @@
 /* 2×2 upload grid */
 .uploadGrid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
 }
 
@@ -199,6 +227,7 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
+  min-width: 0;
 }
 
 .dropZone {
@@ -212,11 +241,18 @@
   align-items: center;
   justify-content: center;
   position: relative;
+  overflow: hidden;
 }
 
-.dropZone:hover { border-color: #D1D1D6; background: #F6F8FA; }
+.dropZone:hover {
+  border-color: #D1D1D6;
+  background: #F6F8FA;
+}
 
-.dragging { border-color: #111111; background: #F0F0F0; }
+.dragging {
+  border-color: #111111;
+  background: #F0F0F0;
+}
 
 .hasFile {
   border-style: solid;
@@ -241,7 +277,9 @@
   line-height: 1.4;
 }
 
-.dropText strong { color: #111111; }
+.dropText strong {
+  color: #111111;
+}
 
 .dropHint {
   font-size: 11px;
@@ -264,7 +302,9 @@
   transition: background 0.15s ease;
 }
 
-.browseBtn:hover { background: #F6F8FA; }
+.browseBtn:hover {
+  background: #F6F8FA;
+}
 
 /* File preview inside zone */
 .filePreview {
@@ -310,7 +350,9 @@
   flex-shrink: 0;
 }
 
-.removeFile:hover { color: #EF4444; }
+.removeFile:hover {
+  color: #EF4444;
+}
 
 .hiddenInput {
   position: absolute;
@@ -346,7 +388,9 @@
   transition: background 0.15s ease;
 }
 
-.cancelBtn:hover { background: #FEF2F2; }
+.cancelBtn:hover {
+  background: #FEF2F2;
+}
 
 .submitBtn {
   height: 40px;
@@ -362,7 +406,9 @@
   transition: opacity 0.15s ease;
 }
 
-.submitBtn:hover { opacity: 0.88; }
+.submitBtn:hover {
+  opacity: 0.88;
+}
 
 .submitBtn:disabled {
   background: #F6F8FA;

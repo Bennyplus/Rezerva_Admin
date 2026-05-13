@@ -147,7 +147,6 @@
 /* ─── Table ─── */
 .tableCard {
   background: #ffffff;
-  border: 1px solid #E2E4E9;
   border-radius: 12px;
 }
 
@@ -165,7 +164,6 @@
   text-align: left;
   padding: 16px;
   background: #F6F8FA;
-  border-bottom: 1px solid #E2E4E9;
   font-size: 12px;
   font-weight: 500;
   color: #868C98;
@@ -181,7 +179,6 @@
 
 .table td {
   padding: 16px;
-  border-bottom: 1px solid #E2E4E9;
   font-size: 13.5px;
   color: #111111;
 }
