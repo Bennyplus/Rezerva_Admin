@@ -8,34 +8,29 @@ export const marketingService = {
    * @param vehicleTypes - Array of vehicle types (e.g., ['suv', 'sedan'])
    */
   getVehicles: async (vehicleTypes?: string[]): Promise<Vehicle[]> => {
-    const params = new URLSearchParams();
+    const params: any = {
+      path: 'vehicles/manage/',
+    };
     
     if (vehicleTypes && vehicleTypes.length > 0) {
-      vehicleTypes.forEach(type => {
-        params.append('vehicle_type', type.toLowerCase());
-      });
+      params.vehicle_type = vehicleTypes.map(t => t.toLowerCase());
     }
 
-    const response = await publicApi.get(`vehicles/manage/`, {
-      params: params
-    });
-    
+    const response = await publicApi.get('', { params });
     return response.data;
   },
 
-  /**
-   * Fetches a single vehicle by ID
-   */
   getVehicleById: async (id: string | number): Promise<Vehicle> => {
-    const response = await publicApi.get(`vehicles/manage/${id}/`);
+    const response = await publicApi.get('', { 
+      params: { path: `vehicles/manage/${id}/` } 
+    });
     return response.data;
   },
 
-  /**
-   * Fetches FAQs
-   */
   getFaqs: async (): Promise<Faq[]> => {
-    const response = await publicApi.get('api/v1/accounts/faqs/');
+    const response = await publicApi.get('', { 
+      params: { path: 'api/v1/accounts/faqs/' } 
+    });
     return response.data;
   }
 };

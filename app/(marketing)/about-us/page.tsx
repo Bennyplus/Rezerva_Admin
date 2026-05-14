@@ -232,7 +232,9 @@ export default function AboutUsPage() {
             </div>
 
             {loading ? (
-              <div className={styles.loading}>Loading FAQs...</div>
+              <div className={styles['loading-container']}>
+                <div className={styles.spinner}></div>
+              </div>
             ) : error ? (
               <div className={styles.error}>{error}</div>
             ) : faqs.length === 0 ? (
