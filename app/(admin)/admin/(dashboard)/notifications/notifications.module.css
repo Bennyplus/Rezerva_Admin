@@ -2,6 +2,7 @@
   display: flex;
   flex-direction: column;
   gap: 24px;
+  flex: 1;
 }
 
 /* ─── Stats Grid ─── */
@@ -147,13 +148,16 @@
 /* ─── Table ─── */
 .tableCard {
   background: #ffffff;
-  border: 1px solid #E2E4E9;
   border-radius: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
 }
 
 .tableWrap {
   position: relative;
   z-index: 10;
+  flex: 1;
 }
 
 .table {
@@ -165,7 +169,6 @@
   text-align: left;
   padding: 16px;
   background: #F6F8FA;
-  border-bottom: 1px solid #E2E4E9;
   font-size: 12px;
   font-weight: 500;
   color: #868C98;
@@ -181,7 +184,6 @@
 
 .table td {
   padding: 16px;
-  border-bottom: 1px solid #E2E4E9;
   font-size: 13.5px;
   color: #111111;
 }

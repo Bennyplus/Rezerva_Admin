@@ -1,79 +1,15 @@
 /* ============================================================
-   ADMIN TEAMS — Scoped styles (CSS Module)
+   ADMIN CUSTOMERS — Scoped styles (CSS Module)
    ============================================================ */
 
 .page {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  position: relative; /* for absolute toast positioning */
   flex: 1;
 }
 
-/* ============================================================
-   TOAST NOTIFICATION
-   ============================================================ */
-.toastWrapper {
-  position: absolute;
-  top: 24px;
-  left: 50%;
-  transform: translateX(-50%);
-  z-index: 50;
-  display: flex;
-  justify-content: center;
-  width: 100%;
-  pointer-events: none;
-}
-
-.toast {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  background: #059669; /* emerald-600 */
-  color: #ffffff;
-  padding: 10px 16px;
-  border-radius: 8px;
-  font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  pointer-events: auto;
-  animation: slideDown 0.3s ease-out;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-16px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.toastClose {
-  background: transparent;
-  border: none;
-  color: rgba(255, 255, 255, 0.8);
-  cursor: pointer;
-  padding: 2px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 4px;
-  margin-left: 8px;
-  transition: background 0.15s ease, color 0.15s ease;
-}
-
-.toastClose:hover {
-  background: rgba(255, 255, 255, 0.2);
-  color: #ffffff;
-}
-
-/* ============================================================
-   EMPTY STATE
-   ============================================================ */
+/* ─── Empty State ─── */
 .emptyCard {
   background: var(--admin-card-bg, #ffffff);
   border: 1px solid var(--admin-card-border, #E2E4E9);
@@ -84,17 +20,12 @@
   justify-content: center;
   padding: 80px 32px;
   min-height: 540px;
+  gap: 12px;
 }
 
-.illustration {
-  margin-bottom: 12px;
-  opacity: 0.85;
-}
-
-.illustrationImg {
-  width: 200px;
-  height: auto;
-  max-width: none;
+.emptyIllustration {
+  margin-bottom: 8px;
+  opacity: 0.7;
 }
 
 .emptyTitle {
@@ -102,47 +33,19 @@
   font-size: 16px;
   font-weight: 600;
   color: var(--color-text, #111111);
-  margin: 0 0 6px;
+  margin: 0;
   letter-spacing: -0.01em;
 }
 
 .emptySubtitle {
   font-size: 13.5px;
   color: var(--admin-section-label, #868C98);
-  margin: 0 0 24px;
+  margin: 0;
   text-align: center;
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
-.addBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px 40px;
-  background: var(--admin-active-bg, #111111);
-  color: var(--admin-active-text, #ffffff);
-  border: none;
-  border-radius: var(--radius-md, 10px);
-  font-family: var(--font-heading);
-  font-size: 13.5px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.15s ease, transform 0.15s ease;
-}
-
-.addBtn:hover {
-  opacity: 0.88;
-  transform: translateY(-1px);
-}
-
-.addBtn:active {
-  transform: translateY(0);
-}
-
-/* ============================================================
-   TABLE CARD (shared container for tabs + table)
-   ============================================================ */
+/* ─── Table Card ─── */
 .tableCard {
   background: var(--admin-card-bg, #ffffff);
   border-radius: var(--radius-md, 10px);
@@ -152,62 +55,13 @@
   flex-direction: column;
 }
 
-/* ─── Tabs ─── */
-.tabBar {
-  display: flex;
-  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
-  padding: 0 20px;
-  gap: 0;
-}
-
-.tab {
-  position: relative;
-  padding: 14px 4px;
-  margin-right: 24px;
-  font-family: var(--font-body);
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--admin-section-label, #868C98);
-  background: none;
-  border: none;
-  cursor: pointer;
-  transition: color 0.15s ease;
-  white-space: nowrap;
-}
-
-.tab::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: var(--admin-active-bg, #111111);
-  border-radius: 2px 2px 0 0;
-  opacity: 0;
-  transition: opacity 0.15s ease;
-}
-
-.tab:hover {
-  color: var(--color-text, #111111);
-}
-
-.tabActive {
-  color: var(--color-text, #111111);
-  font-weight: 600;
-}
-
-.tabActive::after {
-  opacity: 1;
-}
-
 /* ─── Toolbar ─── */
 .toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 20px;
+  padding: 14px 16px;
 }
 
 .toolbarLeft {
@@ -232,7 +86,7 @@
   padding: 0 12px;
   height: 36px;
   background: var(--admin-card-bg, #ffffff);
-  min-width: 200px;
+  min-width: 220px;
 }
 
 .searchBox svg {
@@ -254,7 +108,7 @@
   color: var(--admin-section-label, #868C98);
 }
 
-/* Tool buttons */
+/* Tool button (Filter) */
 .toolBtn {
   display: inline-flex;
   align-items: center;
@@ -281,17 +135,14 @@
   color: var(--admin-section-label, #868C98);
 }
 
-/* Add Role button (toolbar) */
-.addBtnSmall {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
+/* Export Users button */
+.exportBtn {
   height: 36px;
-  padding: 0 16px;
-  background: var(--admin-active-bg, #111111);
-  color: var(--admin-active-text, #ffffff);
+  padding: 0 18px;
   border: none;
   border-radius: 8px;
+  background: var(--admin-active-bg, #111111);
+  color: var(--admin-active-text, #ffffff);
   font-family: var(--font-heading);
   font-size: 13px;
   font-weight: 600;
@@ -299,7 +150,7 @@
   transition: opacity 0.15s ease;
 }
 
-.addBtnSmall:hover {
+.exportBtn:hover {
   opacity: 0.88;
 }
 
@@ -323,7 +174,6 @@
   color: var(--admin-section-label, #868C98);
   background: var(--admin-content-bg, #F6F8FA);
   white-space: nowrap;
-  letter-spacing: 0.01em;
 }
 
 .table td {
@@ -337,12 +187,17 @@
   border-bottom: none;
 }
 
-.table tbody tr {
+.tableRow {
+  cursor: pointer;
   transition: background 0.1s ease;
 }
 
-.table tbody tr:hover {
+.tableRow:hover {
   background: var(--admin-content-bg, #F6F8FA);
+}
+
+.rowSelected {
+  background: rgba(17, 17, 17, 0.02);
 }
 
 /* Checkbox column */
@@ -359,26 +214,54 @@
   cursor: pointer;
 }
 
-/* Permissions cell */
-.rolePermText {
+/* Customer cell (avatar + name) */
+.customerCell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.avatarWrap {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: var(--admin-content-bg, #F6F8FA);
+  flex-shrink: 0;
+}
+
+.avatarImg {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-width: none;
+}
+
+.customerName {
   font-size: 13px;
+  font-weight: 500;
   color: var(--color-text, #111111);
-  font-weight: 400;
 }
 
-/* Date cell */
-.dateCell {
+/* Email cell */
+.emailCell {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Bookings cell */
+.bookingsCell {
   color: var(--admin-section-label, #868C98);
-  font-size: 12.5px;
 }
 
-/* Status badges */
+/* Verification status badges */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 3px 10px;
-  border-radius: var(--radius-full, 9999px);
+  border-radius: 9999px;
   font-size: 11.5px;
   font-weight: 500;
 }
@@ -390,28 +273,39 @@
   flex-shrink: 0;
 }
 
-.badgeActive {
-  background: #ECFDF5;
+.badgeVerified {
+  background: transparent;
   color: #059669;
 }
-
-.badgeActive .badgeDot {
+.badgeVerified .badgeDot {
   background: #059669;
 }
 
-.badgeInactive {
-  background: #F9FAFB;
-  color: #868C98;
+.badgePending {
+  background: transparent;
+  color: var(--admin-section-label, #868C98);
+}
+.badgePending .badgeDot {
+  background: var(--admin-section-label, #868C98);
 }
 
-.badgeInactive .badgeDot {
-  background: #868C98;
+.badgeSuspended {
+  background: transparent;
+  color: #EF4444;
+}
+.badgeSuspended .badgeDot {
+  background: #EF4444;
 }
 
-/* More actions */
+/* Actions col + kebab */
 .actionsCol {
   width: 44px;
   text-align: center;
+}
+
+.kebabWrap {
+  position: relative;
+  display: inline-block;
 }
 
 .moreBtn {
@@ -433,14 +327,51 @@
   color: var(--color-text, #111111);
 }
 
-/* ─── Team Management Stub ─── */
-.teamStub {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 32px;
-  min-height: 400px;
+.kebabMenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 150px;
+  background: #ffffff;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  z-index: 50;
+  overflow: hidden;
+}
+
+.kebabItem {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text, #111111);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+
+.kebabItem:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+}
+
+.kebabItemDanger {
+  color: #EF4444;
+}
+
+.kebabItemDanger:hover {
+  background: #FEF2F2;
+}
+
+/* Empty row */
+.emptyRow {
+  text-align: center;
+  padding: 48px;
+  color: var(--admin-section-label, #868C98);
+  font-size: 13.5px;
 }
 
 /* ─── Dev toggle ─── */
@@ -469,7 +400,7 @@
 }
 
 /* ─── Responsive ─── */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .toolbar {
     flex-direction: column;
     align-items: stretch;
@@ -483,10 +414,5 @@
   .searchBox {
     min-width: 0;
     flex: 1;
-  }
-
-  .emptyCard {
-    padding: 60px 24px;
-    min-height: 320px;
   }
 }
