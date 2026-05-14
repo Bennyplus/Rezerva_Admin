@@ -1,12 +1,14 @@
 "use client";
 
-import { use } from "react";
+import { use, useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { VEHICLES } from "@/data/vehicles";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { marketingService } from "@/services/marketing-service";
+import { Vehicle } from "@/types/vehicle";
 import styles from "./page.module.css";
+
 function StarIcon({ size = 27, className = "" }) {
   return (
     <svg
@@ -65,14 +67,48 @@ function FeatureIcon({ name }: { name: string }) {
 
 export default function VehicleDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
-  const vehicle = VEHICLES.find(v => v.id === parseInt(unwrappedParams.id));
+  const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!vehicle) {
+  useEffect(() => {
+    const fetchVehicle = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await marketingService.getVehicleById(unwrappedParams.id);
+        setVehicle(data);
+      } catch (err: any) {
+        setError("Failed to load vehicle details.");
+        console.error("Error fetching vehicle:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (unwrappedParams.id) {
+      fetchVehicle();
+    }
+  }, [unwrappedParams.id]);
+
+  if (loading) {
     return (
       <>
         <Navbar />
         <main className="container" style={{ paddingTop: '120px', minHeight: '60vh', textAlign: 'center' }}>
-          <h1 className="heading-1">Vehicle Not Found</h1>
+          <div className={styles.loading}>Loading vehicle details...</div>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (error || !vehicle) {
+    return (
+      <>
+        <Navbar />
+        <main className="container" style={{ paddingTop: '120px', minHeight: '60vh', textAlign: 'center' }}>
+          <h1 className="heading-1">{error || "Vehicle Not Found"}</h1>
           <p style={{ marginTop: '20px' }}>
             <Link href="/our-fleet" className="btn btn-primary">Back to Fleet</Link>
           </p>
@@ -100,21 +136,21 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
           <div className={styles.galleryContainer}>
             <div className={styles.galleryTop}>
               <div className={styles.galleryTopImg}>
-                <Image src={vehicle.gallery[0]} alt={vehicle.name} fill style={{ objectFit: 'cover' }} priority />
+                <Image src={vehicle.gallery[0] || vehicle.image || '/images/placeholder-car.png'} alt={vehicle.name} fill style={{ objectFit: 'cover' }} priority />
               </div>
               <div className={styles.galleryTopImg}>
-                <Image src={vehicle.gallery[1]} alt={vehicle.name} fill style={{ objectFit: 'cover' }} priority />
+                <Image src={vehicle.gallery[1] || vehicle.image || '/images/placeholder-car.png'} alt={vehicle.name} fill style={{ objectFit: 'cover' }} priority />
               </div>
             </div>
             <div className={styles.galleryBottom}>
               <div className={styles.galleryBottomImg}>
-                <Image src={vehicle.gallery[2]} alt={vehicle.name} fill style={{ objectFit: 'cover' }} />
+                <Image src={vehicle.gallery[2] || vehicle.image || '/images/placeholder-car.png'} alt={vehicle.name} fill style={{ objectFit: 'cover' }} />
               </div>
               <div className={styles.galleryBottomImg}>
-                <Image src={vehicle.gallery[3]} alt={vehicle.name} fill style={{ objectFit: 'cover' }} />
+                <Image src={vehicle.gallery[3] || vehicle.image || '/images/placeholder-car.png'} alt={vehicle.name} fill style={{ objectFit: 'cover' }} />
               </div>
               <div className={styles.galleryBottomImg}>
-                <Image src={vehicle.gallery[4]} alt={vehicle.name} fill style={{ objectFit: 'cover' }} />
+                <Image src={vehicle.gallery[4] || vehicle.image || '/images/placeholder-car.png'} alt={vehicle.name} fill style={{ objectFit: 'cover' }} />
               </div>
             </div>
           </div>
@@ -149,7 +185,9 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
               {/* Mobile Price & Rating (Hidden on desktop) */}
               <div className={styles.mobilePriceRating}>
                 <div>
-                  <span className={styles.mobilePriceAmount}>${vehicle.price}</span>
+                  <span className={styles.mobilePriceAmount}>
+                    ${typeof vehicle.price === 'number' ? vehicle.price.toLocaleString() : vehicle.price}
+                  </span>
                   <span className={styles.mobilePriceUnit}>/day</span>
                   <span className={styles.mobilePriceTaxes}>Before taxes</span>
                 </div>
@@ -164,7 +202,7 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
               <div className={styles.featuresSection}>
                 <h2 className={styles.featuresTitle}>Features</h2>
                 <div className={styles.featuresGrid}>
-                  {vehicle.features.map(feature => (
+                  {vehicle.features?.map(feature => (
                     <div key={feature} className={styles.featureItem}>
                       <div className={styles.featureIcon}>
                         <FeatureIcon name={feature} />
@@ -179,7 +217,7 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
               <div className={styles.rulesSection}>
                 <h2 className={styles.rulesTitle}>Rules of the road</h2>
                 <div className={styles.rulesList}>
-                  {vehicle.rules.map((rule, index) => {
+                  {vehicle.rules?.map((rule, index) => {
                     const parts = rule.split('.');
                     const title = parts[0];
                     const desc = parts.slice(1).join('.');
@@ -203,7 +241,10 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
               </div>
               <div className={styles.stickyCard}>
                 <div className={styles.priceRow}>
-                  <span className={styles.priceAmount}>${vehicle.price}<span className={styles.priceUnit}>/day</span></span>
+                  <span className={styles.priceAmount}>
+                    ${typeof vehicle.price === 'number' ? vehicle.price.toLocaleString() : vehicle.price}
+                    <span className={styles.priceUnit}>/day</span>
+                  </span>
                   <span className={styles.priceTaxes}>Before taxes</span>
                 </div>
                 <button className={`btn btn-primary ${styles.bookBtn}`}>

@@ -1,49 +1,46 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import { marketingService } from "@/services/marketing-service";
+import { Faq } from "@/types/faq";
 import styles from "./page.module.css";
-
-const FAQ_ITEMS = [
-  {
-    question: "How does Drifully work?",
-    answer: "Download the app, create an account, choose whether you want to drive yourself or hire a chauffeur, select your vehicle, and book. It's that simple.",
-  },
-  {
-    question: "What's the difference between Self-Drive and Chauffeur?",
-    answer: "Self-Drive gives you the keys to the vehicle for complete independence. Chauffeur service provides a professional driver so you can relax or work on the go.",
-  },
-  {
-    question: "How does Airport service work?",
-    answer: "Provide your flight details, and a vehicle will be ready for you upon arrival. For Chauffeur service, your driver will meet you at the terminal.",
-  },
-  {
-    question: "Do I need a driver's license for Chauffeur service?",
-    answer: "No, you only need a valid driver's license if you choose the Self-Drive option.",
-  },
-  {
-    question: "What are the age requirements?",
-    answer: "To rent a car for Self-Drive, you must be at least 21 years old with a valid driver's license held for at least one year.",
-  },
-  {
-    question: "Is insurance included?",
-    answer: "Yes, basic insurance is included in all rentals. You can choose to upgrade to comprehensive coverage during booking.",
-  },
-  {
-    question: "How do I cancel or modify a booking?",
-    answer: "You can cancel or modify your booking directly through the app up to 24 hours before your scheduled trip for a full refund.",
-  },
-];
 
 export default function AboutUsPage() {
   const [openFaqIndex, setOpenFaqIndex] = useState<number | null>(null);
+  const [faqs, setFaqs] = useState<Faq[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await marketingService.getFaqs();
+        setFaqs(data);
+      } catch (err: any) {
+        setError("Failed to load FAQs.");
+        console.error("Error fetching FAQs:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchFaqs();
+  }, []);
 
   const toggleFaq = (index: number) => {
     setOpenFaqIndex(openFaqIndex === index ? null : index);
   };
+
+  // Split FAQs into two columns
+  const midpoint = Math.ceil(faqs.length / 2);
+  const leftColumn = faqs.slice(0, midpoint);
+  const rightColumn = faqs.slice(midpoint);
 
   return (
     <>
@@ -234,73 +231,81 @@ export default function AboutUsPage() {
               <p className={styles['about-faq__subtitle']}>Got Questions? We've Got Clear Answers.</p>
             </div>
 
-            <div className={styles['about-faq__grid']}>
-              {/* Left Column */}
-              <div className={styles['about-faq__col']}>
-                {FAQ_ITEMS.slice(0, 4).map((item, index) => {
-                  const globalIndex = index;
-                  const isOpen = openFaqIndex === globalIndex;
-                  return (
-                    <div
-                      key={globalIndex}
-                      className={styles['about-faq__item']}
-                      data-open={isOpen ? "true" : "false"}
-                    >
-                      <button
-                        className={styles['about-faq__question']}
-                        onClick={() => toggleFaq(globalIndex)}
-                        aria-expanded={isOpen}
+            {loading ? (
+              <div className={styles.loading}>Loading FAQs...</div>
+            ) : error ? (
+              <div className={styles.error}>{error}</div>
+            ) : faqs.length === 0 ? (
+              <div className={styles.empty}>No FAQs available.</div>
+            ) : (
+              <div className={styles['about-faq__grid']}>
+                {/* Left Column */}
+                <div className={styles['about-faq__col']}>
+                  {leftColumn.map((item, index) => {
+                    const globalIndex = index;
+                    const isOpen = openFaqIndex === globalIndex;
+                    return (
+                      <div
+                        key={item.id}
+                        className={styles['about-faq__item']}
+                        data-open={isOpen ? "true" : "false"}
                       >
-                        {item.question}
-                        <span className={styles['about-faq__icon']}>
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </span>
-                      </button>
-                      <div className={styles['about-faq__answer']}>
-                        <div className={styles['about-faq__answer-inner']}>
-                          <p className={styles['about-faq__answer-text']}>{item.answer}</p>
+                        <button
+                          className={styles['about-faq__question']}
+                          onClick={() => toggleFaq(globalIndex)}
+                          aria-expanded={isOpen}
+                        >
+                          {item.question}
+                          <span className={styles['about-faq__icon']}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </span>
+                        </button>
+                        <div className={styles['about-faq__answer']}>
+                          <div className={styles['about-faq__answer-inner']}>
+                            <p className={styles['about-faq__answer-text']}>{item.answer}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
 
-              {/* Right Column */}
-              <div className={styles['about-faq__col']}>
-                {FAQ_ITEMS.slice(4).map((item, index) => {
-                  const globalIndex = index + 4;
-                  const isOpen = openFaqIndex === globalIndex;
-                  return (
-                    <div
-                      key={globalIndex}
-                      className={styles['about-faq__item']}
-                      data-open={isOpen ? "true" : "false"}
-                    >
-                      <button
-                        className={styles['about-faq__question']}
-                        onClick={() => toggleFaq(globalIndex)}
-                        aria-expanded={isOpen}
+                {/* Right Column */}
+                <div className={styles['about-faq__col']}>
+                  {rightColumn.map((item, index) => {
+                    const globalIndex = index + midpoint;
+                    const isOpen = openFaqIndex === globalIndex;
+                    return (
+                      <div
+                        key={item.id}
+                        className={styles['about-faq__item']}
+                        data-open={isOpen ? "true" : "false"}
                       >
-                        {item.question}
-                        <span className={styles['about-faq__icon']}>
-                          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                          </svg>
-                        </span>
-                      </button>
-                      <div className={styles['about-faq__answer']}>
-                        <div className={styles['about-faq__answer-inner']}>
-                          <p className={styles['about-faq__answer-text']}>{item.answer}</p>
+                        <button
+                          className={styles['about-faq__question']}
+                          onClick={() => toggleFaq(globalIndex)}
+                          aria-expanded={isOpen}
+                        >
+                          {item.question}
+                          <span className={styles['about-faq__icon']}>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                          </span>
+                        </button>
+                        <div className={styles['about-faq__answer']}>
+                          <div className={styles['about-faq__answer-inner']}>
+                            <p className={styles['about-faq__answer-text']}>{item.answer}</p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
 
             <div className={styles['about-faq__cta']}>
               <p>

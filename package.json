@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "axios": "^1.16.1",
     "critters": "^0.0.23",
     "jodit": "^4.12.2",
     "jodit-react": "^5.3.21",
