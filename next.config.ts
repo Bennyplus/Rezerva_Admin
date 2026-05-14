@@ -8,8 +8,21 @@ const nextConfig: import('next').NextConfig = {
         hostname: "prosper-django-bucket.s3.us-east-2.amazonaws.com",
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "drifully-backend-1qa6.onrender.com",
+        pathname: "/**",
+      },
     ],
   },
+  // async rewrites() {
+  //   return [
+  //     {
+  //       source: '/api/backend/:path*',
+  //       destination: 'https://drifully-backend-1qa6.onrender.com/:path*',
+  //     },
+  //   ];
+  // },
 };
 
 
