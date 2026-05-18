@@ -1,10 +1,18 @@
 /* ─── Admin Dashboard Mock Data ─── */
 
+export type AdminRole =
+  | "Super Admin"
+  | "Fleet Manager"
+  | "Operations Manager"
+  | "Customer Engagement"
+  | "Finance Manager";
+
 export const ADMIN_USER = {
   name: "James Brown",
   email: "james@drifully.com",
   avatar: "/images/admin/profile-Avatar.svg",
-  role: "Admin",
+  // role: "Super Admin" as AdminRole,
+  role: "Fleet Manager" as AdminRole,
   verified: true,
 };
 

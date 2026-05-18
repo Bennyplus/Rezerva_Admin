@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import AdminSidebar from "@/components/admin/AdminSidebar";
 import AdminTopbar from "@/components/admin/AdminTopbar";
+import AdminGuard from "@/components/admin/AdminGuard";
 import styles from "./layout.module.css";
 
 export const metadata: Metadata = {
@@ -22,7 +23,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       <div className={styles.main}>
         <AdminTopbar />
         <main className={styles.content} id="admin-content">
-          {children}
+          <AdminGuard>{children}</AdminGuard>
         </main>
       </div>
     </div>
