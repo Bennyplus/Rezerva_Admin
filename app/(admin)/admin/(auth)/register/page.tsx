@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import CustomSelect from "@/components/admin/CustomSelect";
 import { accountsService, Country } from "@/services/accounts-service";
 import styles from "./register.module.css";
 
@@ -214,41 +215,18 @@ export default function AdminRegisterPage() {
             </label>
             <div className={styles.phoneInputWrap}>
               <div className={styles.countrySelectWrap}>
-                <select
-                  id="reg-country"
-                  value={countryCode}
-                  onChange={(e) => setCountryCode(e.target.value)}
-                  className={styles.countrySelect}
-                  disabled={loadingCountries}
-                  required
-                >
-                  {loadingCountries ? (
-                    <option value="">...</option>
-                  ) : (
-                    <>
-                      {countries.length === 0 ? (
-                        <option value="1">US (+1)</option>
-                      ) : (
-                        countries.map((c) => (
-                          <option key={c.id} value={c.id}>
-                            {c.name} (+{c.phone_code})
-                          </option>
-                        ))
-                      )}
-                    </>
-                  )}
-                </select>
-                <div className={styles.countryDisplay} aria-hidden="true">
-                  <span className={styles.flagEmoji}>
-                    {countries.find(c => String(c.id) === String(countryCode))?.flag_emoji || "🇺🇸"}
-                  </span>
-                  <span className={styles.countryDialCode}>
-                    +{countries.find(c => String(c.id) === String(countryCode))?.phone_code || "1"}
-                  </span>
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={styles.chevronIcon}>
-                    <polyline points="6 9 12 15 18 9"></polyline>
-                  </svg>
-                </div>
+                <CustomSelect
+                  name="countryCode"
+                  value={String(countryCode)}
+                  placeholder="+1"
+                  options={countries.length > 0 ? countries.map((c) => ({
+                    value: String(c.id),
+                    label: `${c.flag_emoji || "🌐"} +${c.phone_code}`,
+                  })) : [{ value: "1", label: "🇺🇸 +1" }]}
+                  onChange={(_, value) => setCountryCode(value)}
+                  variant="minimal"
+                  showSearch
+                />
               </div>
               <div className={styles.phoneDivider}></div>
               <input
