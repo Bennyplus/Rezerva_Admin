@@ -17,6 +17,11 @@ export interface RegisterPayload {
   country_code: string | number; // Country ID selected from list countries
 }
 
+export interface LoginPayload {
+  email: string;
+  password: string;
+}
+
 export const accountsService = {
   /**
    * Fetches the list of countries from accounts/countries/
@@ -35,12 +40,34 @@ export const accountsService = {
   },
 
   /**
+   * Logs a user into the admin account at accounts/login/
+   * @param payload - LoginPayload object
+   */
+  login: async (payload: LoginPayload): Promise<any> => {
+    const response = await publicApi.post('', payload, {
+      params: { path: 'api/v1/accounts/login/' }
+    });
+    return response.data;
+  },
+
+  /**
    * Creates a new user account at accounts/register/
    * @param payload - RegisterPayload object
    */
   register: async (payload: RegisterPayload): Promise<any> => {
     const response = await publicApi.post('', payload, {
       params: { path: 'api/v1/accounts/register/' }
+    });
+    return response.data;
+  },
+
+  /**
+   * Verifies the OTP sent to the user after registration
+   * @param otp - The one-time password code
+   */
+  verifyOTP: async (otp: string): Promise<any> => {
+    const response = await publicApi.post('', { otp }, {
+      params: { path: 'api/v1/accounts/verify-otp/' }
     });
     return response.data;
   }

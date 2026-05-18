@@ -23,7 +23,13 @@ const ROUTE_PERMISSIONS: Record<string, AdminRole[]> = {
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const currentRole = ADMIN_USER.role as AdminRole;
+  let currentRole = ADMIN_USER.role as AdminRole;
+  if (typeof window !== "undefined") {
+    const savedRole = localStorage.getItem("drifully_admin_role");
+    if (savedRole) {
+      currentRole = savedRole as AdminRole;
+    }
+  }
 
   // Find if current path is protected, matching the most specific prefix first
   const sortedRoutes = Object.keys(ROUTE_PERMISSIONS).sort((a, b) => b.length - a.length);

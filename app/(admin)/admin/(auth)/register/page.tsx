@@ -20,6 +20,8 @@ export default function AdminRegisterPage() {
   const [countryCode, setCountryCode] = useState<string | number>("");
 
   // UI States
+  const [step, setStep] = useState<'register' | 'otp'>('register');
+  const [otp, setOtp] = useState("");
   const [countries, setCountries] = useState<Country[]>([]);
   const [loadingCountries, setLoadingCountries] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -89,12 +91,13 @@ export default function AdminRegisterPage() {
         country_code: countryCode
       });
 
-      setSuccess("Account created successfully! Redirecting you to login...");
+      setSuccess("Account created successfully! Please verify your OTP.");
 
       // Delay redirection so success card is read
       setTimeout(() => {
-        router.push("/admin/login");
-      }, 2000);
+        setStep('otp');
+        setSuccess("");
+      }, 1500);
 
     } catch (err: any) {
       // Extract detailed server-side error messages
@@ -114,6 +117,36 @@ export default function AdminRegisterPage() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const submitOTP = async (otpCode: string) => {
+    setError("");
+    setSuccess("");
+
+    if (!otpCode || otpCode.length < 6) {
+      setError("Please enter a valid 6-digit OTP code");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await accountsService.verifyOTP(otpCode);
+      setSuccess("Account verified successfully! Redirecting to login...");
+
+      setTimeout(() => {
+        router.push("/admin/login");
+      }, 2000);
+    } catch (err: any) {
+      const serverMessage = err.response?.data?.message || err.response?.data?.error || err.message;
+      setError(typeof serverMessage === 'string' ? serverMessage : "Invalid OTP code. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifyOTP = async (e: React.FormEvent) => {
+    e.preventDefault();
+    await submitOTP(otp);
   };
 
   return (
@@ -138,8 +171,10 @@ export default function AdminRegisterPage() {
 
         {/* Heading */}
         <div className={styles.heading}>
-          <h1 className={styles.title}>Create account</h1>
-          <p className={styles.subtitle}>Get started managing your fleet with Drifully</p>
+          <h1 className={styles.title}>{step === 'register' ? 'Create account' : 'Verify Account'}</h1>
+          <p className={styles.subtitle}>
+            {step === 'register' ? 'Get started managing your fleet with Drifully' : 'Enter the code sent to your device to continue'}
+          </p>
         </div>
 
         {/* Success Card */}
@@ -165,172 +200,215 @@ export default function AdminRegisterPage() {
           </div>
         )}
 
-        {/* Registration Form */}
-        <form onSubmit={handleSubmit} className={styles.form}>
+        {/* Dynamic Form Render */}
+        {step === 'register' ? (
+          <form onSubmit={handleSubmit} className={styles.form}>
 
-          {/* Full Name */}
-          <div className={styles.field}>
-            <label htmlFor="reg-fullname" className={styles.label}>Full Name</label>
-            <div className={styles.inputWrap}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.inputIcon}>
-                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                <circle cx="12" cy="7" r="4" />
-              </svg>
-              <input
-                id="reg-fullname"
-                type="text"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                placeholder="Prosperity Test"
-                className={styles.input}
-                required
-              />
-            </div>
-          </div>
-
-          {/* Email address */}
-          <div className={styles.field}>
-            <label htmlFor="reg-email" className={styles.label}>Email Address</label>
-            <div className={styles.inputWrap}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.inputIcon}>
-                <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
-                <polyline points="22,6 12,13 2,6" />
-              </svg>
-              <input
-                id="reg-email"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="edwardprosper002@gmail.com"
-                className={styles.input}
-                autoComplete="email"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Phone Number with Country Code */}
-          <div className={styles.field}>
-            <label htmlFor="reg-phone" className={styles.label}>
-              Phone Number<span style={{ color: '#868C98', fontWeight: 400 }}>(Optional)</span>
-            </label>
-            <div className={styles.phoneInputWrap}>
-              <div className={styles.countrySelectWrap}>
-                <CustomSelect
-                  name="countryCode"
-                  value={String(countryCode)}
-                  placeholder="+1"
-                  options={countries.map((c) => ({
-                    value: String(c.id),
-                    label: `${c.iso_code ? c.iso_code.toLowerCase() : ''} ${c.dial_code}`
-                  }))}
-                  onChange={(_name: string, value: string) => setCountryCode(value)}
-                  variant="minimal"
+            {/* Full Name */}
+            <div className={styles.field}>
+              <label htmlFor="reg-fullname" className={styles.label}>Full Name</label>
+              <div className={styles.inputWrap}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.inputIcon}>
+                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                <input
+                  id="reg-fullname"
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  placeholder="Prosperity Test"
+                  className={styles.input}
+                  required
                 />
               </div>
-              <div className={styles.phoneDivider}></div>
-              <input
-                id="reg-phone"
-                type="tel"
-                value={phoneNumber}
-                onChange={(e) => setPhoneNumber(e.target.value)}
-                placeholder="(555) 000-0000"
-                className={styles.phoneInput}
-              />
             </div>
-          </div>
 
-          {/* Password */}
-          <div className={styles.field}>
-            <label htmlFor="reg-password" className={styles.label}>Password</label>
-            <div className={styles.inputWrap}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.inputIcon}>
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              <input
-                id="reg-password"
-                type={showPassword ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className={styles.input}
-                required
-              />
-              <button
-                type="button"
-                className={styles.togglePassword}
-                onClick={() => setShowPassword(!showPassword)}
-                aria-label={showPassword ? "Hide password" : "Show password"}
-              >
-                {showPassword ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                )}
-              </button>
+            {/* Email address */}
+            <div className={styles.field}>
+              <label htmlFor="reg-email" className={styles.label}>Email Address</label>
+              <div className={styles.inputWrap}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.inputIcon}>
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg>
+                <input
+                  id="reg-email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="edwardprosper002@gmail.com"
+                  className={styles.input}
+                  autoComplete="email"
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Confirm Password */}
-          <div className={styles.field}>
-            <label htmlFor="reg-confirm-password" className={styles.label}>Confirm Password</label>
-            <div className={styles.inputWrap}>
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.inputIcon}>
-                <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-              </svg>
-              <input
-                id="reg-confirm-password"
-                type={showConfirmPassword ? "text" : "password"}
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder="••••••••"
-                className={styles.input}
-                required
-              />
-              <button
-                type="button"
-                className={styles.togglePassword}
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                aria-label={showConfirmPassword ? "Hide password" : "Show password"}
-              >
-                {showConfirmPassword ? (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
-                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
-                    <line x1="1" y1="1" x2="23" y2="23" />
-                  </svg>
-                ) : (
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
-                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
-                    <circle cx="12" cy="12" r="3" />
-                  </svg>
-                )}
-              </button>
+            {/* Phone Number with Country Code */}
+            <div className={styles.field}>
+              <label htmlFor="reg-phone" className={styles.label}>
+                Phone Number<span style={{ color: '#868C98', fontWeight: 400 }}>(Optional)</span>
+              </label>
+              <div className={styles.phoneInputWrap}>
+                <div className={styles.countrySelectWrap}>
+                  <CustomSelect
+                    name="countryCode"
+                    value={String(countryCode)}
+                    placeholder="+1"
+                    options={countries.map((c) => ({
+                      value: String(c.id),
+                      label: `${c.iso_code ? c.iso_code.toLowerCase() : ''} ${c.dial_code}`
+                    }))}
+                    onChange={(_name: string, value: string) => setCountryCode(value)}
+                    variant="minimal"
+                  />
+                </div>
+                <div className={styles.phoneDivider}></div>
+                <input
+                  id="reg-phone"
+                  type="tel"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  placeholder="(555) 000-0000"
+                  className={styles.phoneInput}
+                />
+              </div>
             </div>
-          </div>
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            className={styles.submitBtn}
-            disabled={loading}
-          >
-            {loading ? (
-              <span className={styles.spinner} />
-            ) : (
-              "Sign Up"
-            )}
-          </button>
-        </form>
+            {/* Password */}
+            <div className={styles.field}>
+              <label htmlFor="reg-password" className={styles.label}>Password</label>
+              <div className={styles.inputWrap}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.inputIcon}>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input
+                  id="reg-password"
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className={styles.input}
+                  required
+                />
+                <button
+                  type="button"
+                  className={styles.togglePassword}
+                  onClick={() => setShowPassword(!showPassword)}
+                  aria-label={showPassword ? "Hide password" : "Show password"}
+                >
+                  {showPassword ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Confirm Password */}
+            <div className={styles.field}>
+              <label htmlFor="reg-confirm-password" className={styles.label}>Confirm Password</label>
+              <div className={styles.inputWrap}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.inputIcon}>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input
+                  id="reg-confirm-password"
+                  type={showConfirmPassword ? "text" : "password"}
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className={styles.input}
+                  required
+                />
+                <button
+                  type="button"
+                  className={styles.togglePassword}
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                >
+                  {showConfirmPassword ? (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                      <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                      <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                      <line x1="1" y1="1" x2="23" y2="23" />
+                    </svg>
+                  ) : (
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z" />
+                      <circle cx="12" cy="12" r="3" />
+                    </svg>
+                  )}
+                </button>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className={styles.submitBtn}
+              disabled={loading}
+            >
+              {loading ? (
+                <span className={styles.spinner} />
+              ) : (
+                "Sign Up"
+              )}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleVerifyOTP} className={styles.form}>
+            <div className={styles.field}>
+              <label htmlFor="reg-otp" className={styles.label}>OTP Code</label>
+              <div className={styles.inputWrap}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.inputIcon}>
+                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                </svg>
+                <input
+                  id="reg-otp"
+                  type="text"
+                  value={otp}
+                  onChange={(e) => {
+                    const val = e.target.value.replace(/[^0-9]/g, '');
+                    setOtp(val);
+                    if (val.length === 6) {
+                      submitOTP(val);
+                    }
+                  }}
+                  placeholder="123456"
+                  className={styles.input}
+                  maxLength={6}
+                  required
+                  autoFocus
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className={styles.submitBtn}
+              disabled={loading}
+            >
+              {loading ? (
+                <span className={styles.spinner} />
+              ) : (
+                "Verify Account"
+              )}
+            </button>
+          </form>
+        )}
 
         {/* Footer */}
         <div className={styles.footer}>
