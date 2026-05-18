@@ -11,7 +11,7 @@ export const marketingService = {
     const params: any = {
       path: 'vehicles/manage/',
     };
-    
+
     if (vehicleTypes && vehicleTypes.length > 0) {
       params.vehicle_type = vehicleTypes.map(t => t.toLowerCase());
     }
@@ -21,15 +21,22 @@ export const marketingService = {
   },
 
   getVehicleById: async (id: string | number): Promise<Vehicle> => {
-    const response = await publicApi.get('', { 
-      params: { path: `vehicles/manage/${id}/` } 
+    const response = await publicApi.get('', {
+      params: { path: `vehicles/manage/${id}/` }
     });
     return response.data;
   },
 
   getFaqs: async (): Promise<Faq[]> => {
-    const response = await publicApi.get('', { 
-      params: { path: 'api/v1/accounts/faqs/' } 
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/accounts/faqs/' }
+    });
+    return response.data;
+  },
+
+  getTestimonials: async (): Promise<any[]> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/accounts/testimonials/' }
     });
     return response.data;
   }

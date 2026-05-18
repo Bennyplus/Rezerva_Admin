@@ -1503,6 +1503,74 @@ h6 {
   transition: transform var(--transition-normal), box-shadow var(--transition-normal);
 }
 
+/* Review Card Skeleton Loader */
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.review-card--skeleton {
+  pointer-events: none;
+  background: var(--color-white);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  padding: var(--space-6);
+}
+
+.review-card--skeleton .skeleton-line {
+  background: linear-gradient(90deg, var(--color-surface) 25%, var(--color-border) 50%, var(--color-surface) 75%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.5s infinite linear;
+  border-radius: 4px;
+}
+
+.review-card--skeleton .skeleton-title {
+  width: 45%;
+  height: 20px;
+}
+
+.review-card--skeleton .skeleton-stars {
+  width: 70px;
+  height: 16px;
+}
+
+.review-card--skeleton .skeleton-body-line {
+  height: 14px;
+  width: 100%;
+}
+
+.review-card--skeleton .skeleton-body-line:nth-child(2) {
+  width: 90%;
+}
+
+.review-card--skeleton .skeleton-body-line:nth-child(3) {
+  width: 75%;
+}
+
+.review-card--skeleton .skeleton-avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.review-card--skeleton .skeleton-name {
+  width: 100px;
+  height: 14px;
+  margin-bottom: 6px;
+}
+
+.review-card--skeleton .skeleton-date {
+  width: 70px;
+  height: 12px;
+}
+
 .review-card--tall {
   grid-row: span 2;
 }
@@ -1588,6 +1656,22 @@ h6 {
   background: var(--color-surface);
   flex-shrink: 0;
   border: 1px solid var(--color-border);
+}
+
+.review-card__avatar-initials {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--color-white);
+  flex-shrink: 0;
+  border: 1px solid var(--color-border);
+  text-transform: uppercase;
 }
 
 .review-card__author-info {
