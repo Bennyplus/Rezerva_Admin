@@ -1,5 +1,5 @@
 /* ============================================================
-   ADMIN LOGIN — Scoped styles (CSS Module)
+   ADMIN REGISTER — Scoped styles (CSS Module)
    ============================================================ */
 
 .page {
@@ -7,29 +7,29 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
-  padding: 24px;
+  padding: 32px 24px;
   position: relative;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 
-/* ─── Card ─── */
+/* Card */
 .card {
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
   border-radius: 16px;
   padding: 40px 36px;
   position: relative;
   z-index: 1;
+  margin: var(--space-4) 0;
 }
 
-/* ─── Logo ─── */
+/* Logo */
 .logoArea {
   display: flex;
   flex-direction: column;
   align-items: center;
-  margin-bottom: 28px;
+  margin-bottom: 24px;
 }
 
 .logoLink {
@@ -45,7 +45,7 @@
   text-transform: uppercase;
 }
 
-/* ─── Heading ─── */
+/* Heading */
 .heading {
   text-align: center;
   margin-bottom: 24px;
@@ -66,7 +66,7 @@
   margin: 0;
 }
 
-/* ─── Error ─── */
+/* Alert Boxes */
 .error {
   display: flex;
   align-items: center;
@@ -79,6 +79,7 @@
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 20px;
+  text-align: left;
 }
 
 .success {
@@ -93,45 +94,26 @@
   font-size: 13px;
   font-weight: 500;
   margin-bottom: 20px;
+  text-align: left;
 }
 
-/* ─── Form ─── */
+/* Form */
 .form {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 16px;
 }
 
 .field {
   display: flex;
   flex-direction: column;
   gap: 6px;
+  text-align: left;
 }
 
 .label {
   font-size: 13px;
   font-weight: 500;
-  color: #111111;
-}
-
-.labelRow {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.forgotLink {
-  font-size: 12.5px;
-  font-weight: 500;
-  color: #868C98;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0;
-  transition: color 0.15s ease;
-}
-
-.forgotLink:hover {
   color: #111111;
 }
 
@@ -173,6 +155,83 @@
   color: #C1C7CD;
 }
 
+/* Custom dropdown select styling */
+.select {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: #111111;
+  height: 100%;
+  cursor: pointer;
+  appearance: none;
+}
+
+.select option {
+  background: #ffffff;
+  color: #111111;
+}
+
+/* Unified Phone Input Wrap */
+.phoneInputWrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  height: 46px;
+  background: #ffffff;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.phoneInputWrap:focus-within {
+  border-color: #111111;
+  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.06);
+}
+
+.countrySelectWrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  height: 100%;
+  width: 100px; /* Matched from contact-us style */
+  cursor: pointer;
+}
+
+.countrySelect {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.phoneDivider {
+  width: 1px;
+  height: 24px;
+  background: #E2E4E9;
+}
+
+.phoneInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: #111111;
+  height: 100%;
+  padding: 0 14px;
+}
+
+.phoneInput::placeholder {
+  color: #C1C7CD;
+}
+
 .togglePassword {
   display: flex;
   align-items: center;
@@ -190,7 +249,7 @@
   color: #111111;
 }
 
-/* ─── Submit Button ─── */
+/* Submit Button */
 .submitBtn {
   display: flex;
   align-items: center;
@@ -204,7 +263,7 @@
   font-size: 14px;
   font-weight: 600;
   cursor: pointer;
-  margin-top: 4px;
+  margin-top: 8px;
   transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
@@ -238,12 +297,15 @@
   }
 }
 
-/* ─── Footer ─── */
+/* Footer */
 .footer {
   text-align: center;
   margin-top: 24px;
   padding-top: 20px;
   border-top: 1px solid #E2E4E9;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .backLink {
@@ -258,7 +320,7 @@
   color: #111111;
 }
 
-/* ─── Responsive ─── */
+/* Responsive */
 @media (max-width: 480px) {
   .card {
     padding: 28px 24px;

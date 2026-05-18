@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { accountsService } from "@/services/accounts-service";
 import styles from "./login.module.css";
 
 export default function AdminLoginPage() {
@@ -13,10 +14,12 @@ export default function AdminLoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setSuccess("");
 
     if (!email || !password) {
       setError("Please fill in all fields");
@@ -24,13 +27,25 @@ export default function AdminLoginPage() {
     }
 
     setLoading(true);
-
-    /* Simulate login — replace with real API later */
-    await new Promise((resolve) => setTimeout(resolve, 1200));
-
-    /* Mock: accept any credentials for now */
-    setLoading(false);
-    router.push("/admin");
+    try {
+      const response = await accountsService.login({ email, password });
+      
+      // Allow user to assume Super Admin role for now while BE user roles are tweaked
+      localStorage.setItem("drifully_admin_role", "Super Admin");
+      if (response && (response.token || response.access || response.access_token)) {
+        localStorage.setItem("drifully_admin_token", response.token || response.access || response.access_token);
+      }
+      
+      setSuccess("Logged in successfully! Redirecting...");
+      setTimeout(() => {
+        router.push("/admin");
+      }, 1500);
+    } catch (err: any) {
+      const serverMessage = err.response?.data?.message || err.response?.data?.error || err.message;
+      setError(typeof serverMessage === 'string' ? serverMessage : "Invalid credentials. Please check your email and password.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -58,6 +73,17 @@ export default function AdminLoginPage() {
           <h1 className={styles.title}>Welcome back</h1>
           <p className={styles.subtitle}>Sign in to your admin account</p>
         </div>
+
+        {/* Success */}
+        {success && (
+          <div className={styles.success} role="alert">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+              <polyline points="22 4 12 14.01 9 11.01" />
+            </svg>
+            {success}
+          </div>
+        )}
 
         {/* Error */}
         {error && (

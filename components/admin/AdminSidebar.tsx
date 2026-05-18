@@ -4,37 +4,89 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import { ADMIN_USER } from "@/data/admin-mock";
+import { ADMIN_USER, AdminRole } from "@/data/admin-mock";
 import styles from "./AdminSidebar.module.css";
 
 /* ─── Navigation structure matching the design ─── */
-const NAV_SECTIONS = [
+interface NavItem {
+  label: string;
+  href: string;
+  icon: string;
+  allowedRoles: AdminRole[];
+}
+
+interface NavSection {
+  label: string;
+  items: NavItem[];
+}
+
+const NAV_SECTIONS: NavSection[] = [
   {
     label: "Overview",
     items: [
-      { label: "Dashboard", href: "/admin", icon: "dashboard" },
-      { label: "Analytics", href: "/admin/analytics", icon: "analytics" },
-      { label: "Audit Logs", href: "/admin/audit-logs", icon: "audit" },
+      { 
+        label: "Dashboard", 
+        href: "/admin", 
+        icon: "dashboard", 
+        allowedRoles: ["Super Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"] 
+      },
+      { 
+        label: "Analytics", 
+        href: "/admin/analytics", 
+        icon: "analytics", 
+        allowedRoles: ["Super Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"] 
+      },
+      { 
+        label: "Audit Logs", 
+        href: "/admin/audit-logs", 
+        icon: "audit", 
+        allowedRoles: ["Super Admin"] 
+      },
     ],
   },
   {
     label: "Operations",
     items: [
-      { label: "Vehicles", href: "/admin/vehicles", icon: "vehicles" },
-      { label: "Bookings", href: "/admin/bookings", icon: "bookings" },
-      { label: "Notifications", href: "/admin/notifications", icon: "notifications" },
+      { 
+        label: "Vehicles", 
+        href: "/admin/vehicles", 
+        icon: "vehicles", 
+        allowedRoles: ["Super Admin", "Fleet Manager"] 
+      },
+      { 
+        label: "Bookings", 
+        href: "/admin/bookings", 
+        icon: "bookings", 
+        allowedRoles: ["Super Admin", "Operations Manager", "Fleet Manager"] 
+      },
+      { 
+        label: "Notifications", 
+        href: "/admin/notifications", 
+        icon: "notifications", 
+        allowedRoles: ["Super Admin", "Customer Engagement"] 
+      },
     ],
   },
   {
     label: "Users",
     items: [
-      { label: "Users", href: "/admin/users", icon: "users" },
+      { 
+        label: "Users", 
+        href: "/admin/users", 
+        icon: "users", 
+        allowedRoles: ["Super Admin", "Customer Engagement"] 
+      },
     ],
   },
   {
     label: "Finance",
     items: [
-      { label: "Payments", href: "/admin/payments", icon: "payments" },
+      { 
+        label: "Payments", 
+        href: "/admin/payments", 
+        icon: "payments", 
+        allowedRoles: ["Super Admin", "Finance Manager"] 
+      },
     ],
   },
 ];
@@ -79,6 +131,19 @@ export default function AdminSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [usersExpanded, setUsersExpanded] = useState(true);
   const pathname = usePathname();
+  
+  const currentRole = ADMIN_USER.role as AdminRole;
+
+  // Filter sections and remove empty categories
+  const visibleSections = NAV_SECTIONS.map((section) => {
+    const filteredItems = section.items.filter((item) =>
+      item.allowedRoles.includes(currentRole)
+    );
+    return {
+      ...section,
+      items: filteredItems,
+    };
+  }).filter((section) => section.items.length > 0);
 
   /* Close mobile sidebar on route change */
   useEffect(() => {
@@ -162,7 +227,7 @@ export default function AdminSidebar() {
 
         {/* Navigation */}
         <nav className={styles.nav}>
-          {NAV_SECTIONS.map((section) => (
+          {visibleSections.map((section) => (
             <div key={section.label} className={styles.section}>
               {!collapsed && (
                 <span className={styles.sectionLabel}>{section.label}</span>
@@ -195,11 +260,11 @@ export default function AdminSidebar() {
                         {usersExpanded && !collapsed && (
                           <ul className={styles.subNavList}>
                             {[
-                              { label: "Teams", href: "/admin/teams", icon: "teams" },
-                              { label: "Drivers", href: "/admin/drivers", icon: "drivers" },
-                              { label: "Customers", href: "/admin/customers", icon: "customers" },
-                              { label: "Reviews", href: "/admin/reviews", icon: "reviews" },
-                            ].map((sub) => (
+                              { label: "Teams", href: "/admin/teams", icon: "teams", allowedRoles: ["Super Admin"] },
+                              { label: "Drivers", href: "/admin/drivers", icon: "drivers", allowedRoles: ["Super Admin", "Customer Engagement"] },
+                              { label: "Customers", href: "/admin/customers", icon: "customers", allowedRoles: ["Super Admin", "Customer Engagement"] },
+                              { label: "Reviews", href: "/admin/reviews", icon: "reviews", allowedRoles: ["Super Admin", "Customer Engagement"] },
+                            ].filter((sub) => sub.allowedRoles.includes(currentRole)).map((sub) => (
                               <li key={sub.href}>
                                 <Link
                                   href={sub.href}

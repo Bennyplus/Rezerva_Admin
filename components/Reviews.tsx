@@ -1,6 +1,32 @@
 "use client";
 
-const REVIEWS = [
+import { useState, useEffect } from "react";
+import { marketingService } from "@/services/marketing-service";
+
+interface Testimonial {
+  id: number;
+  name: string;
+  role: string;
+  message: string;
+  rating: number;
+  is_featured: boolean;
+  created_at: string;
+  avatar?: string;
+  image?: string;
+  photo?: string;
+}
+
+interface ReviewType {
+  id: string;
+  title: string;
+  stars: number;
+  body: string;
+  author: string;
+  date: string;
+  avatar: string;
+}
+
+const STATIC_REVIEWS: ReviewType[] = [
   {
     id: "r1",
     title: "Wonderful Experience",
@@ -76,6 +102,58 @@ const REVIEWS = [
 ];
 
 export default function Reviews() {
+  const [reviews, setReviews] = useState<ReviewType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
+
+  useEffect(() => {
+    async function fetchTestimonials() {
+      setIsLoading(true);
+      try {
+        const data = await marketingService.getTestimonials();
+        if (data && data.length > 0) {
+          // Map first 8 testimonials
+          const mapped: ReviewType[] = data.slice(0, 8).map((t: Testimonial) => {
+            let formattedDate = "19 April 2026";
+            if (t.created_at) {
+              try {
+                formattedDate = new Date(t.created_at).toLocaleDateString("en-GB", {
+                  day: "numeric",
+                  month: "long",
+                  year: "numeric",
+                });
+              } catch (e) {
+                console.error("Error formatting date:", e);
+              }
+            }
+            return {
+              id: `r-${t.id}`,
+              title: t.role || "Review",
+              stars: t.rating || 5,
+              body: t.message || "",
+              author: t.name || "Anonymous",
+              date: formattedDate,
+              avatar: t.avatar || t.image || t.photo || "",
+            };
+          });
+          setReviews(mapped);
+        } else {
+          // Fallback to static reviews if empty response
+          setReviews(STATIC_REVIEWS);
+        }
+      } catch (error) {
+        console.error("Failed to load testimonials, falling back to static reviews:", error);
+        setReviews(STATIC_REVIEWS);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchTestimonials();
+  }, []);
+
+  // Use either the mapped reviews or empty array while loading
+  const displayReviews = isLoading ? Array(8).fill(null) : reviews;
+
   return (
     <section
       id="reviews"
@@ -94,13 +172,23 @@ export default function Reviews() {
         </header>
 
         <div className="reviews__grid" role="list">
-          {REVIEWS.map((review, index) => {
+          {displayReviews.map((review, index) => {
             let className = "";
             if (index === 0 || index === 4 || index === 7) {
               className = "review-card--wide";
             } else if (index === 2) {
               className = "review-card--tall";
             }
+
+            if (isLoading) {
+              return (
+                <ReviewCardSkeleton
+                  key={`skeleton-${index}`}
+                  className={className}
+                />
+              );
+            }
+
             return (
               <ReviewCard
                 key={review.id}
@@ -132,14 +220,63 @@ function StarRating({ stars }: { stars: number }) {
   );
 }
 
+function ReviewCardSkeleton({ className = "" }: { className?: string }) {
+  return (
+    <article
+      className={`review-card review-card--skeleton ${className}`}
+      role="presentation"
+    >
+      <div className="review-card__top">
+        <div className="skeleton-line skeleton-title" />
+        <div className="skeleton-line skeleton-stars" />
+      </div>
+
+      <div className="review-card__body" style={{ margin: 0 }}>
+        <div className="skeleton-line skeleton-body-line" />
+        <div className="skeleton-line skeleton-body-line" />
+        <div className="skeleton-line skeleton-body-line" />
+      </div>
+
+      <div className="review-card__author">
+        <div className="skeleton-line skeleton-avatar" />
+        <div className="review-card__author-info" style={{ flexGrow: 1 }}>
+          <div className="skeleton-line skeleton-name" />
+          <div className="skeleton-line skeleton-date" />
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function getInitials(name: string): string {
+  if (!name) return "";
+  const parts = name.trim().split(/\s+/);
+  if (parts.length === 0) return "";
+  if (parts.length === 1) return parts[0].charAt(0).toUpperCase();
+  return (parts[0].charAt(0) + parts[parts.length - 1].charAt(0)).toUpperCase();
+}
+
+function getAvatarColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  const hue = Math.abs(hash) % 360;
+  return `hsl(${hue}, 55%, 45%)`;
+}
+
 function ReviewCard({
   review,
   className = ""
 }: {
-  review: (typeof REVIEWS)[0],
+  review: ReviewType,
   className?: string
 }) {
-  const hasCustomBg = ["r2", "r4", "r8"].includes(review.id);
+  const [imgError, setImgError] = useState(false);
+  const hasCustomBg = ["r2", "r4", "r8", "r-2", "r-4", "r-8", "2", "4", "8"].includes(review.id);
+
+  const initials = getInitials(review.author);
+  const avatarBg = getAvatarColor(review.author);
 
   return (
     <article
@@ -156,14 +293,22 @@ function ReviewCard({
       <p className="review-card__body">{review.body}</p>
 
       <div className="review-card__author">
-        <img
-          src={review.avatar || ""}
-          alt={review.author}
-          className="review-card__avatar"
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = `https://ui-avatars.com/api/?name=${encodeURIComponent(review.author)}&background=random`;
-          }}
-        />
+        {review.avatar && !imgError ? (
+          <img
+            src={review.avatar}
+            alt={review.author}
+            className="review-card__avatar"
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <div
+            className="review-card__avatar-initials"
+            style={{ backgroundColor: avatarBg }}
+            aria-label={review.author}
+          >
+            {initials}
+          </div>
+        )}
         <div className="review-card__author-info">
           <p className="review-card__name">{review.author}</p>
           <p className="review-card__date">{review.date}</p>
