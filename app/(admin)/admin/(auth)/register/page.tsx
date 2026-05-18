@@ -4,13 +4,13 @@ import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import CustomSelect from "@/components/admin/CustomSelect";
 import { accountsService, Country } from "@/services/accounts-service";
 import styles from "./register.module.css";
+import CustomSelect from "@/components/admin/CustomSelect";
 
 export default function AdminRegisterPage() {
   const router = useRouter();
-  
+
   // State for form fields
   const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
@@ -35,10 +35,11 @@ export default function AdminRegisterPage() {
         setLoadingCountries(true);
         const data = await accountsService.getCountries();
         setCountries(data);
-        
+        console.log("COUNTRIES DATA SHAPE:", Array.isArray(data), "LENGTH:", data?.length, "DATA:", data);
+
         // Auto-select first country or country ID 1 if available
         if (data && data.length > 0) {
-          const defaultCountry = data.find(c => c.id === 1 || String(c.id) === "1") || data[0];
+          const defaultCountry = data.find((c: any) => c.id === 1 || String(c.id) === "1") || data[0];
           setCountryCode(defaultCountry.id);
         } else {
           setCountryCode("1"); // Dynamic spec fallback
@@ -89,7 +90,7 @@ export default function AdminRegisterPage() {
       });
 
       setSuccess("Account created successfully! Redirecting you to login...");
-      
+
       // Delay redirection so success card is read
       setTimeout(() => {
         router.push("/admin/login");
@@ -98,7 +99,7 @@ export default function AdminRegisterPage() {
     } catch (err: any) {
       // Extract detailed server-side error messages
       const serverMessage = err.response?.data?.message || err.response?.data?.error || err.message;
-      
+
       if (typeof serverMessage === "object") {
         // Handle field-level object errors (e.g. { email: ["Already exists"] })
         const keys = Object.keys(serverMessage);
@@ -166,7 +167,7 @@ export default function AdminRegisterPage() {
 
         {/* Registration Form */}
         <form onSubmit={handleSubmit} className={styles.form}>
-          
+
           {/* Full Name */}
           <div className={styles.field}>
             <label htmlFor="reg-fullname" className={styles.label}>Full Name</label>
@@ -211,7 +212,7 @@ export default function AdminRegisterPage() {
           {/* Phone Number with Country Code */}
           <div className={styles.field}>
             <label htmlFor="reg-phone" className={styles.label}>
-              Phone Number<span style={{color: '#868C98', fontWeight: 400}}>(Optional)</span>
+              Phone Number<span style={{ color: '#868C98', fontWeight: 400 }}>(Optional)</span>
             </label>
             <div className={styles.phoneInputWrap}>
               <div className={styles.countrySelectWrap}>
@@ -219,13 +220,12 @@ export default function AdminRegisterPage() {
                   name="countryCode"
                   value={String(countryCode)}
                   placeholder="+1"
-                  options={countries.length > 0 ? countries.map((c) => ({
+                  options={countries.map((c) => ({
                     value: String(c.id),
-                    label: `${c.flag_emoji || "🌐"} +${c.phone_code}`,
-                  })) : [{ value: "1", label: "🇺🇸 +1" }]}
-                  onChange={(_, value) => setCountryCode(value)}
+                    label: `${c.iso_code ? c.iso_code.toLowerCase() : ''} ${c.dial_code}`
+                  }))}
+                  onChange={(_name: string, value: string) => setCountryCode(value)}
                   variant="minimal"
-                  showSearch
                 />
               </div>
               <div className={styles.phoneDivider}></div>

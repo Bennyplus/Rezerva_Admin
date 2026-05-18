@@ -3,9 +3,9 @@ import { publicApi } from '@/lib/api-client';
 export interface Country {
   id: number;
   name: string;
-  code: string;
-  phone_code: string;
-  flag_emoji?: string;
+  iso_code: string;
+  dial_code: string;
+  flag: string | null;
 }
 
 export interface RegisterPayload {
