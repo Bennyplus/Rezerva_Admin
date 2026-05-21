@@ -75,8 +75,14 @@ export default function CustomersPage() {
       {/* ─── Empty State ─── */}
       {isEmpty ? (
         <div className={styles.emptyCard} id="customers-empty-state">
-          <div className={styles.emptyIllustration}>
-            <EmptyIcon />
+          <div className={styles.illustration} aria-hidden="true">
+            <Image
+              src="/images/admin/Items.png"
+              alt="No users illustration"
+              width={460}
+              height={380}
+              className={styles.illustrationImg}
+            />
           </div>
           <h2 className={styles.emptyTitle}>No users found</h2>
           <p className={styles.emptySubtitle}>

@@ -58,8 +58,8 @@ export default function BookingsPage() {
 
           {isEmpty ? (
             /* ─── Empty State ─── */
-            <div className={styles.emptyCard}>
-              <div className={styles.illustration}>
+            <div className={styles.emptyCard} id="bookings-empty-state">
+              <div className={styles.illustration} aria-hidden="true">
                 <Image
                   src="/images/admin/Items.png"
                   alt="No bookings illustration"
