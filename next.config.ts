@@ -5,6 +5,11 @@ const nextConfig: import('next').NextConfig = {
     remotePatterns: [
       {
         protocol: "https",
+        hostname: "prosper-django-bucket.s3.amazonaws.com",
+        pathname: "/**",
+      },
+      {
+        protocol: "https",
         hostname: "prosper-django-bucket.s3.us-east-2.amazonaws.com",
         pathname: "/**",
       },

@@ -23,7 +23,8 @@ interface ReviewType {
   body: string;
   author: string;
   date: string;
-  avatar: string;
+  avatar?: string;
+  image?: string;
 }
 
 const STATIC_REVIEWS: ReviewType[] = [
@@ -132,7 +133,8 @@ export default function Reviews() {
               body: t.message || "",
               author: t.name || "Anonymous",
               date: formattedDate,
-              avatar: t.avatar || t.image || t.photo || "",
+              image: t.image || t.avatar || t.photo || "",
+              avatar: t.avatar || t.photo || "",
             };
           });
           setReviews(mapped);
@@ -293,9 +295,9 @@ function ReviewCard({
       <p className="review-card__body">{review.body}</p>
 
       <div className="review-card__author">
-        {review.avatar && !imgError ? (
+        {(review.image || review.avatar) && !imgError ? (
           <img
-            src={review.avatar}
+            src={review.image || review.avatar}
             alt={review.author}
             className="review-card__avatar"
             onError={() => setImgError(true)}
