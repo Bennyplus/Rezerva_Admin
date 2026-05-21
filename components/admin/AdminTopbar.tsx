@@ -59,6 +59,10 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Payments",
     subtitle: "Monitor payments, refunds, and wallet activity",
   },
+  "/admin/payments/:id": {
+    title: "Payment Details",
+    subtitle: "Review transaction details and payment status",
+  },
   "/admin/refunds": {
     title: "Refunds",
     subtitle: "Manage and monitor customer refund requests",
@@ -71,7 +75,14 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
 
 export default function AdminTopbar() {
   const pathname = usePathname();
-  const meta = PAGE_META[pathname] || { title: "Dashboard", subtitle: "" };
+
+  // Resolve dynamic routes before exact lookup
+  const resolvedPath = (() => {
+    if (/^\/admin\/payments\/[^/]+$/.test(pathname)) return "/admin/payments/:id";
+    return pathname;
+  })();
+
+  const meta = PAGE_META[resolvedPath] || { title: "Dashboard", subtitle: "" };
 
   return (
     <header className={styles.topbar} id="admin-topbar">
