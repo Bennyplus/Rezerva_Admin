@@ -170,7 +170,7 @@ export default function OurFleetPage() {
                           {vehicle.location}
                         </span>
                         <span className={styles['fleet-card__price']}>
-                          ${typeof vehicle.price === 'number' ? vehicle.price.toLocaleString() : vehicle.price}
+                          ${typeof vehicle.price === 'number' ? vehicle.price.toLocaleString() : parseFloat(vehicle.price).toLocaleString()}
                           <span className={styles['fleet-card__price-unit']}>/day</span>
                         </span>
                       </div>
