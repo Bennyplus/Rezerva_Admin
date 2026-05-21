@@ -14,6 +14,7 @@ type ViewMode = "list" | "grid";
 
 export default function DriversPage() {
   const [drivers, setDrivers] = useState<Driver[]>(ADMIN_DRIVERS);
+  const [isEmpty, setIsEmpty] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [currentPage, setCurrentPage] = useState(2);
   const [searchQuery, setSearchQuery] = useState("");
@@ -133,209 +134,242 @@ export default function DriversPage() {
         ))}
       </div>
 
-      {/* Toolbar */}
-      <div className={styles.toolbar} id="drivers-toolbar">
-        <div className={styles.toolbarLeft}>
-          {/* Search */}
-          <div className={styles.searchBox}>
-            <SearchIcon />
-            <input
-              type="text"
-              placeholder="Search..."
-              className={styles.searchInput}
-              id="drivers-search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
+      {isEmpty ? (
+        <div className={styles.emptyCard} id="drivers-empty-state">
+          <div className={styles.illustration} aria-hidden="true">
+            <Image
+              src="/images/admin/Items.png"
+              alt="No drivers illustration"
+              width={460}
+              height={380}
+              className={styles.illustrationImg}
             />
           </div>
-          {/* Filter */}
-          <button className={styles.toolBtn} id="drivers-filter-btn">
-            <FilterIcon /> Filter
+          <h2 className={styles.emptyTitle}>No drivers yet</h2>
+          <p className={styles.emptySubtitle}>Add your first driver to start assigning trips</p>
+          <button className={styles.addBtn} onClick={() => setIsAddModalOpen(true)}>
+            <PlusIcon />
+            Add Driver
           </button>
-          {/* Sort */}
-          <button className={styles.toolBtn} id="drivers-sort-btn">
-            <SortIcon /> Sort by
-          </button>
-          {/* View toggles */}
-          <div className={styles.viewToggle}>
-            <button
-              className={`${styles.viewBtn} ${viewMode === "grid" ? styles.viewBtnActive : ""}`}
-              onClick={() => setViewMode("grid")}
-              aria-label="Grid view"
-              id="drivers-grid-view"
-            >
-              <GridIcon />
-            </button>
-            <button
-              className={`${styles.viewBtn} ${viewMode === "list" ? styles.viewBtnActive : ""}`}
-              onClick={() => setViewMode("list")}
-              aria-label="List view"
-              id="drivers-list-view"
-            >
-              <ListIcon />
-            </button>
-          </div>
-        </div>
-        <div className={styles.toolbarRight}>
-          <button
-            className={styles.addBtnSmall}
-            id="add-driver-btn"
-            onClick={() => setIsAddModalOpen(true)}
-          >
-            <PlusIcon /> Add Driver
-          </button>
-        </div>
-      </div>
-
-      {/* ─── List View ─── */}
-      {viewMode === "list" ? (
-        <div className={styles.tableCard} id="drivers-table">
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Phone Number</th>
-                  <th>Email</th>
-                  <th>Drivers License</th>
-                  <th>Status</th>
-                  <th>Location</th>
-                  <th className={styles.actionsCol} />
-                </tr>
-              </thead>
-              <tbody>
-                {filteredDrivers.map((driver) => (
-                  <tr
-                    key={driver.id}
-                    className={styles.tableRow}
-                    onClick={() => setSelectedDriverId(driver.id)}
-                  >
-                    <td>
-                      <div className={styles.driverCell}>
-                        <div className={styles.avatarWrap}>
-                          <Image
-                            src={driver.avatar}
-                            alt={driver.name}
-                            width={36}
-                            height={36}
-                            className={styles.avatarImg}
-                          />
-                        </div>
-                        <div className={styles.driverInfo}>
-                          <span className={styles.driverName}>{driver.name}</span>
-                          <span className={styles.driverRating}>{driver.rating.toFixed(1)}</span>
-                        </div>
-                      </div>
-                    </td>
-                    <td>{driver.phone}</td>
-                    <td className={styles.emailCell}>{driver.email}</td>
-                    <td>{driver.licenseNo}</td>
-                    <td>
-                      <DriverStatusBadge status={driver.status} />
-                    </td>
-                    <td>{driver.location}</td>
-                    <td
-                      className={styles.actionsCol}
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      <div className={styles.kebabWrap}>
-                        <button
-                          className={styles.moreBtn}
-                          aria-label={`More actions for ${driver.name}`}
-                          id={`kebab-${driver.id}`}
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setOpenKebab((prev) => (prev === driver.id ? null : driver.id));
-                          }}
-                        >
-                          <MoreIcon />
-                        </button>
-                        {openKebab === driver.id && (
-                          <div className={styles.kebabMenu}>
-                            <button
-                              className={styles.kebabItem}
-                              onClick={() => { setOpenKebab(null); setSelectedDriverId(driver.id); }}
-                            >
-                              View
-                            </button>
-                            <button
-                              className={`${styles.kebabItem} ${styles.kebabItemDanger}`}
-                              onClick={() => { setOpenKebab(null); setSuspendTarget(driver); }}
-                            >
-                              Suspend Driver
-                            </button>
-                          </div>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-                {filteredDrivers.length === 0 && (
-                  <tr>
-                    <td colSpan={7} className={styles.emptyRow}>No drivers found.</td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            resultsPerPage={resultsPerPage}
-            onPageChange={setCurrentPage}
-            variant="table"
-          />
         </div>
       ) : (
-        /* ─── Grid View ─── */
         <>
-          <div className={styles.cardGrid} id="drivers-grid">
-            {filteredDrivers.slice(0, 6).map((driver) => (
-              <div
-                key={driver.id}
-                className={styles.driverCard}
-                onClick={() => setSelectedDriverId(driver.id)}
-              >
-                {/* Full-bleed photo */}
-                <div className={styles.cardPhoto}>
-                  <Image
-                    src={driver.avatar}
-                    alt={driver.name}
-                    width={400}
-                    height={240}
-                    className={styles.cardPhotoImg}
-                  />
-                  {/* Overlay row */}
-                  <div className={styles.cardOverlay}>
-                    <span className={styles.cardLocation}>
-                      <LocationIcon /> {driver.location}
-                    </span>
-                    <DriverStatusBadge status={driver.status} />
-                  </div>
-                </div>
-                {/* Card info */}
-                <div className={styles.cardBody}>
-                  <div className={styles.cardRow}>
-                    <span className={styles.cardName}>{driver.name}</span>
-                    <span className={styles.cardEmail}>{driver.email}</span>
-                  </div>
-                  <div className={styles.cardRow}>
-                    <span className={styles.cardPhone}>{driver.phone}</span>
-                    <span className={styles.cardLicense}>{driver.licenseNo}</span>
-                  </div>
-                </div>
+          {/* Toolbar */}
+          <div className={styles.toolbar} id="drivers-toolbar">
+            <div className={styles.toolbarLeft}>
+              {/* Search */}
+              <div className={styles.searchBox}>
+                <SearchIcon />
+                <input
+                  type="text"
+                  placeholder="Search..."
+                  className={styles.searchInput}
+                  id="drivers-search"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
-            ))}
+              {/* Filter */}
+              <button className={styles.toolBtn} id="drivers-filter-btn">
+                <FilterIcon /> Filter
+              </button>
+              {/* Sort */}
+              <button className={styles.toolBtn} id="drivers-sort-btn">
+                <SortIcon /> Sort by
+              </button>
+              {/* View toggles */}
+              <div className={styles.viewToggle}>
+                <button
+                  className={`${styles.viewBtn} ${viewMode === "grid" ? styles.viewBtnActive : ""}`}
+                  onClick={() => setViewMode("grid")}
+                  aria-label="Grid view"
+                  id="drivers-grid-view"
+                >
+                  <GridIcon />
+                </button>
+                <button
+                  className={`${styles.viewBtn} ${viewMode === "list" ? styles.viewBtnActive : ""}`}
+                  onClick={() => setViewMode("list")}
+                  aria-label="List view"
+                  id="drivers-list-view"
+                >
+                  <ListIcon />
+                </button>
+              </div>
+            </div>
+            <div className={styles.toolbarRight}>
+              <button
+                className={styles.addBtnSmall}
+                id="add-driver-btn"
+                onClick={() => setIsAddModalOpen(true)}
+              >
+                <PlusIcon /> Add Driver
+              </button>
+            </div>
           </div>
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            resultsPerPage={6}
-            onPageChange={setCurrentPage}
-            variant="standalone"
-          />
+
+          {/* ─── List View ─── */}
+          {viewMode === "list" ? (
+            <div className={styles.tableCard} id="drivers-table">
+              <div className={styles.tableWrap}>
+                <table className={styles.table}>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Phone Number</th>
+                      <th>Email</th>
+                      <th>Drivers License</th>
+                      <th>Status</th>
+                      <th>Location</th>
+                      <th className={styles.actionsCol} />
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {filteredDrivers.map((driver) => (
+                      <tr
+                        key={driver.id}
+                        className={styles.tableRow}
+                        onClick={() => setSelectedDriverId(driver.id)}
+                      >
+                        <td>
+                          <div className={styles.driverCell}>
+                            <div className={styles.avatarWrap}>
+                              <Image
+                                src={driver.avatar}
+                                alt={driver.name}
+                                width={36}
+                                height={36}
+                                className={styles.avatarImg}
+                              />
+                            </div>
+                            <div className={styles.driverInfo}>
+                              <span className={styles.driverName}>{driver.name}</span>
+                              <span className={styles.driverRating}>{driver.rating.toFixed(1)}</span>
+                            </div>
+                          </div>
+                        </td>
+                        <td>{driver.phone}</td>
+                        <td className={styles.emailCell}>{driver.email}</td>
+                        <td>{driver.licenseNo}</td>
+                        <td>
+                          <DriverStatusBadge status={driver.status} />
+                        </td>
+                        <td>{driver.location}</td>
+                        <td
+                          className={styles.actionsCol}
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <div className={styles.kebabWrap}>
+                            <button
+                              className={styles.moreBtn}
+                              aria-label={`More actions for ${driver.name}`}
+                              id={`kebab-${driver.id}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setOpenKebab((prev) => (prev === driver.id ? null : driver.id));
+                              }}
+                            >
+                              <MoreIcon />
+                            </button>
+                            {openKebab === driver.id && (
+                              <div className={styles.kebabMenu}>
+                                <button
+                                  className={styles.kebabItem}
+                                  onClick={() => { setOpenKebab(null); setSelectedDriverId(driver.id); }}
+                                >
+                                  View
+                                </button>
+                                <button
+                                  className={`${styles.kebabItem} ${styles.kebabItemDanger}`}
+                                  onClick={() => { setOpenKebab(null); setSuspendTarget(driver); }}
+                                >
+                                  Suspend Driver
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                    {filteredDrivers.length === 0 && (
+                      <tr>
+                        <td colSpan={7} className={styles.emptyRow}>No drivers found.</td>
+                      </tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                resultsPerPage={resultsPerPage}
+                onPageChange={setCurrentPage}
+                variant="table"
+              />
+            </div>
+          ) : (
+            /* ─── Grid View ─── */
+            <>
+              <div className={styles.cardGrid} id="drivers-grid">
+                {filteredDrivers.slice(0, 6).map((driver) => (
+                  <div
+                    key={driver.id}
+                    className={styles.driverCard}
+                    onClick={() => setSelectedDriverId(driver.id)}
+                  >
+                    {/* Full-bleed photo */}
+                    <div className={styles.cardPhoto}>
+                      <Image
+                        src={driver.avatar}
+                        alt={driver.name}
+                        width={400}
+                        height={240}
+                        className={styles.cardPhotoImg}
+                      />
+                      {/* Overlay row */}
+                      <div className={styles.cardOverlay}>
+                        <span className={styles.cardLocation}>
+                          <LocationIcon /> {driver.location}
+                        </span>
+                        <DriverStatusBadge status={driver.status} />
+                      </div>
+                    </div>
+                    {/* Card info */}
+                    <div className={styles.cardBody}>
+                      <div className={styles.cardRow}>
+                        <span className={styles.cardName}>{driver.name}</span>
+                        <span className={styles.cardEmail}>{driver.email}</span>
+                      </div>
+                      <div className={styles.cardRow}>
+                        <span className={styles.cardPhone}>{driver.phone}</span>
+                        <span className={styles.cardLicense}>{driver.licenseNo}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <Pagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                resultsPerPage={6}
+                onPageChange={setCurrentPage}
+                variant="standalone"
+              />
+            </>
+          )}
         </>
       )}
+
+      {/* Dev toggle */}
+      <div className={styles.devToggleWrap}>
+        <button
+          className={styles.stateToggle}
+          onClick={() => setIsEmpty((v) => !v)}
+          id="toggle-drivers-state"
+        >
+          {isEmpty ? "Show Populated State" : "Show Empty State"} →
+        </button>
+      </div>
 
       {/* Modals */}
       <AddDriverModal

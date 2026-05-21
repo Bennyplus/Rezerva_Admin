@@ -13,11 +13,15 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   },
   "/admin/analytics": {
     title: "Analytics",
-    subtitle: "Track performance metrics and trends",
+    subtitle: "Monitor platform growth, bookings, and revenue trends",
   },
   "/admin/audit-logs": {
     title: "Audit Logs",
-    subtitle: "Review system activity and changes",
+    subtitle: "Track admin and system activity across the platform",
+  },
+  "/admin/tickets": {
+    title: "Tickets",
+    subtitle: "Monitor platform growth, bookings, and revenue trends",
   },
   "/admin/vehicles": {
     title: "Vehicles",
@@ -25,11 +29,11 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   },
   "/admin/bookings": {
     title: "Bookings",
-    subtitle: "Manage reservations and scheduling",
+    subtitle: "Manage reservations and trip activity",
   },
   "/admin/notifications": {
     title: "Notifications",
-    subtitle: "View alerts and system messages",
+    subtitle: "Notify users instantly across every channel.",
   },
   "/admin/users": {
     title: "Users",
@@ -37,23 +41,31 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   },
   "/admin/teams": {
     title: "Team Management",
-    subtitle: "Manage administrative users and roles",
+    subtitle: "Manage all administrative users",
   },
   "/admin/drivers": {
     title: "Drivers",
-    subtitle: "Manage driver accounts and documents",
+    subtitle: "Manage and monitor all drivers",
   },
   "/admin/customers": {
-    title: "Users",
+    title: "Customers",
     subtitle: "Manage customer accounts and activity",
   },
   "/admin/reviews": {
     title: "Reviews",
-    subtitle: "View and moderate customer reviews",
+    subtitle: "Manage customer feedback and moderate reported content",
   },
   "/admin/payments": {
     title: "Payments",
-    subtitle: "Track revenue and transactions",
+    subtitle: "Monitor payments, refunds, and wallet activity",
+  },
+  "/admin/payments/:id": {
+    title: "Payment Details",
+    subtitle: "Review transaction details and payment status",
+  },
+  "/admin/refunds": {
+    title: "Refunds",
+    subtitle: "Manage and monitor customer refund requests",
   },
   "/admin/settings": {
     title: "Settings",
@@ -63,7 +75,14 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
 
 export default function AdminTopbar() {
   const pathname = usePathname();
-  const meta = PAGE_META[pathname] || { title: "Dashboard", subtitle: "" };
+
+  // Resolve dynamic routes before exact lookup
+  const resolvedPath = (() => {
+    if (/^\/admin\/payments\/[^/]+$/.test(pathname)) return "/admin/payments/:id";
+    return pathname;
+  })();
+
+  const meta = PAGE_META[resolvedPath] || { title: "Dashboard", subtitle: "" };
 
   return (
     <header className={styles.topbar} id="admin-topbar">

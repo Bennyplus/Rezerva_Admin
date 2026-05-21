@@ -1,5 +1,5 @@
 /* ============================================================
-   ADMIN CUSTOMERS — Scoped styles (CSS Module)
+   ADMIN REVIEWS — Scoped styles (CSS Module)
    ============================================================ */
 
 .page {
@@ -9,7 +9,9 @@
   flex: 1;
 }
 
-/* ─── Empty State ─── */
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
 .emptyCard {
   background: var(--admin-card-bg, #ffffff);
   border: 1px solid var(--admin-card-border, #E2E4E9);
@@ -23,7 +25,7 @@
 }
 
 .illustration {
-  margin-bottom: 12px;
+  margin-bottom: 24px;
   opacity: 0.85;
 }
 
@@ -47,10 +49,12 @@
   color: var(--admin-section-label, #868C98);
   margin: 0 0 24px;
   text-align: center;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-/* ─── Table Card ─── */
+/* ============================================================
+   TABLE CARD
+   ============================================================ */
 .tableCard {
   background: var(--admin-card-bg, #ffffff);
   border-radius: var(--radius-md, 10px);
@@ -66,7 +70,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px;
+  padding: 14px 20px;
 }
 
 .toolbarLeft {
@@ -91,7 +95,7 @@
   padding: 0 12px;
   height: 36px;
   background: var(--admin-card-bg, #ffffff);
-  min-width: 220px;
+  min-width: 240px;
 }
 
 .searchBox svg {
@@ -113,7 +117,7 @@
   color: var(--admin-section-label, #868C98);
 }
 
-/* Tool button (Filter) */
+/* Tool buttons */
 .toolBtn {
   display: inline-flex;
   align-items: center;
@@ -140,25 +144,6 @@
   color: var(--admin-section-label, #868C98);
 }
 
-/* Export Users button */
-.exportBtn {
-  height: 36px;
-  padding: 0 18px;
-  border: none;
-  border-radius: 8px;
-  background: var(--admin-active-bg, #111111);
-  color: var(--admin-active-text, #ffffff);
-  font-family: var(--font-heading);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: opacity 0.15s ease;
-}
-
-.exportBtn:hover {
-  opacity: 0.88;
-}
-
 /* ─── Table ─── */
 .tableWrap {
   overflow-x: auto;
@@ -179,6 +164,7 @@
   color: var(--admin-section-label, #868C98);
   background: var(--admin-content-bg, #F6F8FA);
   white-space: nowrap;
+  letter-spacing: 0.01em;
 }
 
 .table td {
@@ -192,17 +178,12 @@
   border-bottom: none;
 }
 
-.tableRow {
-  cursor: pointer;
+.table tbody tr {
   transition: background 0.1s ease;
 }
 
-.tableRow:hover {
+.table tbody tr:hover {
   background: var(--admin-content-bg, #F6F8FA);
-}
-
-.rowSelected {
-  background: rgba(17, 17, 17, 0.02);
 }
 
 /* Checkbox column */
@@ -219,54 +200,22 @@
   cursor: pointer;
 }
 
-/* Customer cell (avatar + name) */
-.customerCell {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.avatarWrap {
-  width: 34px;
-  height: 34px;
-  border-radius: 8px;
-  overflow: hidden;
-  background: var(--admin-content-bg, #F6F8FA);
-  flex-shrink: 0;
-}
-
-.avatarImg {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  max-width: none;
-}
-
-.customerName {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--color-text, #111111);
-}
-
-/* Email cell */
-.emailCell {
-  max-width: 180px;
+/* Truncate review text */
+.reviewText {
+  max-width: 250px;
+  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-}
-
-/* Bookings cell */
-.bookingsCell {
   color: var(--admin-section-label, #868C98);
 }
 
-/* Verification status badges */
+/* Status badges */
 .badge {
   display: inline-flex;
   align-items: center;
   gap: 5px;
   padding: 3px 10px;
-  border-radius: 9999px;
+  border-radius: var(--radius-full, 9999px);
   font-size: 11.5px;
   font-weight: 500;
 }
@@ -278,31 +227,25 @@
   flex-shrink: 0;
 }
 
-.badgeVerified {
-  background: transparent;
-  color: #059669;
-}
-.badgeVerified .badgeDot {
-  background: #059669;
+.badgePublished {
+  background: var(--admin-content-bg, #F6F8FA);
+  color: var(--color-text, #111111);
 }
 
-.badgePending {
-  background: transparent;
-  color: var(--admin-section-label, #868C98);
-}
-.badgePending .badgeDot {
+.badgePublished .badgeDot {
   background: var(--admin-section-label, #868C98);
 }
 
-.badgeSuspended {
-  background: transparent;
-  color: #EF4444;
-}
-.badgeSuspended .badgeDot {
-  background: #EF4444;
+.badgeRemoved {
+  background: #FEF2F2;
+  color: #DC2626;
 }
 
-/* Actions col + kebab */
+.badgeRemoved .badgeDot {
+  background: #DC2626;
+}
+
+/* More actions */
 .actionsCol {
   width: 44px;
   text-align: center;
@@ -332,57 +275,48 @@
   color: var(--color-text, #111111);
 }
 
+/* Kebab menu popup */
 .kebabMenu {
   position: absolute;
+  top: 100%;
   right: 0;
-  top: calc(100% + 4px);
-  min-width: 150px;
-  background: #ffffff;
+  margin-top: 4px;
+  min-width: 140px;
+  background: var(--admin-card-bg, #ffffff);
   border: 1px solid var(--admin-card-border, #E2E4E9);
   border-radius: 8px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   z-index: 50;
-  overflow: hidden;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
 }
 
 .kebabItem {
-  display: block;
+  display: flex;
+  align-items: center;
   width: 100%;
-  padding: 10px 16px;
-  text-align: left;
-  background: transparent;
+  padding: 8px 12px;
   border: none;
+  background: transparent;
+  text-align: left;
   font-family: var(--font-body);
   font-size: 13px;
   color: var(--color-text, #111111);
+  border-radius: 4px;
   cursor: pointer;
-  transition: background 0.12s ease;
+  transition: background 0.1s ease;
 }
 
 .kebabItem:hover {
   background: var(--admin-content-bg, #F6F8FA);
 }
 
-.kebabItemDanger {
-  color: #EF4444;
-}
-
-.kebabItemDanger:hover {
-  background: #FEF2F2;
-}
-
-/* Empty row */
-.emptyRow {
-  text-align: center;
-  padding: 48px;
-  color: var(--admin-section-label, #868C98);
-  font-size: 13.5px;
-}
-
 /* ─── Dev toggle ─── */
 .devToggleWrap {
   display: flex;
   justify-content: center;
+  margin-top: auto;
 }
 
 .stateToggle {
@@ -405,7 +339,7 @@
 }
 
 /* ─── Responsive ─── */
-@media (max-width: 768px) {
+@media (max-width: 640px) {
   .toolbar {
     flex-direction: column;
     align-items: stretch;

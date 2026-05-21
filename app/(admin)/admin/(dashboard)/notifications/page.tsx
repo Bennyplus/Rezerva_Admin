@@ -57,16 +57,15 @@ export default function NotificationsPage() {
 
       {isEmpty ? (
         /* ─── Empty State ─── */
-        <div className={styles.emptyCard}>
-          <div className={styles.illustration}>
-            <div className={styles.customIllustration}>
-              <svg width="200" height="120" viewBox="0 0 200 120" fill="none">
-                <path d="M40 80C60 40 100 40 120 80" stroke="#E2E4E9" strokeWidth="2" strokeDasharray="6 6" />
-                <path d="M80 80C100 40 140 40 160 80" stroke="#E2E4E9" strokeWidth="2" strokeDasharray="6 6" />
-                <circle cx="120" cy="80" r="4" fill="#E2E4E9" />
-                <circle cx="160" cy="80" r="4" fill="#E2E4E9" />
-              </svg>
-            </div>
+        <div className={styles.emptyCard} id="notifications-empty-state">
+          <div className={styles.illustration} aria-hidden="true">
+            <Image
+              src="/images/admin/Items.png"
+              alt="No notifications illustration"
+              width={460}
+              height={380}
+              className={styles.illustrationImg}
+            />
           </div>
           <h2 className={styles.emptyTitle}>No Notifications Yet</h2>
           <p className={styles.emptySubtitle}>

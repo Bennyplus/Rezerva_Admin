@@ -61,6 +61,80 @@
   gap: 16px;
 }
 
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.emptyCard {
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: var(--radius-md, 10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px;
+  min-height: 540px;
+}
+
+.illustration {
+  margin-bottom: 12px;
+  opacity: 0.85;
+}
+
+.illustrationImg {
+  width: 200px;
+  height: auto;
+  max-width: none;
+}
+
+.emptyTitle {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.emptySubtitle {
+  font-size: 13.5px;
+  color: var(--admin-section-label, #868C98);
+  margin: 0 0 24px;
+  text-align: center;
+  line-height: 1.5;
+}
+
+.addBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 40px;
+  background: var(--admin-active-bg, #111111);
+  color: var(--admin-active-text, #ffffff);
+  border: none;
+  border-radius: var(--radius-md, 10px);
+  font-family: var(--font-heading);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 0.15s ease, transform 0.15s ease;
+}
+
+.addBtn:hover {
+  opacity: 0.88;
+  transform: translateY(-1px);
+}
+
+.addBtn:active {
+  transform: translateY(0);
+}
+
+.devToggleWrap {
+  display: flex;
+  justify-content: center;
+}
+
 /* ─── Toolbar ─── */
 .toolbar {
   display: flex;

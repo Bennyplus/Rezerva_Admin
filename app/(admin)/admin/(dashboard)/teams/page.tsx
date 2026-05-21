@@ -125,8 +125,8 @@ export default function TeamsPage() {
             <Image
               src="/images/admin/Items.png"
               alt="No roles illustration"
-              width={200}
-              height={166}
+              width={460}
+              height={380}
               className={styles.illustrationImg}
             />
           </div>
