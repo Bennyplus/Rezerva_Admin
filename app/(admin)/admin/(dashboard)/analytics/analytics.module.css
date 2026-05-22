@@ -1,0 +1,398 @@
+.page {
+  padding: 32px;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 24px;
+}
+
+.headerLeft h1 {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1d1f;
+  margin-bottom: 8px;
+}
+
+.headerLeft p {
+  font-size: 14px;
+  color: #6f767e;
+}
+
+.headerRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.toggleBtn {
+  padding: 8px 16px;
+  background: #f4f5f6;
+  border: 1px solid #e2e4e9;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.todaySelect {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  background: white;
+  border: 1px solid #e2e4e9;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #1a1d1f;
+  cursor: pointer;
+}
+
+.exportBtn {
+  padding: 8px 24px;
+  background: #1a1d1f;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.exportBtn:hover {
+  background: #33383f;
+}
+
+/* ============================================================
+   EMPTY STATE
+   ============================================================ */
+.emptyCard {
+  background: white;
+  border: 1px solid #e2e4e9;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px;
+  min-height: 540px;
+}
+
+.illustration {
+  margin-bottom: 12px;
+  opacity: 0.85;
+}
+
+.illustrationImg {
+  width: 200px;
+  height: auto;
+  max-width: none;
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1d1f;
+  margin: 0 0 6px;
+}
+
+.emptySubtitle {
+  font-size: 13.5px;
+  color: #6f767e;
+  margin: 0 0 24px;
+  text-align: center;
+}
+
+/* ============================================================
+   STATS GRID
+   ============================================================ */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.statCard {
+  background: white;
+  border: 1px solid #e2e4e9;
+  border-radius: 12px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.statLabel {
+  font-size: 13px;
+  color: #6f767e;
+  margin-bottom: 12px;
+}
+
+.statValueRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+}
+
+.statValue {
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1d1f;
+  line-height: 1;
+}
+
+.statGrowth {
+  font-size: 12px;
+  font-weight: 500;
+}
+.statGrowth.positive {
+  color: #027a48;
+}
+.statGrowth.negative {
+  color: #b42318;
+}
+
+@media (max-width: 900px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ============================================================
+   CHARTS GRID
+   ============================================================ */
+.chartsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.chartCard {
+  background: white;
+  border: 1px solid #e2e4e9;
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.chartHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.chartTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1d1f;
+}
+
+.chartControls {
+  display: flex;
+  align-items: center;
+  background: #fcfcfd;
+  border: 1px solid #e2e4e9;
+  border-radius: 8px;
+  padding: 4px;
+}
+
+.chartToggle {
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #6f767e;
+  border: none;
+  background: transparent;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.chartToggle.active {
+  background: #1a1d1f;
+  color: white;
+}
+
+.chartSelect {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 1px solid #e2e4e9;
+  border-radius: 8px;
+  background: white;
+  font-size: 13px;
+  color: #1a1d1f;
+  cursor: pointer;
+}
+
+@media (max-width: 900px) {
+  .chartsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================================================
+   LOCATION BARS
+   ============================================================ */
+.locationList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.locationItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.locationBarWrap {
+  flex: 1;
+  display: flex;
+  align-items: center;
+}
+
+.locationBar {
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  padding: 0 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #1a1d1f;
+}
+
+.locationCount {
+  font-size: 13px;
+  font-weight: 500;
+  color: #6f767e;
+  width: 40px;
+  text-align: right;
+}
+
+/* Legend */
+.legend {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.legendItem {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #6f767e;
+}
+.legendDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.legendDot.new {
+  background: #d94625;
+}
+.legendDot.returning {
+  background: #4a6ee0;
+}
+
+/* ============================================================
+   REPORTS SECTION
+   ============================================================ */
+.reportsSection {
+  margin-top: 32px;
+}
+
+.reportsHeader {
+  margin-bottom: 20px;
+}
+
+.reportsTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1a1d1f;
+  margin-bottom: 4px;
+}
+
+.reportsSubtitle {
+  font-size: 13px;
+  color: #6f767e;
+}
+
+.reportsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.reportCard {
+  background: white;
+  border: 1px solid #e2e4e9;
+  border-radius: 12px;
+  padding: 16px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.reportIcon {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+.reportIcon.pdf {
+  background: #fef3f2;
+  color: #b42318;
+}
+
+.reportInfo {
+  flex: 1;
+}
+
+.reportName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #1a1d1f;
+  margin-bottom: 4px;
+}
+
+.reportDesc {
+  font-size: 12px;
+  color: #6f767e;
+  line-height: 1.4;
+}
+
+.reportDownloadBtn {
+  background: transparent;
+  border: none;
+  color: #9ea5ad;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.reportDownloadBtn:hover {
+  color: #1a1d1f;
+}
+
+@media (max-width: 900px) {
+  .reportsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 600px) {
+  .reportsGrid {
+    grid-template-columns: 1fr;
+  }
+}

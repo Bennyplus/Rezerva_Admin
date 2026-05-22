@@ -31,8 +31,8 @@ const transformVehicle = (apiVehicle: any): Vehicle => {
   const brandName = BRAND_MAP[apiVehicle.brand] || `Brand ${apiVehicle.brand}`;
   const categoryName = CATEGORY_MAP[apiVehicle.category] || `Category ${apiVehicle.category}`;
   const primaryImage = apiVehicle.images?.find((img: any) => img.is_primary)?.image ||
-                       apiVehicle.images?.[0]?.image ||
-                       '/images/placeholder-car.png';
+    apiVehicle.images?.[0]?.image ||
+    '/images/placeholder-car.png';
 
   return {
     id: apiVehicle.id,
@@ -69,7 +69,7 @@ export const marketingService = {
 
     const response = await publicApi.get('', { params });
     const vehicles = response.data;
-    
+
     // Transform API response to Vehicle interface
     return Array.isArray(vehicles) ? vehicles.map(transformVehicle) : [];
   },

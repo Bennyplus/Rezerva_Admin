@@ -24,23 +24,23 @@ const NAV_SECTIONS: NavSection[] = [
   {
     label: "Overview",
     items: [
-      { 
-        label: "Dashboard", 
-        href: "/admin", 
-        icon: "dashboard", 
-        allowedRoles: ["Super Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"] 
+      {
+        label: "Dashboard",
+        href: "/admin",
+        icon: "dashboard",
+        allowedRoles: ["Super Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"]
       },
-      { 
-        label: "Analytics", 
-        href: "/admin/analytics", 
-        icon: "analytics", 
-        allowedRoles: ["Super Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"] 
+      {
+        label: "Analytics",
+        href: "/admin/analytics",
+        icon: "analytics",
+        allowedRoles: ["Super Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"]
       },
-      { 
-        label: "Audit Logs", 
-        href: "/admin/audit-logs", 
-        icon: "audit", 
-        allowedRoles: ["Super Admin"] 
+      {
+        label: "Audit Logs",
+        href: "/admin/audit-logs",
+        icon: "audit",
+        allowedRoles: ["Super Admin"]
       },
       {
         label: "Tickets",
@@ -53,62 +53,58 @@ const NAV_SECTIONS: NavSection[] = [
   {
     label: "Operations",
     items: [
-      { 
-        label: "Vehicles", 
-        href: "/admin/vehicles", 
-        icon: "vehicles", 
-        allowedRoles: ["Super Admin", "Fleet Manager"] 
+      {
+        label: "Vehicles",
+        href: "/admin/vehicles",
+        icon: "vehicles",
+        allowedRoles: ["Super Admin", "Fleet Manager"]
       },
-      { 
-        label: "Bookings", 
-        href: "/admin/bookings", 
-        icon: "bookings", 
-        allowedRoles: ["Super Admin", "Operations Manager", "Fleet Manager"] 
+      {
+        label: "Bookings",
+        href: "/admin/bookings",
+        icon: "bookings",
+        allowedRoles: ["Super Admin", "Operations Manager", "Fleet Manager"]
       },
-      { 
-        label: "Notifications", 
-        href: "/admin/notifications", 
-        icon: "notification", 
-        allowedRoles: ["Super Admin", "Customer Engagement"] 
+      {
+        label: "Notifications",
+        href: "/admin/notifications",
+        icon: "notification",
+        allowedRoles: ["Super Admin", "Customer Engagement"]
       },
     ],
   },
   {
     label: "Users",
     items: [
-      { 
-        label: "Users", 
-        href: "/admin/users", 
-        icon: "users", 
-        allowedRoles: ["Super Admin", "Customer Engagement"] 
+      {
+        label: "Users",
+        href: "/admin/users",
+        icon: "users",
+        allowedRoles: ["Super Admin", "Customer Engagement"]
+      },
+      {
+        label: "Reviews",
+        href: "/admin/reviews",
+        icon: "reviews",
+        allowedRoles: ["Super Admin", "Customer Engagement"]
       },
     ],
   },
+
   {
     label: "Finance",
     items: [
-      { 
-        label: "Payments", 
-        href: "/admin/payments", 
-        icon: "payments", 
-        allowedRoles: ["Super Admin", "Finance Manager"] 
+      {
+        label: "Payments",
+        href: "/admin/payments",
+        icon: "payments",
+        allowedRoles: ["Super Admin", "Finance Manager"]
       },
       {
         label: "Refunds",
         href: "/admin/refunds",
         icon: "refunds",
         allowedRoles: ["Super Admin", "Finance Manager"]
-      },
-    ],
-  },
-  {
-    label: "Settings",
-    items: [
-      {
-        label: "Settings",
-        href: "/admin/settings",
-        icon: "settings",
-        allowedRoles: ["Super Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"]
       },
     ],
   },
@@ -119,18 +115,18 @@ function NavIcon({ icon }: { icon: string }) {
   const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 1.8, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 
   const imageIcons = [
-    "analytics", "audit", "bookings", "dashboard", 
-    "notification", "payments", "refunds", "reviews", 
+    "analytics", "audit", "bookings", "dashboard", "users",
+    "notification", "payments", "refunds", "reviews",
     "ticket", "vehicles"
   ];
 
   if (imageIcons.includes(icon)) {
     return (
-      <Image 
-        src={`/images/admin/sidebar-icons/${icon}.svg`} 
-        alt={icon} 
-        width={size} 
-        height={size} 
+      <Image
+        src={`/images/admin/sidebar-icons/${icon}.svg`}
+        alt={icon}
+        width={size}
+        height={size}
         style={{ objectFit: "contain" }}
       />
     );
@@ -157,7 +153,7 @@ export default function AdminSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [usersExpanded, setUsersExpanded] = useState(true);
   const pathname = usePathname();
-  
+
   const currentRole = ADMIN_USER.role as AdminRole;
 
   // Filter sections and remove empty categories
@@ -289,7 +285,6 @@ export default function AdminSidebar() {
                               { label: "Teams", href: "/admin/teams", icon: "teams", allowedRoles: ["Super Admin"] },
                               { label: "Drivers", href: "/admin/drivers", icon: "drivers", allowedRoles: ["Super Admin", "Customer Engagement"] },
                               { label: "Customers", href: "/admin/customers", icon: "customers", allowedRoles: ["Super Admin", "Customer Engagement"] },
-                              { label: "Reviews", href: "/admin/reviews", icon: "reviews", allowedRoles: ["Super Admin", "Customer Engagement"] },
                             ].filter((sub) => sub.allowedRoles.includes(currentRole)).map((sub) => (
                               <li key={sub.href}>
                                 <Link
