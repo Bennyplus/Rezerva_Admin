@@ -1,0 +1,95 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import styles from "./TicketModals.module.css";
+import CustomSelect from "./CustomSelect";
+
+interface AssignTicketModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onAssign: (admin: string, notes: string) => void;
+}
+
+const ADMIN_OPTIONS = [
+  { value: "Prosper Edward", label: "Prosper Edward" },
+  { value: "Sarah Johnson", label: "Sarah Johnson" },
+  { value: "James Brown", label: "James Brown" },
+];
+
+export default function AssignTicketModal({
+  isOpen,
+  onClose,
+  onAssign,
+}: AssignTicketModalProps) {
+  const [admin, setAdmin] = useState("");
+  const [notes, setNotes] = useState("");
+
+  useEffect(() => {
+    if (isOpen) {
+      document.body.style.overflow = "hidden";
+      setAdmin("");
+      setNotes("");
+    } else {
+      document.body.style.overflow = "unset";
+    }
+    return () => { document.body.style.overflow = "unset"; };
+  }, [isOpen]);
+
+  if (!isOpen) return null;
+
+  const isValid = admin.trim().length > 0;
+
+  return (
+    <div className={styles.overlay} onClick={onClose}>
+      <div
+        className={styles.modal}
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+      >
+        <div className={styles.header}>
+          <h2 className={styles.title}>Assign Ticket</h2>
+          <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
+            <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+              <path d="M18 6L6 18M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+
+        <div className={styles.content}>
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Admin</label>
+            <CustomSelect
+              name="admin"
+              value={admin}
+              placeholder="eg Prosper Edward"
+              options={ADMIN_OPTIONS}
+              onChange={(_, v) => setAdmin(v)}
+            />
+          </div>
+
+          <div className={styles.formGroup}>
+            <label className={styles.label}>Admin Notes</label>
+            <textarea
+              className={styles.textarea}
+              placeholder="Notes related to the case"
+              value={notes}
+              onChange={(e) => setNotes(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <div className={styles.footer}>
+          <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
+          <button
+            className={styles.submitBtn}
+            disabled={!isValid}
+            onClick={() => isValid && onAssign(admin, notes)}
+          >
+            Assign Ticket
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}

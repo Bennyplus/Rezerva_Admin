@@ -31,11 +31,9 @@ export default function AuditLogsPage() {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <h1>Audit Logs</h1>
-          <p>Track admin and system activity across the platform</p>
         </div>
         <div className={styles.headerRight}>
-          <button 
+          <button
             onClick={() => setShowEmptyState(!showEmptyState)}
             style={{ padding: '8px 16px', background: '#f4f5f6', border: '1px solid #e2e4e9', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 500 }}
           >
@@ -111,7 +109,7 @@ export default function AuditLogsPage() {
                         </span>
                       </td>
                       <td className={styles.actionCell}>
-                        <button 
+                        <button
                           className={`${styles.actionBtn} ${openDropdownId === log.id ? styles.actionBtnActive : ''}`}
                           onClick={() => handleDropdownToggle(log.id)}
                         >
@@ -133,7 +131,7 @@ export default function AuditLogsPage() {
                 </tbody>
               </table>
             </div>
-            
+
             {/* Pagination */}
             <div className={styles.footer}>
               <div className={styles.pageInfo}>Page 2 of 16</div>

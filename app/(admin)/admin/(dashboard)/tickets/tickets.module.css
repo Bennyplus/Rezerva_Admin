@@ -1,0 +1,340 @@
+/* ============================================================
+   ADMIN TICKETS — Scoped styles (CSS Module)
+   ============================================================ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+/* ─── Stats Grid ─── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.statCard {
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: var(--radius-md, 10px);
+  padding: 20px 20px 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.statLabel {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: var(--admin-section-label, #868C98);
+  letter-spacing: 0.01em;
+}
+
+.statValue {
+  font-family: var(--font-heading);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  letter-spacing: -0.02em;
+}
+
+/* ─── Toolbar ─── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.toolbarRight {
+  margin-left: auto;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  padding: 0 12px;
+  height: 36px;
+  background: var(--admin-card-bg, #ffffff);
+  min-width: 240px;
+}
+
+.searchBox svg {
+  flex-shrink: 0;
+  color: var(--admin-section-label, #868C98);
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--color-text, #111111);
+  width: 100%;
+}
+
+.searchInput::placeholder {
+  color: var(--admin-section-label, #868C98);
+}
+
+.toolBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  background: var(--admin-card-bg, #ffffff);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+  cursor: pointer;
+  transition: border-color 0.15s ease, background 0.15s ease;
+  white-space: nowrap;
+}
+
+.toolBtn:hover {
+  border-color: #D1D1D6;
+  background: var(--admin-content-bg, #F6F8FA);
+}
+
+.toolBtn svg {
+  color: var(--admin-section-label, #868C98);
+}
+
+/* ─── Board (Kanban) ─── */
+.board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  flex: 1;
+  align-items: start;
+}
+
+.column {
+  background: var(--admin-content-bg, #F6F8FA);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 10px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 400px;
+}
+
+/* ─── Column Header ─── */
+.colHeader {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.colDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.colTitle {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--admin-section-label, #868C98);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.colCount {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  border-radius: 9999px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-left: 2px;
+}
+
+/* Column dot and count colors */
+.dotTodo { background: #868C98; }
+.dotInProgress { background: #EA580C; }
+.dotResolved { background: #16A34A; }
+.dotClosed { background: #2563EB; }
+
+.countTodo { background: #E2E4E9; color: #868C98; }
+.countInProgress { background: #FFF7ED; color: #EA580C; }
+.countResolved { background: #F0FDF4; color: #16A34A; }
+.countClosed { background: #EFF6FF; color: #2563EB; }
+
+/* ─── Ticket Card ─── */
+.card {
+  background: #ffffff;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  cursor: pointer;
+  transition: box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.card:hover {
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.06);
+  border-color: #D1D1D6;
+}
+
+.cardTop {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.cardTitle {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+  flex: 1;
+}
+
+.cardDate {
+  font-size: 11.5px;
+  color: #868C98;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.cardId {
+  font-size: 11.5px;
+  color: #868C98;
+}
+
+.priorityBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 11.5px;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.priorityLow {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+.priorityMedium {
+  background: #FFF7ED;
+  color: #EA580C;
+}
+.priorityHigh {
+  background: #FEF2F2;
+  color: #DC2626;
+}
+
+.cardDescription {
+  font-size: 12.5px;
+  color: #4B5563;
+  line-height: 1.5;
+  margin: 0;
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cardCustomer {
+  font-size: 12.5px;
+  font-weight: 500;
+  color: #111111;
+}
+
+.cardAvatar {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: #EF4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 600;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+/* ─── Empty State ─── */
+.emptyCard {
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: var(--radius-md, 10px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 32px;
+  min-height: 460px;
+  flex: 1;
+}
+
+.emptyIllustration {
+  margin-bottom: 24px;
+  opacity: 0.7;
+}
+
+.emptyTitle {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0 0 6px;
+}
+
+.emptySubtitle {
+  font-size: 13.5px;
+  color: var(--admin-section-label, #868C98);
+  margin: 0;
+}
+
+/* Dev toggle */
+.devToggleWrap {
+  display: flex;
+  justify-content: center;
+}
+
+.stateToggle {
+  height: 36px;
+  padding: 0 14px;
+  border: 1px dashed var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  background: var(--admin-card-bg, #ffffff);
+  font-family: var(--font-body);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--admin-section-label, #868C98);
+  cursor: pointer;
+  transition: border-color 0.15s ease;
+}
+
+.stateToggle:hover {
+  border-color: var(--color-text, #111111);
+  color: var(--color-text, #111111);
+}

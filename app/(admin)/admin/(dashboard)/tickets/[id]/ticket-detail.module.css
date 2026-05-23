@@ -1,0 +1,531 @@
+/* ============================================================
+   ADMIN TICKET DETAIL — Scoped styles (CSS Module)
+   ============================================================ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+/* ─── Top Bar ─── */
+.topBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.backBtn {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #E2E4E9;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #868C98;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.backBtn:hover {
+  background: #F6F8FA;
+  color: #111111;
+}
+
+.topBarRight {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.updateStatusBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 14px;
+  border: 1px solid #E2E4E9;
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: #111111;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.updateStatusBtn:hover {
+  border-color: #D1D1D6;
+  background: #F6F8FA;
+}
+
+.exportBtn {
+  height: 36px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: #111111;
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.exportBtn:hover {
+  background: #000000;
+}
+
+/* ─── Ticket Header Info ─── */
+.ticketInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ticketIdLabel {
+  font-size: 12px;
+  color: #868C98;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+.ticketIdRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ticketId {
+  font-family: var(--font-heading);
+  font-size: 26px;
+  font-weight: 700;
+  color: #111111;
+  margin: 0;
+}
+
+.copyBtn {
+  background: transparent;
+  border: none;
+  color: #868C98;
+  cursor: pointer;
+  display: inline-flex;
+  transition: color 0.2s;
+}
+
+.copyBtn:hover {
+  color: #111111;
+}
+
+.badges {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* Status badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.badgeTodo {
+  background: #F6F8FA;
+  color: #868C98;
+}
+
+.badgeTodo .badgeDot {
+  background: #868C98;
+}
+
+.badgeInProgress {
+  background: #FFF7ED;
+  color: #EA580C;
+}
+
+.badgeInProgress .badgeDot {
+  background: #EA580C;
+}
+
+.badgeResolved {
+  background: #F0FDF4;
+  color: #16A34A;
+}
+
+.badgeResolved .badgeDot {
+  background: #16A34A;
+}
+
+.badgeClosed {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.badgeClosed .badgeDot {
+  background: #2563EB;
+}
+
+/* Priority badges */
+.priorityBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.priorityLow {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.priorityMedium {
+  background: #FFF7ED;
+  color: #EA580C;
+}
+
+.priorityHigh {
+  background: #FEF2F2;
+  color: #DC2626;
+}
+
+.ticketDate {
+  font-size: 13px;
+  color: #000000;
+}
+
+/* ─── Layout: Split ─── */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 460px;
+  gap: 20px;
+  align-items: start;
+  flex: 1;
+}
+
+/* ─── Left Column ─── */
+.leftCol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card {
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.cardTitle {
+  font-family: var(--font-heading);
+  font-size: 15px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+/* Customer Details */
+.customerRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.customerAvatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: #F6F8FA;
+}
+
+.customerAvatarPlaceholder {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: #E2E4E9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+  font-weight: 600;
+  color: #868C98;
+  flex-shrink: 0;
+}
+
+.customerFields {
+  display: flex;
+  gap: 40px;
+  flex-wrap: wrap;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.fieldLabel {
+  font-size: 11.5px;
+  color: #868C98;
+}
+
+.fieldValue {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #111111;
+}
+
+/* Customer Report */
+.reportBox {
+  background: #F6F8FA;
+  border-radius: 8px;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reportCategory {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111111;
+}
+
+.reportDesc {
+  font-size: 13px;
+  color: #868C98;
+  margin: 0;
+  line-height: 1.5;
+  white-space: pre-line;
+}
+
+/* Evidence Attachment */
+.attachment {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  border: 1px solid #E2E4E9;
+  border-radius: 8px;
+  padding: 10px 14px;
+  width: fit-content;
+}
+
+.attachmentIcon {
+  width: 36px;
+  height: 36px;
+  background: #2563EB;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+}
+
+.attachmentName {
+  font-size: 13px;
+  font-weight: 500;
+  color: #111111;
+}
+
+.attachmentSize {
+  font-size: 11.5px;
+  color: #868C98;
+}
+
+/* Admin Notes */
+.notesTextarea {
+  border: 1px solid #E2E4E9;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: #111111;
+  min-height: 100px;
+  resize: vertical;
+  outline: none;
+  width: 100%;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.notesTextarea:focus {
+  border-color: #111111;
+}
+
+.notesTextarea::placeholder {
+  color: #868C98;
+}
+
+/* ─── Right Column (Sidebar) ─── */
+.rightCol {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: sticky;
+  top: 0;
+  align-self: stretch;
+}
+
+.sideCard {
+  background: #ffffff;
+  /* border: 1px solid #E2E4E9; */
+  border-radius: 10px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.assignedRow {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  font-size: 13px;
+  color: #868C98;
+}
+
+.assignedName {
+  font-weight: 500;
+  color: #111111;
+}
+
+/* ─── Activity Timeline ─── */
+.timelineTitle {
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  position: relative;
+}
+
+.timelineItem {
+  display: flex;
+  gap: 16px;
+  position: relative;
+  padding-bottom: 24px;
+}
+
+.timelineItem:last-child {
+  padding-bottom: 0;
+}
+
+.timelineIconWrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+  width: 24px;
+}
+
+.timelineIcon {
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  background: #111111;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  z-index: 1;
+}
+
+.timelineLineSvg {
+  height: 44px;
+  margin-top: 6px;
+  margin-bottom: 2px;
+}
+
+.timelineItem:last-child .timelineLineSvg {
+  display: none;
+}
+
+.timelineContent {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  padding-top: 2px;
+}
+
+.timelineLabel {
+  font-size: 15px;
+  font-weight: 500;
+  color: #111111;
+}
+
+.timelineMeta {
+  font-size: 13px;
+  color: #868C98;
+}
+
+/* ─── Action Buttons ─── */
+.actionsGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: auto;
+}
+
+.actionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  background: #ffffff;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #868C98;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-align: left;
+}
+
+.actionBtn:hover {
+  background: #F6F8FA;
+}
+
+.actionChevron {
+  color: #868C98;
+}
