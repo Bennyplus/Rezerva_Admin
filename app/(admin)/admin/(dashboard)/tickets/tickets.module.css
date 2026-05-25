@@ -320,13 +320,18 @@
   align-items: center;
   justify-content: center;
   padding: 80px 32px;
-  min-height: 460px;
-  flex: 1;
+  min-height: 540px;
 }
 
 .emptyIllustration {
   margin-bottom: 24px;
   opacity: 0.7;
+}
+
+.illustrationImg {
+  width: 200px;
+  height: auto;
+  max-width: none;
 }
 
 .emptyTitle {

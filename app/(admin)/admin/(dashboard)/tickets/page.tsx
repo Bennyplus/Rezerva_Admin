@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import {
   ADMIN_TICKETS,
   TICKET_STATS,
@@ -60,8 +61,14 @@ export default function TicketsPage() {
       {isEmpty ? (
         /* ─── Empty State ─── */
         <div className={styles.emptyCard} id="tickets-empty-state">
-          <div className={styles.emptyIllustration}>
-            <EmptyIllustration />
+          <div className={styles.emptyIllustration} aria-hidden="true">
+            <Image
+              src="/images/admin/Items.png"
+              alt="No roles illustration"
+              width={460}
+              height={380}
+              className={styles.illustrationImg}
+            />
           </div>
           <h2 className={styles.emptyTitle}>No tickets available</h2>
           <p className={styles.emptySubtitle}>Support requests and reports will appear here</p>
