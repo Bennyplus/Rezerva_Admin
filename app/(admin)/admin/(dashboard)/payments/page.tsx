@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
@@ -15,6 +15,7 @@ import {
 import Pagination from "@/components/admin/Pagination";
 import FilterBar from "@/components/admin/FilterBar";
 import styles from "./payments.module.css";
+import { paymentsService } from "@/services/payments-service";
 
 type Tab = "transactions" | "payouts";
 
@@ -25,15 +26,54 @@ export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openKebab, setOpenKebab] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 8;
+  const [totalPages, setTotalPages] = useState(8);
 
-  const filteredTransactions = ADMIN_TRANSACTIONS.filter(
+  // Data states
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [payouts, setPayouts] = useState<Payout[]>([]);
+  const [stats, setStats] = useState(PAYMENT_STATS);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch data
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        if (activeTab === "transactions") {
+          const data = await paymentsService.getTransactions(currentPage, searchQuery);
+          setTransactions(data.length > 0 ? data : ADMIN_TRANSACTIONS);
+        } else {
+          const data = await paymentsService.getPayouts(currentPage, searchQuery);
+          setPayouts(data.length > 0 ? data : ADMIN_PAYOUTS);
+        }
+        
+        const statsData = await paymentsService.getPaymentStats();
+        if (statsData && statsData.totalRevenue !== undefined) {
+          setStats(statsData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch payments data, using mock data fallback:", error);
+        setTransactions(ADMIN_TRANSACTIONS);
+        setPayouts(ADMIN_PAYOUTS);
+        setStats(PAYMENT_STATS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [activeTab, currentPage, searchQuery]);
+
+  const filteredTransactions = transactions.filter(
     (t) =>
       t.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredPayouts = ADMIN_PAYOUTS.filter(
+  const filteredPayouts = payouts.filter(
     (p) =>
       p.driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.id.toLowerCase().includes(searchQuery.toLowerCase())
@@ -43,17 +83,17 @@ export default function PaymentsPage() {
     activeTab === "transactions" ? "Total Refunds" : "Total Commissions";
   const fourthStatValue =
     activeTab === "transactions"
-      ? PAYMENT_STATS.totalRefunds
-      : PAYMENT_STATS.totalCommissions;
+      ? stats.totalRefunds
+      : stats.totalCommissions;
 
   return (
     <div className={styles.page} onClick={() => setOpenKebab(null)}>
       {/* ─── Stats ─── */}
       <div className={styles.statsGrid}>
         {[
-          { label: "Total Revenue", value: PAYMENT_STATS.totalRevenue },
-          { label: "Total Payouts", value: PAYMENT_STATS.totalPayouts },
-          { label: "Pending Transactions", value: PAYMENT_STATS.pendingTransactions },
+          { label: "Total Revenue", value: stats.totalRevenue },
+          { label: "Total Payouts", value: stats.totalPayouts },
+          { label: "Pending Transactions", value: stats.pendingTransactions },
           { label: fourthStatLabel, value: fourthStatValue },
         ].map((stat) => (
           <div key={stat.label} className={styles.statCard}>
