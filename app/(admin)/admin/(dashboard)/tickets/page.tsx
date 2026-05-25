@@ -9,6 +9,7 @@ import {
   TicketStatus,
   TicketPriority,
 } from "@/data/admin-tickets";
+import FilterBar from "@/components/admin/FilterBar";
 import styles from "./tickets.module.css";
 
 const COLUMNS: { status: TicketStatus; dotClass: string; countClass: string }[] = [
@@ -52,18 +53,7 @@ export default function TicketsPage() {
 
       {/* ─── Toolbar ─── */}
       <div className={styles.toolbar}>
-        <div className={styles.searchBox}>
-          <SearchIcon />
-          <input
-            type="text"
-            placeholder="Search..."
-            className={styles.searchInput}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            id="tickets-search"
-          />
-        </div>
-        <button className={styles.toolBtn} id="tickets-filter"><FilterIcon /> Filter</button>
+        <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideSort />
         <button className={styles.toolBtn} id="tickets-export" style={{ marginLeft: "auto" }}>Export</button>
       </div>
 
@@ -163,6 +153,4 @@ function EmptyIllustration() {
 
 /* ─── Inline Icons ─── */
 const ip = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-function SearchIcon() { return <svg {...ip}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>; }
-function FilterIcon() { return <svg {...ip}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>; }
 function FlagIcon() { return <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" /></svg>; }

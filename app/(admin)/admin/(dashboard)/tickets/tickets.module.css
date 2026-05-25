@@ -5,7 +5,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  /* gap: 20px; */
   flex: 1;
 }
 
@@ -46,6 +46,7 @@
   display: flex;
   align-items: center;
   gap: 10px;
+  padding: 10px 0px;
 }
 
 .toolbarRight {
@@ -165,15 +166,41 @@
 }
 
 /* Column dot and count colors */
-.dotTodo { background: #868C98; }
-.dotInProgress { background: #EA580C; }
-.dotResolved { background: #16A34A; }
-.dotClosed { background: #2563EB; }
+.dotTodo {
+  background: #868C98;
+}
 
-.countTodo { background: #E2E4E9; color: #868C98; }
-.countInProgress { background: #FFF7ED; color: #EA580C; }
-.countResolved { background: #F0FDF4; color: #16A34A; }
-.countClosed { background: #EFF6FF; color: #2563EB; }
+.dotInProgress {
+  background: #EA580C;
+}
+
+.dotResolved {
+  background: #16A34A;
+}
+
+.dotClosed {
+  background: #2563EB;
+}
+
+.countTodo {
+  background: #E2E4E9;
+  color: #868C98;
+}
+
+.countInProgress {
+  background: #FFF7ED;
+  color: #EA580C;
+}
+
+.countResolved {
+  background: #F0FDF4;
+  color: #16A34A;
+}
+
+.countClosed {
+  background: #EFF6FF;
+  color: #2563EB;
+}
 
 /* ─── Ticket Card ─── */
 .card {
@@ -235,10 +262,12 @@
   background: #EFF6FF;
   color: #2563EB;
 }
+
 .priorityMedium {
   background: #FFF7ED;
   color: #EA580C;
 }
+
 .priorityHigh {
   background: #FEF2F2;
   color: #DC2626;

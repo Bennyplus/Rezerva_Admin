@@ -31,7 +31,7 @@ export const accountsService = {
     const response = await publicApi.get('', {
       params: { path: 'api/v1/accounts/countries/' }
     });
-    
+
     // API response formatting handles both arrays directly or wrapped results
     if (Array.isArray(response.data)) {
       return response.data;
@@ -70,5 +70,58 @@ export const accountsService = {
       params: { path: 'api/v1/accounts/verify-otp/' }
     });
     return response.data;
+  },
+  /**
+   * Creates a new role in the admin account at admin/roles/
+   * @param payload - RolePayload object
+   */
+  createRole: async (payload: any): Promise<any> => {
+    const response = await publicApi.post('', payload, {
+      params: { path: 'api/v1/admin/roles/' }
+    });
+    return response.data;
+  },
+  /**
+   * Updates an existing role in the admin account at admin/roles/{id}/
+   * @param payload - RolePayload object
+   */
+  updateRole: async (id: string, payload: any): Promise<any> => {
+    const response = await publicApi.put('', payload, {
+      params: { path: `api/v1/admin/roles/${id}/` }
+    });
+    return response.data;
+  },
+  /**
+   * Deletes a role from the admin account at admin/roles/{id}/
+   * @param id - The ID of the role to delete
+   */
+  deleteRole: async (id: string): Promise<any> => {
+    const response = await publicApi.delete('', {
+      params: { path: `api/v1/admin/roles/${id}/` }
+    });
+    return response.data;
+  },
+  /**
+   * Gets all roles from the admin account at admin/roles/
+   * @param payload - RolePayload object
+   */
+  getRoles: async (): Promise<any> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/admin/roles/' }
+    });
+    return response.data;
+  },
+  
+  /**
+   * Logs the user out by hitting the custom proxy logout route which clears cookies
+   */
+  logout: async () => {
+    try {
+      await publicApi.get('', {
+        params: { path: 'auth/logout' }
+      });
+    } catch (e) {
+      console.error('Logout failed:', e);
+    }
   }
 };

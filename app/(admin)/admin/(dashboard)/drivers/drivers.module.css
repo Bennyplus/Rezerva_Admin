@@ -5,7 +5,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 10px;
   position: relative;
   flex: 1;
 }
@@ -21,8 +21,15 @@
 }
 
 @keyframes slideUp {
-  from { transform: translateX(-50%) translateY(10px); opacity: 0; }
-  to   { transform: translateX(-50%) translateY(0);    opacity: 1; }
+  from {
+    transform: translateX(-50%) translateY(10px);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateX(-50%) translateY(0);
+    opacity: 1;
+  }
 }
 
 .toast {
@@ -52,7 +59,9 @@
   transition: color 0.12s ease;
 }
 
-.toastClose:hover { color: #ffffff; }
+.toastClose:hover {
+  color: #ffffff;
+}
 
 /* ─── Stats Grid ─── */
 .statsGrid {
@@ -170,7 +179,10 @@
   min-width: 200px;
 }
 
-.searchBox svg { flex-shrink: 0; color: var(--admin-section-label, #868C98); }
+.searchBox svg {
+  flex-shrink: 0;
+  color: var(--admin-section-label, #868C98);
+}
 
 .searchInput {
   border: none;
@@ -182,7 +194,9 @@
   width: 100%;
 }
 
-.searchInput::placeholder { color: var(--admin-section-label, #868C98); }
+.searchInput::placeholder {
+  color: var(--admin-section-label, #868C98);
+}
 
 /* Tool buttons */
 .toolBtn {
@@ -202,8 +216,14 @@
   transition: border-color 0.15s ease, background 0.15s ease;
 }
 
-.toolBtn:hover { border-color: #D1D1D6; background: var(--admin-content-bg, #F6F8FA); }
-.toolBtn svg { color: var(--admin-section-label, #868C98); }
+.toolBtn:hover {
+  border-color: #D1D1D6;
+  background: var(--admin-content-bg, #F6F8FA);
+}
+
+.toolBtn svg {
+  color: var(--admin-section-label, #868C98);
+}
 
 /* View toggle */
 .viewToggle {
@@ -226,9 +246,18 @@
   transition: background 0.15s ease, color 0.15s ease;
 }
 
-.viewBtn:first-child { border-right: 1px solid var(--admin-card-border, #E2E4E9); }
-.viewBtn:hover { background: var(--admin-content-bg, #F6F8FA); }
-.viewBtnActive { background: var(--admin-content-bg, #F6F8FA); color: var(--color-text, #111111); }
+.viewBtn:first-child {
+  border-right: 1px solid var(--admin-card-border, #E2E4E9);
+}
+
+.viewBtn:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+}
+
+.viewBtnActive {
+  background: var(--admin-content-bg, #F6F8FA);
+  color: var(--color-text, #111111);
+}
 
 /* Add Driver button */
 .addBtnSmall {
@@ -248,7 +277,9 @@
   transition: opacity 0.15s ease;
 }
 
-.addBtnSmall:hover { opacity: 0.88; }
+.addBtnSmall:hover {
+  opacity: 0.88;
+}
 
 /* ─── Table ─── */
 .tableCard {
@@ -260,7 +291,10 @@
   flex-direction: column;
 }
 
-.tableWrap { overflow-x: auto; flex: 1; }
+.tableWrap {
+  overflow-x: auto;
+  flex: 1;
+}
 
 .table {
   width: 100%;
@@ -285,14 +319,18 @@
   font-size: 13px;
 }
 
-.table tbody tr:last-child td { border-bottom: none; }
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
 
 .tableRow {
   cursor: pointer;
   transition: background 0.1s ease;
 }
 
-.tableRow:hover { background: var(--admin-content-bg, #F6F8FA); }
+.tableRow:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+}
 
 /* Driver cell (avatar + name + rating) */
 .driverCell {
@@ -360,14 +398,32 @@
   flex-shrink: 0;
 }
 
-.badgeActive    { background: #ECFDF5; color: #059669; }
-.badgeActive .badgeDot { background: #059669; }
+.badgeActive {
+  background: #ECFDF5;
+  color: #059669;
+}
 
-.badgeInactive  { background: #FEF2F2; color: #DC2626; }
-.badgeInactive .badgeDot { background: #DC2626; }
+.badgeActive .badgeDot {
+  background: #059669;
+}
 
-.badgeSuspended { background: #FFFBEB; color: #D97706; }
-.badgeSuspended .badgeDot { background: #D97706; }
+.badgeInactive {
+  background: #FEF2F2;
+  color: #DC2626;
+}
+
+.badgeInactive .badgeDot {
+  background: #DC2626;
+}
+
+.badgeSuspended {
+  background: #FFFBEB;
+  color: #D97706;
+}
+
+.badgeSuspended .badgeDot {
+  background: #D97706;
+}
 
 /* Actions column + kebab */
 .actionsCol {
@@ -375,7 +431,10 @@
   text-align: center;
 }
 
-.kebabWrap { position: relative; display: inline-block; }
+.kebabWrap {
+  position: relative;
+  display: inline-block;
+}
 
 .moreBtn {
   display: flex;
@@ -391,7 +450,10 @@
   transition: background 0.15s ease;
 }
 
-.moreBtn:hover { background: var(--admin-content-bg, #F6F8FA); color: var(--color-text, #111111); }
+.moreBtn:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+  color: var(--color-text, #111111);
+}
 
 .kebabMenu {
   position: absolute;
@@ -420,9 +482,17 @@
   transition: background 0.12s ease;
 }
 
-.kebabItem:hover { background: var(--admin-content-bg, #F6F8FA); }
-.kebabItemDanger { color: #EF4444; }
-.kebabItemDanger:hover { background: #FEF2F2; }
+.kebabItem:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+}
+
+.kebabItemDanger {
+  color: #EF4444;
+}
+
+.kebabItemDanger:hover {
+  background: #FEF2F2;
+}
 
 /* Empty row */
 .emptyRow {
@@ -469,7 +539,9 @@
   transition: transform 0.25s ease;
 }
 
-.driverCard:hover .cardPhotoImg { transform: scale(1.03); }
+.driverCard:hover .cardPhotoImg {
+  transform: scale(1.03);
+}
 
 .cardOverlay {
   position: absolute;
@@ -480,7 +552,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(to top, rgba(0,0,0,0.45), transparent);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent);
 }
 
 .cardLocation {
@@ -538,17 +610,38 @@
 
 /* ─── Responsive ─── */
 @media (max-width: 1100px) {
-  .cardGrid { grid-template-columns: repeat(2, 1fr); }
+  .cardGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 900px) {
-  .statsGrid { grid-template-columns: repeat(2, 1fr); }
-  .toolbar { flex-direction: column; align-items: stretch; }
-  .toolbarLeft, .toolbarRight { flex-wrap: wrap; }
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .toolbarLeft,
+  .toolbarRight {
+    flex-wrap: wrap;
+  }
 }
 
 @media (max-width: 600px) {
-  .statsGrid { grid-template-columns: 1fr; }
-  .cardGrid  { grid-template-columns: 1fr; }
-  .searchBox { min-width: 0; flex: 1; }
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .cardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .searchBox {
+    min-width: 0;
+    flex: 1;
+  }
 }
