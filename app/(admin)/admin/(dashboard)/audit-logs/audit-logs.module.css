@@ -8,7 +8,7 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  margin-bottom: 32px;
+  margin-bottom: 20px;
 }
 
 .headerLeft h1 {
@@ -125,7 +125,7 @@
 /* Table Card */
 .tableCard {
   background: white;
-  border: 1px solid #e2e4e9;
+  /* border: 1px solid #e2e4e9; */
   border-radius: 12px;
   overflow: hidden;
 }
@@ -146,16 +146,14 @@
   font-size: 13px;
   font-weight: 500;
   color: #6f767e;
-  background: #fcfcfd;
-  border-bottom: 1px solid #e2e4e9;
+  background: #F6F8FA;
   white-space: nowrap;
 }
 
 .table td {
-  padding: 20px 24px;
+  padding: 15px 24px;
   font-size: 14px;
   color: #1a1d1f;
-  border-bottom: 1px solid #e2e4e9;
 }
 
 .table tr:last-child td {
@@ -285,72 +283,4 @@
 
 .actionItem:hover {
   background: #f4f5f6;
-}
-
-/* Footer Pagination */
-.footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px 24px;
-  border-top: 1px solid #e2e4e9;
-}
-
-.pageInfo {
-  font-size: 14px;
-  color: #6f767e;
-}
-
-.pagination {
-  display: flex;
-  gap: 4px;
-  align-items: center;
-}
-
-.pageBtn {
-  min-width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #6f767e;
-  transition: all 0.2s;
-  border: 1px solid transparent;
-}
-
-.pageBtn:hover:not(:disabled) {
-  background: #f4f5f6;
-  color: #1a1d1f;
-}
-
-.pageBtn.active {
-  background: #f4f5f6;
-  color: #1a1d1f;
-  font-weight: 500;
-  border-color: #e2e4e9;
-}
-
-.pageBtn:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-.pageDots {
-  color: #6f767e;
-  padding: 0 4px;
-}
-
-.showingSelector {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #6f767e;
-  padding: 6px 12px;
-  border: 1px solid #e2e4e9;
-  border-radius: 6px;
-  background: white;
-  cursor: pointer;
 }

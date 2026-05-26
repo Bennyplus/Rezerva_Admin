@@ -1,7 +1,9 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { ADMIN_USER, AdminRole } from "@/data/admin-mock";
+import Spinner from "./Spinner";
 import styles from "./AdminGuard.module.css";
 
 // Pathname-to-allowed-roles mapping
@@ -23,12 +25,16 @@ const ROUTE_PERMISSIONS: Record<string, AdminRole[]> = {
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  let currentRole = ADMIN_USER.role as AdminRole;
-  if (typeof window !== "undefined") {
-    const savedRole = localStorage.getItem("drifully_admin_role");
-    if (savedRole) {
-      currentRole = savedRole as AdminRole;
-    }
+  
+  const [currentRole, setCurrentRole] = useState<AdminRole | null>(null);
+
+  useEffect(() => {
+    const savedRole = localStorage.getItem("drifully_admin_role") as AdminRole | null;
+    setCurrentRole(savedRole || (ADMIN_USER.role as AdminRole));
+  }, []);
+
+  if (currentRole === null) {
+    return null; // Wait for role to load from client storage to prevent hydration mismatch
   }
 
   // Find if current path is protected, matching the most specific prefix first
@@ -38,7 +44,7 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
   );
 
   const allowedRoles = matchedRoute ? ROUTE_PERMISSIONS[matchedRoute] : null;
-  const isAuthorized = !allowedRoles || allowedRoles.includes(currentRole);
+  const isAuthorized = !allowedRoles || allowedRoles.includes(currentRole as AdminRole);
 
   if (!isAuthorized && allowedRoles) {
     return (

@@ -93,8 +93,8 @@ export default function Pagination({
 
 /* ─── Pagination Icons ─── */
 const iconProps = {
-  width: 14,
-  height: 14,
+  width: 20,
+  height: 20,
   viewBox: "0 0 24 24",
   fill: "none",
   stroke: "currentColor",

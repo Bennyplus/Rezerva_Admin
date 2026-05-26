@@ -1,19 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import StatCard from "@/components/admin/StatCard";
+import Spinner from "@/components/admin/Spinner";
 import Pagination from "@/components/admin/Pagination";
 import UploadMethodModal from "@/components/admin/UploadMethodModal";
 import AddVehicleForm from "@/components/admin/AddVehicleForm";
 import BulkUploadModal from "@/components/admin/BulkUploadModal";
-import { ADMIN_VEHICLES, VEHICLE_STATS_EMPTY, VEHICLE_STATS_POPULATED } from "../../../../../data/admin-vehicles";
+import { ADMIN_VEHICLES, VEHICLE_STATS_EMPTY, VEHICLE_STATS_POPULATED, AdminVehicle } from "../../../../../data/admin-vehicles";
+import { vehiclesService } from "@/services/vehicles-service";
+import FilterBar from "@/components/admin/FilterBar";
 import styles from "./vehicles.module.css";
 
 type ViewMode = "list" | "grid";
 
 export default function VehiclesPage() {
-  const [isEmpty, setIsEmpty] = useState(true);
+  const [vehicles, setVehicles] = useState<AdminVehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const isEmpty = vehicles.length === 0;
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [currentPage, setCurrentPage] = useState(2);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
@@ -21,15 +26,28 @@ export default function VehiclesPage() {
   const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
   const [currentView, setCurrentView] = useState<"list" | "add-manual">("list");
 
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      setLoading(true);
+      try {
+        const data = await vehiclesService.getVehicles();
+        setVehicles(data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVehicles();
+  }, []);
+
   const stats = isEmpty ? VEHICLE_STATS_EMPTY : VEHICLE_STATS_POPULATED;
   const totalPages = 16;
   const resultsPerPage = 9;
 
   const toggleSelectAll = () => {
-    if (selectedRows.size === ADMIN_VEHICLES.length) {
+    if (selectedRows.size === vehicles.length && vehicles.length > 0) {
       setSelectedRows(new Set());
     } else {
-      setSelectedRows(new Set(ADMIN_VEHICLES.map((_, i: number) => i)));
+      setSelectedRows(new Set(vehicles.map((_, i: number) => i)));
     }
   };
 
@@ -49,6 +67,14 @@ export default function VehiclesPage() {
           setCurrentView("list");
         }} 
       />
+    );
+  }
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner size={40} />
+      </div>
     );
   }
 
@@ -91,29 +117,7 @@ export default function VehiclesPage() {
           {/* Toolbar */}
           <div className={styles.toolbar} id="vehicles-toolbar">
             <div className={styles.toolbarLeft}>
-              {/* Search */}
-              <div className={styles.searchBox}>
-                <SearchIcon />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className={styles.searchInput}
-                  id="vehicles-search"
-                />
-              </div>
-
-              {/* Filter */}
-              <button className={styles.toolBtn}>
-                <FilterIcon />
-                Filter
-              </button>
-
-              {/* Sort */}
-              <button className={styles.toolBtn}>
-                <SortIcon />
-                Sort by
-              </button>
-
+              <FilterBar />
               {/* View toggles */}
               <div className={styles.viewToggle}>
                 <button
@@ -134,16 +138,6 @@ export default function VehiclesPage() {
             </div>
 
             <div className={styles.toolbarRight}>
-              {/* State toggle (dev) */}
-              <button
-                className={styles.stateToggle}
-                onClick={() => setIsEmpty(!isEmpty)}
-                title="Toggle empty/populated state"
-                id="toggle-empty-state"
-              >
-                {isEmpty ? "Show Data" : "Show Empty"}
-              </button>
-
               {/* Add Vehicle */}
               <button 
                 className={styles.addBtnSmall} 
@@ -167,7 +161,7 @@ export default function VehiclesPage() {
                         <input
                           type="checkbox"
                           className={styles.checkbox}
-                          checked={selectedRows.size === ADMIN_VEHICLES.length}
+                          checked={selectedRows.size === vehicles.length && vehicles.length > 0}
                           onChange={toggleSelectAll}
                           aria-label="Select all"
                         />
@@ -189,7 +183,7 @@ export default function VehiclesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {ADMIN_VEHICLES.map((v, idx: number) => (
+                    {vehicles.map((v, idx: number) => (
                       <tr key={idx} className={selectedRows.has(idx) ? styles.rowSelected : ""}>
                         <td className={styles.checkCol}>
                           <input
@@ -252,7 +246,7 @@ export default function VehiclesPage() {
             /* ─── Grid / Card View ─── */
             <>
               <div className={styles.cardGrid} id="vehicles-grid">
-                {ADMIN_VEHICLES.slice(0, 6).map((v, idx: number) => (
+                {vehicles.slice(0, 6).map((v, idx: number) => (
                   <div key={idx} className={styles.vehicleCard}>
                     {/* Card Image */}
                     <div className={styles.cardImage}>
@@ -312,19 +306,6 @@ export default function VehiclesPage() {
         </>
       )}
 
-      {/* State toggle for empty state view */}
-      {isEmpty && (
-        <div className={styles.devToggleWrap}>
-          <button
-            className={styles.stateToggle}
-            onClick={() => setIsEmpty(false)}
-            id="toggle-populated-state"
-          >
-            Show populated state →
-          </button>
-        </div>
-      )}
-
       {/* Upload Method Selection Modal */}
       <UploadMethodModal
         isOpen={showUploadModal}
@@ -353,9 +334,6 @@ const s = 16;
 const iconProps = { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 
 function PlusIcon() { return <svg {...iconProps}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>; }
-function SearchIcon() { return <svg {...iconProps} strokeWidth={1.8}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>; }
-function FilterIcon() { return <svg {...iconProps} strokeWidth={1.8}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>; }
-function SortIcon() { return <svg {...iconProps} strokeWidth={1.8}><line x1="4" y1="6" x2="13" y2="6" /><line x1="4" y1="12" x2="10" y2="12" /><line x1="4" y1="18" x2="7" y2="18" /><line x1="18" y1="6" x2="18" y2="18" /><polyline points="15 15 18 18 21 15" /></svg>; }
 function GridIcon() { return <svg {...iconProps} strokeWidth={1.8}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>; }
 function ListIcon() { return <svg {...iconProps} strokeWidth={1.8}><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>; }
 function MoreIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }

@@ -1,0 +1,312 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
+}
+
+/* Header */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+}
+
+.title {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+.closeBtn {
+  background: transparent;
+  border: 1px solid #E2E4E9;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #868C98;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.closeBtn:hover {
+  background: #F6F8FA;
+  color: #111111;
+}
+
+/* Content */
+.content {
+  padding: 0 24px 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #111111;
+}
+
+/* Amount Input */
+.amountInputWrap {
+  display: flex;
+  align-items: center;
+  border: 1px solid #E2E4E9;
+  border-radius: 8px;
+  height: 44px;
+  padding: 0 14px;
+  transition: border-color 0.2s;
+}
+
+.amountInputWrap:focus-within {
+  border-color: #111111;
+}
+
+.currencySymbol {
+  color: #868C98;
+  font-size: 14px;
+  margin-right: 8px;
+}
+
+.amountInput {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: #111111;
+  background: transparent;
+}
+
+.currencySelect {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  padding-left: 12px;
+  border-left: 1px solid #E2E4E9;
+  height: 24px;
+}
+
+.currencyFlag {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: #0052B4; /* simple placeholder for EU flag color */
+  position: relative;
+  overflow: hidden;
+}
+
+.currencyFlag::after {
+  content: "";
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+  width: 4px; height: 4px;
+  background: #FFDA44;
+  border-radius: 50%;
+  box-shadow: -4px 0 0 #FFDA44, 4px 0 0 #FFDA44, 0 -4px 0 #FFDA44, 0 4px 0 #FFDA44;
+}
+
+.currencyLabel {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #111111;
+}
+
+.textarea {
+  border: 1px solid #E2E4E9;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: #111111;
+  min-height: 100px;
+  resize: vertical;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.textarea:focus {
+  border-color: #111111;
+}
+
+.textarea::placeholder {
+  color: #868C98;
+}
+
+/* Footer */
+.footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 24px;
+  border-top: 1px solid #E2E4E9;
+}
+
+.cancelBtn {
+  background: transparent;
+  border: none;
+  color: #DC2626;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+
+.cancelBtn:hover {
+  text-decoration: underline;
+}
+
+.submitBtn {
+  height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: #111111;
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.submitBtn:hover {
+  background: #000000;
+}
+
+/* Confirmation Modal Overlay */
+.overlayConfirm {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(2px);
+  z-index: 110;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 80px;
+}
+
+.confirmModal {
+  background: #ffffff;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.confirmHeader {
+  display: flex;
+  gap: 16px;
+}
+
+.iconWrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #EFF6FF;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.confirmText {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.confirmTitle {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+}
+
+.confirmSubtitle {
+  font-size: 13.5px;
+  color: #868C98;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.confirmFooter {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.secondaryBtn {
+  height: 38px;
+  padding: 0 16px;
+  border: 1px solid #E2E4E9;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #868C98;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.secondaryBtn:hover {
+  border-color: #D1D1D6;
+  color: #111111;
+}
+
+.primaryBtn {
+  height: 38px;
+  padding: 0 16px;
+  border: none;
+  border-radius: 8px;
+  background: #111111;
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.primaryBtn:hover {
+  background: #000000;
+}

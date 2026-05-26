@@ -32,9 +32,6 @@ export default function AdminLoginPage() {
       
       // Allow user to assume Super Admin role for now while BE user roles are tweaked
       localStorage.setItem("drifully_admin_role", "Super Admin");
-      if (response && (response.token || response.access || response.access_token)) {
-        localStorage.setItem("drifully_admin_token", response.token || response.access || response.access_token);
-      }
       
       setSuccess("Logged in successfully! Redirecting...");
       setTimeout(() => {

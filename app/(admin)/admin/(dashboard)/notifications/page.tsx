@@ -7,6 +7,7 @@ import Pagination from "@/components/admin/Pagination";
 import CreateNotificationForm from "@/components/admin/CreateNotificationForm";
 import NotificationDetailsModal from "@/components/admin/NotificationDetailsModal";
 import { NOTIFICATION_STATS, ADMIN_NOTIFICATIONS } from "@/data/admin-notifications";
+import FilterBar from "@/components/admin/FilterBar";
 import styles from "./notifications.module.css";
 
 export default function NotificationsPage() {
@@ -94,22 +95,7 @@ export default function NotificationsPage() {
         <>
           <div className={styles.toolbar}>
             <div className={styles.toolbarLeft}>
-              <div className={styles.searchBox}>
-                <SearchIcon />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className={styles.searchInput}
-                />
-              </div>
-              <button className={styles.toolBtn}>
-                <FilterIcon />
-                Filter
-              </button>
-              <button className={styles.toolBtn}>
-                <SortIcon />
-                Sort by
-              </button>
+              <FilterBar />
             </div>
             <div className={styles.toolbarRight}>
               <button
@@ -216,30 +202,6 @@ function PlusIcon() {
   return (
     <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-
-function SearchIcon() {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-  );
-}
-
-function FilterIcon() {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-    </svg>
-  );
-}
-
-function SortIcon() {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="4" y1="6" x2="13" y2="6" /><line x1="4" y1="12" x2="10" y2="12" /><line x1="4" y1="18" x2="7" y2="18" /><line x1="18" y1="6" x2="18" y2="18" /><polyline points="15 15 18 18 21 15" />
     </svg>
   );
 }

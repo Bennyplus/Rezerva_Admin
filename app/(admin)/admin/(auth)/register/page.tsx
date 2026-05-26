@@ -21,7 +21,7 @@ export default function AdminRegisterPage() {
 
   // UI States
   const [step, setStep] = useState<'register' | 'otp'>('register');
-  const [otp, setOtp] = useState("");
+  const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
   const [countries, setCountries] = useState<Country[]>([]);
   const [loadingCountries, setLoadingCountries] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
@@ -146,7 +146,7 @@ export default function AdminRegisterPage() {
 
   const handleVerifyOTP = async (e: React.FormEvent) => {
     e.preventDefault();
-    await submitOTP(otp);
+    await submitOTP(otp.join(''));
   };
 
   return (
@@ -370,29 +370,63 @@ export default function AdminRegisterPage() {
         ) : (
           <form onSubmit={handleVerifyOTP} className={styles.form}>
             <div className={styles.field}>
-              <label htmlFor="reg-otp" className={styles.label}>OTP Code</label>
-              <div className={styles.inputWrap}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.inputIcon}>
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
-                  <path d="M7 11V7a5 5 0 0 1 10 0v4" />
-                </svg>
-                <input
-                  id="reg-otp"
-                  type="text"
-                  value={otp}
-                  onChange={(e) => {
-                    const val = e.target.value.replace(/[^0-9]/g, '');
-                    setOtp(val);
-                    if (val.length === 6) {
-                      submitOTP(val);
-                    }
-                  }}
-                  placeholder="123456"
-                  className={styles.input}
-                  maxLength={6}
-                  required
-                  autoFocus
-                />
+              <label className={styles.label}>OTP Code</label>
+              <div className={styles.otpContainer}>
+                {otp.map((digit, index) => (
+                  <input
+                    key={index}
+                    id={`otp-${index}`}
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={digit}
+                    onChange={(e) => {
+                      const value = e.target.value.replace(/[^0-9]/g, '');
+                      if (!value && e.target.value !== '') return;
+
+                      const newOtp = [...otp];
+                      
+                      if (value.length > 1) {
+                        const pasted = value.slice(0, 6).split('');
+                        for (let i = 0; i < pasted.length; i++) {
+                          if (index + i < 6) newOtp[index + i] = pasted[i];
+                        }
+                        setOtp(newOtp);
+                        
+                        const nextIndex = Math.min(index + pasted.length, 5);
+                        document.getElementById(`otp-${nextIndex}`)?.focus();
+                        
+                        const resultingOtp = newOtp.join('');
+                        if (resultingOtp.length === 6) {
+                          submitOTP(resultingOtp);
+                        }
+                        return;
+                      }
+
+                      newOtp[index] = value;
+                      setOtp(newOtp);
+                      
+                      if (value) {
+                        if (index < 5) {
+                          document.getElementById(`otp-${index + 1}`)?.focus();
+                        } else {
+                          const resultingOtp = newOtp.join('');
+                          if (resultingOtp.length === 6) {
+                            submitOTP(resultingOtp);
+                          }
+                        }
+                      }
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Backspace' && !digit && index > 0) {
+                        document.getElementById(`otp-${index - 1}`)?.focus();
+                      }
+                    }}
+                    className={styles.otpInput}
+                    required
+                    autoFocus={index === 0}
+                  />
+                ))}
               </div>
             </div>
 

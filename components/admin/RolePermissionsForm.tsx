@@ -7,11 +7,13 @@ import styles from "./RolePermissionsForm.module.css";
 interface RolePermissionsFormProps {
   onBack: () => void;
   onSubmit: (name: string, permissions: string[]) => Promise<void>;
+  initialName?: string;
+  initialPermissions?: string[];
 }
 
-export default function RolePermissionsForm({ onBack, onSubmit }: RolePermissionsFormProps) {
-  const [roleName, setRoleName] = useState("");
-  const [selected, setSelected] = useState<Set<string>>(new Set());
+export default function RolePermissionsForm({ onBack, onSubmit, initialName, initialPermissions }: RolePermissionsFormProps) {
+  const [roleName, setRoleName] = useState(initialName || "");
+  const [selected, setSelected] = useState<Set<string>>(new Set(initialPermissions || []));
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isValid = roleName.trim().length > 0;
@@ -85,11 +87,11 @@ export default function RolePermissionsForm({ onBack, onSubmit }: RolePermission
         >
           {isSubmitting ? (
             <>
-              Create Role
+              {initialName ? "Saving..." : "Create Role"}
               <span className={styles.spinner} aria-hidden="true" />
             </>
           ) : (
-            "Create Role"
+            initialName ? "Save Role" : "Create Role"
           )}
         </button>
       </div>

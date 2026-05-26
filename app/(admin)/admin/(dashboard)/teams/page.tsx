@@ -1,11 +1,13 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Pagination from "@/components/admin/Pagination";
 import RolePermissionsForm from "@/components/admin/RolePermissionsForm";
 import AddTeamMemberModal from "@/components/admin/AddTeamMemberModal";
 import { ADMIN_ROLES, ADMIN_TEAM_MEMBERS, formatPermissions, type Role, type TeamMember } from "@/data/admin-teams";
+import { accountsService } from "@/services/accounts-service";
+import FilterBar from "@/components/admin/FilterBar";
 import styles from "./teams.module.css";
 
 type View = "list" | "create-role";
@@ -23,9 +25,38 @@ export default function TeamsPage() {
   
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+  
+  const [loadingRoles, setLoadingRoles] = useState(true);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const [editingRole, setEditingRole] = useState<Role | null>(null);
 
   const totalPages = 16;
   const resultsPerPage = 9;
+
+  useEffect(() => {
+    fetchRoles();
+  }, []);
+
+  const fetchRoles = async () => {
+    try {
+      setLoadingRoles(true);
+      const data = await accountsService.getRoles();
+      const rolesData = Array.isArray(data) ? data : data?.results || [];
+      const mapped = rolesData.map((r: any) => ({
+        id: r.id || r._id,
+        name: r.name,
+        permissions: r.permissions || [],
+        createdAt: r.createdAt || new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
+        status: r.status || "Active",
+      }));
+      setRoles(mapped.length > 0 ? mapped : ADMIN_ROLES);
+    } catch (error) {
+      console.error("Failed to fetch roles:", error);
+      setRoles(ADMIN_ROLES);
+    } finally {
+      setLoadingRoles(false);
+    }
+  };
 
   /* Filter roles by search */
   const filteredRoles = roles.filter((r) =>
@@ -42,21 +73,42 @@ export default function TeamsPage() {
 
   /* Handle role creation */
   const handleCreateRole = async (name: string, permissions: string[]) => {
-    /* Simulate async API call */
-    await new Promise((r) => setTimeout(r, 1200));
-    const newRole: Role = {
-      id: `role-${Date.now()}`,
-      name,
-      permissions,
-      createdAt: new Date().toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }),
-      status: "Active",
-    };
-    setRoles((prev) => [newRole, ...prev]);
-    setCurrentView("list");
+    try {
+      if (editingRole) {
+        await accountsService.updateRole(editingRole.id, { name, permissions });
+        setToastMessage(`Role "${name}" updated successfully.`);
+      } else {
+        await accountsService.createRole({ name, permissions });
+        setToastMessage(`Role "${name}" created successfully.`);
+      }
+      await fetchRoles();
+      setCurrentView("list");
+      setEditingRole(null);
+    } catch (error: any) {
+      console.error("Failed to save role:", error);
+      const serverMessage = error.response?.data?.message || error.message;
+      setToastMessage(`Error: ${serverMessage}`);
+    }
+  };
+
+  const handleEditRole = (role: Role) => {
+    setEditingRole(role);
+    setCurrentView("create-role");
+    setActiveDropdown(null);
+  };
+
+  const handleDeleteRole = async (id: string, name: string) => {
+    if (!confirm(`Are you sure you want to delete the role "${name}"?`)) return;
+    try {
+      await accountsService.deleteRole(id);
+      setToastMessage(`Role "${name}" deleted successfully.`);
+      await fetchRoles();
+    } catch (error: any) {
+      console.error("Failed to delete role:", error);
+      const serverMessage = error.response?.data?.message || error.message;
+      setToastMessage(`Error: ${serverMessage}`);
+    }
+    setActiveDropdown(null);
   };
 
   /* Handle Add Team Member */
@@ -90,8 +142,13 @@ export default function TeamsPage() {
   if (currentView === "create-role") {
     return (
       <RolePermissionsForm
-        onBack={() => setCurrentView("list")}
+        onBack={() => {
+          setCurrentView("list");
+          setEditingRole(null);
+        }}
         onSubmit={handleCreateRole}
+        initialName={editingRole?.name}
+        initialPermissions={editingRole?.permissions}
       />
     );
   }
@@ -170,25 +227,9 @@ export default function TeamsPage() {
             <>
               {/* Toolbar */}
               <div className={styles.toolbar} id="roles-toolbar">
-                <div className={styles.toolbarLeft}>
-                  {/* Search */}
-                  <div className={styles.searchBox}>
-                    <SearchIcon />
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      className={styles.searchInput}
-                      id="roles-search"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                  <div className={styles.toolbarLeft}>
+                    <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideSort />
                   </div>
-                  {/* Filter */}
-                  <button className={styles.toolBtn} id="roles-filter-btn">
-                    <FilterIcon />
-                    Filter
-                  </button>
-                </div>
                 <div className={styles.toolbarRight}>
                   <button
                     className={styles.addBtnSmall}
@@ -247,12 +288,31 @@ export default function TeamsPage() {
                           </span>
                         </td>
                         <td className={styles.actionsCol}>
-                          <button
-                            className={styles.moreBtn}
-                            aria-label={`More actions for ${role.name}`}
-                          >
-                            <MoreIcon />
-                          </button>
+                          <div className={styles.actionsWrapper}>
+                            <button
+                              className={styles.moreBtn}
+                              aria-label={`More actions for ${role.name}`}
+                              onClick={() => setActiveDropdown(activeDropdown === role.id ? null : role.id)}
+                            >
+                              <MoreIcon />
+                            </button>
+                            {activeDropdown === role.id && (
+                              <div className={styles.actionsMenu}>
+                                <button
+                                  className={styles.actionItem}
+                                  onClick={() => handleEditRole(role)}
+                                >
+                                  Edit Role
+                                </button>
+                                <button
+                                  className={`${styles.actionItem} ${styles.actionItemDanger}`}
+                                  onClick={() => handleDeleteRole(role.id, role.name)}
+                                >
+                                  Delete
+                                </button>
+                              </div>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -274,25 +334,9 @@ export default function TeamsPage() {
             <>
               {/* Toolbar */}
               <div className={styles.toolbar} id="team-toolbar">
-                <div className={styles.toolbarLeft}>
-                  {/* Search */}
-                  <div className={styles.searchBox}>
-                    <SearchIcon />
-                    <input
-                      type="text"
-                      placeholder="Search..."
-                      className={styles.searchInput}
-                      id="team-search"
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                    />
+                  <div className={styles.toolbarLeft}>
+                    <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideSort />
                   </div>
-                  {/* Filter */}
-                  <button className={styles.toolBtn} id="team-filter-btn">
-                    <FilterIcon />
-                    Filter
-                  </button>
-                </div>
                 <div className={styles.toolbarRight}>
                   <button
                     className={styles.addBtnSmall}
@@ -400,21 +444,6 @@ function PlusIcon() {
     <svg {...iconProps}>
       <line x1="12" y1="5" x2="12" y2="19" />
       <line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-function SearchIcon() {
-  return (
-    <svg {...iconProps} strokeWidth={1.8}>
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-  );
-}
-function FilterIcon() {
-  return (
-    <svg {...iconProps} strokeWidth={1.8}>
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
     </svg>
   );
 }

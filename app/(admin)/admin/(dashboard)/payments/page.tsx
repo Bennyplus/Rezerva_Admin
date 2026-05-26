@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
@@ -13,7 +13,9 @@ import {
   PayoutStatus,
 } from "@/data/admin-payments";
 import Pagination from "@/components/admin/Pagination";
+import FilterBar from "@/components/admin/FilterBar";
 import styles from "./payments.module.css";
+import { paymentsService } from "@/services/payments-service";
 
 type Tab = "transactions" | "payouts";
 
@@ -24,15 +26,54 @@ export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openKebab, setOpenKebab] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 8;
+  const [totalPages, setTotalPages] = useState(8);
 
-  const filteredTransactions = ADMIN_TRANSACTIONS.filter(
+  // Data states
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
+  const [payouts, setPayouts] = useState<Payout[]>([]);
+  const [stats, setStats] = useState(PAYMENT_STATS);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch data
+  useEffect(() => {
+    const fetchData = async () => {
+      setIsLoading(true);
+      try {
+        if (activeTab === "transactions") {
+          const data = await paymentsService.getTransactions(currentPage, searchQuery);
+          setTransactions(data.length > 0 ? data : ADMIN_TRANSACTIONS);
+        } else {
+          const data = await paymentsService.getPayouts(currentPage, searchQuery);
+          setPayouts(data.length > 0 ? data : ADMIN_PAYOUTS);
+        }
+        
+        const statsData = await paymentsService.getPaymentStats();
+        if (statsData && statsData.totalRevenue !== undefined) {
+          setStats(statsData);
+        }
+      } catch (error) {
+        console.error("Failed to fetch payments data, using mock data fallback:", error);
+        setTransactions(ADMIN_TRANSACTIONS);
+        setPayouts(ADMIN_PAYOUTS);
+        setStats(PAYMENT_STATS);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    const timer = setTimeout(() => {
+      fetchData();
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [activeTab, currentPage, searchQuery]);
+
+  const filteredTransactions = transactions.filter(
     (t) =>
       t.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const filteredPayouts = ADMIN_PAYOUTS.filter(
+  const filteredPayouts = payouts.filter(
     (p) =>
       p.driverName.toLowerCase().includes(searchQuery.toLowerCase()) ||
       p.id.toLowerCase().includes(searchQuery.toLowerCase())
@@ -42,17 +83,17 @@ export default function PaymentsPage() {
     activeTab === "transactions" ? "Total Refunds" : "Total Commissions";
   const fourthStatValue =
     activeTab === "transactions"
-      ? PAYMENT_STATS.totalRefunds
-      : PAYMENT_STATS.totalCommissions;
+      ? stats.totalRefunds
+      : stats.totalCommissions;
 
   return (
     <div className={styles.page} onClick={() => setOpenKebab(null)}>
       {/* ─── Stats ─── */}
       <div className={styles.statsGrid}>
         {[
-          { label: "Total Revenue", value: PAYMENT_STATS.totalRevenue },
-          { label: "Total Payouts", value: PAYMENT_STATS.totalPayouts },
-          { label: "Pending Transactions", value: PAYMENT_STATS.pendingTransactions },
+          { label: "Total Revenue", value: stats.totalRevenue },
+          { label: "Total Payouts", value: stats.totalPayouts },
+          { label: "Pending Transactions", value: stats.pendingTransactions },
           { label: fourthStatLabel, value: fourthStatValue },
         ].map((stat) => (
           <div key={stat.label} className={styles.statCard}>
@@ -104,21 +145,7 @@ export default function PaymentsPage() {
       ) : activeTab === "transactions" ? (
         /* ─── Transactions Table ─── */
         <div className={styles.tableCard} id="transactions-table">
-          <div className={styles.toolbar}>
-            <div className={styles.searchBox}>
-              <SearchIcon />
-              <input
-                type="text"
-                placeholder="Search..."
-                className={styles.searchInput}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                id="transactions-search"
-              />
-            </div>
-            <button className={styles.toolBtn}><FilterIcon /> Filter</button>
-            <button className={styles.toolBtn}><SortIcon /> Sort By</button>
-          </div>
+          <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} />
 
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -182,21 +209,7 @@ export default function PaymentsPage() {
       ) : (
         /* ─── Payouts Table ─── */
         <div className={styles.tableCard} id="payouts-table">
-          <div className={styles.toolbar}>
-            <div className={styles.searchBox}>
-              <SearchIcon />
-              <input
-                type="text"
-                placeholder="Search..."
-                className={styles.searchInput}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                id="payouts-search"
-              />
-            </div>
-            <button className={styles.toolBtn}><FilterIcon /> Filter</button>
-            <button className={styles.toolBtn}><SortIcon /> Sort By</button>
-          </div>
+          <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} />
 
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -351,7 +364,4 @@ function PayoutKebab({
 
 /* ─── Inline Icons ─── */
 const ip = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-function SearchIcon() { return <svg {...ip}><circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /></svg>; }
-function FilterIcon() { return <svg {...ip}><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" /></svg>; }
-function SortIcon() { return <svg {...ip}><line x1="11" y1="5" x2="19" y2="5" /><line x1="11" y1="9" x2="15" y2="9" /><line x1="11" y1="13" x2="19" y2="13" /><line x1="11" y1="17" x2="15" y2="17" /><path d="M4 17l4 4 4-4" /><path d="M8 3v18" /></svg>; }
 function MoreIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }

@@ -1,7 +1,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 20px;
   flex: 1;
 }
 
@@ -200,17 +200,41 @@
   border-radius: 50%;
 }
 
-.statusCompleted { background: #ecfdf3; color: #027a48; }
-.statusCompleted .badgeDot { background: #12b76a; }
+.statusCompleted {
+  background: #ecfdf3;
+  color: #027a48;
+}
 
-.statusUpcoming { background: #fff7ed; color: #c2410c; }
-.statusUpcoming .badgeDot { background: #f97316; }
+.statusCompleted .badgeDot {
+  background: #12b76a;
+}
 
-.statusOngoing { background: #eff6ff; color: #1d4ed8; }
-.statusOngoing .badgeDot { background: #3b82f6; }
+.statusUpcoming {
+  background: #fff7ed;
+  color: #c2410c;
+}
 
-.statusCancelled { background: #f2f4f7; color: #344054; }
-.statusCancelled .badgeDot { background: #98a2b3; }
+.statusUpcoming .badgeDot {
+  background: #f97316;
+}
+
+.statusOngoing {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.statusOngoing .badgeDot {
+  background: #3b82f6;
+}
+
+.statusCancelled {
+  background: #f2f4f7;
+  color: #344054;
+}
+
+.statusCancelled .badgeDot {
+  background: #98a2b3;
+}
 
 .actionsCol {
   width: 48px;
@@ -298,10 +322,12 @@
     flex-direction: column;
     align-items: stretch;
   }
+
   .toolbarLeft {
     flex-direction: column;
     align-items: stretch;
   }
+
   .searchInput {
     width: 100%;
   }

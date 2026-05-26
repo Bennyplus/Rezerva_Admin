@@ -43,6 +43,27 @@
   line-height: 1;
 }
 
+.valueRow {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.growth {
+  font-size: 12px;
+  font-weight: 500;
+  margin-bottom: 4px;
+}
+
+.positive {
+  color: #027a48;
+}
+
+.negative {
+  color: #b42318;
+}
+
 /* ─── Responsive ─── */
 @media (max-width: 640px) {
   .valueArea {

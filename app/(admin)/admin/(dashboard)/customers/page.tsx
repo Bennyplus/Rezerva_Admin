@@ -4,6 +4,7 @@ import { useState } from "react";
 import Image from "next/image";
 import Pagination from "@/components/admin/Pagination";
 import CustomerDetailView from "@/components/admin/CustomerDetailView";
+import FilterBar from "@/components/admin/FilterBar";
 import { ADMIN_CUSTOMERS, type Customer } from "@/data/admin-customers";
 import styles from "./customers.module.css";
 
@@ -95,20 +96,7 @@ export default function CustomersPage() {
           {/* Toolbar */}
           <div className={styles.toolbar} id="customers-toolbar">
             <div className={styles.toolbarLeft}>
-              <div className={styles.searchBox}>
-                <SearchIcon />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className={styles.searchInput}
-                  id="customers-search"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                />
-              </div>
-              <button className={styles.toolBtn} id="customers-filter-btn">
-                <FilterIcon /> Filter
-              </button>
+              <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} />
             </div>
             <div className={styles.toolbarRight}>
               <button className={styles.exportBtn} id="customers-export-btn">
@@ -283,23 +271,6 @@ function VerificationBadge({ status }: { status: string }) {
 }
 
 /* ─── Icons ─── */
-function SearchIcon() {
-  return (
-    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-  );
-}
-
-function FilterIcon() {
-  return (
-    <svg width={15} height={15} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round">
-      <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3" />
-    </svg>
-  );
-}
-
 function MoreIcon() {
   return (
     <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">

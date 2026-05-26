@@ -3,14 +3,15 @@
 import { useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { 
-  ANALYTICS_STATS, 
-  BOOKINGS_OVER_TIME_DATA, 
-  REVENUE_PERFORMANCE_DATA, 
-  USER_GROWTH_DATA, 
-  BOOKINGS_BY_LOCATION, 
-  REPORTS_DATA 
+import {
+  ANALYTICS_STATS,
+  BOOKINGS_OVER_TIME_DATA,
+  REVENUE_PERFORMANCE_DATA,
+  USER_GROWTH_DATA,
+  BOOKINGS_BY_LOCATION,
+  REPORTS_DATA
 } from "@/data/admin-analytics";
+import StatCard from "@/components/admin/StatCard";
 import styles from "./analytics.module.css";
 
 // Dynamically import ApexCharts to avoid SSR issues
@@ -107,11 +108,9 @@ export default function AnalyticsPage() {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          <h1>Analytics & Reports</h1>
-          <p>Monitor platform growth, bookings, and revenue trends</p>
         </div>
         <div className={styles.headerRight}>
-          <button 
+          <button
             className={styles.toggleBtn}
             onClick={() => setShowEmptyState(!showEmptyState)}
           >
@@ -149,17 +148,14 @@ export default function AnalyticsPage() {
           {/* Stats Grid */}
           <div className={styles.statsGrid}>
             {ANALYTICS_STATS.map((stat) => (
-              <div key={stat.id} className={styles.statCard}>
-                <span className={styles.statLabel}>{stat.label}</span>
-                <div className={styles.statValueRow}>
-                  <span className={styles.statValue}>{stat.value}</span>
-                  {stat.growth && (
-                    <span className={`${styles.statGrowth} ${stat.isPositive ? styles.positive : styles.negative}`}>
-                      {stat.growth}
-                    </span>
-                  )}
-                </div>
-              </div>
+              <StatCard
+                key={stat.id}
+                label={stat.label}
+                value={stat.value}
+                id={`stat-${stat.id}`}
+                growth={stat.growth}
+                isPositive={stat.isPositive}
+              />
             ))}
           </div>
 
@@ -170,13 +166,13 @@ export default function AnalyticsPage() {
               <div className={styles.chartHeader}>
                 <span className={styles.chartTitle}>Bookings Over Time</span>
                 <div className={styles.chartControls}>
-                  <button 
+                  <button
                     className={`${styles.chartToggle} ${bookingsTimeframe === "Weekly" ? styles.active : ""}`}
                     onClick={() => setBookingsTimeframe("Weekly")}
                   >
                     Weekly
                   </button>
-                  <button 
+                  <button
                     className={`${styles.chartToggle} ${bookingsTimeframe === "Monthly" ? styles.active : ""}`}
                     onClick={() => setBookingsTimeframe("Monthly")}
                   >
@@ -185,11 +181,11 @@ export default function AnalyticsPage() {
                 </div>
               </div>
               <div style={{ height: 280 }}>
-                <ReactApexChart 
-                  options={bookingsChartOptions} 
-                  series={BOOKINGS_OVER_TIME_DATA.series} 
-                  type="line" 
-                  height="100%" 
+                <ReactApexChart
+                  options={bookingsChartOptions}
+                  series={BOOKINGS_OVER_TIME_DATA.series}
+                  type="line"
+                  height="100%"
                 />
               </div>
             </div>
@@ -203,11 +199,11 @@ export default function AnalyticsPage() {
                 </button>
               </div>
               <div style={{ height: 280 }}>
-                <ReactApexChart 
-                  options={revenueChartOptions} 
-                  series={REVENUE_PERFORMANCE_DATA.series} 
-                  type="bar" 
-                  height="100%" 
+                <ReactApexChart
+                  options={revenueChartOptions}
+                  series={REVENUE_PERFORMANCE_DATA.series}
+                  type="bar"
+                  height="100%"
                 />
               </div>
             </div>
@@ -231,11 +227,11 @@ export default function AnalyticsPage() {
                 </div>
               </div>
               <div style={{ height: 280 }}>
-                <ReactApexChart 
-                  options={userGrowthChartOptions} 
-                  series={USER_GROWTH_DATA.series} 
-                  type="line" 
-                  height="100%" 
+                <ReactApexChart
+                  options={userGrowthChartOptions}
+                  series={USER_GROWTH_DATA.series}
+                  type="line"
+                  height="100%"
                 />
               </div>
             </div>
@@ -253,8 +249,8 @@ export default function AnalyticsPage() {
                     <div key={idx} className={styles.locationItem}>
                       <span style={{ width: 60, fontSize: "13px", color: "#1a1d1f" }}>{loc.location}</span>
                       <div className={styles.locationBarWrap}>
-                        <div 
-                          className={styles.locationBar} 
+                        <div
+                          className={styles.locationBar}
                           style={{ width: `${percentage}%`, backgroundColor: loc.color }}
                         ></div>
                       </div>
