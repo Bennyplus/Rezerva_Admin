@@ -115,46 +115,7 @@
   margin-bottom: 24px;
 }
 
-.statCard {
-  background: white;
-  border: 1px solid #e2e4e9;
-  border-radius: 12px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-}
 
-.statLabel {
-  font-size: 13px;
-  color: #6f767e;
-  margin-bottom: 12px;
-}
-
-.statValueRow {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-}
-
-.statValue {
-  font-size: 28px;
-  font-weight: 600;
-  color: #1a1d1f;
-  line-height: 1;
-}
-
-.statGrowth {
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.statGrowth.positive {
-  color: #027a48;
-}
-
-.statGrowth.negative {
-  color: #b42318;
-}
 
 @media (max-width: 900px) {
   .statsGrid {

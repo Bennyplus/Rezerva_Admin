@@ -5,11 +5,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { ADMIN_AUDIT_LOGS } from "@/data/admin-audit-logs";
 import FilterBar from "@/components/admin/FilterBar";
+import Pagination from "@/components/admin/Pagination";
 import styles from "./audit-logs.module.css";
 
 export default function AuditLogsPage() {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [showEmptyState, setShowEmptyState] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const resultsPerPage = 9;
+  const totalPages = Math.ceil(ADMIN_AUDIT_LOGS.length / resultsPerPage) || 1;
 
   const handleDropdownToggle = (id: string) => {
     setOpenDropdownId(openDropdownId === id ? null : id);
@@ -32,6 +37,7 @@ export default function AuditLogsPage() {
       {/* Header */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
+          <FilterBar />
         </div>
         <div className={styles.headerRight}>
           <button
@@ -62,7 +68,7 @@ export default function AuditLogsPage() {
         /* Table View */
         <>
           {/* Controls */}
-          <FilterBar />
+
 
           <div className={styles.tableCard}>
             <div className={styles.tableWrap}>
@@ -80,7 +86,7 @@ export default function AuditLogsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {ADMIN_AUDIT_LOGS.slice(0, 9).map((log) => (
+                  {ADMIN_AUDIT_LOGS.slice((currentPage - 1) * resultsPerPage, currentPage * resultsPerPage).map((log) => (
                     <tr key={log.id}>
                       <td><input type="checkbox" className={styles.checkbox} /></td>
                       <td>{log.timestamp}</td>
@@ -123,25 +129,12 @@ export default function AuditLogsPage() {
             </div>
 
             {/* Pagination */}
-            <div className={styles.footer}>
-              <div className={styles.pageInfo}>Page 2 of 16</div>
-              <div className={styles.pagination}>
-                <button className={styles.pageBtn}>«</button>
-                <button className={styles.pageBtn}>‹</button>
-                <button className={styles.pageBtn}>1</button>
-                <button className={`${styles.pageBtn} ${styles.active}`}>2</button>
-                <button className={styles.pageBtn}>3</button>
-                <button className={styles.pageBtn}>4</button>
-                <button className={styles.pageBtn}>5</button>
-                <span className={styles.pageDots}>...</span>
-                <button className={styles.pageBtn}>16</button>
-                <button className={styles.pageBtn}>›</button>
-                <button className={styles.pageBtn}>»</button>
-              </div>
-              <button className={styles.showingSelector}>
-                Showing 9 results ⌄
-              </button>
-            </div>
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              resultsPerPage={resultsPerPage}
+              onPageChange={setCurrentPage}
+            />
           </div>
         </>
       )}

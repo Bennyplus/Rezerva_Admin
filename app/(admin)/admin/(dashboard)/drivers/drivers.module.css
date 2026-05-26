@@ -5,7 +5,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 20px;
   position: relative;
   flex: 1;
 }

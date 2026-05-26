@@ -11,6 +11,7 @@ import {
   BOOKINGS_BY_LOCATION,
   REPORTS_DATA
 } from "@/data/admin-analytics";
+import StatCard from "@/components/admin/StatCard";
 import styles from "./analytics.module.css";
 
 // Dynamically import ApexCharts to avoid SSR issues
@@ -147,17 +148,14 @@ export default function AnalyticsPage() {
           {/* Stats Grid */}
           <div className={styles.statsGrid}>
             {ANALYTICS_STATS.map((stat) => (
-              <div key={stat.id} className={styles.statCard}>
-                <span className={styles.statLabel}>{stat.label}</span>
-                <div className={styles.statValueRow}>
-                  <span className={styles.statValue}>{stat.value}</span>
-                  {stat.growth && (
-                    <span className={`${styles.statGrowth} ${stat.isPositive ? styles.positive : styles.negative}`}>
-                      {stat.growth}
-                    </span>
-                  )}
-                </div>
-              </div>
+              <StatCard
+                key={stat.id}
+                label={stat.label}
+                value={stat.value}
+                id={`stat-${stat.id}`}
+                growth={stat.growth}
+                isPositive={stat.isPositive}
+              />
             ))}
           </div>
 

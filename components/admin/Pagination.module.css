@@ -13,7 +13,7 @@
 
 .pagination {
   padding: 12px 16px;
-  border-top: 1px solid var(--admin-card-border, #E2E4E9);
+  /* border-top: 1px solid var(--admin-card-border, #E2E4E9); */
 }
 
 .paginationStandalone {
@@ -27,7 +27,7 @@
 .pageControls {
   display: flex;
   align-items: center;
-  gap: 2px;
+  gap: 8px;
 }
 
 .pageBtn {
@@ -36,7 +36,7 @@
   justify-content: center;
   width: 30px;
   height: 30px;
-  border: 1px solid var(--admin-card-border, #E2E4E9);
+  /* border: 1px solid var(--admin-card-border, #E2E4E9); */
   border-radius: 6px;
   background: var(--admin-card-bg, #ffffff);
   color: var(--admin-section-label, #868C98);
@@ -60,10 +60,10 @@
   justify-content: center;
   width: 30px;
   height: 30px;
-  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border: 1px solid #E2E4E9;
   border-radius: 6px;
   background: var(--admin-card-bg, #ffffff);
-  color: var(--color-text, #111111);
+  color: #868C98;
   font-size: 12px;
   font-weight: 500;
   cursor: pointer;
@@ -75,13 +75,15 @@
 }
 
 .pageNumActive {
-  background: var(--admin-active-bg, #111111);
-  color: var(--admin-active-text, #ffffff);
-  border-color: var(--admin-active-bg, #111111);
+  background: #E4E5E73D;
+  color: var(--color-text, #111111);
+  border-color: #E2E4E9;
 }
 
 .pageNumActive:hover {
-  background: var(--admin-active-bg, #111111);
+  background: #E4E5E73D;
+  color: var(--color-text, #111111);
+  border-color: #E2E4E9;
 }
 
 .pageDots {
@@ -106,6 +108,7 @@
 
 /* ─── Responsive ─── */
 @media (max-width: 900px) {
+
   .pagination,
   .paginationStandalone {
     flex-direction: column;
