@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Image from "next/image";
 import CustomSelect from "@/components/admin/CustomSelect";
 import styles from "./AddVehicleForm.module.css";
+import { vehiclesService } from "@/services/vehicles-service";
 
 interface AddVehicleFormProps {
   onCancel: () => void;
@@ -14,8 +15,10 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
   const [formData, setFormData] = useState({
     name: "",
     model: "",
+    year: "",
+    color: "",
     category: "",
-    dailyPrice: "",
+    price_per_day: "",
     seatingCapacity: "",
     location: "",
     chassisNumber: "",
@@ -23,12 +26,36 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
     transmission: "",
     fuelType: "",
     features: "",
+    image_files: null,
   });
 
-  const [imagePreviews, setImagePreviews] = useState<{ url: string; name: string; size: number }[]>([]);
+  const [imagePreviews, setImagePreviews] = useState<{ url: string; name: string; size: number; file: File }[]>([]);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [saveStatus, setSaveStatus] = useState<"idle" | "loading" | "success">("idle");
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [brandOptions, setBrandOptions] = useState<{ value: string; label: string }[]>([]);
+  const [colorOptions, setColorOptions] = useState<{ value: string; label: string }[]>([]);
+  const [fuelTypeOptions, setFuelTypeOptions] = useState<{ value: string; label: string }[]>([]);
+  const [transmissionOptions, setTransmissionOptions] = useState<{ value: string; label: string }[]>([]);
+  const [featureOptions, setFeatureOptions] = useState<{ value: string; label: string }[]>([]);
+
+  useEffect(() => {
+    const fetchOptions = async () => {
+      try {
+        const { brands, colors, fuels, transmissions, features } = await vehiclesService.getVehicleOptions();
+
+        setBrandOptions(brands.map((b: any) => ({ value: b.id.toString(), label: b.name })));
+        setColorOptions(colors.map((c: any) => ({ value: c.id.toString(), label: c.name })));
+        setFuelTypeOptions(fuels.map((f: any) => ({ value: f.value, label: f.label })));
+        setTransmissionOptions(transmissions.map((t: any) => ({ value: t.value, label: t.label })));
+        setFeatureOptions(features.map((f: any) => ({ value: f.id.toString(), label: f.name })));
+      } catch (error) {
+        console.error("Failed to fetch vehicle options:", error);
+      }
+    };
+    fetchOptions();
+  }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
@@ -46,6 +73,7 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
         url: URL.createObjectURL(file),
         name: file.name,
         size: file.size,
+        file: file,
       }));
       console.log("New images:", newImages);
       setImagePreviews((prev) => [...prev, ...newImages]);
@@ -67,20 +95,42 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
 
   const handleSave = async () => {
     setSaveStatus("loading");
-    
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    
-    setSaveStatus("success");
 
-    // Reset after 3 seconds and then trigger onSave
-    setTimeout(() => {
+    try {
+      const payload = new FormData();
+      payload.append("brand", formData.name);
+      payload.append("model", formData.model);
+      payload.append("transmission", formData.transmission);
+      payload.append("fuel_type", formData.fuelType);
+      payload.append("price_per_day", formData.price_per_day);
+      payload.append("year", formData.year);
+      payload.append("color", formData.color);
+      payload.append("features", formData.features);
+
+      // Send files
+      imagePreviews.forEach((img) => {
+        payload.append("image_files", img.file);
+      });
+
+      await vehiclesService.createVehicle(payload);
+
+      setSaveStatus("success");
+
+      setTimeout(() => {
+        setSaveStatus("idle");
+        onSave(formData);
+      }, 3000);
+    } catch (error) {
+      console.error("Failed to save vehicle:", error);
       setSaveStatus("idle");
-      onSave(formData);
-    }, 3000);
+      // Optionally handle error state
+    }
   };
 
-  const isFormValid = Object.values(formData).every((value) => value.trim() !== "");
+  const isFormValid = Object.entries(formData).every(([key, value]) => {
+    if (key === "image_files") return true; // Handled separately via imagePreviews
+    return typeof value === "string" && value.trim() !== "";
+  });
 
   return (
     <div className={styles.formContainer}>
@@ -120,12 +170,8 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
               <CustomSelect
                 name="name"
                 value={formData.name}
-                placeholder="e.g Toyota"
-                options={[
-                  { value: "toyota", label: "Toyota" },
-                  { value: "honda", label: "Honda" },
-                  { value: "ford", label: "Ford" },
-                ]}
+                placeholder="Select Brand"
+                options={brandOptions}
                 onChange={handleSelectChange}
               />
             </div>
@@ -144,6 +190,28 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
             </div>
 
             {/* Row 2: Category */}
+            <div className={`${styles.formField}`}>
+              <label className={styles.label}>Year</label>
+              <input
+                type="text"
+                name="year"
+                className={styles.input}
+                placeholder="e.g 2025"
+                value={formData.year}
+                onChange={handleChange}
+              />
+            </div>
+            <div className={`${styles.formField}`}>
+              <label className={styles.label}>Color</label>
+              <CustomSelect
+                name="color"
+                value={formData.color}
+                placeholder="Select Color"
+                options={colorOptions}
+                onChange={handleSelectChange}
+              />
+            </div>
+
             <div className={`${styles.formField} ${styles.fullWidth}`}>
               <label className={styles.label}>Category</label>
               <CustomSelect
@@ -164,15 +232,15 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
               />
             </div>
 
-            {/* Row 3: Daily Price & Seating Capacity */}
+            {/* Row 3: Price Per Day & Seating Capacity */}
             <div className={styles.formField}>
-              <label className={styles.label}>Daily Price</label>
+              <label className={styles.label}>Price Per Day</label>
               <input
                 type="text"
-                name="dailyPrice"
+                name="price_per_day"
                 className={styles.input}
                 placeholder="e.g $120.00"
-                value={formData.dailyPrice}
+                value={formData.price_per_day}
                 onChange={handleChange}
               />
             </div>
@@ -240,12 +308,8 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
               <CustomSelect
                 name="transmission"
                 value={formData.transmission}
-                placeholder="e.g Automatic"
-                options={[
-                  { value: "automatic", label: "Automatic" },
-                  { value: "manual", label: "Manual" },
-                  { value: "hybrid", label: "Hybrid" },
-                ]}
+                placeholder="Select Transmission"
+                options={transmissionOptions}
                 onChange={handleSelectChange}
               />
             </div>
@@ -254,14 +318,8 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
               <CustomSelect
                 name="fuelType"
                 value={formData.fuelType}
-                placeholder="e.g Diesel"
-                options={[
-                  { value: "diesel", label: "Diesel" },
-                  { value: "petrol", label: "Petrol" },
-                  { value: "electric", label: "Electric" },
-                  { value: "hybrid", label: "Hybrid" },
-                  { value: "lpg", label: "LPG" },
-                ]}
+                placeholder="Select Fuel Type"
+                options={fuelTypeOptions}
                 onChange={handleSelectChange}
               />
             </div>
@@ -272,14 +330,10 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
               <CustomSelect
                 name="features"
                 value={formData.features}
-                placeholder="e.g Bluetooth"
-                options={[
-                  { value: "bluetooth", label: "Bluetooth" },
-                  { value: "gps", label: "GPS" },
-                  { value: "airconditioner", label: "Airconditioner" },
-                  { value: "camera", label: "Back Camera" },
-                ]}
+                placeholder="Select Features"
+                options={featureOptions}
                 showSearch={true}
+                multiple={true}
                 onChange={handleSelectChange}
               />
             </div>
@@ -395,7 +449,7 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
 
 /* ─── Modal Component ─── */
 interface PreviewModalProps {
-  images: { url: string; name: string; size: number }[];
+  images: { url: string; name: string; size: number; file?: File }[];
   onClose: () => void;
   onRemove: (idx: number) => void;
   onAddMore: () => void;

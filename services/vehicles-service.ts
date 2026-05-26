@@ -3,6 +3,48 @@ import { AdminVehicle } from '@/data/admin-vehicles';
 
 export const vehiclesService = {
   /**
+   * Fetches all dynamic options for vehicle forms (brands, colors, fuels, transmissions, features)
+   */
+  getVehicleOptions: async () => {
+    try {
+      const [brandsRes, colorsRes, fuelsRes, transRes, featuresRes] = await Promise.all([
+        publicApi.get("", { params: { path: "api/v1/vehicles/brands/" } }),
+        publicApi.get("", { params: { path: "api/v1/vehicles/colors/" } }),
+        publicApi.get("", { params: { path: "api/v1/vehicles/fuel-types/" } }),
+        publicApi.get("", { params: { path: "api/v1/vehicles/transmissions/" } }),
+        publicApi.get("", { params: { path: "api/v1/vehicles/features/" } }),
+      ]);
+
+      return {
+        brands: Array.isArray(brandsRes.data) ? brandsRes.data : brandsRes.data?.results || [],
+        colors: Array.isArray(colorsRes.data) ? colorsRes.data : colorsRes.data?.results || [],
+        fuels: Array.isArray(fuelsRes.data) ? fuelsRes.data : fuelsRes.data?.results || [],
+        transmissions: Array.isArray(transRes.data) ? transRes.data : transRes.data?.results || [],
+        features: Array.isArray(featuresRes.data) ? featuresRes.data : featuresRes.data?.results || [],
+      };
+    } catch (error) {
+      console.error("Failed to fetch vehicle options:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Creates a new vehicle using FormData
+   */
+  createVehicle: async (payload: FormData) => {
+    try {
+      const response = await publicApi.post("", payload, {
+        params: { path: "api/v1/vehicles/manage/" },
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to create vehicle:", error);
+      throw error;
+    }
+  },
+
+  /**
    * Fetches the list of vehicles from admin/vehicles/
    * Returns an array of vehicles
    */

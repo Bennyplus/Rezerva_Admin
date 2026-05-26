@@ -16,6 +16,7 @@ interface CustomSelectProps {
   onChange: (name: string, value: string) => void;
   showSearch?: boolean;
   variant?: 'default' | 'minimal';
+  multiple?: boolean;
 }
 
 export default function CustomSelect({
@@ -26,6 +27,7 @@ export default function CustomSelect({
   onChange,
   showSearch = false,
   variant = 'default',
+  multiple = false,
 }: CustomSelectProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -43,7 +45,9 @@ export default function CustomSelect({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const selectedOption = options.find((opt) => opt.value === value);
+  const selectedValues = multiple ? (value ? value.split(',').map((v) => v.trim()) : []) : [];
+  const selectedOption = !multiple ? options.find((opt) => opt.value === value) : null;
+  const selectedOptions = multiple ? options.filter((opt) => selectedValues.includes(opt.value)) : [];
 
   const filteredOptions = options.filter((opt) =>
     opt.label.toLowerCase().includes(searchTerm.toLowerCase())
@@ -55,8 +59,10 @@ export default function CustomSelect({
         className={`${styles.trigger} ${isOpen ? styles.triggerActive : ""} ${variant === 'minimal' ? styles.triggerMinimal : ""}`}
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className={selectedOption ? styles.value : styles.placeholder}>
-          {selectedOption ? selectedOption.label : placeholder}
+        <span className={(multiple ? selectedOptions.length > 0 : selectedOption) ? styles.value : styles.placeholder}>
+          {multiple 
+            ? (selectedOptions.length > 0 ? selectedOptions.map(o => o.label).join(', ') : placeholder)
+            : (selectedOption ? selectedOption.label : placeholder)}
         </span>
         <ChevronDownIcon isOpen={isOpen} />
       </div>
@@ -81,20 +87,39 @@ export default function CustomSelect({
 
           <div className={styles.optionsList}>
             {filteredOptions.length > 0 ? (
-              filteredOptions.map((option) => (
-                <li
-                  key={option.value}
-                  className={`${styles.option} ${value === option.value ? styles.optionSelected : ""}`}
-                  onClick={() => {
-                    onChange(name, option.value);
-                    setIsOpen(false);
-                    setSearchTerm("");
-                  }}
-                >
-                  {option.label}
-                  {value === option.value && <CheckIcon />}
-                </li>
-              ))
+              filteredOptions.map((option) => {
+                const isSelected = multiple ? selectedValues.includes(option.value) : value === option.value;
+                return (
+                  <li
+                    key={option.value}
+                    className={`${styles.option} ${isSelected ? styles.optionSelected : ""}`}
+                    onClick={(e) => {
+                      if (multiple) {
+                        e.stopPropagation();
+                        const newValues = isSelected
+                          ? selectedValues.filter(v => v !== option.value)
+                          : [...selectedValues, option.value];
+                        onChange(name, newValues.join(','));
+                      } else {
+                        onChange(name, option.value);
+                        setIsOpen(false);
+                        setSearchTerm("");
+                      }
+                    }}
+                  >
+                    {multiple && (
+                      <input 
+                        type="checkbox" 
+                        checked={isSelected} 
+                        readOnly 
+                        style={{ marginRight: '8px', cursor: 'pointer' }}
+                      />
+                    )}
+                    {option.label}
+                    {!multiple && isSelected && <CheckIcon />}
+                  </li>
+                );
+              })
             ) : (
               <li className={styles.noResults}>No results found</li>
             )}
