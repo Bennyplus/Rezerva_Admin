@@ -51,10 +51,16 @@ async function handleRequest(request: NextRequest, method: string) {
     let body: any = undefined;
     if (['POST', 'PUT', 'PATCH'].includes(method)) {
       const contentType = request.headers.get('content-type') || 'application/json';
-      headers['Content-Type'] = contentType;
+      
       if (contentType.includes('application/json')) {
+        headers['Content-Type'] = contentType;
         body = await request.json().catch(() => undefined);
+      } else if (contentType.includes('multipart/form-data')) {
+        // Do not set Content-Type header manually here because axios 
+        // needs to automatically set it with the correct boundary
+        body = await request.formData().catch(() => undefined);
       } else {
+        headers['Content-Type'] = contentType;
         body = await request.text().catch(() => undefined);
       }
     }
