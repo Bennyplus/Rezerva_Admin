@@ -1,20 +1,24 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import StatCard from "@/components/admin/StatCard";
+import Spinner from "@/components/admin/Spinner";
 import Pagination from "@/components/admin/Pagination";
 import UploadMethodModal from "@/components/admin/UploadMethodModal";
 import AddVehicleForm from "@/components/admin/AddVehicleForm";
 import BulkUploadModal from "@/components/admin/BulkUploadModal";
-import { ADMIN_VEHICLES, VEHICLE_STATS_EMPTY, VEHICLE_STATS_POPULATED } from "../../../../../data/admin-vehicles";
+import { ADMIN_VEHICLES, VEHICLE_STATS_EMPTY, VEHICLE_STATS_POPULATED, AdminVehicle } from "../../../../../data/admin-vehicles";
+import { vehiclesService } from "@/services/vehicles-service";
 import FilterBar from "@/components/admin/FilterBar";
 import styles from "./vehicles.module.css";
 
 type ViewMode = "list" | "grid";
 
 export default function VehiclesPage() {
-  const [isEmpty, setIsEmpty] = useState(true);
+  const [vehicles, setVehicles] = useState<AdminVehicle[]>([]);
+  const [loading, setLoading] = useState(true);
+  const isEmpty = vehicles.length === 0;
   const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [currentPage, setCurrentPage] = useState(2);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
@@ -22,15 +26,28 @@ export default function VehiclesPage() {
   const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
   const [currentView, setCurrentView] = useState<"list" | "add-manual">("list");
 
+  useEffect(() => {
+    const fetchVehicles = async () => {
+      setLoading(true);
+      try {
+        const data = await vehiclesService.getVehicles();
+        setVehicles(data);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchVehicles();
+  }, []);
+
   const stats = isEmpty ? VEHICLE_STATS_EMPTY : VEHICLE_STATS_POPULATED;
   const totalPages = 16;
   const resultsPerPage = 9;
 
   const toggleSelectAll = () => {
-    if (selectedRows.size === ADMIN_VEHICLES.length) {
+    if (selectedRows.size === vehicles.length && vehicles.length > 0) {
       setSelectedRows(new Set());
     } else {
-      setSelectedRows(new Set(ADMIN_VEHICLES.map((_, i: number) => i)));
+      setSelectedRows(new Set(vehicles.map((_, i: number) => i)));
     }
   };
 
@@ -50,6 +67,14 @@ export default function VehiclesPage() {
           setCurrentView("list");
         }} 
       />
+    );
+  }
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner size={40} />
+      </div>
     );
   }
 
@@ -113,16 +138,6 @@ export default function VehiclesPage() {
             </div>
 
             <div className={styles.toolbarRight}>
-              {/* State toggle (dev) */}
-              <button
-                className={styles.stateToggle}
-                onClick={() => setIsEmpty(!isEmpty)}
-                title="Toggle empty/populated state"
-                id="toggle-empty-state"
-              >
-                {isEmpty ? "Show Data" : "Show Empty"}
-              </button>
-
               {/* Add Vehicle */}
               <button 
                 className={styles.addBtnSmall} 
@@ -146,7 +161,7 @@ export default function VehiclesPage() {
                         <input
                           type="checkbox"
                           className={styles.checkbox}
-                          checked={selectedRows.size === ADMIN_VEHICLES.length}
+                          checked={selectedRows.size === vehicles.length && vehicles.length > 0}
                           onChange={toggleSelectAll}
                           aria-label="Select all"
                         />
@@ -168,7 +183,7 @@ export default function VehiclesPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {ADMIN_VEHICLES.map((v, idx: number) => (
+                    {vehicles.map((v, idx: number) => (
                       <tr key={idx} className={selectedRows.has(idx) ? styles.rowSelected : ""}>
                         <td className={styles.checkCol}>
                           <input
@@ -231,7 +246,7 @@ export default function VehiclesPage() {
             /* ─── Grid / Card View ─── */
             <>
               <div className={styles.cardGrid} id="vehicles-grid">
-                {ADMIN_VEHICLES.slice(0, 6).map((v, idx: number) => (
+                {vehicles.slice(0, 6).map((v, idx: number) => (
                   <div key={idx} className={styles.vehicleCard}>
                     {/* Card Image */}
                     <div className={styles.cardImage}>
@@ -289,19 +304,6 @@ export default function VehiclesPage() {
             </>
           )}
         </>
-      )}
-
-      {/* State toggle for empty state view */}
-      {isEmpty && (
-        <div className={styles.devToggleWrap}>
-          <button
-            className={styles.stateToggle}
-            onClick={() => setIsEmpty(false)}
-            id="toggle-populated-state"
-          >
-            Show populated state →
-          </button>
-        </div>
       )}
 
       {/* Upload Method Selection Modal */}
