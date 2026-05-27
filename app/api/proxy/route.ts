@@ -65,19 +65,68 @@ async function handleRequest(request: NextRequest, method: string) {
       }
     }
 
-    const response = await axios({
-      method,
-      url: `${BACKEND_URL}/${path}`,
-      params: forwardParams,
-      headers,
-      data: body,
-    });
+    let response;
+    try {
+      response = await axios({
+        method,
+        url: `${BACKEND_URL}/${path}`,
+        params: forwardParams,
+        headers,
+        data: body,
+      });
+    } catch (error: any) {
+      // If unauthorized and we have a refresh token, try to refresh
+      if (error.response?.status === 401) {
+        const refreshToken = cookieStore.get('refreshToken')?.value;
+        if (refreshToken) {
+          try {
+            const refreshResponse = await axios.post(
+              `${BACKEND_URL}/api/v1/accounts/token/refresh/`,
+              { refresh: refreshToken },
+              {
+                headers: {
+                  'X-API-KEY': API_KEY,
+                  'Accept': 'application/json',
+                }
+              }
+            );
+
+            const newAccessToken = refreshResponse.data.access;
+            const newRefreshToken = refreshResponse.data.refresh || refreshToken;
+
+            // Retry original request with new token
+            headers['Authorization'] = `Bearer ${newAccessToken}`;
+            response = await axios({
+              method,
+              url: `${BACKEND_URL}/${path}`,
+              params: forwardParams,
+              headers,
+              data: body,
+            });
+
+            // Pass the new tokens down to be set as cookies
+            (response as any)._newTokens = { access: newAccessToken, refresh: newRefreshToken };
+          } catch (refreshError) {
+            console.error('Token refresh failed');
+            throw error; // Throw original 401 to clear cookies
+          }
+        } else {
+          throw error;
+        }
+      } else {
+        throw error;
+      }
+    }
 
     const nextResponse = NextResponse.json(response.data);
 
+    // Get tokens from either login/register response or refreshed tokens
+    const accessToSet = response.data?.access || (response as any)._newTokens?.access;
+    const refreshToSet = response.data?.refresh || (response as any)._newTokens?.refresh;
+
     // Set secure cookies when receiving tokens
-    if (response.data?.access) {
-      nextResponse.cookies.set('accessToken', response.data.access, {
+    if (accessToSet) {
+      nextResponse.cookies.set('accessToken', accessToSet, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
@@ -85,8 +134,8 @@ async function handleRequest(request: NextRequest, method: string) {
         maxAge: 60 * 15, // 15 mins for access token
       });
     }
-    if (response.data?.refresh) {
-      nextResponse.cookies.set('refreshToken', response.data.refresh, {
+    if (refreshToSet) {
+      nextResponse.cookies.set('refreshToken', refreshToSet, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',

@@ -8,9 +8,10 @@ import Pagination from "@/components/admin/Pagination";
 import UploadMethodModal from "@/components/admin/UploadMethodModal";
 import AddVehicleForm from "@/components/admin/AddVehicleForm";
 import BulkUploadModal from "@/components/admin/BulkUploadModal";
-import { ADMIN_VEHICLES, VEHICLE_STATS_EMPTY, VEHICLE_STATS_POPULATED, AdminVehicle } from "../../../../../data/admin-vehicles";
+import { AdminVehicle, VEHICLE_STATS_EMPTY } from "@/data/admin-vehicles";
 import { vehiclesService } from "@/services/vehicles-service";
 import FilterBar from "@/components/admin/FilterBar";
+import VehicleDetailView from "@/components/admin/VehicleDetailView";
 import styles from "./vehicles.module.css";
 
 type ViewMode = "list" | "grid";
@@ -20,28 +21,95 @@ export default function VehiclesPage() {
   const [loading, setLoading] = useState(true);
   const isEmpty = vehicles.length === 0;
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const [currentPage, setCurrentPage] = useState(2);
+  const [currentPage, setCurrentPage] = useState(1);
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
-  const [currentView, setCurrentView] = useState<"list" | "add-manual">("list");
+  const [currentView, setCurrentView] = useState<"list" | "add-manual" | "detail">("list");
+  const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
+  const [selectedVehicle, setSelectedVehicle] = useState<AdminVehicle | null>(null);
+
+  const [stats, setStats] = useState(VEHICLE_STATS_EMPTY);
+  const [totalPages, setTotalPages] = useState(1);
+  const [resultsPerPage, setResultsPerPage] = useState(9);
+  
+  const [brandsMap, setBrandsMap] = useState<Record<string, string>>({});
+  const [categoriesMap, setCategoriesMap] = useState<Record<string, string>>({});
+
+  useEffect(() => {
+    const fetchMaps = async () => {
+      const { brands, categories } = await vehiclesService.getBrandsAndCategories();
+      const bMap: Record<string, string> = {};
+      const cMap: Record<string, string> = {};
+      if (Array.isArray(brands)) {
+        brands.forEach((b: any) => { bMap[b.id.toString()] = b.name; });
+      }
+      if (Array.isArray(categories)) {
+        categories.forEach((c: any) => { cMap[c.id.toString()] = c.name; });
+      }
+      setBrandsMap(bMap);
+      setCategoriesMap(cMap);
+    };
+    fetchMaps();
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (openMenuIndex !== null) {
+        setOpenMenuIndex(null);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [openMenuIndex]);
 
   useEffect(() => {
     const fetchVehicles = async () => {
       setLoading(true);
       try {
-        const data = await vehiclesService.getVehicles();
-        setVehicles(data);
+        const data = await vehiclesService.getVehicles(currentPage);
+
+        const mappedVehicles: AdminVehicle[] = (data.vehicles || []).map((v: any) => {
+
+          const rawStatus = v.status ? String(v.status).toLowerCase() : '';
+          let mappedStatus: AdminVehicle['status'] = 'Available';
+          if (rawStatus.includes('maintenance')) mappedStatus = 'Maintenance';
+          else if (rawStatus.includes('book')) mappedStatus = 'Booked';
+          else if (rawStatus.includes('inactive')) mappedStatus = 'Inactive';
+
+          return {
+            id: v.id,
+            name: `${v.model || 'Unknown'}`,
+            brand: brandsMap[v.brand?.toString()] || (typeof v.brand === 'string' ? v.brand : `Brand ${v.brand || 'Unknown'}`),
+            image: v.image && v.image.length > 0 ? v.image[0].image : '/images/3rd-img.png',
+            category: categoriesMap[v.category?.toString()] || v.category || 'Unknown',
+            dailyPrice: parseFloat(v.daily_price) || 0,
+            capacity: parseInt(v.capacity) || 4,
+            status: mappedStatus,
+            chassisNo: v.chasis_number || 'N/A',
+            location: 'N/A',
+          };
+        });
+
+        setVehicles(mappedVehicles);
+        setTotalPages(data.total_pages || 1);
+        setResultsPerPage(data.results_per_page || 9);
+
+        setStats([
+          { id: "total-vehicles", label: "Total Vehicles", value: data.total_vehicles || 0 },
+          { id: "available-vehicles", label: "Available Vehicles", value: data.available_vehicles || 0 },
+          { id: "booked-vehicles", label: "Booked Vehicles", value: data.booked_vehicles || 0 },
+          { id: "under-maintenance", label: "Under maintenance", value: data.under_maintenance || 0 },
+        ]);
+      } catch (error) {
+        console.error("Failed to load dashboard data:", error);
       } finally {
         setLoading(false);
       }
     };
     fetchVehicles();
-  }, []);
+  }, [currentPage]);
 
-  const stats = isEmpty ? VEHICLE_STATS_EMPTY : VEHICLE_STATS_POPULATED;
-  const totalPages = 16;
-  const resultsPerPage = 9;
 
   const toggleSelectAll = () => {
     if (selectedRows.size === vehicles.length && vehicles.length > 0) {
@@ -58,14 +126,67 @@ export default function VehiclesPage() {
     setSelectedRows(next);
   };
 
+  const handleStatusChange = async (vehicleId: number, newStatus: string) => {
+    try {
+      await vehiclesService.updateVehicleStatus(vehicleId, newStatus);
+      
+      const mapStatus = (s: string): AdminVehicle['status'] => {
+        if (s === 'booked') return 'Booked';
+        if (s === 'maintenance') return 'Maintenance';
+        if (s === 'inactive') return 'Inactive';
+        if (s === 'available') return 'Available';
+        return 'Available';
+      };
+      
+      const mappedStatus = mapStatus(newStatus);
+      
+      setVehicles((prev) => 
+        prev.map((v) => v.id === vehicleId ? { ...v, status: mappedStatus } : v)
+      );
+      
+      if (selectedVehicle && selectedVehicle.id === vehicleId) {
+        setSelectedVehicle({ ...selectedVehicle, status: mappedStatus });
+      }
+      
+      setOpenMenuIndex(null);
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    }
+  };
+
   if (currentView === "add-manual") {
     return (
-      <AddVehicleForm 
-        onCancel={() => setCurrentView("list")} 
+      <AddVehicleForm
+        onCancel={() => setCurrentView("list")}
         onSave={(data) => {
           console.log("Saving vehicle:", data);
+          
+          const newVehicle: AdminVehicle = {
+            id: Date.now(),
+            name: data.model || 'Unknown',
+            brand: brandsMap[data.name?.toString()] || data.name || 'Unknown',
+            image: '/images/3rd-img.png',
+            category: categoriesMap[data.category?.toString()] || data.category || 'Unknown',
+            dailyPrice: parseFloat(data.price_per_day) || 0,
+            capacity: parseInt(data.seatingCapacity) || 4,
+            status: "Available",
+            chassisNo: data.chassisNumber || 'N/A',
+            location: data.location || 'N/A',
+          };
+          
+          setVehicles((prev) => [newVehicle, ...prev]);
           setCurrentView("list");
-        }} 
+        }}
+      />
+    );
+  }
+
+  if (currentView === "detail" && selectedVehicle) {
+    return (
+      <VehicleDetailView 
+        vehicle={selectedVehicle}
+        onBack={() => setCurrentView("list")}
+        onStatusChange={handleStatusChange}
       />
     );
   }
@@ -139,8 +260,8 @@ export default function VehiclesPage() {
 
             <div className={styles.toolbarRight}>
               {/* Add Vehicle */}
-              <button 
-                className={styles.addBtnSmall} 
+              <button
+                className={styles.addBtnSmall}
                 id="add-vehicle-btn-toolbar"
                 onClick={() => setShowUploadModal(true)}
               >
@@ -223,9 +344,23 @@ export default function VehiclesPage() {
                         <td className={styles.chassisCell}>{v.chassisNo}</td>
                         <td>{v.location}</td>
                         <td className={styles.actionsCol}>
-                          <button className={styles.moreBtn} aria-label="More actions">
-                            <MoreIcon />
-                          </button>
+                          <div className={styles.actionsWrapper} onClick={(e) => e.stopPropagation()}>
+                            <button 
+                              className={styles.moreBtn} 
+                              aria-label="More actions"
+                              onClick={() => setOpenMenuIndex(openMenuIndex === idx ? null : idx)}
+                            >
+                              <MoreIcon />
+                            </button>
+                            {openMenuIndex === idx && (
+                              <div className={styles.kebabMenu}>
+                                <button className={styles.kebabMenuItem} onClick={() => { setSelectedVehicle(v); setCurrentView("detail"); setOpenMenuIndex(null); }}>View Details</button>
+                                <button className={styles.kebabMenuItem} onClick={() => handleStatusChange(v.id!, 'booked')}>Mark As Booked</button>
+                                <button className={styles.kebabMenuItem} onClick={() => handleStatusChange(v.id!, 'maintenance')}>Mark As Maintenance</button>
+                                <button className={styles.kebabMenuItem} onClick={() => handleStatusChange(v.id!, 'inactive')}>Deactivate</button>
+                              </div>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     ))}
@@ -321,7 +456,7 @@ export default function VehiclesPage() {
       />
 
       {/* Bulk Upload Modal */}
-      <BulkUploadModal 
+      <BulkUploadModal
         isOpen={showBulkUploadModal}
         onClose={() => setShowBulkUploadModal(false)}
       />

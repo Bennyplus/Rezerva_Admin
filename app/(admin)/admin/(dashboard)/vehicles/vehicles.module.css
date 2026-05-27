@@ -387,12 +387,21 @@
 }
 
 .statusMaintenance {
-  background: #FFFBEB;
-  color: #D97706;
+  background: #a2a2a0;
+  color: #444444;
 }
 
 .statusMaintenance .badgeDot {
-  background: #D97706;
+  background: #444444;
+}
+
+.statusInactive {
+  background: #dfc4c4;
+  color: #e86e6e;
+}
+
+.statusInactive .badgeDot {
+  background: #e86e6e;
 }
 
 .statusBooked {
@@ -435,7 +444,42 @@
   color: var(--color-text, #111111);
 }
 
+.actionsWrapper {
+  position: relative;
+  display: inline-block;
+}
 
+.kebabMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: var(--admin-card-bg, #ffffff);
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  min-width: 170px;
+  z-index: 10;
+  padding: 8px 0;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  text-align: left;
+}
+
+.kebabMenuItem {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  text-align: left;
+  font-size: 13px;
+  color: var(--color-text, #111111);
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.kebabMenuItem:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+}
 
 /* ============================================================
    CARD / GRID VIEW

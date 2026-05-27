@@ -29,10 +29,10 @@ export default function AdminLoginPage() {
     setLoading(true);
     try {
       const response = await accountsService.login({ email, password });
-      
+
       // Allow user to assume Super Admin role for now while BE user roles are tweaked
       localStorage.setItem("drifully_admin_role", "Super Admin");
-      
+
       setSuccess("Logged in successfully! Redirecting...");
       setTimeout(() => {
         router.push("/admin");
@@ -55,20 +55,19 @@ export default function AdminLoginPage() {
         <div className={styles.logoArea}>
           <Link href="/" className={styles.logoLink}>
             <Image
-              src="/images/logo.svg"
+              src="/images/admin/admin-drifully-logo.svg"
               alt="Drifully"
               width={120}
               height={36}
               priority
             />
           </Link>
-          <p className={styles.logoSub}>Admin Dashboard</p>
         </div>
 
         {/* Heading */}
         <div className={styles.heading}>
-          <h1 className={styles.title}>Welcome back</h1>
-          <p className={styles.subtitle}>Sign in to your admin account</p>
+          <h1 className={styles.title}>Sign In To Continue</h1>
+          <p className={styles.subtitle}>Access all your tools in one place</p>
         </div>
 
         {/* Success */}
@@ -116,9 +115,6 @@ export default function AdminLoginPage() {
           <div className={styles.field}>
             <div className={styles.labelRow}>
               <label htmlFor="admin-password" className={styles.label}>Password</label>
-              <button type="button" className={styles.forgotLink}>
-                Forgot password?
-              </button>
             </div>
             <div className={styles.inputWrap}>
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" className={styles.inputIcon}>
@@ -154,6 +150,9 @@ export default function AdminLoginPage() {
                 )}
               </button>
             </div>
+            <button type="button" className={styles.forgotLink}>
+              Forgot password?
+            </button>
           </div>
 
           <button
