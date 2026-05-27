@@ -106,6 +106,9 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
       payload.append("year", formData.year);
       payload.append("color", formData.color);
       payload.append("features", formData.features);
+      payload.append("chasis_number", formData.chassisNumber);
+      payload.append("vin_number", formData.vin);
+      payload.append("transmission", formData.transmission);
 
       // Send files
       imagePreviews.forEach((img) => {

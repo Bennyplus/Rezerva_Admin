@@ -15,13 +15,14 @@ export const VEHICLE_STATS_POPULATED = [
 ];
 
 export interface AdminVehicle {
+  id?: number;
   name: string;
   brand: string;
   image: string;
   category: string;
   dailyPrice: number;
   capacity: number;
-  status: "Available" | "Maintenance" | "Booked";
+  status: "Available" | "Maintenance" | "Booked" | "Inactive";
   chassisNo: string;
   location: string;
 }

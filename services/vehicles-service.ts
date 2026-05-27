@@ -45,68 +45,63 @@ export const vehiclesService = {
   },
 
   /**
-   * Fetches the list of vehicles from admin/vehicles/
-   * Returns an array of vehicles
+   * Updates a vehicle's status (Booked, Maintenance, Inactive)
    */
-  getVehicles: async (): Promise<AdminVehicle[]> => {
+  updateVehicleStatus: async (vehicleId: number, status: string) => {
+    try {
+      const formData = new FormData();
+      formData.append("status", status);
+
+      const response = await publicApi.put("", formData, {
+        params: { path: "api/v1/admin/vehicles/update-status/", vehicle_id: vehicleId },
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to update vehicle status:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Fetches the dashboard vehicles, stats, and pagination data
+   */
+  getVehicles: async (page: number = 1): Promise<any> => {
     try {
       const response = await publicApi.get('', {
-        params: { path: 'api/v1/vehicles/manage/' }
+        params: { path: 'api/v1/admin/vehicles/dashboard/', page }
       });
-
-      let rawVehicles: any[] = [];
-
-      // Check if the response is the grouped dictionary structure
-      if (response.data && typeof response.data === 'object' && !Array.isArray(response.data)) {
-        // It might be wrapped in results/data, or it might be the dictionary directly
-        const dataToProcess = response.data.results || response.data.data || response.data;
-        
-        if (Array.isArray(dataToProcess)) {
-          rawVehicles = dataToProcess;
-        } else if (typeof dataToProcess === 'object') {
-          // Extract vehicles from each group (e.g. "Budget Friendly", "Hot Cars")
-          // Use a Map to deduplicate vehicles that appear in multiple groups
-          const uniqueVehicles = new Map<number, any>();
-          Object.values(dataToProcess).forEach((group: any) => {
-            if (group && Array.isArray(group.vehicles)) {
-              group.vehicles.forEach((v: any) => {
-                if (v.id && !uniqueVehicles.has(v.id)) {
-                  uniqueVehicles.set(v.id, v);
-                }
-              });
-            }
-          });
-          rawVehicles = Array.from(uniqueVehicles.values());
-        }
-      } else if (Array.isArray(response.data)) {
-        rawVehicles = response.data;
-      }
-
-      // Map the raw API vehicles to the expected AdminVehicle interface
-      return rawVehicles.map((v: any): AdminVehicle => {
-        // Capitalize status properly to match "Available" | "Maintenance" | "Booked"
-        let mappedStatus: AdminVehicle['status'] = "Available";
-        if (v.status) {
-          const lowerStatus = v.status.toLowerCase();
-          if (lowerStatus.includes('maintenance')) mappedStatus = 'Maintenance';
-          else if (lowerStatus.includes('book')) mappedStatus = 'Booked';
-        }
-
-        return {
-          name: `${v.year || ''} ${v.model || 'Unknown'}`.trim(),
-          brand: typeof v.brand === 'string' ? v.brand : `Brand ${v.brand || 'Unknown'}`,
-          image: v.images && v.images.length > 0 ? v.images[0].image : '/images/3rd-img.png', // Fallback to a default
-          category: typeof v.category === 'string' ? v.category : `Category ${v.category || 'Unknown'}`,
-          dailyPrice: parseFloat(v.price_per_day) || 0,
-          capacity: v.seats || 4,
-          status: mappedStatus,
-          chassisNo: v.chasis_number || v.vin_number || 'N/A',
-          location: 'N/A', // Location is not provided in this response payload
-        };
-      });
+      return response.data;
     } catch (error) {
-      console.error('Failed to fetch vehicles:', error);
-      return []; // Return empty array on error for fallback to empty state
+      // Fallback in case api/v1 is not needed
+      try {
+        const fallbackResponse = await publicApi.get('', {
+          params: { path: 'admin/vehicles/dashboard/', page }
+        });
+        return fallbackResponse.data;
+      } catch (fallbackError) {
+        console.error('Failed to fetch dashboard vehicles:', fallbackError);
+        throw fallbackError;
+      }
+    }
+  },
+
+  /**
+   * Fetches brands and categories for mapping
+   */
+  getBrandsAndCategories: async () => {
+    try {
+      const [brandsRes, categoriesRes] = await Promise.all([
+        publicApi.get("", { params: { path: "api/v1/vehicles/brands/" } }),
+        publicApi.get("", { params: { path: "api/v1/vehicles/categories/" } })
+      ]);
+      return {
+        brands: brandsRes.data || [],
+        categories: categoriesRes.data || []
+      };
+    } catch (e) {
+      console.error("Failed to fetch brands and categories:", e);
+      return { brands: [], categories: [] };
     }
   }
 };

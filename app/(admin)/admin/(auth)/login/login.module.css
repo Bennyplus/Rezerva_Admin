@@ -17,9 +17,9 @@
 /* ─── Card ─── */
 .card {
   width: 100%;
-  max-width: 420px;
+  max-width: 431px;
   border-radius: 16px;
-  padding: 40px 36px;
+  /* padding: 40px 36px; */
   position: relative;
   z-index: 1;
 }
@@ -53,7 +53,7 @@
 
 .title {
   font-family: var(--font-heading);
-  font-size: 22px;
+  font-size: 28Spx;
   font-weight: 600;
   color: #111111;
   margin: 0 0 6px;
@@ -121,7 +121,7 @@
 }
 
 .forgotLink {
-  font-size: 12.5px;
+  font-size: 12px;
   font-weight: 500;
   color: #868C98;
   background: none;
@@ -242,8 +242,8 @@
 .footer {
   text-align: center;
   margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #E2E4E9;
+  /* padding-top: 20px; */
+  /* border-top: 1px solid #E2E4E9; */
 }
 
 .backLink {
