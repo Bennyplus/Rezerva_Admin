@@ -14,7 +14,7 @@ publicApi.interceptors.response.use(
     // We optionally handle 401 locally if needed, but cookies are cleared by proxy
     if (error.response?.status === 401) {
       if (typeof window !== 'undefined') {
-        // window.location.href = '/admin/login';
+        window.location.href = '/admin/login';
       }
     }
 

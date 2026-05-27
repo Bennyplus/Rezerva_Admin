@@ -52,7 +52,7 @@ export const vehiclesService = {
       const formData = new FormData();
       formData.append("status", status);
 
-      const response = await publicApi.put("", formData, {
+      const response = await publicApi.patch("", formData, {
         params: { path: "api/v1/admin/vehicles/update-status/", vehicle_id: vehicleId },
         headers: { "Content-Type": "multipart/form-data" }
       });
@@ -96,8 +96,8 @@ export const vehiclesService = {
         publicApi.get("", { params: { path: "api/v1/vehicles/categories/" } })
       ]);
       return {
-        brands: brandsRes.data || [],
-        categories: categoriesRes.data || []
+        brands: Array.isArray(brandsRes.data) ? brandsRes.data : brandsRes.data?.results || [],
+        categories: Array.isArray(categoriesRes.data) ? categoriesRes.data : categoriesRes.data?.results || []
       };
     } catch (e) {
       console.error("Failed to fetch brands and categories:", e);

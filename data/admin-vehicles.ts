@@ -19,6 +19,7 @@ export interface AdminVehicle {
   name: string;
   brand: string;
   image: string;
+  images?: { image: string; is_primary: boolean }[];
   category: string;
   dailyPrice: number;
   capacity: number;

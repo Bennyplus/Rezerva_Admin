@@ -32,41 +32,30 @@ export default function VehiclesPage() {
   const [stats, setStats] = useState(VEHICLE_STATS_EMPTY);
   const [totalPages, setTotalPages] = useState(1);
   const [resultsPerPage, setResultsPerPage] = useState(9);
-  
+
   const [brandsMap, setBrandsMap] = useState<Record<string, string>>({});
   const [categoriesMap, setCategoriesMap] = useState<Record<string, string>>({});
 
   useEffect(() => {
-    const fetchMaps = async () => {
-      const { brands, categories } = await vehiclesService.getBrandsAndCategories();
-      const bMap: Record<string, string> = {};
-      const cMap: Record<string, string> = {};
-      if (Array.isArray(brands)) {
-        brands.forEach((b: any) => { bMap[b.id.toString()] = b.name; });
-      }
-      if (Array.isArray(categories)) {
-        categories.forEach((c: any) => { cMap[c.id.toString()] = c.name; });
-      }
-      setBrandsMap(bMap);
-      setCategoriesMap(cMap);
-    };
-    fetchMaps();
-  }, []);
-
-  useEffect(() => {
-    const handleClickOutside = () => {
-      if (openMenuIndex !== null) {
-        setOpenMenuIndex(null);
-      }
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, [openMenuIndex]);
-
-  useEffect(() => {
-    const fetchVehicles = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
+        // Fetch maps first (or concurrently if we wanted, but sequential is fine here as maps might be fast/cached)
+        let bMap = { ...brandsMap };
+        let cMap = { ...categoriesMap };
+
+        if (Object.keys(bMap).length === 0) {
+          const { brands, categories } = await vehiclesService.getBrandsAndCategories();
+          if (Array.isArray(brands)) {
+            brands.forEach((b: any) => { bMap[b.id.toString()] = b.name; });
+          }
+          if (Array.isArray(categories)) {
+            categories.forEach((c: any) => { cMap[c.id.toString()] = c.name; });
+          }
+          setBrandsMap(bMap);
+          setCategoriesMap(cMap);
+        }
+
         const data = await vehiclesService.getVehicles(currentPage);
 
         const mappedVehicles: AdminVehicle[] = (data.vehicles || []).map((v: any) => {
@@ -80,9 +69,10 @@ export default function VehiclesPage() {
           return {
             id: v.id,
             name: `${v.model || 'Unknown'}`,
-            brand: brandsMap[v.brand?.toString()] || (typeof v.brand === 'string' ? v.brand : `Brand ${v.brand || 'Unknown'}`),
-            image: v.image && v.image.length > 0 ? v.image[0].image : '/images/3rd-img.png',
-            category: categoriesMap[v.category?.toString()] || v.category || 'Unknown',
+            brand: bMap[v.brand?.toString()] || (typeof v.brand === 'string' ? v.brand : `Brand ${v.brand || 'Unknown'}`),
+            image: v.image && v.image.length > 0 ? v.image.find((i: any) => i.is_primary)?.image || v.image[0].image : '/images/3rd-img.png',
+            images: Array.isArray(v.image) ? v.image : [],
+            category: cMap[v.category?.toString()] || v.category || 'N/A',
             dailyPrice: parseFloat(v.daily_price) || 0,
             capacity: parseInt(v.capacity) || 4,
             status: mappedStatus,
@@ -107,8 +97,18 @@ export default function VehiclesPage() {
         setLoading(false);
       }
     };
-    fetchVehicles();
+    fetchData();
   }, [currentPage]);
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (openMenuIndex !== null) {
+        setOpenMenuIndex(null);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [openMenuIndex]);
 
 
   const toggleSelectAll = () => {
@@ -129,7 +129,7 @@ export default function VehiclesPage() {
   const handleStatusChange = async (vehicleId: number, newStatus: string) => {
     try {
       await vehiclesService.updateVehicleStatus(vehicleId, newStatus);
-      
+
       const mapStatus = (s: string): AdminVehicle['status'] => {
         if (s === 'booked') return 'Booked';
         if (s === 'maintenance') return 'Maintenance';
@@ -137,17 +137,17 @@ export default function VehiclesPage() {
         if (s === 'available') return 'Available';
         return 'Available';
       };
-      
+
       const mappedStatus = mapStatus(newStatus);
-      
-      setVehicles((prev) => 
+
+      setVehicles((prev) =>
         prev.map((v) => v.id === vehicleId ? { ...v, status: mappedStatus } : v)
       );
-      
+
       if (selectedVehicle && selectedVehicle.id === vehicleId) {
         setSelectedVehicle({ ...selectedVehicle, status: mappedStatus });
       }
-      
+
       setOpenMenuIndex(null);
     } catch (error) {
       console.error("Failed to update status:", error);
@@ -160,7 +160,7 @@ export default function VehiclesPage() {
         onCancel={() => setCurrentView("list")}
         onSave={(data) => {
           console.log("Saving vehicle:", data);
-          
+
           const newVehicle: AdminVehicle = {
             id: Date.now(),
             name: data.model || 'Unknown',
@@ -173,7 +173,7 @@ export default function VehiclesPage() {
             chassisNo: data.chassisNumber || 'N/A',
             location: data.location || 'N/A',
           };
-          
+
           setVehicles((prev) => [newVehicle, ...prev]);
           setCurrentView("list");
         }}
@@ -183,7 +183,7 @@ export default function VehiclesPage() {
 
   if (currentView === "detail" && selectedVehicle) {
     return (
-      <VehicleDetailView 
+      <VehicleDetailView
         vehicle={selectedVehicle}
         onBack={() => setCurrentView("list")}
         onStatusChange={handleStatusChange}
@@ -345,8 +345,8 @@ export default function VehiclesPage() {
                         <td>{v.location}</td>
                         <td className={styles.actionsCol}>
                           <div className={styles.actionsWrapper} onClick={(e) => e.stopPropagation()}>
-                            <button 
-                              className={styles.moreBtn} 
+                            <button
+                              className={styles.moreBtn}
                               aria-label="More actions"
                               onClick={() => setOpenMenuIndex(openMenuIndex === idx ? null : idx)}
                             >
