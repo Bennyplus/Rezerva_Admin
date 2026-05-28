@@ -180,15 +180,13 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
             </div>
             <div className={styles.formField}>
               <label className={styles.label}>Model</label>
-              <CustomSelect
+              <input
+                type="text"
                 name="model"
-                value={formData.model}
+                className={styles.input}
                 placeholder="e.g Camry 2007"
-                options={[
-                  { value: "camry", label: "Camry 2007" },
-                  { value: "civic", label: "Civic 2010" },
-                ]}
-                onChange={handleSelectChange}
+                value={formData.model}
+                onChange={handleChange}
               />
             </div>
 
@@ -269,15 +267,13 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
             {/* Row 4: Location & Chassis Number */}
             <div className={styles.formField}>
               <label className={styles.label}>Location</label>
-              <CustomSelect
+              <input
+                type="text"
                 name="location"
-                value={formData.location}
+                className={styles.input}
                 placeholder="e.g Lagos"
-                options={[
-                  { value: "lagos", label: "Lagos" },
-                  { value: "abuja", label: "Abuja" },
-                ]}
-                onChange={handleSelectChange}
+                value={formData.location}
+                onChange={handleChange}
               />
             </div>
             <div className={styles.formField}>

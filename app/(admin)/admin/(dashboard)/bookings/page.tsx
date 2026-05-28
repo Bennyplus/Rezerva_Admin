@@ -1,30 +1,86 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import StatCard from "@/components/admin/StatCard";
 import Pagination from "@/components/admin/Pagination";
 import BookingDetailView from "@/components/admin/BookingDetailView";
 import CancelBookingModal from "@/components/admin/CancelBookingModal";
-import { ADMIN_BOOKINGS, BOOKING_STATS_EMPTY, BOOKING_STATS_POPULATED, Booking } from "@/data/admin-bookings";
+import { BOOKING_STATS_EMPTY, Booking } from "@/data/admin-bookings";
 import FilterBar from "@/components/admin/FilterBar";
+import Spinner from "@/components/admin/Spinner";
+import { bookingsService } from "@/services/bookings-service";
 import styles from "./bookings.module.css";
 
 export default function BookingsPage() {
-  const [isEmpty, setIsEmpty] = useState(false);
-  const [currentPage, setCurrentPage] = useState(2);
+  const [bookings, setBookings] = useState<any[]>([]);
+  const [stats, setStats] = useState(BOOKING_STATS_EMPTY);
+  const [loading, setLoading] = useState(true);
+  
+  const [currentPage, setCurrentPage] = useState(1);
+  const resultsPerPage = 9;
+  
   const [viewMode, setViewMode] = useState<"list" | "detail">("list");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [openMenuIdx, setOpenMenuIdx] = useState<number | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
+  const [isExporting, setIsExporting] = useState(false);
 
-  const stats = isEmpty ? BOOKING_STATS_EMPTY : BOOKING_STATS_POPULATED;
-  const totalPages = 16;
-  const resultsPerPage = 9;
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const [bookingsData, metricsData] = await Promise.all([
+          bookingsService.getBookings(),
+          bookingsService.getMetrics()
+        ]);
+        
+        if (Array.isArray(bookingsData)) {
+          setBookings(bookingsData);
+        } else if (bookingsData?.results) {
+          setBookings(bookingsData.results);
+        }
 
-  const handleViewDetails = (booking: Booking) => {
-    setSelectedBooking(booking);
+        if (metricsData?.metrics) {
+          setStats([
+            { id: "total-bookings", label: "Total Bookings", value: metricsData.metrics.total_bookings || 0 },
+            { id: "ongoing-trips", label: "Ongoing Trips", value: metricsData.metrics.ongoing_trips || 0 },
+            { id: "completed-trips", label: "Completed Trips", value: metricsData.metrics.completed_trips || 0 },
+            { id: "cancelled-bookings", label: "Cancelled Bookings", value: metricsData.metrics.cancelled_bookings || 0 },
+          ]);
+        }
+      } catch (error) {
+        console.error("Error fetching bookings data", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    fetchData();
+  }, []);
+
+  const totalPages = Math.max(1, Math.ceil(bookings.length / resultsPerPage));
+  const displayedBookings = useMemo(() => {
+    const start = (currentPage - 1) * resultsPerPage;
+    return bookings.slice(start, start + resultsPerPage);
+  }, [bookings, currentPage, resultsPerPage]);
+
+  const isEmpty = bookings.length === 0;
+
+  useEffect(() => {
+    const handleClickOutside = () => {
+      if (openMenuIdx !== null) {
+        setOpenMenuIdx(null);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, [openMenuIdx]);
+
+  const handleViewDetails = (bookingRaw: any) => {
+    // We pass the raw booking reference or id to the detail view, which will fetch the full details
+    setSelectedBooking(bookingRaw);
     setViewMode("detail");
     setOpenMenuIdx(null);
   };
@@ -35,11 +91,39 @@ export default function BookingsPage() {
     setOpenMenuIdx(null);
   };
 
+  const handleExport = async () => {
+    setIsExporting(true);
+    try {
+      const blob = await bookingsService.exportBookings();
+      const url = window.URL.createObjectURL(new Blob([blob]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `bookings_export_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      document.body.appendChild(link);
+      link.click();
+      if (link.parentNode) link.parentNode.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to export bookings:', error);
+      alert('Failed to export bookings. Please try again.');
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner size={40} />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
       {viewMode === "detail" && selectedBooking ? (
         <BookingDetailView
-          booking={selectedBooking}
+          bookingId={selectedBooking.booking_id || selectedBooking.id || selectedBooking.reference || ''}
           onBack={() => setViewMode("list")}
           onCancelBooking={handleCancelBooking}
         />
@@ -82,7 +166,13 @@ export default function BookingsPage() {
                 </div>
 
                 <div className={styles.toolbarRight}>
-                  <button className={styles.exportBtn}>Export Bookings</button>
+                  <button 
+                    className={styles.exportBtn} 
+                    onClick={handleExport}
+                    disabled={isExporting}
+                  >
+                    {isExporting ? 'Exporting...' : 'Export Bookings'}
+                  </button>
                 </div>
               </div>
 
@@ -103,22 +193,24 @@ export default function BookingsPage() {
                       </tr>
                     </thead>
                     <tbody>
-                      {ADMIN_BOOKINGS.map((b, idx) => (
+                      {displayedBookings.map((b, idx) => (
                         <tr key={idx}>
-                          <td>{b.id}</td>
-                          <td>{b.customerName}</td>
+                          <td style={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={b.booking_id}>
+                            {b.booking_id}
+                          </td>
+                          <td>{b.customer_name}</td>
                           <td>{b.vehicle}</td>
-                          <td>{b.bookingType}</td>
-                          <td>{b.pickupDate}</td>
-                          <td>{b.returnDate}</td>
+                          <td>{b.booking_type || "N/A"}</td>
+                          <td>{b.pickup_date}</td>
+                          <td>{b.return_date}</td>
                           <td>
-                            <span className={`${styles.badge} ${styles[`status${b.status}`]}`}>
+                            <span className={`${styles.badge} ${styles[`status${b.booking_status}`]}`}>
                               <span className={styles.badgeDot} />
-                              {b.status}
+                              {b.booking_status}
                             </span>
                           </td>
                           <td className={styles.actionsCol}>
-                            <div style={{ position: 'relative' }}>
+                            <div style={{ position: 'relative' }} onClick={(e) => e.stopPropagation()}>
                               <button
                                 className={styles.moreBtn}
                                 onClick={() => setOpenMenuIdx(openMenuIdx === idx ? null : idx)}
@@ -130,7 +222,7 @@ export default function BookingsPage() {
                                 <div className={styles.dropdown}>
                                   <button className={styles.dropdownItem} onClick={() => handleViewDetails(b)}>View Details</button>
                                   <button className={styles.dropdownItem}>Modify Booking</button>
-                                  <button className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`} onClick={() => handleCancelBooking(b.id)}>Cancel Booking</button>
+                                  <button className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`} onClick={() => handleCancelBooking(b.booking_id)}>Cancel Booking</button>
                                   <button className={styles.dropdownItem}>Send Reminder</button>
                                 </div>
                               )}
@@ -143,26 +235,18 @@ export default function BookingsPage() {
                 </div>
 
                 {/* Pagination */}
-                <Pagination
-                  currentPage={currentPage}
-                  totalPages={totalPages}
-                  resultsPerPage={resultsPerPage}
-                  onPageChange={setCurrentPage}
-                  variant="table"
-                />
+                {totalPages > 1 && (
+                  <Pagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    resultsPerPage={resultsPerPage}
+                    onPageChange={setCurrentPage}
+                    variant="table"
+                  />
+                )}
               </div>
             </>
           )}
-
-          {/* State toggle for dev */}
-          <div className={styles.devToggleWrap}>
-            <button
-              className={styles.stateToggle}
-              onClick={() => setIsEmpty(!isEmpty)}
-            >
-              {isEmpty ? "Show Populated State" : "Show Empty State"}
-            </button>
-          </div>
         </>
       )}
 
@@ -185,3 +269,4 @@ const s = 16;
 const iconProps = { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 
 function MoreIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }
+

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import { AdminVehicle } from "@/data/admin-vehicles";
 import styles from "./VehicleDetailView.module.css";
@@ -11,6 +12,8 @@ interface VehicleDetailViewProps {
 }
 
 export default function VehicleDetailView({ vehicle, onBack, onStatusChange }: VehicleDetailViewProps) {
+  const [activeImage, setActiveImage] = useState<string>(vehicle.image || "/images/3rd-img.png");
+
   const statusClasses: Record<string, string> = {
     Available: styles.statusAvailable,
     Booked: styles.statusBooked,
@@ -88,10 +91,36 @@ export default function VehicleDetailView({ vehicle, onBack, onStatusChange }: V
 
         {/* Right Column */}
         <div className={styles.rightCol}>
-          <div className={styles.imageCard}>
-            <Image src={vehicle.image || "/images/3rd-img.png"} alt={vehicle.name} width={400} height={300} className={styles.vehicleImage} />
+          <div className={styles.imageCard} style={{ position: 'relative', height: '300px', marginBottom: '16px' }}>
+            <Image src={activeImage} alt={vehicle.name} sizes="(max-width: 1200px) 100vw, 540px" fill style={{ objectFit: 'cover' }} />
           </div>
           
+          {vehicle.images && vehicle.images.length > 1 && (
+            <div style={{ display: 'flex', gap: '12px', overflowX: 'auto', paddingBottom: '8px', marginBottom: '16px' }}>
+              {vehicle.images.map((img, idx) => (
+                <button 
+                  key={idx} 
+                  onClick={() => setActiveImage(img.image)}
+                  style={{ 
+                    position: 'relative', 
+                    width: '80px', 
+                    height: '60px', 
+                    flexShrink: 0, 
+                    borderRadius: '8px', 
+                    overflow: 'hidden', 
+                    border: activeImage === img.image ? '2px solid #1a1c1e' : '1px solid #e2e4e9',
+                    cursor: 'pointer',
+                    padding: 0,
+                    background: 'transparent'
+                  }}
+                  aria-label={`View image ${idx + 1}`}
+                >
+                  <Image src={img.image} alt={`${vehicle.name} thumbnail ${idx + 1}`} fill sizes="80px" style={{ objectFit: 'cover' }} />
+                </button>
+              ))}
+            </div>
+          )}
+
           {/* Quick Actions */}
           <section className={styles.section} style={{ padding: 0 }}>
             <h2 className={styles.sectionTitle}>Quick Actions</h2>

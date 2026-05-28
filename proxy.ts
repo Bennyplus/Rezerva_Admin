@@ -1,17 +1,17 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // We only care about /admin routes
   if (pathname.startsWith('/admin')) {
     const token = request.cookies.get('accessToken')?.value;
-    
+
     // Auth routes (login, register, etc.) inside /admin
-    const isAuthRoute = pathname.startsWith('/admin/login') || 
-                        pathname.startsWith('/admin/register') || 
-                        pathname.startsWith('/admin/create-password');
+    const isAuthRoute = pathname.startsWith('/admin/login') ||
+      pathname.startsWith('/admin/register') ||
+      pathname.startsWith('/admin/create-password');
 
     // If no token and trying to access a protected route
     if (!token && !isAuthRoute) {
@@ -30,6 +30,6 @@ export function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // Apply middleware to /admin and all its subpaths
+  // Apply to /admin and all its subpaths
   matcher: ['/admin/:path*'],
 };

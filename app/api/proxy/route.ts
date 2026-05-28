@@ -5,6 +5,8 @@ import axios from 'axios';
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://drifully-backend-1qa6.onrender.com';
 const API_KEY = process.env.DRIFULLY_BACKEND_API_KEY;
 
+let activeRefreshPromise: Promise<{ access: string; refresh: string }> | null = null;
+
 async function handleRequest(request: NextRequest, method: string) {
   const { searchParams } = new URL(request.url);
   const path = searchParams.get('path');
@@ -75,27 +77,35 @@ async function handleRequest(request: NextRequest, method: string) {
         data: body,
       });
     } catch (error: any) {
-      // If unauthorized and we have a refresh token, try to refresh
       if (error.response?.status === 401) {
         const refreshToken = cookieStore.get('refreshToken')?.value;
         if (refreshToken) {
           try {
-            const refreshResponse = await axios.post(
-              `${BACKEND_URL}/api/v1/accounts/token/refresh/`,
-              { refresh: refreshToken },
-              {
-                headers: {
-                  'X-API-KEY': API_KEY,
-                  'Accept': 'application/json',
+            if (!activeRefreshPromise) {
+              activeRefreshPromise = axios.post(
+                `${BACKEND_URL}/api/v1/accounts/token/refresh/`,
+                { refresh: refreshToken },
+                {
+                  headers: {
+                    'X-API-KEY': API_KEY,
+                    'Accept': 'application/json',
+                  }
                 }
-              }
-            );
+              ).then(res => {
+                return {
+                  access: res.data.access,
+                  refresh: res.data.refresh || refreshToken,
+                };
+              }).finally(() => {
+                // Clear the promise so future 401s will trigger a new refresh
+                activeRefreshPromise = null;
+              });
+            }
 
-            const newAccessToken = refreshResponse.data.access;
-            const newRefreshToken = refreshResponse.data.refresh || refreshToken;
+            const newTokens = await activeRefreshPromise;
 
             // Retry original request with new token
-            headers['Authorization'] = `Bearer ${newAccessToken}`;
+            headers['Authorization'] = `Bearer ${newTokens.access}`;
             response = await axios({
               method,
               url: `${BACKEND_URL}/${path}`,
@@ -105,7 +115,7 @@ async function handleRequest(request: NextRequest, method: string) {
             });
 
             // Pass the new tokens down to be set as cookies
-            (response as any)._newTokens = { access: newAccessToken, refresh: newRefreshToken };
+            (response as any)._newTokens = newTokens;
           } catch (refreshError) {
             console.error('Token refresh failed');
             throw error; // Throw original 401 to clear cookies
@@ -178,4 +188,8 @@ export async function PUT(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   return handleRequest(request, 'DELETE');
+}
+
+export async function PATCH(request: NextRequest) {
+  return handleRequest(request, 'PATCH');
 }

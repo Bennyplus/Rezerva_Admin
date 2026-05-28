@@ -52,7 +52,7 @@ export const vehiclesService = {
       const formData = new FormData();
       formData.append("status", status);
 
-      const response = await publicApi.put("", formData, {
+      const response = await publicApi.patch("", formData, {
         params: { path: "api/v1/admin/vehicles/update-status/", vehicle_id: vehicleId },
         headers: { "Content-Type": "multipart/form-data" }
       });
@@ -66,17 +66,17 @@ export const vehiclesService = {
   /**
    * Fetches the dashboard vehicles, stats, and pagination data
    */
-  getVehicles: async (page: number = 1): Promise<any> => {
+  getVehicles: async (page: number = 1, filters?: Record<string, string>): Promise<any> => {
     try {
       const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/vehicles/dashboard/', page }
+        params: { path: 'api/v1/admin/vehicles/dashboard/', page, ...filters }
       });
       return response.data;
     } catch (error) {
       // Fallback in case api/v1 is not needed
       try {
         const fallbackResponse = await publicApi.get('', {
-          params: { path: 'admin/vehicles/dashboard/', page }
+          params: { path: 'admin/vehicles/dashboard/', page, ...filters }
         });
         return fallbackResponse.data;
       } catch (fallbackError) {
@@ -96,8 +96,8 @@ export const vehiclesService = {
         publicApi.get("", { params: { path: "api/v1/vehicles/categories/" } })
       ]);
       return {
-        brands: brandsRes.data || [],
-        categories: categoriesRes.data || []
+        brands: Array.isArray(brandsRes.data) ? brandsRes.data : brandsRes.data?.results || [],
+        categories: Array.isArray(categoriesRes.data) ? categoriesRes.data : categoriesRes.data?.results || []
       };
     } catch (e) {
       console.error("Failed to fetch brands and categories:", e);
