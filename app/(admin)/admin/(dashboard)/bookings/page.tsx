@@ -16,10 +16,10 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [stats, setStats] = useState(BOOKING_STATS_EMPTY);
   const [loading, setLoading] = useState(true);
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const resultsPerPage = 9;
-  
+
   const [viewMode, setViewMode] = useState<"list" | "detail">("list");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [openMenuIdx, setOpenMenuIdx] = useState<number | null>(null);
@@ -35,7 +35,7 @@ export default function BookingsPage() {
           bookingsService.getBookings(),
           bookingsService.getMetrics()
         ]);
-        
+
         if (Array.isArray(bookingsData)) {
           setBookings(bookingsData);
         } else if (bookingsData?.results) {
@@ -56,7 +56,7 @@ export default function BookingsPage() {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, []);
 
@@ -95,13 +95,15 @@ export default function BookingsPage() {
     setIsExporting(true);
     try {
       const blob = await bookingsService.exportBookings();
-      const url = window.URL.createObjectURL(new Blob([blob]));
+      const url = window.URL.createObjectURL(
+        new Blob([blob], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+      );
       const link = document.createElement('a');
       link.href = url;
-      link.setAttribute('download', `bookings_export_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      link.download = `bookings_export_${new Date().toISOString().slice(0, 10)}.xlsx`;
       document.body.appendChild(link);
       link.click();
-      if (link.parentNode) link.parentNode.removeChild(link);
+      document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (error) {
       console.error('Failed to export bookings:', error);
@@ -166,8 +168,8 @@ export default function BookingsPage() {
                 </div>
 
                 <div className={styles.toolbarRight}>
-                  <button 
-                    className={styles.exportBtn} 
+                  <button
+                    className={styles.exportBtn}
                     onClick={handleExport}
                     disabled={isExporting}
                   >
@@ -217,7 +219,7 @@ export default function BookingsPage() {
                               >
                                 <MoreIcon />
                               </button>
-                              
+
                               {openMenuIdx === idx && (
                                 <div className={styles.dropdown}>
                                   <button className={styles.dropdownItem} onClick={() => handleViewDetails(b)}>View Details</button>

@@ -10,7 +10,7 @@ let activeRefreshPromise: Promise<{ access: string; refresh: string }> | null = 
 async function handleRequest(request: NextRequest, method: string) {
   const { searchParams } = new URL(request.url);
   const path = searchParams.get('path');
-  
+
   // Custom logout handler
   if (path === 'auth/logout') {
     const response = NextResponse.json({ message: 'Logged out successfully' });
@@ -45,7 +45,7 @@ async function handleRequest(request: NextRequest, method: string) {
     const isAuthRoute = path.includes('login') || path.includes('register') || path.includes('verify-otp');
     const cookieStore = await cookies();
     const token = cookieStore.get('accessToken')?.value;
-    
+
     if (token && !isAuthRoute) {
       headers['Authorization'] = `Bearer ${token}`;
     }
@@ -53,7 +53,7 @@ async function handleRequest(request: NextRequest, method: string) {
     let body: any = undefined;
     if (['POST', 'PUT', 'PATCH'].includes(method)) {
       const contentType = request.headers.get('content-type') || 'application/json';
-      
+
       if (contentType.includes('application/json')) {
         headers['Content-Type'] = contentType;
         body = await request.json().catch(() => undefined);
@@ -75,6 +75,7 @@ async function handleRequest(request: NextRequest, method: string) {
         params: forwardParams,
         headers,
         data: body,
+        responseType: 'arraybuffer',
       });
     } catch (error: any) {
       if (error.response?.status === 401) {
@@ -112,6 +113,7 @@ async function handleRequest(request: NextRequest, method: string) {
               params: forwardParams,
               headers,
               data: body,
+              responseType: 'arraybuffer',
             });
 
             // Pass the new tokens down to be set as cookies
@@ -128,11 +130,33 @@ async function handleRequest(request: NextRequest, method: string) {
       }
     }
 
-    const nextResponse = NextResponse.json(response.data);
+    const contentType = response.headers['content-type'] || '';
+    let nextResponse;
+
+    if (contentType.includes('application/json')) {
+      const jsonString = Buffer.from(response.data).toString('utf-8');
+      nextResponse = NextResponse.json(JSON.parse(jsonString));
+    } else {
+      nextResponse = new NextResponse(response.data, {
+        headers: {
+          'Content-Type': contentType,
+          ...(response.headers['content-disposition'] && { 'Content-Disposition': response.headers['content-disposition'] }),
+        }
+      });
+    }
 
     // Get tokens from either login/register response or refreshed tokens
-    const accessToSet = response.data?.access || (response as any)._newTokens?.access;
-    const refreshToSet = response.data?.refresh || (response as any)._newTokens?.refresh;
+    let accessToSet = undefined;
+    let refreshToSet = undefined;
+
+    if (contentType.includes('application/json')) {
+      const jsonData = JSON.parse(Buffer.from(response.data).toString('utf-8'));
+      accessToSet = jsonData?.access;
+      refreshToSet = jsonData?.refresh;
+    }
+
+    accessToSet = accessToSet || (response as any)._newTokens?.access;
+    refreshToSet = refreshToSet || (response as any)._newTokens?.refresh;
 
     // Set secure cookies when receiving tokens
     if (accessToSet) {
@@ -156,14 +180,24 @@ async function handleRequest(request: NextRequest, method: string) {
 
     return nextResponse;
   } catch (error: any) {
-    console.error(`Proxy ${method} Error for ${path}:`, error.response?.data || error.message);
-    
+    console.error(`Proxy ${method} Error for ${path}:`, error.message);
+
+    let errorData = { message: 'Internal Server Error' };
+    if (error.response?.data) {
+      if (Buffer.isBuffer(error.response.data) || error.response.data instanceof ArrayBuffer) {
+        try {
+          errorData = JSON.parse(Buffer.from(error.response.data).toString('utf-8'));
+        } catch (e) {
+          // Keep default error
+        }
+      } else {
+        errorData = error.response.data;
+      }
+    }
+
     const status = error.response?.status || 500;
-    const nextResponse = NextResponse.json(
-      error.response?.data || { message: 'Internal Server Error' },
-      { status }
-    );
-    
+    const nextResponse = NextResponse.json(errorData, { status });
+
     // Auto clear cookies on unauthorized from backend
     if (status === 401) {
       nextResponse.cookies.delete('accessToken');
