@@ -82,7 +82,7 @@ const jsonLd = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={dmSans.variable} suppressHydrationWarning>
+    <html lang="en" className={dmSans.variable} suppressHydrationWarning data-scroll-behavior="smooth">
       <body suppressHydrationWarning>
         <script
           type="application/ld+json"

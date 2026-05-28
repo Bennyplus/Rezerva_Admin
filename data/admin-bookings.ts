@@ -15,6 +15,8 @@ export const BOOKING_STATS_POPULATED = [
 
 export interface Booking {
   id: string;
+  booking_id?: string;
+  reference?: string;
   customerName: string;
   vehicle: string;
   bookingType: string;
