@@ -123,7 +123,7 @@ export default function BookingsPage() {
     <div className={styles.page}>
       {viewMode === "detail" && selectedBooking ? (
         <BookingDetailView
-          bookingId={selectedBooking.booking_id || selectedBooking.id || selectedBooking.reference}
+          bookingId={selectedBooking.booking_id || selectedBooking.id || selectedBooking.reference || ''}
           onBack={() => setViewMode("list")}
           onCancelBooking={handleCancelBooking}
         />
