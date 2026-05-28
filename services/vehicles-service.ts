@@ -66,17 +66,17 @@ export const vehiclesService = {
   /**
    * Fetches the dashboard vehicles, stats, and pagination data
    */
-  getVehicles: async (page: number = 1): Promise<any> => {
+  getVehicles: async (page: number = 1, filters?: Record<string, string>): Promise<any> => {
     try {
       const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/vehicles/dashboard/', page }
+        params: { path: 'api/v1/admin/vehicles/dashboard/', page, ...filters }
       });
       return response.data;
     } catch (error) {
       // Fallback in case api/v1 is not needed
       try {
         const fallbackResponse = await publicApi.get('', {
-          params: { path: 'admin/vehicles/dashboard/', page }
+          params: { path: 'admin/vehicles/dashboard/', page, ...filters }
         });
         return fallbackResponse.data;
       } catch (fallbackError) {

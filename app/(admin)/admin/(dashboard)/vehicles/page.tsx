@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, Suspense } from "react";
 import Image from "next/image";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import StatCard from "@/components/admin/StatCard";
 import Spinner from "@/components/admin/Spinner";
 import Pagination from "@/components/admin/Pagination";
@@ -12,11 +13,24 @@ import { AdminVehicle, VEHICLE_STATS_EMPTY } from "@/data/admin-vehicles";
 import { vehiclesService } from "@/services/vehicles-service";
 import FilterBar from "@/components/admin/FilterBar";
 import VehicleDetailView from "@/components/admin/VehicleDetailView";
+import VehiclesFilterModal from "@/components/admin/VehiclesFilterModal";
 import styles from "./vehicles.module.css";
 
 type ViewMode = "list" | "grid";
 
-export default function VehiclesPage() {
+function VehiclesPageContent() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  const currentFilters = {
+    status: searchParams.get('status') || '',
+    category: searchParams.get('category') || '',
+    location: searchParams.get('location') || '',
+    seats: searchParams.get('seats') || '',
+    fuel_type: searchParams.get('fuel_type') || '',
+    transmission: searchParams.get('transmission') || '',
+  };
   const [vehicles, setVehicles] = useState<AdminVehicle[]>([]);
   const [loading, setLoading] = useState(true);
   const isEmpty = vehicles.length === 0;
@@ -25,6 +39,7 @@ export default function VehiclesPage() {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
+  const [showFilterModal, setShowFilterModal] = useState(false);
   const [currentView, setCurrentView] = useState<"list" | "add-manual" | "detail">("list");
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
   const [selectedVehicle, setSelectedVehicle] = useState<AdminVehicle | null>(null);
@@ -56,7 +71,12 @@ export default function VehiclesPage() {
           setCategoriesMap(cMap);
         }
 
-        const data = await vehiclesService.getVehicles(currentPage);
+        const apiFilters: Record<string, string> = {};
+        Object.entries(currentFilters).forEach(([key, value]) => {
+          if (value) apiFilters[key] = value;
+        });
+
+        const data = await vehiclesService.getVehicles(currentPage, apiFilters);
 
         const mappedVehicles: AdminVehicle[] = (data.vehicles || []).map((v: any) => {
 
@@ -98,7 +118,7 @@ export default function VehiclesPage() {
       }
     };
     fetchData();
-  }, [currentPage]);
+  }, [currentPage, searchParams]);
 
   useEffect(() => {
     const handleClickOutside = () => {
@@ -152,6 +172,14 @@ export default function VehiclesPage() {
     } catch (error) {
       console.error("Failed to update status:", error);
     }
+  };
+
+  const handleApplyFilters = (filters: Record<string, string>) => {
+    const params = new URLSearchParams();
+    Object.entries(filters).forEach(([k, v]) => {
+      if (v) params.set(k, v);
+    });
+    router.push(`${pathname}?${params.toString()}`);
   };
 
   if (currentView === "add-manual") {
@@ -238,7 +266,7 @@ export default function VehiclesPage() {
           {/* Toolbar */}
           <div className={styles.toolbar} id="vehicles-toolbar">
             <div className={styles.toolbarLeft}>
-              <FilterBar />
+              <FilterBar onFilterClick={() => setShowFilterModal(true)} />
               {/* View toggles */}
               <div className={styles.viewToggle}>
                 <button
@@ -455,12 +483,31 @@ export default function VehiclesPage() {
         }}
       />
 
-      {/* Bulk Upload Modal */}
       <BulkUploadModal
         isOpen={showBulkUploadModal}
         onClose={() => setShowBulkUploadModal(false)}
       />
+
+      <VehiclesFilterModal
+        isOpen={showFilterModal}
+        onClose={() => setShowFilterModal(false)}
+        onApply={handleApplyFilters}
+        initialFilters={currentFilters}
+        categoriesMap={categoriesMap}
+      />
     </div>
+  );
+}
+
+export default function VehiclesPage() {
+  return (
+    <Suspense fallback={
+      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner size={40} />
+      </div>
+    }>
+      <VehiclesPageContent />
+    </Suspense>
   );
 }
 
