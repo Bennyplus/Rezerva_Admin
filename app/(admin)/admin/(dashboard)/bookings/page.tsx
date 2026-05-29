@@ -16,10 +16,10 @@ export default function BookingsPage() {
   const [bookings, setBookings] = useState<any[]>([]);
   const [stats, setStats] = useState(BOOKING_STATS_EMPTY);
   const [loading, setLoading] = useState(true);
-  
+
   const [currentPage, setCurrentPage] = useState(1);
   const resultsPerPage = 9;
-  
+
   const [viewMode, setViewMode] = useState<"list" | "detail">("list");
   const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
   const [openMenuIdx, setOpenMenuIdx] = useState<number | null>(null);
@@ -35,7 +35,7 @@ export default function BookingsPage() {
           bookingsService.getBookings(),
           bookingsService.getMetrics()
         ]);
-        
+
         if (Array.isArray(bookingsData)) {
           setBookings(bookingsData);
         } else if (bookingsData?.results) {
@@ -56,7 +56,7 @@ export default function BookingsPage() {
         setLoading(false);
       }
     };
-    
+
     fetchData();
   }, []);
 
@@ -78,9 +78,9 @@ export default function BookingsPage() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [openMenuIdx]);
 
-  const handleViewDetails = (bookingRaw: any) => {
-    // We pass the raw booking reference or id to the detail view, which will fetch the full details
-    setSelectedBooking(bookingRaw);
+  const handleViewDetails = (bookingRef: string) => {
+    const booking = bookings.find((b) => b.booking_reference === bookingRef);
+    setSelectedBooking(booking);
     setViewMode("detail");
     setOpenMenuIdx(null);
   };
@@ -91,21 +91,92 @@ export default function BookingsPage() {
     setOpenMenuIdx(null);
   };
 
+  // const handleExport = async () => {
+  //   try {
+  //     setIsExporting(true);
+  //     const response = await bookingsService.exportBookings();
+
+  //     const blob = new Blob([response.data], {
+  //       type: (response.headers['content-type'] as string) || '',
+  //     });
+
+  //     const url = window.URL.createObjectURL(blob);
+
+  //     const contentDisposition =
+  //       response.headers?.["content-disposition"] ||
+  //       response.headers?.["Content-Disposition"];
+  //     let filename = "bookings.xlsx";
+  //     if (contentDisposition) {
+  //       const match = contentDisposition.match(/filename\*?=([^;]+)/i);
+  //       if (match) {
+  //         filename = match[1]
+  //           .replace(/UTF-8''/, "")
+  //           .replace(/['\"]+/g, "")
+  //           .trim();
+  //       }
+  //     }
+
+  //     const link = document.createElement("a");
+  //     link.href = url;
+  //     link.setAttribute("download", filename);
+  //     document.body.appendChild(link);
+  //     link.click();
+  //     link.remove();
+  //     window.URL.revokeObjectURL(url);
+
+
+  //   } catch (error) {
+  //     console.error('Failed to export bookings:', error);
+  //   } finally {
+  //     setIsExporting(false);
+  //   }
+  // };
+
   const handleExport = async () => {
-    setIsExporting(true);
     try {
-      const blob = await bookingsService.exportBookings();
-      const url = window.URL.createObjectURL(new Blob([blob]));
-      const link = document.createElement('a');
+      setIsExporting(true);
+
+      const response = await bookingsService.exportBookings();
+
+      const blob = new Blob(
+        [response.data],
+        {
+          type:
+            (response.headers["content-type"] as string) ||
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        }
+      );
+
+      const url = window.URL.createObjectURL(blob);
+
+      let filename = "bookings.xlsx";
+
+      const disposition =
+        response.headers["content-disposition"];
+
+      if (disposition) {
+        const match = disposition.match(/filename="?([^"]+)"?/);
+
+        if (match?.[1]) {
+          filename = match[1];
+        }
+      }
+
+      const link = document.createElement("a");
+
       link.href = url;
-      link.setAttribute('download', `bookings_export_${new Date().toISOString().slice(0, 10)}.xlsx`);
+      link.download = filename;
+
       document.body.appendChild(link);
+
       link.click();
-      if (link.parentNode) link.parentNode.removeChild(link);
+
+      document.body.removeChild(link);
+
       window.URL.revokeObjectURL(url);
+
     } catch (error) {
-      console.error('Failed to export bookings:', error);
-      alert('Failed to export bookings. Please try again.');
+      console.error("Export failed:", error);
     } finally {
       setIsExporting(false);
     }
@@ -123,7 +194,7 @@ export default function BookingsPage() {
     <div className={styles.page}>
       {viewMode === "detail" && selectedBooking ? (
         <BookingDetailView
-          bookingId={selectedBooking.booking_id || selectedBooking.id || selectedBooking.reference || ''}
+          bookingId={selectedBooking.booking_reference || selectedBooking.booking_id || selectedBooking.id || selectedBooking.reference || ''}
           onBack={() => setViewMode("list")}
           onCancelBooking={handleCancelBooking}
         />
@@ -166,8 +237,8 @@ export default function BookingsPage() {
                 </div>
 
                 <div className={styles.toolbarRight}>
-                  <button 
-                    className={styles.exportBtn} 
+                  <button
+                    className={styles.exportBtn}
                     onClick={handleExport}
                     disabled={isExporting}
                   >
@@ -185,7 +256,7 @@ export default function BookingsPage() {
                         <th>Booking ID</th>
                         <th>Customer Name</th>
                         <th>Vehicle</th>
-                        <th>Booking Type</th>
+                        {/* <th>Booking Type</th> */}
                         <th>Pickup Date</th>
                         <th>Return Date</th>
                         <th>Booking Status</th>
@@ -195,12 +266,12 @@ export default function BookingsPage() {
                     <tbody>
                       {displayedBookings.map((b, idx) => (
                         <tr key={idx}>
-                          <td style={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={b.booking_id}>
-                            {b.booking_id}
+                          <td style={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={b.booking_reference}>
+                            {b.booking_reference}
                           </td>
                           <td>{b.customer_name}</td>
                           <td>{b.vehicle}</td>
-                          <td>{b.booking_type || "N/A"}</td>
+                          {/* <td>{b.booking_type || "N/A"}</td> */}
                           <td>{b.pickup_date}</td>
                           <td>{b.return_date}</td>
                           <td>
@@ -217,12 +288,12 @@ export default function BookingsPage() {
                               >
                                 <MoreIcon />
                               </button>
-                              
+
                               {openMenuIdx === idx && (
                                 <div className={styles.dropdown}>
-                                  <button className={styles.dropdownItem} onClick={() => handleViewDetails(b)}>View Details</button>
+                                  <button className={styles.dropdownItem} onClick={() => handleViewDetails(b.booking_reference)}>View Details</button>
                                   <button className={styles.dropdownItem}>Modify Booking</button>
-                                  <button className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`} onClick={() => handleCancelBooking(b.booking_id)}>Cancel Booking</button>
+                                  <button className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`} onClick={() => handleCancelBooking(b.booking_reference)}>Cancel Booking</button>
                                   <button className={styles.dropdownItem}>Send Reminder</button>
                                 </div>
                               )}

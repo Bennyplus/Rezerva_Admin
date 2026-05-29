@@ -41,10 +41,9 @@ export const bookingsService = {
     try {
       const response = await publicApi.get('', {
         params: { path: 'api/v1/admin/bookings/list/', export: 'xlsx' },
-        responseType: 'blob'
+        responseType: 'arraybuffer',
       });
-      
-      return response.data;
+      return response;
     } catch (error) {
       console.error('Failed to export bookings:', error);
       throw error;
