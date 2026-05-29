@@ -25,6 +25,18 @@ export const bookingsService = {
     }
   },
 
+  cancelBooking: async (bookingRef: string) => {
+    try {
+      const response = await publicApi.post('', {
+        params: { path: `api/v1/admin/bookings/cancel/`, booking_ref: bookingRef }
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to cancel booking ${bookingRef}:`, error);
+      throw error;
+    }
+  },
+
   getMetrics: async () => {
     try {
       const response = await publicApi.get('', {

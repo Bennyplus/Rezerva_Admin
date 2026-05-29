@@ -86,7 +86,11 @@ export default function BookingsPage() {
   };
 
   const handleCancelBooking = (bookingId: string) => {
-    setBookingToCancel(bookingId);
+    console.log(bookings, bookingId);
+    const booking = bookings.find((b) => b.booking_reference === bookingId);
+    console.log(booking);
+    if (!booking) return;
+    setBookingToCancel(booking.booking_reference);
     setShowCancelModal(true);
     setOpenMenuIdx(null);
   };
