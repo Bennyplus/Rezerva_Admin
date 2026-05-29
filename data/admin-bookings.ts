@@ -17,6 +17,7 @@ export interface Booking {
   id: string;
   booking_id?: string;
   reference?: string;
+  booking_reference?: string;
   customerName: string;
   vehicle: string;
   bookingType: string;

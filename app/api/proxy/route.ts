@@ -67,6 +67,57 @@ async function handleRequest(request: NextRequest, method: string) {
       }
     }
 
+    // --- STREAMING BYPASS FOR FILE EXPORTS ---
+    // Axios often corrupts binary buffers in Node.js when passed to NextResponse. 
+    // By using native fetch and piping the ReadableStream directly, we guarantee 100% byte-for-byte accuracy.
+    // if (searchParams.get('export')) {
+    //   const fetchResponse = await fetch(`${BACKEND_URL}/${path}?${forwardParams.toString()}`, {
+    //     method,
+    //     headers: {
+    //       'Authorization': headers['Authorization'],
+    //       'X-API-KEY': API_KEY,
+    //     }
+    //   });
+
+    //   return new NextResponse(fetchResponse.body, {
+    //     status: fetchResponse.status,
+    //     headers: {
+    //       'Content-Type': fetchResponse.headers.get('content-type') || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+    //       'Content-Disposition': fetchResponse.headers.get('content-disposition') || `attachment; filename="export_${Date.now()}.xlsx"`,
+    //     }
+    //   });
+    // }
+    // -----------------------------------------
+    if (searchParams.get('export') === 'xlsx') {
+      const fetchResponse = await fetch(
+        `${BACKEND_URL}/${path}?${forwardParams.toString()}`,
+        {
+          method,
+          headers: {
+            ...(headers.Authorization && {
+              Authorization: headers.Authorization,
+            }),
+            'X-API-KEY': API_KEY,
+            Accept: '*/*',
+          },
+        }
+      );
+
+      return new NextResponse(fetchResponse.body, {
+        status: fetchResponse.status,
+        headers: {
+          'Content-Type':
+            fetchResponse.headers.get('content-type') ||
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+
+          'Content-Disposition':
+            fetchResponse.headers.get('content-disposition') ||
+            'attachment; filename="bookings.xlsx"',
+        },
+      });
+    }
+    // -----------------------------------------
+
     let response;
     try {
       response = await axios({
@@ -130,17 +181,20 @@ async function handleRequest(request: NextRequest, method: string) {
       }
     }
 
-    const contentType = response.headers['content-type'] || '';
+    const contentType = (response.headers['content-type'] as string) || '';
     let nextResponse;
 
     if (contentType.includes('application/json')) {
       const jsonString = Buffer.from(response.data).toString('utf-8');
       nextResponse = NextResponse.json(JSON.parse(jsonString));
     } else {
+      const fallbackContentType = contentType || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+      const fallbackDisposition = (response.headers['content-disposition'] as string) || `attachment; filename="export_${Date.now()}.xlsx"`;
+
       nextResponse = new NextResponse(response.data, {
         headers: {
-          'Content-Type': contentType,
-          ...(response.headers['content-disposition'] && { 'Content-Disposition': response.headers['content-disposition'] }),
+          'Content-Type': fallbackContentType,
+          'Content-Disposition': fallbackDisposition,
         }
       });
     }
