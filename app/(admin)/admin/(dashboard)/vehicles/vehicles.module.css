@@ -312,11 +312,37 @@
 }
 
 .checkbox {
+  appearance: none;
+  -webkit-appearance: none;
   width: 16px;
   height: 16px;
+  border: 1px solid #E2E4E9;
   border-radius: 4px;
-  accent-color: var(--admin-active-bg, #111111);
+  background-color: #ffffff;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.checkbox:checked {
+  background-color: var(--admin-active-bg, #111111);
+  border-color: var(--admin-active-bg, #111111);
+}
+
+.checkbox:checked::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -2px;
 }
 
 /* Vehicle cell */
@@ -363,10 +389,10 @@
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
-  padding: 3px 10px;
+  gap: 8px;
+  padding: 6px 14px;
   border-radius: var(--radius-full, 9999px);
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 500;
 }
 
@@ -378,39 +404,39 @@
 }
 
 .statusAvailable {
-  background: #ECFDF5;
-  color: #059669;
+  background: #F0FDF4;
+  color: #16A34A;
 }
 
 .statusAvailable .badgeDot {
-  background: #059669;
+  background: #16A34A;
 }
 
 .statusMaintenance {
-  background: #a2a2a0;
-  color: #444444;
+  background: #F8FAFC;
+  color: #64748B;
 }
 
 .statusMaintenance .badgeDot {
-  background: #444444;
+  background: #64748B;
 }
 
 .statusInactive {
-  background: #dfc4c4;
-  color: #e86e6e;
+  background: #FEF2F2;
+  color: #EF4444;
 }
 
 .statusInactive .badgeDot {
-  background: #e86e6e;
+  background: #EF4444;
 }
 
 .statusBooked {
-  background: #FEF2F2;
-  color: #DC2626;
+  background: #FFF7ED;
+  color: #EA580C;
 }
 
 .statusBooked .badgeDot {
-  background: #DC2626;
+  background: #EA580C;
 }
 
 /* Chassis */

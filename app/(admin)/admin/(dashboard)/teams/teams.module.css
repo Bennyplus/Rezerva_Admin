@@ -355,11 +355,37 @@
 }
 
 .checkbox {
+  appearance: none;
+  -webkit-appearance: none;
   width: 16px;
   height: 16px;
+  border: 1px solid #E2E4E9;
   border-radius: 4px;
-  accent-color: var(--admin-active-bg, #111111);
+  background-color: #ffffff;
   cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.checkbox:checked {
+  background-color: var(--admin-active-bg, #111111);
+  border-color: var(--admin-active-bg, #111111);
+}
+
+.checkbox:checked::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -2px;
 }
 
 /* Permissions cell */

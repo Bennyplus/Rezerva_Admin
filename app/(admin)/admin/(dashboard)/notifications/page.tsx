@@ -113,8 +113,8 @@ export default function NotificationsPage() {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th style={{ width: "40px" }}>
-                      <input type="checkbox" className={styles.checkbox} />
+                    <th className={styles.checkCol}>
+                      <input type="checkbox" className={styles.checkbox} aria-label="Select all notifications" />
                     </th>
                     <th>Title</th>
                     <th>Channel</th>
@@ -127,8 +127,8 @@ export default function NotificationsPage() {
                 <tbody>
                   {ADMIN_NOTIFICATIONS.map((notif) => (
                     <tr key={notif.id}>
-                      <td>
-                        <input type="checkbox" className={styles.checkbox} />
+                      <td className={styles.checkCol}>
+                        <input type="checkbox" className={styles.checkbox} aria-label={`Select notification ${notif.title}`} />
                       </td>
                       <td>{notif.title}</td>
                       <td>{notif.channel}</td>

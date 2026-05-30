@@ -97,7 +97,7 @@ function VehiclesPageContent() {
             capacity: parseInt(v.capacity) || 4,
             status: mappedStatus,
             chassisNo: v.chasis_number || 'N/A',
-            location: 'N/A',
+            location: v.location || 'N/A',
           };
         });
 
@@ -350,7 +350,7 @@ function VehiclesPageContent() {
                                 src={v.image}
                                 alt={v.name}
                                 width={40}
-                                height={28}
+                                height={40}
                                 className={styles.thumbImg}
                               />
                             </div>
@@ -370,7 +370,7 @@ function VehiclesPageContent() {
                           </span>
                         </td>
                         <td className={styles.chassisCell}>{v.chassisNo}</td>
-                        <td>{v.location}</td>
+                        <td>{v.location?.trim().split(/\s+/)[0]}</td>
                         <td className={styles.actionsCol}>
                           <div className={styles.actionsWrapper} onClick={(e) => e.stopPropagation()}>
                             <button

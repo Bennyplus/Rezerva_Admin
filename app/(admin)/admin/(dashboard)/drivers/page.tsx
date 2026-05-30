@@ -197,6 +197,9 @@ export default function DriversPage() {
                 <table className={styles.table}>
                   <thead>
                     <tr>
+                      <th className={styles.checkCol}>
+                        <input type="checkbox" className={styles.checkbox} aria-label="Select all drivers" />
+                      </th>
                       <th>Name</th>
                       <th>Phone Number</th>
                       <th>Email</th>
@@ -213,6 +216,9 @@ export default function DriversPage() {
                         className={styles.tableRow}
                         onClick={() => setSelectedDriverId(driver.id)}
                       >
+                        <td className={styles.checkCol} onClick={(e) => e.stopPropagation()}>
+                          <input type="checkbox" className={styles.checkbox} aria-label={`Select driver ${driver.name}`} />
+                        </td>
                         <td>
                           <div className={styles.driverCell}>
                             <div className={styles.avatarWrap}>
@@ -275,7 +281,7 @@ export default function DriversPage() {
                     ))}
                     {filteredDrivers.length === 0 && (
                       <tr>
-                        <td colSpan={7} className={styles.emptyRow}>No drivers found.</td>
+                        <td colSpan={8} className={styles.emptyRow}>No drivers found.</td>
                       </tr>
                     )}
                   </tbody>

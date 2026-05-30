@@ -270,6 +270,9 @@ export default function BookingsPage() {
                   <table className={styles.table}>
                     <thead>
                       <tr>
+                        <th className={styles.checkCol}>
+                          <input type="checkbox" className={styles.checkbox} aria-label="Select all bookings" />
+                        </th>
                         <th>Booking ID</th>
                         <th>Customer Name</th>
                         <th>Vehicle</th>
@@ -283,6 +286,9 @@ export default function BookingsPage() {
                     <tbody>
                       {displayedBookings.map((b, idx) => (
                         <tr key={idx}>
+                          <td className={styles.checkCol}>
+                            <input type="checkbox" className={styles.checkbox} aria-label={`Select booking ${b.booking_reference}`} />
+                          </td>
                           <td style={{ maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }} title={b.booking_reference}>
                             {b.booking_reference}
                           </td>
