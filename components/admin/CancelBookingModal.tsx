@@ -22,6 +22,8 @@ export default function CancelBookingModal({ isOpen, onClose, onConfirm, booking
     }
   };
 
+  console.log(bookingId);
+
   return (
     <div className={styles.backdrop} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>

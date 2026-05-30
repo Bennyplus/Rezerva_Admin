@@ -10,6 +10,8 @@ import { BOOKING_STATS_EMPTY, Booking } from "@/data/admin-bookings";
 import FilterBar from "@/components/admin/FilterBar";
 import Spinner from "@/components/admin/Spinner";
 import { bookingsService } from "@/services/bookings-service";
+import BookingsFilterDropdown from "@/components/admin/bookings/BookingsFilterDropdown";
+import BookingsSortDropdown from "@/components/admin/bookings/BookingsSortDropdown";
 import styles from "./bookings.module.css";
 
 export default function BookingsPage() {
@@ -26,6 +28,14 @@ export default function BookingsPage() {
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
   const [isExporting, setIsExporting] = useState(false);
+
+
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
+  const [isSortOpen, setIsSortOpen] = useState(false);
+
+  const [sortOption, setSortOption] = useState<string>("Newest to Oldest");
+  const [activeFilters, setActiveFilters] = useState<any>({});
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -60,14 +70,6 @@ export default function BookingsPage() {
     fetchData();
   }, []);
 
-  const totalPages = Math.max(1, Math.ceil(bookings.length / resultsPerPage));
-  const displayedBookings = useMemo(() => {
-    const start = (currentPage - 1) * resultsPerPage;
-    return bookings.slice(start, start + resultsPerPage);
-  }, [bookings, currentPage, resultsPerPage]);
-
-  const isEmpty = bookings.length === 0;
-
   useEffect(() => {
     const handleClickOutside = () => {
       if (openMenuIdx !== null) {
@@ -86,55 +88,40 @@ export default function BookingsPage() {
   };
 
   const handleCancelBooking = (bookingId: string) => {
-    console.log(bookings, bookingId);
     const booking = bookings.find((b) => b.booking_reference === bookingId);
-    console.log(booking);
     if (!booking) return;
     setBookingToCancel(booking.booking_reference);
     setShowCancelModal(true);
     setOpenMenuIdx(null);
   };
 
-  // const handleExport = async () => {
-  //   try {
-  //     setIsExporting(true);
-  //     const response = await bookingsService.exportBookings();
+  const submitCancelBooking = async (bookingId: string, reason: string) => {
+    try {
+      await bookingsService.cancelBooking(bookingId, { reason });
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.booking_reference === bookingId ? { ...b, booking_status: "Cancelled" } : b
+        )
+      );
+      setShowCancelModal(false);
+      setBookingToCancel(null);
+    } catch (error) {
+      console.error(`Failed to cancel booking ${bookingId}:`, error);
+    }
+  };
 
-  //     const blob = new Blob([response.data], {
-  //       type: (response.headers['content-type'] as string) || '',
-  //     });
-
-  //     const url = window.URL.createObjectURL(blob);
-
-  //     const contentDisposition =
-  //       response.headers?.["content-disposition"] ||
-  //       response.headers?.["Content-Disposition"];
-  //     let filename = "bookings.xlsx";
-  //     if (contentDisposition) {
-  //       const match = contentDisposition.match(/filename\*?=([^;]+)/i);
-  //       if (match) {
-  //         filename = match[1]
-  //           .replace(/UTF-8''/, "")
-  //           .replace(/['\"]+/g, "")
-  //           .trim();
-  //       }
-  //     }
-
-  //     const link = document.createElement("a");
-  //     link.href = url;
-  //     link.setAttribute("download", filename);
-  //     document.body.appendChild(link);
-  //     link.click();
-  //     link.remove();
-  //     window.URL.revokeObjectURL(url);
-
-
-  //   } catch (error) {
-  //     console.error('Failed to export bookings:', error);
-  //   } finally {
-  //     setIsExporting(false);
-  //   }
-  // };
+  const handleConfirmPickup = async (bookingId: string) => {
+    try {
+      await bookingsService.confirmPickup(bookingId);
+      setBookings((prev) =>
+        prev.map((b) =>
+          b.booking_reference === bookingId ? { ...b, booking_status: "Confirmed" } : b
+        )
+      );
+    } catch (error) {
+      console.error(`Failed to confirm booking ${bookingId}:`, error);
+    }
+  };
 
   const handleExport = async () => {
     try {
@@ -152,39 +139,60 @@ export default function BookingsPage() {
       );
 
       const url = window.URL.createObjectURL(blob);
-
       let filename = "bookings.xlsx";
-
-      const disposition =
-        response.headers["content-disposition"];
+      const disposition = response.headers["content-disposition"];
 
       if (disposition) {
         const match = disposition.match(/filename="?([^"]+)"?/);
-
         if (match?.[1]) {
           filename = match[1];
         }
       }
 
       const link = document.createElement("a");
-
       link.href = url;
       link.download = filename;
-
       document.body.appendChild(link);
-
       link.click();
-
       document.body.removeChild(link);
-
       window.URL.revokeObjectURL(url);
-
     } catch (error) {
       console.error("Export failed:", error);
     } finally {
       setIsExporting(false);
     }
   };
+
+  const applyFiltersAndSort = (data: any[]) => {
+    let result = [...data];
+
+    // Apply filters
+    if (activeFilters.status && activeFilters.status.length > 0) {
+      result = result.filter(b => activeFilters.status.includes(b.booking_status));
+    }
+
+    // Apply sort
+    if (sortOption === "Newest to Oldest") {
+      result.sort((a, b) => new Date(b.created_at || b.pickup_date || 0).getTime() - new Date(a.created_at || a.pickup_date || 0).getTime());
+    } else if (sortOption === "Oldest to Newest") {
+      result.sort((a, b) => new Date(a.created_at || a.pickup_date || 0).getTime() - new Date(b.created_at || b.pickup_date || 0).getTime());
+    } else if (sortOption === "Amount Highest to Lowest") {
+      result.sort((a, b) => (b.amount || 0) - (a.amount || 0));
+    } else if (sortOption === "Amount Lowest to Highest") {
+      result.sort((a, b) => (a.amount || 0) - (b.amount || 0));
+    }
+
+    return result;
+  };
+
+  const processedBookings = useMemo(() => applyFiltersAndSort(bookings), [bookings, activeFilters, sortOption]);
+  const totalPages = Math.max(1, Math.ceil(processedBookings.length / resultsPerPage));
+  const displayedBookings = useMemo(() => {
+    const start = (currentPage - 1) * resultsPerPage;
+    return processedBookings.slice(start, start + resultsPerPage);
+  }, [processedBookings, currentPage, resultsPerPage]);
+
+  const isEmpty = processedBookings.length === 0;
 
   if (loading) {
     return (
@@ -216,7 +224,7 @@ export default function BookingsPage() {
             ))}
           </div>
 
-          {isEmpty ? (
+          {bookings.length === 0 ? (
             /* ─── Empty State ─── */
             <div className={styles.emptyCard} id="bookings-empty-state">
               <div className={styles.illustration} aria-hidden="true">
@@ -237,7 +245,12 @@ export default function BookingsPage() {
               {/* Toolbar */}
               <div className={styles.toolbar}>
                 <div className={styles.toolbarLeft}>
-                  <FilterBar />
+                  <FilterBar
+                    onFilterClick={() => { setIsFilterOpen(prev => !prev); setIsSortOpen(false); }}
+                    onSortClick={() => { setIsSortOpen(prev => !prev); setIsFilterOpen(false); }}
+                    filterDropdown={isFilterOpen ? <BookingsFilterDropdown onClose={() => setIsFilterOpen(false)} onApply={setActiveFilters} /> : null}
+                    sortDropdown={isSortOpen ? <BookingsSortDropdown onClose={() => setIsSortOpen(false)} onSortSelect={setSortOption} /> : null}
+                  />
                 </div>
 
                 <div className={styles.toolbarRight}>
@@ -299,6 +312,7 @@ export default function BookingsPage() {
                                   <button className={styles.dropdownItem}>Modify Booking</button>
                                   <button className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`} onClick={() => handleCancelBooking(b.booking_reference)}>Cancel Booking</button>
                                   <button className={styles.dropdownItem}>Send Reminder</button>
+                                  <button className={styles.dropdownItem} onClick={() => handleConfirmPickup(b.booking_reference)}>Confirm Pickup</button>
                                 </div>
                               )}
                             </div>
@@ -331,8 +345,9 @@ export default function BookingsPage() {
         onClose={() => setShowCancelModal(false)}
         bookingId={bookingToCancel || ""}
         onConfirm={(reason) => {
-          console.log(`Cancelling booking ${bookingToCancel} with reason: ${reason}`);
-          setShowCancelModal(false);
+          if (bookingToCancel) {
+            submitCancelBooking(bookingToCancel, reason);
+          }
         }}
       />
     </div>

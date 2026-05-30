@@ -1,0 +1,176 @@
+.container {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1);
+  display: flex;
+  width: 580px;
+  height: 380px;
+  z-index: 100;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  overflow: hidden;
+}
+
+.sidebar {
+  width: 200px;
+  background: #F9F9FB;
+  border-right: 1px solid var(--admin-card-border, #E2E4E9);
+  display: flex;
+  flex-direction: column;
+  padding: 12px;
+  gap: 4px;
+}
+
+.tabBtn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--admin-section-label, #868C98);
+  text-align: left;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.tabBtn:hover {
+  background: rgba(0, 0, 0, 0.02);
+}
+
+.tabBtn.active {
+  background: #ffffff;
+  color: #111111;
+  font-weight: 500;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+}
+
+.tabIcon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+}
+
+.tabArrow {
+  margin-left: auto;
+  opacity: 0.5;
+}
+
+.content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #ffffff;
+}
+
+.header {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+  gap: 8px;
+  font-weight: 500;
+  font-size: 13px;
+  color: #111111;
+  font-family: var(--font-body);
+}
+
+.body {
+  flex: 1;
+  padding: 24px 20px;
+  overflow-y: auto;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  row-gap: 20px;
+  column-gap: 16px;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 13px;
+  color: #111111;
+  cursor: pointer;
+  font-family: var(--font-body);
+  user-select: none;
+}
+
+.checkboxInput {
+  width: 16px;
+  height: 16px;
+  border: 1px solid #D1D1D6;
+  border-radius: 4px;
+  appearance: none;
+  -webkit-appearance: none;
+  background: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+}
+
+.checkboxInput:checked {
+  background: #1B1E28;
+  border-color: #1B1E28;
+}
+
+.checkboxInput:checked::after {
+  content: "";
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-bottom: 2px;
+}
+
+.footer {
+  padding: 16px 20px;
+  border-top: 1px solid var(--admin-card-border, #E2E4E9);
+  display: flex;
+  gap: 12px;
+}
+
+.clearBtn, .applyBtn {
+  flex: 1;
+  height: 38px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease;
+}
+
+.clearBtn:hover, .applyBtn:hover {
+  opacity: 0.9;
+}
+
+.clearBtn {
+  background: white;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  color: #111111;
+}
+
+.applyBtn {
+  background: #1B1E28;
+  border: none;
+  color: white;
+}

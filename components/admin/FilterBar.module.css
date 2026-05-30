@@ -58,3 +58,8 @@
   border-color: #D1D1D6;
   background: var(--admin-content-bg, #F6F8FA);
 }
+
+.popoverWrapper {
+  position: relative;
+  display: inline-block;
+}

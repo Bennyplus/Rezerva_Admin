@@ -10,6 +10,8 @@ interface FilterBarProps {
   onSortClick?: () => void;
   hideFilter?: boolean;
   hideSort?: boolean;
+  filterDropdown?: React.ReactNode;
+  sortDropdown?: React.ReactNode;
 }
 
 export default function FilterBar({
@@ -20,6 +22,8 @@ export default function FilterBar({
   onSortClick,
   hideFilter = false,
   hideSort = false,
+  filterDropdown,
+  sortDropdown,
 }: FilterBarProps) {
   const [internalSearch, setInternalSearch] = React.useState("");
   
@@ -52,26 +56,32 @@ export default function FilterBar({
         />
       </div>
       {!hideFilter && (
-        <button className={styles.toolBtn} onClick={onFilterClick}>
-          <Image
-            src="/images/admin/sidebar-icons/filter.svg"
-            alt="Filter"
-            width={16}
-            height={16}
-          />
-          Filter
-        </button>
+        <div className={styles.popoverWrapper} onMouseDown={(e) => e.stopPropagation()}>
+          <button className={styles.toolBtn} onClick={onFilterClick}>
+            <Image
+              src="/images/admin/sidebar-icons/filter.svg"
+              alt="Filter"
+              width={16}
+              height={16}
+            />
+            Filter
+          </button>
+          {filterDropdown}
+        </div>
       )}
       {!hideSort && (
-        <button className={styles.toolBtn} onClick={onSortClick}>
-          <Image
-            src="/images/admin/sidebar-icons/sort.svg"
-            alt="Sort"
-            width={16}
-            height={16}
-          />
-          Sort By
-        </button>
+        <div className={styles.popoverWrapper} onMouseDown={(e) => e.stopPropagation()}>
+          <button className={styles.toolBtn} onClick={onSortClick}>
+            <Image
+              src="/images/admin/sidebar-icons/sort.svg"
+              alt="Sort"
+              width={16}
+              height={16}
+            />
+            Sort By
+          </button>
+          {sortDropdown}
+        </div>
       )}
     </div>
   );
