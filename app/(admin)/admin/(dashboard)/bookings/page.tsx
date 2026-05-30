@@ -30,8 +30,7 @@ export default function BookingsPage() {
   const [isExporting, setIsExporting] = useState(false);
 
 
-  const [isFilterOpen, setIsFilterOpen] = useState(false);
-  const [isSortOpen, setIsSortOpen] = useState(false);
+
 
   const [sortOption, setSortOption] = useState<string>("Newest to Oldest");
   const [activeFilters, setActiveFilters] = useState<any>({});
@@ -86,6 +85,9 @@ export default function BookingsPage() {
     setViewMode("detail");
     setOpenMenuIdx(null);
   };
+  const handleModifyBooking = (bookingRef: string) => {
+    // TODO: Implement modify booking functionality
+  }
 
   const handleCancelBooking = (bookingId: string) => {
     const booking = bookings.find((b) => b.booking_reference === bookingId);
@@ -246,10 +248,8 @@ export default function BookingsPage() {
               <div className={styles.toolbar}>
                 <div className={styles.toolbarLeft}>
                   <FilterBar
-                    onFilterClick={() => { setIsFilterOpen(prev => !prev); setIsSortOpen(false); }}
-                    onSortClick={() => { setIsSortOpen(prev => !prev); setIsFilterOpen(false); }}
-                    filterDropdown={isFilterOpen ? <BookingsFilterDropdown onClose={() => setIsFilterOpen(false)} onApply={setActiveFilters} /> : null}
-                    sortDropdown={isSortOpen ? <BookingsSortDropdown onClose={() => setIsSortOpen(false)} onSortSelect={setSortOption} /> : null}
+                    filterDropdown={<BookingsFilterDropdown onClose={() => { }} onApply={setActiveFilters} />}
+                    sortDropdown={<BookingsSortDropdown onClose={() => { }} onSortSelect={setSortOption} />}
                   />
                 </div>
 
@@ -276,7 +276,7 @@ export default function BookingsPage() {
                         <th>Booking ID</th>
                         <th>Customer Name</th>
                         <th>Vehicle</th>
-                        {/* <th>Booking Type</th> */}
+                        <th>Booking Type</th>
                         <th>Pickup Date</th>
                         <th>Return Date</th>
                         <th>Booking Status</th>
@@ -294,7 +294,7 @@ export default function BookingsPage() {
                           </td>
                           <td>{b.customer_name}</td>
                           <td>{b.vehicle}</td>
-                          {/* <td>{b.booking_type || "N/A"}</td> */}
+                          <td>{b.booking_type || "N/A"}</td>
                           <td>{b.pickup_date}</td>
                           <td>{b.return_date}</td>
                           <td>
@@ -315,7 +315,7 @@ export default function BookingsPage() {
                               {openMenuIdx === idx && (
                                 <div className={styles.dropdown}>
                                   <button className={styles.dropdownItem} onClick={() => handleViewDetails(b.booking_reference)}>View Details</button>
-                                  <button className={styles.dropdownItem}>Modify Booking</button>
+                                  <button className={styles.dropdownItem} onClick={() => handleModifyBooking(b.booking_reference)}>Modify Booking</button>
                                   <button className={`${styles.dropdownItem} ${styles.dropdownItemDanger}`} onClick={() => handleCancelBooking(b.booking_reference)}>Cancel Booking</button>
                                   <button className={styles.dropdownItem}>Send Reminder</button>
                                   <button className={styles.dropdownItem} onClick={() => handleConfirmPickup(b.booking_reference)}>Confirm Pickup</button>
