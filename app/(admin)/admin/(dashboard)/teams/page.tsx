@@ -7,6 +7,7 @@ import RolePermissionsForm from "@/components/admin/RolePermissionsForm";
 import AddTeamMemberModal from "@/components/admin/AddTeamMemberModal";
 import { ADMIN_ROLES, ADMIN_TEAM_MEMBERS, formatPermissions, type Role, type TeamMember } from "@/data/admin-teams";
 import { accountsService } from "@/services/accounts-service";
+import { teamService } from "@/services/teams-services";
 import FilterBar from "@/components/admin/FilterBar";
 import styles from "./teams.module.css";
 
@@ -18,6 +19,7 @@ export default function TeamsPage() {
   const [activeTab, setActiveTab] = useState<Tab>("roles");
 
   const [roles, setRoles] = useState<Role[]>(ADMIN_ROLES);
+  const [permissions, setPermissions] = useState<any[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(ADMIN_TEAM_MEMBERS);
 
   const [currentPage, setCurrentPage] = useState(2);
