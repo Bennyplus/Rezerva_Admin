@@ -105,10 +105,9 @@ export default function BookingsPage() {
           b.booking_reference === bookingId ? { ...b, booking_status: "Cancelled" } : b
         )
       );
-      setShowCancelModal(false);
-      setBookingToCancel(null);
     } catch (error) {
       console.error(`Failed to cancel booking ${bookingId}:`, error);
+      throw error; // Propagate the error so the modal can catch it
     }
   };
 
@@ -350,9 +349,9 @@ export default function BookingsPage() {
         isOpen={showCancelModal}
         onClose={() => setShowCancelModal(false)}
         bookingId={bookingToCancel || ""}
-        onConfirm={(reason) => {
+        onConfirm={async (reason) => {
           if (bookingToCancel) {
-            submitCancelBooking(bookingToCancel, reason);
+            await submitCancelBooking(bookingToCancel, reason);
           }
         }}
       />

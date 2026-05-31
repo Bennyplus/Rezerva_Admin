@@ -1,27 +1,8 @@
-.overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.4);
-  backdrop-filter: blur(4px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 1rem;
-}
-
-.modal {
-  background: #ffffff;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 600px;
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+.dropdownWrap {
+  width: 500px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  background: #ffffff;
 }
 
 .body {
@@ -30,35 +11,40 @@
 }
 
 .sidebar {
-  width: 200px;
-  background: #f8f9fa;
+  width: 180px;
+  background: #ffffff;
   border-right: 1px solid #eaeaea;
-  padding: 1rem 0;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
 .sidebarItem {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0.75rem 1.25rem;
-  font-size: 0.9rem;
-  color: #4b5563;
+  padding: 10px 12px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #868C98;
   cursor: pointer;
   background: transparent;
   border: none;
+  border-radius: 8px;
   width: 100%;
   text-align: left;
   transition: all 0.2s ease;
 }
 
 .sidebarItem:hover {
-  background: #f1f3f5;
+  background: #F6F8FA;
+  color: #111111;
 }
 
 .sidebarItemActive {
-  background: #f1f3f5;
-  color: #111827;
-  font-weight: 500;
+  background: #F6F8FA;
+  color: #111111;
 }
 
 .sidebarItemIcon {
@@ -73,27 +59,29 @@
 }
 
 .contentHeader {
-  font-size: 1rem;
+  font-size: 14px;
   font-weight: 600;
-  color: #111827;
-  margin-bottom: 1rem;
+  color: #111111;
+  padding-bottom: 16px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid #eaeaea;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .optionsList {
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  gap: 16px;
 }
 
 .checkboxLabel {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  font-size: 0.9rem;
-  color: #374151;
+  gap: 12px;
+  font-size: 13px;
+  color: #111111;
   cursor: pointer;
 }
 
@@ -103,7 +91,7 @@
   border-radius: 4px;
   border: 1px solid #d1d5db;
   cursor: pointer;
-  accent-color: #000;
+  accent-color: #111111;
 }
 
 .textInput {
@@ -122,19 +110,19 @@
 
 .footer {
   display: flex;
-  justify-content: flex-end;
-  gap: 1rem;
-  padding: 1rem 1.5rem;
+  gap: 12px;
+  padding: 16px;
   border-top: 1px solid #eaeaea;
-  background: #fff;
+  background: #ffffff;
 }
 
 .clearBtn {
-  padding: 0.6rem 1.5rem;
+  flex: 1;
+  padding: 10px;
   border: 1px solid #eaeaea;
-  background: #fff;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  background: #ffffff;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 500;
   color: #4b5563;
   cursor: pointer;
@@ -146,17 +134,18 @@
 }
 
 .applyBtn {
-  padding: 0.6rem 2rem;
-  background: #111827;
-  color: #fff;
+  flex: 1;
+  padding: 10px;
+  background: #1A1D27;
+  color: #ffffff;
   border: none;
-  border-radius: 6px;
-  font-size: 0.9rem;
+  border-radius: 8px;
+  font-size: 13px;
   font-weight: 500;
   cursor: pointer;
   transition: background 0.2s;
 }
 
 .applyBtn:hover {
-  background: #374151;
+  background: #111111;
 }

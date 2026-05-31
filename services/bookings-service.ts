@@ -73,4 +73,15 @@ export const bookingsService = {
       throw error;
     }
   },
+  modifyBooking: async (bookingRef: string, data: {}) => {
+    try {
+      const response = await publicApi.put('', data, {
+        params: { path: `api/v1/admin/bookings/`, booking_ref: bookingRef },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to modify booking ${bookingRef}:`, error);
+      throw error;
+    }
+  },
 };
