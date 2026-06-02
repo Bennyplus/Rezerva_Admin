@@ -6,6 +6,7 @@ import StatCard from "@/components/admin/StatCard";
 import Pagination from "@/components/admin/Pagination";
 import CreateNotificationForm from "@/components/admin/CreateNotificationForm";
 import NotificationDetailsModal from "@/components/admin/NotificationDetailsModal";
+import { notificationsService } from "@/services/notifications-services";
 import { NOTIFICATION_STATS, ADMIN_NOTIFICATIONS } from "@/data/admin-notifications";
 import FilterBar from "@/components/admin/FilterBar";
 import styles from "./notifications.module.css";
@@ -17,9 +18,27 @@ export default function NotificationsPage() {
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
 
+  // data states
+  const [notificationlist, setNotificationList] = useState<any[]>([]);
+
+  
   const toggleDropdown = (id: string) => {
     setActiveDropdown(activeDropdown === id ? null : id);
   };
+
+  useEffect(() => {
+    const fetchNotifications = async () => {
+      try {
+        const data = await notificationsService.getNotifications();
+        setNotificationList(data);
+      } catch (error) {
+        console.error("Error fetching notifications:", error);
+      }
+    };
+
+    fetchNotifications();
+  }, []);
+
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -125,28 +144,28 @@ export default function NotificationsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {ADMIN_NOTIFICATIONS.map((notif) => (
-                    <tr key={notif.id}>
+                  {notificationlist.map((notif) => (
+                    <tr key={notif?.id}>
                       <td className={styles.checkCol}>
-                        <input type="checkbox" className={styles.checkbox} aria-label={`Select notification ${notif.title}`} />
+                        <input type="checkbox" className={styles.checkbox} aria-label={`Select notification ${notif?.title}`} />
                       </td>
-                      <td>{notif.title}</td>
-                      <td>{notif.channel}</td>
-                      <td>{notif.recipients}</td>
+                      <td>{notif?.title}</td>
+                      <td>{notif?.delivery_channel}</td>
+                      <td>{notif?.recipient_count}</td>
                       <td>
                         <span className={styles.statusBadge}>
                           <span className={styles.statusDot} />
-                          {notif.status}
+                          {notif?.status}
                         </span>
                       </td>
-                      <td>{notif.createdOn}</td>
+                      <td>{notif?.created_at}</td>
                       <td>
                         <div style={{ position: "relative" }}>
                           <button
                             className={styles.moreBtn}
                             onClick={(e) => {
                               e.stopPropagation();
-                              toggleDropdown(notif.id);
+                              toggleDropdown(notif?.id);
                             }}
                           >
                             <MoreIcon />
@@ -189,7 +208,7 @@ export default function NotificationsPage() {
 
       {selectedNotificationId && (
         <NotificationDetailsModal
-          notification={ADMIN_NOTIFICATIONS.find((n) => n.id === selectedNotificationId)}
+          notification={notificationlist.find((n) => n.id === selectedNotificationId)}
           onClose={() => setSelectedNotificationId(null)}
         />
       )}
