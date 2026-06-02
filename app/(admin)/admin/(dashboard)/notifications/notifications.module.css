@@ -238,11 +238,18 @@
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background: #ECFDF5;
-  color: #059669;
   border-radius: 100px;
   font-size: 11px;
   font-weight: 600;
+}
+.statusBadge[data-status="draft"] {
+  background: #FEF2F2;
+  color: gray;
+}
+
+.statusBadge[data-status="sent"] {
+  background: #ECFDF5;
+  color: #059669;
 }
 
 .statusDot {

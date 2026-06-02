@@ -153,12 +153,12 @@ export default function NotificationsPage() {
                       <td>{notif?.delivery_channel}</td>
                       <td>{notif?.recipient_count}</td>
                       <td>
-                        <span className={styles.statusBadge}>
+                        <span className={styles.statusBadge} data-status={notif?.status}>
                           <span className={styles.statusDot} />
                           {notif?.status}
                         </span>
                       </td>
-                      <td>{notif?.created_at}</td>
+                      <td>{notif?.created_at?.slice(0, 10)}</td>
                       <td>
                         <div style={{ position: "relative" }}>
                           <button
