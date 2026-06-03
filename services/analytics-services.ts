@@ -22,19 +22,18 @@ export const analyticsService = {
       });
       throw error;
     }
-  }, 
-  exportAnalyticsReport: async (reportType: string, filters: Record<string, any> = {}) => {
+  },
+  exportReportanalytics: async () => {
     try {
-      console.log(`Analytics Service: Exporting ${reportType} report...`);
-      const response = await publicApi.get("", {
-        params: { path: `api/v1/admin/analytics/reports/${reportType}/`, ...filters },
-        responseType: "blob", // Expecting a file download
+      const response = await publicApi.get('', {
+        params: { path: 'api/v1/admin/analytics/overview/', export: 'xlsx' },
+        responseType: 'blob',
       });
-      console.log(`Analytics Service: ${reportType} report exported successfully`);
-      return response.data; // This will be the file blob
+      return response.data as Blob;
     } catch (error) {
-      console.error(`Analytics Service: Failed to export analytics report ${reportType}:`, error);
+      console.error('Failed to export analytics:', error);
       throw error;
     }
-    },
+  },
+
 };

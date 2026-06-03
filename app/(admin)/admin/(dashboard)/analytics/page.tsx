@@ -44,11 +44,11 @@ export default function AnalyticsPage() {
 
   const handleExportReport = async (reportType: string) => {
     try {
-      const blob = await analyticsService.exportAnalyticsReport(reportType);
+      const blob = await analyticsService.exportReportanalytics() as Blob;
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${reportType}-report-${new Date().toISOString().split("T")[0]}.pdf`;
+      link.download = `${reportType}-report-${new Date().toISOString().split("T")[0]}.xlsx`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -145,13 +145,13 @@ export default function AnalyticsPage() {
     },
   };
   if (loading) {
-      return (
-        <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
-          <Spinner size={40} />
-        </div>
-      );
-    }
-  
+    return (
+      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner size={40} />
+      </div>
+    );
+  }
+
   return (
     <div className={styles.page}>
       {/* Header */}
@@ -170,7 +170,7 @@ export default function AnalyticsPage() {
               <button className={styles.todaySelect}>
                 Today <ChevronDownIcon />
               </button>
-              <button 
+              <button
                 className={styles.exportBtn}
                 onClick={() => handleExportReport("analytics")}
               >
@@ -200,7 +200,7 @@ export default function AnalyticsPage() {
         /* ─── Error State ─── */
         <div className={styles.emptyCard}>
           <p className={styles.emptySubtitle}>{error}</p>
-          <button 
+          <button
             className={styles.exportBtn}
             onClick={fetchAnalyticsData}
             style={{ marginTop: "16px" }}
@@ -382,7 +382,7 @@ export default function AnalyticsPage() {
                     <div className={styles.reportName}>{report.title}</div>
                     <div className={styles.reportDesc}>{report.description}</div>
                   </div>
-                  <button 
+                  <button
                     className={styles.reportDownloadBtn}
                     onClick={() => handleExportReport(report.id.replace('-report', ''))}
                   >
