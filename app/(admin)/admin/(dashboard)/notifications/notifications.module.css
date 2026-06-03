@@ -243,13 +243,13 @@
   font-weight: 600;
 }
 .statusBadge[data-status="draft"] {
-  background: #FEF2F2;
-  color: gray;
+  background: #F8FAFC;
+  color: #64748B;
 }
 
 .statusBadge[data-status="sent"] {
-  background: #ECFDF5;
-  color: #059669;
+  background: #F0FDF4;
+  color: #16A34A;
 }
 
 .statusDot {
@@ -257,6 +257,32 @@
   height: 6px;
   background: currentColor;
   border-radius: 50%;
+}
+
+.errorTitle {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0;
+}
+
+.retryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  background: var(--admin-active-bg, #111111);
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.retryBtn:hover {
+  opacity: 0.9;
 }
 
 .moreBtn {

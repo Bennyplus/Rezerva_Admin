@@ -1,91 +1,224 @@
+"use client";
+
+import { useState } from "react";
+import dynamic from "next/dynamic";
+import type { ApexOptions } from "apexcharts";
 import StatCard from "@/components/admin/StatCard";
-import { DASHBOARD_STATS, RECENT_BOOKINGS, RECENT_ACTIVITY } from "@/data/admin-mock";
+import {
+  DASHBOARD_STATS,
+  MONTHLY_REVENUE,
+  BOOKING_TRENDS,
+  RECENT_BOOKINGS,
+} from "@/data/admin-mock";
 import styles from "./page.module.css";
 
-/* ─── Status badge color helper ─── */
-function statusClass(status: string) {
+// Dynamically import ApexCharts to avoid SSR issues
+const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
+
+/* ─── Revenue bar chart options ─── */
+const revenueChartOptions: ApexOptions = {
+  chart: {
+    type: "bar",
+    toolbar: { show: false },
+    zoom: { enabled: false },
+    fontFamily: "inherit",
+  },
+  plotOptions: {
+    bar: {
+      columnWidth: "45%",
+      borderRadius: 3,
+    },
+  },
+  colors: ["#CCCED2"],
+  dataLabels: { enabled: false },
+  grid: {
+    borderColor: "#E2E4E9",
+    strokeDashArray: 4,
+    xaxis: { lines: { show: false } },
+    yaxis: { lines: { show: true } },
+  },
+  legend: { show: false },
+  xaxis: {
+    categories: MONTHLY_REVENUE.categories,
+    labels: { style: { colors: "#868C98", fontSize: "12px" } },
+    axisBorder: { show: false },
+    axisTicks: { show: false },
+  },
+  yaxis: {
+    min: 0,
+    tickAmount: 4,
+    labels: {
+      style: { colors: "#868C98", fontSize: "12px" },
+      formatter: (val: number) => `$${val}K`,
+    },
+  },
+};
+
+/* ─── Booking trends donut options ─── */
+const total = BOOKING_TRENDS.cancelled + BOOKING_TRENDS.ongoing + BOOKING_TRENDS.scheduled;
+const pct = (n: number) => `${Math.round((n / total) * 100)}%`;
+
+const trendsChartOptions: ApexOptions = {
+  chart: {
+    type: "donut",
+    toolbar: { show: false },
+    fontFamily: "inherit",
+  },
+  colors: ["#BEBFC2", "#1a1d1f", "#D8D9DC"],
+  labels: ["Cancelled Bookings", "Ongoing Trips", "Scheduled Trips"],
+  dataLabels: {
+    enabled: true,
+    formatter: (_val: string | number | number[], opts?: { seriesIndex?: number }) => {
+      const counts = [BOOKING_TRENDS.cancelled, BOOKING_TRENDS.ongoing, BOOKING_TRENDS.scheduled];
+      const idx = opts?.seriesIndex ?? 0;
+      return pct(counts[idx]);
+    },
+    style: { fontSize: "12px", fontWeight: "500", colors: ["#fff"] },
+    dropShadow: { enabled: false },
+  },
+  plotOptions: {
+    pie: {
+      donut: {
+        size: "62%",
+      },
+    },
+  },
+  legend: { show: false },
+  stroke: { width: 0 },
+  tooltip: { enabled: false },
+};
+
+const trendsSeries = [BOOKING_TRENDS.cancelled, BOOKING_TRENDS.ongoing, BOOKING_TRENDS.scheduled];
+
+/* ─── Status badge helper ─── */
+function statusClass(status: string): string {
   switch (status) {
-    case "active": return styles.statusActive;
-    case "completed": return styles.statusCompleted;
-    case "pending": return styles.statusPending;
-    case "cancelled": return styles.statusCancelled;
-    default: return "";
-  }
-}
-
-/* ─── Activity icon helper ─── */
-function ActivityIcon({ type }: { type: string }) {
-  const size = 16;
-  const props = { width: size, height: size, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-
-  switch (type) {
-    case "booking":
-      return <svg {...props}><rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" /></svg>;
-    case "return":
-      return <svg {...props}><polyline points="1 4 1 10 7 10" /><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10" /></svg>;
-    case "user":
-      return <svg {...props}><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /></svg>;
-    case "payment":
-      return <svg {...props}><line x1="12" y1="1" x2="12" y2="23" /><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6" /></svg>;
-    case "vehicle":
-      return <svg {...props}><rect x="1" y="3" width="15" height="13" /><polygon points="16 8 20 8 23 11 23 16 16 16 16 8" /><circle cx="5.5" cy="18.5" r="2.5" /><circle cx="18.5" cy="18.5" r="2.5" /></svg>;
-    default:
-      return <svg {...props}><circle cx="12" cy="12" r="10" /></svg>;
+    case "completed":  return styles.statusCompleted;
+    case "upcoming":   return styles.statusUpcoming;
+    case "ongoing":    return styles.statusOngoing;
+    case "cancelled":  return styles.statusCancelled;
+    default:           return "";
   }
 }
 
 export default function AdminDashboard() {
+  const [_openMenu, setOpenMenu] = useState<number | null>(null);
+
   return (
     <div className={styles.page}>
-      {/* Stat Cards */}
+
+      {/* ─── Stat Cards ─── */}
       <div className={styles.statsGrid} id="admin-stats">
         {DASHBOARD_STATS.map((stat) => (
           <StatCard
             key={stat.id}
             label={stat.label}
             value={stat.value}
-            accent={stat.accent}
             id={`stat-${stat.id}`}
+            growth={stat.growth}
+            isPositive={stat.isPositive}
           />
         ))}
       </div>
 
-      {/* Main content grid: Recent Bookings + Activity */}
-      <div className={styles.contentGrid}>
-        {/* Recent Bookings */}
-        <div className={styles.card} id="admin-recent-bookings">
+      {/* ─── Charts Row ─── */}
+      <div className={styles.chartsRow}>
+
+        {/* Total Revenue bar chart */}
+        <div className={styles.card} id="admin-revenue-chart">
           <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>Recent Bookings</h2>
-            <button className={styles.viewAll}>View All</button>
+            <h2 className={styles.cardTitle}>Total Revenue</h2>
           </div>
+          <div className={styles.revenueChart}>
+            <ReactApexChart
+              options={revenueChartOptions}
+              series={MONTHLY_REVENUE.series}
+              type="bar"
+              height={260}
+            />
+          </div>
+        </div>
+
+        {/* Booking Trends donut */}
+        <div className={styles.card} id="admin-trends-chart">
+          <div className={styles.cardHeader}>
+            <h2 className={styles.cardTitle}>Booking Trends</h2>
+          </div>
+          <div className={styles.trendsBody}>
+            <div className={styles.trendsChart}>
+              <ReactApexChart
+                options={trendsChartOptions}
+                series={trendsSeries}
+                type="donut"
+                width={200}
+                height={200}
+              />
+            </div>
+            <div className={styles.trendsLegend}>
+              <div className={styles.legendItem}>
+                <span className={styles.legendLabel}>
+                  <span className={`${styles.legendDot} ${styles.dotCancelled}`} />
+                  Cancelled Bookings
+                </span>
+                <span className={styles.legendCount}>{BOOKING_TRENDS.cancelled}</span>
+              </div>
+              <div className={styles.legendItem}>
+                <span className={styles.legendLabel}>
+                  <span className={`${styles.legendDot} ${styles.dotOngoing}`} />
+                  Ongoing Trips
+                </span>
+                <span className={styles.legendCount}>{BOOKING_TRENDS.ongoing}</span>
+              </div>
+              <div className={styles.legendItem}>
+                <span className={styles.legendLabel}>
+                  <span className={`${styles.legendDot} ${styles.dotScheduled}`} />
+                  Scheduled Trips
+                </span>
+                <span className={styles.legendCount}>{BOOKING_TRENDS.scheduled}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      {/* ─── Recent Bookings ─── */}
+      <div id="admin-recent-bookings">
+        <h2 className={styles.sectionTitle}>Recent Bookings</h2>
+        <div className={styles.tableCard}>
           <div className={styles.tableWrap}>
             <table className={styles.table}>
               <thead>
                 <tr>
                   <th>Booking ID</th>
-                  <th>Customer</th>
+                  <th>Customer Name</th>
                   <th>Vehicle</th>
-                  <th>Dates</th>
-                  <th>Amount</th>
-                  <th>Status</th>
+                  <th>Booking Type</th>
+                  <th>Booking Status</th>
+                  <th className={styles.actionsCol} />
                 </tr>
               </thead>
               <tbody>
-                {RECENT_BOOKINGS.map((booking) => (
-                  <tr key={booking.id}>
-                    <td className={styles.mono}>{booking.id}</td>
+                {RECENT_BOOKINGS.map((booking, idx) => (
+                  <tr key={idx}>
+                    <td>{booking.id}</td>
                     <td>{booking.customer}</td>
                     <td>{booking.vehicle}</td>
-                    <td className={styles.dateCell}>
-                      {new Date(booking.startDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                      {" – "}
-                      {new Date(booking.endDate).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
-                    </td>
-                    <td className={styles.amountCell}>{booking.amount}</td>
+                    <td>{booking.bookingType}</td>
                     <td>
                       <span className={`${styles.badge} ${statusClass(booking.status)}`}>
-                        {booking.status}
+                        <span className={styles.badgeDot} />
+                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
                       </span>
+                    </td>
+                    <td className={styles.actionsCol}>
+                      <button
+                        className={styles.moreBtn}
+                        aria-label="More actions"
+                        onClick={() => setOpenMenu(idx)}
+                      >
+                        <MoreIcon />
+                      </button>
                     </td>
                   </tr>
                 ))}
@@ -93,28 +226,19 @@ export default function AdminDashboard() {
             </table>
           </div>
         </div>
-
-        {/* Recent Activity */}
-        <div className={styles.card} id="admin-recent-activity">
-          <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>Recent Activity</h2>
-          </div>
-          <div className={styles.activityList}>
-            {RECENT_ACTIVITY.map((item) => (
-              <div key={item.id} className={styles.activityItem}>
-                <div className={styles.activityIcon}>
-                  <ActivityIcon type={item.type} />
-                </div>
-                <div className={styles.activityContent}>
-                  <span className={styles.activityAction}>{item.action}</span>
-                  <span className={styles.activityDetail}>{item.detail}</span>
-                </div>
-                <span className={styles.activityTime}>{item.time}</span>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
+
     </div>
+  );
+}
+
+/* ─── Inline Icons ─── */
+function MoreIcon() {
+  return (
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+      <circle cx="12" cy="5" r="1" />
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="12" cy="19" r="1" />
+    </svg>
   );
 }

@@ -1,20 +1,39 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { ADMIN_AUDIT_LOGS } from "@/data/admin-audit-logs";
 import FilterBar from "@/components/admin/FilterBar";
 import Pagination from "@/components/admin/Pagination";
+import Spinner from "@/components/admin/Spinner";
+import { auditLogsService } from "@/services/audit-logs-service";
 import styles from "./audit-logs.module.css";
 
 export default function AuditLogsPage() {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
   const [showEmptyState, setShowEmptyState] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
+  const [logs, setLogs] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalPages, setTotalPages] = useState(1);
+  const [resultsPerPage, setResultsPerPage] = useState(9);
 
-  const resultsPerPage = 9;
-  const totalPages = Math.ceil(ADMIN_AUDIT_LOGS.length / resultsPerPage) || 1;
+  useEffect(() => {
+    const fetchData = async () => {
+      setLoading(true);
+      try {
+        const data = await auditLogsService.getAuditLogs();
+        setLogs(Array.isArray(data) ? data : data.results || data.data || []);
+        // setTotalPages(data.total_pages || data.totalPages || 1);
+        // setResultsPerPage(data.results_per_page || data.resultsPerPage || 9);        
+      } catch (error) {
+        console.error("Failed to load audit logs:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [currentPage]);
 
   const handleDropdownToggle = (id: string) => {
     setOpenDropdownId(openDropdownId === id ? null : id);
@@ -30,7 +49,30 @@ export default function AuditLogsPage() {
     }
   };
 
-  const hasLogs = !showEmptyState && ADMIN_AUDIT_LOGS.length > 0;
+  const hasLogs = !showEmptyState && logs.length > 0;
+
+  const handleExport = async () => {
+    try {
+      const response = await auditLogsService.exportAuditLogs();
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', 'audit_logs.xlsx');
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Failed to export logs:", error);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner size={40} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -41,11 +83,17 @@ export default function AuditLogsPage() {
         </div>
         <div className={styles.headerRight}>
           <button
+            onClick={handleExport}
+            style={{ padding: '8px 16px', background: '#111', color: '#fff', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 600, marginRight: '8px' }}
+          >
+            Export Logs
+          </button>
+          {/* <button
             onClick={() => setShowEmptyState(!showEmptyState)}
             style={{ padding: '8px 16px', background: '#f4f5f6', border: '1px solid #e2e4e9', borderRadius: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 500 }}
           >
             Toggle Empty State
-          </button>
+          </button> */}
         </div>
       </div>
 
@@ -67,9 +115,6 @@ export default function AuditLogsPage() {
       ) : (
         /* Table View */
         <>
-          {/* Controls */}
-
-
           <div className={styles.tableCard}>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
@@ -78,7 +123,7 @@ export default function AuditLogsPage() {
                     <th><input type="checkbox" className={styles.checkbox} /></th>
                     <th>Timestamp</th>
                     <th>User</th>
-                    <th>Role</th>
+                    {/* <th>Role</th> */}
                     <th>Category</th>
                     <th>Action</th>
                     <th>Status</th>
@@ -86,18 +131,18 @@ export default function AuditLogsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {ADMIN_AUDIT_LOGS.slice((currentPage - 1) * resultsPerPage, currentPage * resultsPerPage).map((log) => (
+                  {logs.map((log) => (
                     <tr key={log.id}>
                       <td><input type="checkbox" className={styles.checkbox} /></td>
-                      <td>{log.timestamp}</td>
+                      <td>{new Date(log.timestamp).toLocaleString('en-US', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true }) || 'N/A'}</td>
                       <td>
                         <div className={styles.userCell}>
-                          {log.user.name}
+                          {log.user?.name || log.user_name || log.user || 'System'}
                         </div>
                       </td>
-                      <td>{log.user.role}</td>
-                      <td>{log.category}</td>
-                      <td>{log.action}</td>
+                      {/* <td>{log.user?.role || log.role || 'N/A'}</td> */}
+                      <td>{log.category || 'N/A'}</td>
+                      <td>{log.action.split('_').map((word: string) => word.charAt(0).toUpperCase() + word.slice(1)).join(' ') || 'N/A'}</td>
                       <td>
                         <span className={`${styles.badge} ${statusClass(log.status)}`}>
                           <span className={styles.badgeDot}></span>
@@ -116,9 +161,6 @@ export default function AuditLogsPage() {
                             <Link href={`/admin/audit-logs/${log.id}`} className={styles.actionItem}>
                               View Details
                             </Link>
-                            <button className={styles.actionItem} style={{ border: 'none', background: 'transparent', cursor: 'pointer', fontFamily: 'inherit' }}>
-                              Export Log
-                            </button>
                           </div>
                         )}
                       </td>

@@ -1,9 +1,10 @@
 "use client";
 
-import { use } from "react";
+import { use, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { ADMIN_AUDIT_LOGS } from "@/data/admin-audit-logs";
+import { auditLogsService } from "@/services/audit-logs-service";
+import Spinner from "@/components/admin/Spinner";
 import styles from "./audit-log-details.module.css";
 
 interface AuditLogDetailsProps {
@@ -13,9 +14,22 @@ interface AuditLogDetailsProps {
 export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
   const router = useRouter();
   const { id } = use(params);
+  const [log, setLog] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Find the log, or default to the third one which closely matches the design if id is not found
-  const log = ADMIN_AUDIT_LOGS.find(l => l.id === id) || ADMIN_AUDIT_LOGS[2];
+  useEffect(() => {
+    const fetchLog = async () => {
+      try {
+        const data = await auditLogsService.getAuditLogDetail(id);
+        setLog(data);
+      } catch (err) {
+        console.error("Failed to fetch log details:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchLog();
+  }, [id]);
 
   const statusClass = (status: string) => {
     switch (status) {
@@ -27,6 +41,18 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
   };
 
   const isStatusSuccess = (statusStr: string) => statusStr === "Success";
+
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner size={40} />
+      </div>
+    );
+  }
+
+  if (!log) {
+    return <div style={{ padding: '24px' }}>Log not found</div>;
+  }
 
   return (
     <div className={styles.page}>
@@ -44,10 +70,26 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
                 {log.status}
               </span>
             </div>
-            <div className={styles.timestamp}>Timestamp: On {log.timestamp}</div>
+            <div className={styles.timestamp}>Timestamp: On {log.timestamp || log.created_at || 'N/A'}</div>
           </div>
         </div>
-        <button className={styles.exportBtn}>Export Log</button>
+        <button 
+          className={styles.exportBtn}
+          onClick={async () => {
+            try {
+               const response = await auditLogsService.exportAuditLogs();
+               const url = window.URL.createObjectURL(new Blob([response.data]));
+               const link = document.createElement('a');
+               link.href = url;
+               link.setAttribute('download', `audit_log_${log.id}.xlsx`);
+               document.body.appendChild(link);
+               link.click();
+               document.body.removeChild(link);
+            } catch(e) {
+               console.error(e);
+            }
+          }}
+        >Export Log</button>
       </div>
 
       <div className={styles.contentGrid}>
@@ -58,24 +100,28 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Action Performed By</h2>
             <div className={styles.performerGrid}>
-              <Image 
-                src={log.user.avatar} 
-                alt={log.user.name} 
-                width={64} 
-                height={64} 
-                className={styles.avatar} 
-              />
+              {log.user?.avatar ? (
+                <Image 
+                  src={log.user.avatar} 
+                  alt={log.user.name || 'User'} 
+                  width={64} 
+                  height={64} 
+                  className={styles.avatar} 
+                />
+              ) : (
+                <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#ccc' }} className={styles.avatar} />
+              )}
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Admin Name</span>
-                <span className={styles.infoValue}>{log.user.name}</span>
+                <span className={styles.infoValue}>{log.user?.name || log.user_name || log.user || 'System'}</span>
               </div>
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Role</span>
-                <span className={styles.infoValue}>{log.user.role}</span>
+                <span className={styles.infoValue}>{log.user?.role || log.role || 'N/A'}</span>
               </div>
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Email</span>
-                <span className={styles.infoValue}>{log.user.email}</span>
+                <span className={styles.infoValue}>{log.user?.email || log.email || 'N/A'}</span>
               </div>
             </div>
           </div>
@@ -135,7 +181,7 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {log.changeDetails.map((change, idx) => (
+                  {log.changeDetails.map((change: any, idx: number) => (
                     <tr key={idx}>
                       <td style={{ fontWeight: 500 }}>{change.field}</td>
                       <td>
@@ -175,7 +221,7 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
             <div className={styles.sidebarCard}>
               <h3 className={styles.timelineTitle}>Activity Timeline</h3>
               <div className={styles.timelineList}>
-                {log.activityTimeline.map((step, idx) => (
+                {log.activityTimeline.map((step: any, idx: number) => (
                   <div key={idx} className={styles.timelineItem}>
                     <div className={styles.timelineLine}></div>
                     <div className={`${styles.timelineCheckbox} ${step.completed ? styles.checked : ''}`}>

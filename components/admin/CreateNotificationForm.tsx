@@ -25,6 +25,7 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
     channel: "",
     date: new Date().toISOString(),
     schedule: false,
+    userEmails: "",
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -170,6 +171,26 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
                 />
               </div>
             </div>
+
+            {formData.recipients === "custom" && (
+              <div className={styles.fieldGroup}>
+                <label className={styles.label}>Users Email</label>
+                <CustomSelect
+                  name="userEmails"
+                  value={formData.userEmails}
+                  placeholder="propseredward001@gmail.com, prosperdtyrant@yahoo.com"
+                  options={[
+                    { value: "propseredward001@gmail.com", label: "propseredward001@gmail.com" },
+                    { value: "prosperdtyrant@yahoo.com", label: "prosperdtyrant@yahoo.com" },
+                    { value: "jane.doe@example.com", label: "jane.doe@example.com" },
+                    { value: "john.smith@example.com", label: "john.smith@example.com" }
+                  ]}
+                  onChange={handleSelectChange}
+                  showSearch
+                  multiple
+                />
+              </div>
+            )}
 
             <div className={styles.fieldGroup}>
               <label className={styles.label}>Media Attachment</label>
