@@ -6,20 +6,48 @@ import StatCard from "@/components/admin/StatCard";
 import Pagination from "@/components/admin/Pagination";
 import CreateNotificationForm from "@/components/admin/CreateNotificationForm";
 import NotificationDetailsModal from "@/components/admin/NotificationDetailsModal";
+import Spinner from "@/components/admin/Spinner";
+import { notificationsService } from "@/services/notifications-services";
 import { NOTIFICATION_STATS, ADMIN_NOTIFICATIONS } from "@/data/admin-notifications";
 import FilterBar from "@/components/admin/FilterBar";
 import styles from "./notifications.module.css";
 
 export default function NotificationsPage() {
-  const [isEmpty, setIsEmpty] = useState(ADMIN_NOTIFICATIONS.length === 0);
+  const [isEmpty, setIsEmpty] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<"list" | "create">("list");
   const [currentPage, setCurrentPage] = useState(2);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
 
+  // data states
+  const [notificationlist, setNotificationList] = useState<any[]>([]);
+
   const toggleDropdown = (id: string) => {
     setActiveDropdown(activeDropdown === id ? null : id);
   };
+
+  const fetchNotifications = async () => {
+    setIsLoading(true);
+    setFetchError(null);
+
+    try {
+      const data = await notificationsService.getNotifications(currentPage);
+      setNotificationList(data);
+      setIsEmpty(!Array.isArray(data) || data.length === 0);
+    } catch (error) {
+      console.error("Error fetching notifications:", error);
+      setFetchError(error instanceof Error ? error.message : "Unable to load notifications.");
+      setIsEmpty(false);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchNotifications();
+  }, [currentPage]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -42,6 +70,14 @@ export default function NotificationsPage() {
     );
   }
 
+  if (isLoading) {
+      return (
+        <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+          <Spinner size={40} />
+        </div>
+      );
+    }
+
   return (
     <div className={styles.page}>
       {/* Stats Grid */}
@@ -56,7 +92,15 @@ export default function NotificationsPage() {
         ))}
       </div>
 
-      {isEmpty ? (
+      {fetchError ? (
+        <div className={styles.errorCard}>
+          <h2 className={styles.errorTitle}>Unable to fetch notifications</h2>
+          <p className={styles.errorSubtitle}>{fetchError}</p>
+          <button className={styles.retryBtn} onClick={fetchNotifications}>
+            Retry
+          </button>
+        </div>
+      ) : isEmpty ? (
         /* ─── Empty State ─── */
         <div className={styles.emptyCard} id="notifications-empty-state">
           <div className={styles.illustration} aria-hidden="true">
@@ -113,8 +157,8 @@ export default function NotificationsPage() {
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th style={{ width: "40px" }}>
-                      <input type="checkbox" className={styles.checkbox} />
+                    <th className={styles.checkCol}>
+                      <input type="checkbox" className={styles.checkbox} aria-label="Select all notifications" />
                     </th>
                     <th>Title</th>
                     <th>Channel</th>
@@ -125,28 +169,28 @@ export default function NotificationsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {ADMIN_NOTIFICATIONS.map((notif) => (
-                    <tr key={notif.id}>
-                      <td>
-                        <input type="checkbox" className={styles.checkbox} />
+                  {notificationlist.map((notif) => (
+                    <tr key={notif?.id}>
+                      <td className={styles.checkCol}>
+                        <input type="checkbox" className={styles.checkbox} aria-label={`Select notification ${notif?.title}`} />
                       </td>
-                      <td>{notif.title}</td>
-                      <td>{notif.channel}</td>
-                      <td>{notif.recipients}</td>
+                      <td>{notif?.title}</td>
+                      <td style={{ textTransform: "capitalize" }}>{notif?.delivery_channel}</td>
+                      <td>{notif?.recipient_count}</td>
                       <td>
-                        <span className={styles.statusBadge}>
+                        <span className={styles.statusBadge} data-status={notif?.status}>
                           <span className={styles.statusDot} />
-                          {notif.status}
+                          {notif?.status}
                         </span>
                       </td>
-                      <td>{notif.createdOn}</td>
+                      <td>{notif?.created_at?.slice(0, 10)}</td>
                       <td>
                         <div style={{ position: "relative" }}>
                           <button
                             className={styles.moreBtn}
                             onClick={(e) => {
                               e.stopPropagation();
-                              toggleDropdown(notif.id);
+                              toggleDropdown(notif?.id);
                             }}
                           >
                             <MoreIcon />
@@ -189,7 +233,7 @@ export default function NotificationsPage() {
 
       {selectedNotificationId && (
         <NotificationDetailsModal
-          notification={ADMIN_NOTIFICATIONS.find((n) => n.id === selectedNotificationId)}
+          notification={notificationlist.find((n) => n.id === selectedNotificationId)}
           onClose={() => setSelectedNotificationId(null)}
         />
       )}

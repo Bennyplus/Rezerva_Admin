@@ -7,6 +7,7 @@ import RolePermissionsForm from "@/components/admin/RolePermissionsForm";
 import AddTeamMemberModal from "@/components/admin/AddTeamMemberModal";
 import { ADMIN_ROLES, ADMIN_TEAM_MEMBERS, formatPermissions, type Role, type TeamMember } from "@/data/admin-teams";
 import { accountsService } from "@/services/accounts-service";
+import { teamService } from "@/services/teams-services";
 import FilterBar from "@/components/admin/FilterBar";
 import styles from "./teams.module.css";
 
@@ -16,16 +17,17 @@ type Tab = "roles" | "team";
 export default function TeamsPage() {
   const [currentView, setCurrentView] = useState<View>("list");
   const [activeTab, setActiveTab] = useState<Tab>("roles");
-  
+
   const [roles, setRoles] = useState<Role[]>(ADMIN_ROLES);
+  const [permissions, setPermissions] = useState<any[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(ADMIN_TEAM_MEMBERS);
-  
+
   const [currentPage, setCurrentPage] = useState(2);
   const [searchQuery, setSearchQuery] = useState("");
-  
+
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  
+
   const [loadingRoles, setLoadingRoles] = useState(true);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
@@ -45,7 +47,7 @@ export default function TeamsPage() {
       const mapped = rolesData.map((r: any) => ({
         id: r.id || r._id,
         name: r.name,
-        permissions: r.permissions || [],
+        permissions: (r.permissions || []).map((p: any) => typeof p === 'string' ? p : p.name || p.module || p.id || JSON.stringify(p)),
         createdAt: r.createdAt || new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
         status: r.status || "Active",
       }));
@@ -65,7 +67,7 @@ export default function TeamsPage() {
   );
 
   /* Filter team members by search */
-  const filteredTeamMembers = teamMembers.filter((m) => 
+  const filteredTeamMembers = teamMembers.filter((m) =>
     m.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
     m.role.toLowerCase().includes(searchQuery.toLowerCase())
@@ -130,7 +132,7 @@ export default function TeamsPage() {
     };
     setTeamMembers(prev => [newMember, ...prev]);
     setIsAddModalOpen(false);
-    
+
     // Show toast
     setToastMessage(`${name} has been successfully assigned ${roleName}`);
     setTimeout(() => {
@@ -164,8 +166,8 @@ export default function TeamsPage() {
           <div className={styles.toast}>
             <CheckCircleIcon />
             {toastMessage}
-            <button 
-              className={styles.toastClose} 
+            <button
+              className={styles.toastClose}
               onClick={() => setToastMessage(null)}
               aria-label="Close notification"
             >
@@ -227,9 +229,9 @@ export default function TeamsPage() {
             <>
               {/* Toolbar */}
               <div className={styles.toolbar} id="roles-toolbar">
-                  <div className={styles.toolbarLeft}>
-                    <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideSort />
-                  </div>
+                <div className={styles.toolbarLeft}>
+                  <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideSort />
+                </div>
                 <div className={styles.toolbarRight}>
                   <button
                     className={styles.addBtnSmall}
@@ -272,16 +274,15 @@ export default function TeamsPage() {
                           />
                         </td>
                         <td>
-                          <span className={styles.rolePermText} title={role.permissions.map(p => p.split(":")[0]).join(", ")}>
-                            {formatPermissions(role.permissions)}
+                          <span className={styles.rolePermText} title={role.permissions.map((p: any) => typeof p === 'string' ? p.split(":")[0] : (p?.name || "").split(":")[0]).join(", ")}>
+                            {formatPermissions(role.permissions as string[])}
                           </span>
                         </td>
                         <td className={styles.dateCell}>{role.createdAt}</td>
                         <td>
                           <span
-                            className={`${styles.badge} ${
-                              role.status === "Active" ? styles.badgeActive : styles.badgeInactive
-                            }`}
+                            className={`${styles.badge} ${role.status === "Active" ? styles.badgeActive : styles.badgeInactive
+                              }`}
                           >
                             <span className={styles.badgeDot} />
                             {role.status}
@@ -334,9 +335,9 @@ export default function TeamsPage() {
             <>
               {/* Toolbar */}
               <div className={styles.toolbar} id="team-toolbar">
-                  <div className={styles.toolbarLeft}>
-                    <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideSort />
-                  </div>
+                <div className={styles.toolbarLeft}>
+                  <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideSort />
+                </div>
                 <div className={styles.toolbarRight}>
                   <button
                     className={styles.addBtnSmall}
@@ -417,10 +418,10 @@ export default function TeamsPage() {
         </button>
       </div>
 
-      <AddTeamMemberModal 
-        isOpen={isAddModalOpen} 
-        onClose={() => setIsAddModalOpen(false)} 
-        onSubmit={handleAddMemberSubmit} 
+      <AddTeamMemberModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        onSubmit={handleAddMemberSubmit}
       />
     </div>
   );

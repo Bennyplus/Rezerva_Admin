@@ -14,6 +14,7 @@ import { vehiclesService } from "@/services/vehicles-service";
 import FilterBar from "@/components/admin/FilterBar";
 import VehicleDetailView from "@/components/admin/VehicleDetailView";
 import VehiclesFilterModal from "@/components/admin/VehiclesFilterModal";
+import VehiclesSortDropdown from "@/components/admin/VehiclesSortDropdown";
 import styles from "./vehicles.module.css";
 
 type ViewMode = "list" | "grid";
@@ -30,6 +31,7 @@ function VehiclesPageContent() {
     seats: searchParams.get('seats') || '',
     fuel_type: searchParams.get('fuel_type') || '',
     transmission: searchParams.get('transmission') || '',
+    sort: searchParams.get('sort') || '',
   };
   const [vehicles, setVehicles] = useState<AdminVehicle[]>([]);
   const [loading, setLoading] = useState(true);
@@ -39,7 +41,6 @@ function VehiclesPageContent() {
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [showUploadModal, setShowUploadModal] = useState(false);
   const [showBulkUploadModal, setShowBulkUploadModal] = useState(false);
-  const [showFilterModal, setShowFilterModal] = useState(false);
   const [currentView, setCurrentView] = useState<"list" | "add-manual" | "detail">("list");
   const [openMenuIndex, setOpenMenuIndex] = useState<number | null>(null);
   const [selectedVehicle, setSelectedVehicle] = useState<AdminVehicle | null>(null);
@@ -97,7 +98,7 @@ function VehiclesPageContent() {
             capacity: parseInt(v.capacity) || 4,
             status: mappedStatus,
             chassisNo: v.chasis_number || 'N/A',
-            location: 'N/A',
+            location: v.location || 'N/A',
           };
         });
 
@@ -175,10 +176,18 @@ function VehiclesPageContent() {
   };
 
   const handleApplyFilters = (filters: Record<string, string>) => {
-    const params = new URLSearchParams();
+    const params = new URLSearchParams(searchParams.toString());
     Object.entries(filters).forEach(([k, v]) => {
       if (v) params.set(k, v);
+      else params.delete(k);
     });
+    router.push(`${pathname}?${params.toString()}`);
+  };
+
+  const handleSortSelect = (sort: string) => {
+    const params = new URLSearchParams(searchParams.toString());
+    if (sort) params.set('sort', sort);
+    else params.delete('sort');
     router.push(`${pathname}?${params.toString()}`);
   };
 
@@ -266,7 +275,20 @@ function VehiclesPageContent() {
           {/* Toolbar */}
           <div className={styles.toolbar} id="vehicles-toolbar">
             <div className={styles.toolbarLeft}>
-              <FilterBar onFilterClick={() => setShowFilterModal(true)} />
+              <FilterBar
+                filterDropdown={
+                  <VehiclesFilterModal
+                    isOpen={true}
+                    onClose={() => {}}
+                    onApply={handleApplyFilters}
+                    initialFilters={currentFilters}
+                    categoriesMap={categoriesMap}
+                  />
+                }
+                sortDropdown={
+                  <VehiclesSortDropdown onSortSelect={handleSortSelect} />
+                }
+              />
               {/* View toggles */}
               <div className={styles.viewToggle}>
                 <button
@@ -350,7 +372,7 @@ function VehiclesPageContent() {
                                 src={v.image}
                                 alt={v.name}
                                 width={40}
-                                height={28}
+                                height={40}
                                 className={styles.thumbImg}
                               />
                             </div>
@@ -370,7 +392,7 @@ function VehiclesPageContent() {
                           </span>
                         </td>
                         <td className={styles.chassisCell}>{v.chassisNo}</td>
-                        <td>{v.location}</td>
+                        <td>{v.location?.trim().split(/\s+/)[0]}</td>
                         <td className={styles.actionsCol}>
                           <div className={styles.actionsWrapper} onClick={(e) => e.stopPropagation()}>
                             <button
@@ -486,14 +508,6 @@ function VehiclesPageContent() {
       <BulkUploadModal
         isOpen={showBulkUploadModal}
         onClose={() => setShowBulkUploadModal(false)}
-      />
-
-      <VehiclesFilterModal
-        isOpen={showFilterModal}
-        onClose={() => setShowFilterModal(false)}
-        onApply={handleApplyFilters}
-        initialFilters={currentFilters}
-        categoriesMap={categoriesMap}
       />
     </div>
   );

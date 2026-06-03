@@ -192,11 +192,44 @@
   color: #111111;
 }
 
+/* Checkbox column */
+.checkCol {
+  width: 44px;
+  text-align: center;
+}
+
 .checkbox {
+  appearance: none;
+  -webkit-appearance: none;
   width: 16px;
   height: 16px;
+  border: 1px solid #E2E4E9;
   border-radius: 4px;
-  accent-color: #111111;
+  background-color: #ffffff;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  margin: 0;
+}
+
+.checkbox:checked {
+  background-color: var(--admin-active-bg, #111111);
+  border-color: var(--admin-active-bg, #111111);
+}
+
+.checkbox:checked::after {
+  content: "";
+  position: absolute;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+  margin-top: -2px;
 }
 
 /* ─── Status Badge ─── */
@@ -205,11 +238,18 @@
   align-items: center;
   gap: 6px;
   padding: 4px 10px;
-  background: #ECFDF5;
-  color: #059669;
   border-radius: 100px;
   font-size: 11px;
   font-weight: 600;
+}
+.statusBadge[data-status="draft"] {
+  background: #F8FAFC;
+  color: #64748B;
+}
+
+.statusBadge[data-status="sent"] {
+  background: #F0FDF4;
+  color: #16A34A;
 }
 
 .statusDot {
@@ -217,6 +257,32 @@
   height: 6px;
   background: currentColor;
   border-radius: 50%;
+}
+
+.errorTitle {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0;
+}
+
+.retryBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 28px;
+  background: var(--admin-active-bg, #111111);
+  border: none;
+  border-radius: 10px;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.retryBtn:hover {
+  opacity: 0.9;
 }
 
 .moreBtn {

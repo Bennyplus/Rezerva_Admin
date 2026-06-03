@@ -25,6 +25,18 @@ export const bookingsService = {
     }
   },
 
+  cancelBooking: async (bookingRef: string, data: { reason: string }) => {
+    try {
+      const response = await publicApi.post('', data, {
+        params: { path: `api/v1/admin/bookings/cancel/`, booking_ref: bookingRef },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to cancel booking ${bookingRef}:`, error);
+      throw error;
+    }
+  },
+
   getMetrics: async () => {
     try {
       const response = await publicApi.get('', {
@@ -48,5 +60,28 @@ export const bookingsService = {
       console.error('Failed to export bookings:', error);
       throw error;
     }
-  }
+  },
+
+  confirmPickup: async (bookingRef: string) => {
+    try {
+      const response = await publicApi.post('', null, {
+        params: { path: `api/v1/admin/bookings/pickup/confirm/`, booking_ref: bookingRef },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to confirm pickup for booking ${bookingRef}:`, error);
+      throw error;
+    }
+  },
+  modifyBooking: async (bookingRef: string, data: {}) => {
+    try {
+      const response = await publicApi.put('', data, {
+        params: { path: `api/v1/admin/bookings/`, booking_ref: bookingRef },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to modify booking ${bookingRef}:`, error);
+      throw error;
+    }
+  },
 };

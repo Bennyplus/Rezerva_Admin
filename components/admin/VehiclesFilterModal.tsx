@@ -210,9 +210,8 @@ export default function VehiclesFilterModal({
   }
 
   return (
-    <div className={styles.overlay} onClick={onClose}>
-      <div className={styles.modal} onClick={e => e.stopPropagation()}>
-        <div className={styles.body}>
+    <div className={styles.dropdownWrap} onClick={e => e.stopPropagation()}>
+      <div className={styles.body}>
           {/* Sidebar */}
           <div className={styles.sidebar}>
             {TABS.map(tab => (
@@ -247,7 +246,6 @@ export default function VehiclesFilterModal({
           <button className={styles.clearBtn} onClick={handleClear}>Clear</button>
           <button className={styles.applyBtn} onClick={handleApply}>Apply</button>
         </div>
-      </div>
     </div>
   );
 }

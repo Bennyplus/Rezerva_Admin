@@ -1,16 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import {
-  ANALYTICS_STATS,
-  BOOKINGS_OVER_TIME_DATA,
-  REVENUE_PERFORMANCE_DATA,
-  USER_GROWTH_DATA,
-  BOOKINGS_BY_LOCATION,
-  REPORTS_DATA
-} from "@/data/admin-analytics";
+import { REPORTS_DATA } from "@/data/admin-analytics";
+import Spinner from "@/components/admin/Spinner";
+import { analyticsService } from "@/services/analytics-services";
 import StatCard from "@/components/admin/StatCard";
 import styles from "./analytics.module.css";
 
@@ -20,6 +15,49 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false })
 export default function AnalyticsPage() {
   const [showEmptyState, setShowEmptyState] = useState(false);
   const [bookingsTimeframe, setBookingsTimeframe] = useState<"Weekly" | "Monthly">("Weekly");
+  const [analyticsData, setAnalyticsData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    console.log("Analytics page mounted, fetching data...");
+    fetchAnalyticsData();
+  }, []);
+
+  const fetchAnalyticsData = async () => {
+    try {
+      console.log("Starting fetchAnalyticsData...");
+      setLoading(true);
+      setError(null);
+      console.log("Calling analyticsService.fetchDashboardAnalytics()...");
+      const data = await analyticsService.fetchDashboardAnalytics();
+      console.log("Analytics data received:", data);
+      setAnalyticsData(data);
+    } catch (err) {
+      console.error("Error fetching analytics:", err);
+      const errorMsg = err instanceof Error ? err.message : "Failed to load analytics data";
+      setError(errorMsg);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleExportReport = async (reportType: string) => {
+    try {
+      const blob = await analyticsService.exportReportanalytics() as Blob;
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${reportType}-report-${new Date().toISOString().split("T")[0]}.xlsx`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Error exporting report:", err);
+      setError("Failed to export report");
+    }
+  };
 
   const commonOptions = {
     chart: {
@@ -48,7 +86,7 @@ export default function AnalyticsPage() {
       strokeWidth: 2,
     },
     xaxis: {
-      categories: BOOKINGS_OVER_TIME_DATA.categories,
+      categories: analyticsData?.bookings_over_time?.map((item: any) => item.label) || [],
       labels: { style: { colors: "#6f767e", fontSize: "12px" } },
       axisBorder: { show: false },
       axisTicks: { show: false },
@@ -72,16 +110,21 @@ export default function AnalyticsPage() {
     },
     colors: ["#1a1d1f"],
     xaxis: {
-      categories: REVENUE_PERFORMANCE_DATA.categories,
+      categories: analyticsData?.revenue_performance?.map((item: any) => item.label) || [],
       labels: { style: { colors: "#6f767e", fontSize: "12px" } },
       axisBorder: { show: false },
       axisTicks: { show: false },
     },
     yaxis: {
       min: 0,
-      max: 60,
-      tickAmount: 6,
-      labels: { style: { colors: "#6f767e", fontSize: "12px" } },
+      max: analyticsData?.revenue_performance
+        ? Math.ceil(Math.max(...analyticsData.revenue_performance.map((item: any) => Number(item.value)), 1) * 1.25)
+        : 100000,
+      tickAmount: 5,
+      labels: {
+        style: { colors: "#6f767e", fontSize: "12px" },
+        formatter: (val: number) => val >= 1000 ? `$${(val / 1000).toFixed(0)}k` : `$${val}`,
+      },
     },
   };
 
@@ -90,18 +133,24 @@ export default function AnalyticsPage() {
     stroke: { curve: "smooth" as const, width: 2 },
     colors: ["#d94625", "#4a6ee0"], // orange-red and blue
     xaxis: {
-      categories: USER_GROWTH_DATA.categories,
+      categories: analyticsData?.user_growth?.map((item: any) => item.label) || [],
       labels: { style: { colors: "#6f767e", fontSize: "12px" } },
       axisBorder: { show: false },
       axisTicks: { show: false },
     },
     yaxis: {
       min: 0,
-      max: 60,
-      tickAmount: 6,
+      tickAmount: 5,
       labels: { style: { colors: "#6f767e", fontSize: "12px" } },
     },
   };
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner size={40} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -121,7 +170,12 @@ export default function AnalyticsPage() {
               <button className={styles.todaySelect}>
                 Today <ChevronDownIcon />
               </button>
-              <button className={styles.exportBtn}>Export</button>
+              <button
+                className={styles.exportBtn}
+                onClick={() => handleExportReport("analytics")}
+              >
+                Export
+              </button>
             </>
           )}
         </div>
@@ -142,21 +196,51 @@ export default function AnalyticsPage() {
           <h2 className={styles.emptyTitle}>No analytics data available</h2>
           <p className={styles.emptySubtitle}>Platform activity and reports will appear here</p>
         </div>
+      ) : error ? (
+        /* ─── Error State ─── */
+        <div className={styles.emptyCard}>
+          <p className={styles.emptySubtitle}>{error}</p>
+          <button
+            className={styles.exportBtn}
+            onClick={fetchAnalyticsData}
+            style={{ marginTop: "16px" }}
+          >
+            Retry
+          </button>
+        </div>
       ) : (
         /* ─── Populated State ─── */
         <>
           {/* Stats Grid */}
           <div className={styles.statsGrid}>
-            {ANALYTICS_STATS.map((stat) => (
-              <StatCard
-                key={stat.id}
-                label={stat.label}
-                value={stat.value}
-                id={`stat-${stat.id}`}
-                growth={stat.growth}
-                isPositive={stat.isPositive}
-              />
-            ))}
+            {analyticsData && (
+              <>
+                <StatCard
+                  label="Total Bookings"
+                  value={analyticsData.total_bookings?.toString() || "0"}
+                  id="stat-total-bookings"
+                  isPositive={true}
+                />
+                <StatCard
+                  label="Revenue"
+                  value={`$${Number(analyticsData.revenue || 0).toLocaleString("en-US", { maximumFractionDigits: 0 })}`}
+                  id="stat-revenue"
+                  isPositive={true}
+                />
+                <StatCard
+                  label="Completed Trips"
+                  value={analyticsData.completed_trips?.toString() || "0"}
+                  id="stat-completed-trips"
+                  isPositive={true}
+                />
+                <StatCard
+                  label="Active Users"
+                  value={analyticsData.active_users?.toString() || "0"}
+                  id="stat-active-users"
+                  isPositive={true}
+                />
+              </>
+            )}
           </div>
 
           {/* Top Charts */}
@@ -183,7 +267,10 @@ export default function AnalyticsPage() {
               <div style={{ height: 280 }}>
                 <ReactApexChart
                   options={bookingsChartOptions}
-                  series={BOOKINGS_OVER_TIME_DATA.series}
+                  series={[{
+                    name: "Bookings",
+                    data: analyticsData?.bookings_over_time?.map((item: any) => item.value) || []
+                  }]}
                   type="line"
                   height="100%"
                 />
@@ -201,7 +288,10 @@ export default function AnalyticsPage() {
               <div style={{ height: 280 }}>
                 <ReactApexChart
                   options={revenueChartOptions}
-                  series={REVENUE_PERFORMANCE_DATA.series}
+                  series={[{
+                    name: "Revenue",
+                    data: analyticsData?.revenue_performance?.map((item: any) => Number(item.value)) || []
+                  }]}
                   type="bar"
                   height="100%"
                 />
@@ -229,7 +319,16 @@ export default function AnalyticsPage() {
               <div style={{ height: 280 }}>
                 <ReactApexChart
                   options={userGrowthChartOptions}
-                  series={USER_GROWTH_DATA.series}
+                  series={[
+                    {
+                      name: "New Users",
+                      data: analyticsData?.user_growth?.map((item: any) => item.new_users) || []
+                    },
+                    {
+                      name: "Returning Users",
+                      data: analyticsData?.user_growth?.map((item: any) => item.returning_users) || []
+                    }
+                  ]}
                   type="line"
                   height="100%"
                 />
@@ -242,22 +341,27 @@ export default function AnalyticsPage() {
                 <span className={styles.chartTitle}>Bookings By Location</span>
               </div>
               <div className={styles.locationList}>
-                {BOOKINGS_BY_LOCATION.map((loc, idx) => {
-                  const maxCount = Math.max(...BOOKINGS_BY_LOCATION.map(l => l.count));
-                  const percentage = (loc.count / maxCount) * 100;
-                  return (
-                    <div key={idx} className={styles.locationItem}>
-                      <span style={{ width: 60, fontSize: "13px", color: "#1a1d1f" }}>{loc.location}</span>
-                      <div className={styles.locationBarWrap}>
-                        <div
-                          className={styles.locationBar}
-                          style={{ width: `${percentage}%`, backgroundColor: loc.color }}
-                        ></div>
+                {analyticsData?.bookings_by_location && analyticsData.bookings_by_location.length > 0 ? (
+                  analyticsData.bookings_by_location.map((loc: any, idx: number) => {
+                    const maxCount = Math.max(...analyticsData.bookings_by_location.map((l: any) => l.count));
+                    const percentage = (loc.count / maxCount) * 100;
+                    const colors = ["#FFE8CC", "#F4F5F6", "#FFE2E5", "#D1FADF", "#E0EAFF"];
+                    return (
+                      <div key={idx} className={styles.locationItem}>
+                        <span style={{ width: 60, fontSize: "13px", color: "#1a1d1f" }}>{loc.location}</span>
+                        <div className={styles.locationBarWrap}>
+                          <div
+                            className={styles.locationBar}
+                            style={{ width: `${percentage}%`, backgroundColor: colors[idx % colors.length] }}
+                          ></div>
+                        </div>
+                        <span className={styles.locationCount}>{loc.count}</span>
                       </div>
-                      <span className={styles.locationCount}>{loc.count}</span>
-                    </div>
-                  );
-                })}
+                    );
+                  })
+                ) : (
+                  <p style={{ color: "#6f767e", fontSize: "13px", margin: "12px 0" }}>No location data available</p>
+                )}
               </div>
             </div>
           </div>
@@ -278,7 +382,10 @@ export default function AnalyticsPage() {
                     <div className={styles.reportName}>{report.title}</div>
                     <div className={styles.reportDesc}>{report.description}</div>
                   </div>
-                  <button className={styles.reportDownloadBtn}>
+                  <button
+                    className={styles.reportDownloadBtn}
+                    onClick={() => handleExportReport(report.id.replace('-report', ''))}
+                  >
                     <DownloadIcon />
                   </button>
                 </div>
