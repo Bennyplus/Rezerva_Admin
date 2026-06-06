@@ -246,6 +246,7 @@ export default function BulkUploadModal({ isOpen, onClose }: BulkUploadModalProp
         <VehicleDetailsModal 
           vehicle={selectedVehicle} 
           onClose={() => setSelectedVehicle(null)} 
+          onStatusChange={() => {}}
         />
       )}
     </>
