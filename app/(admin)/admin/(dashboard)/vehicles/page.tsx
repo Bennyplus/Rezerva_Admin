@@ -31,9 +31,10 @@ function VehiclesPageContent() {
     seats: searchParams.get('seats') || '',
     fuel_type: searchParams.get('fuel_type') || '',
     transmission: searchParams.get('transmission') || '',
-    sort: searchParams.get('sort') || '',
   };
   const [vehicles, setVehicles] = useState<AdminVehicle[]>([]);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [localSort, setLocalSort] = useState("");
   const [loading, setLoading] = useState(true);
   const isEmpty = vehicles.length === 0;
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -134,10 +135,10 @@ function VehiclesPageContent() {
 
 
   const toggleSelectAll = () => {
-    if (selectedRows.size === vehicles.length && vehicles.length > 0) {
+    if (selectedRows.size === displayedVehicles.length && displayedVehicles.length > 0) {
       setSelectedRows(new Set());
     } else {
-      setSelectedRows(new Set(vehicles.map((_, i: number) => i)));
+      setSelectedRows(new Set(displayedVehicles.map((_, i: number) => i)));
     }
   };
 
@@ -186,10 +187,7 @@ function VehiclesPageContent() {
   };
 
   const handleSortSelect = (sort: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    if (sort) params.set('sort', sort);
-    else params.delete('sort');
-    router.push(`${pathname}?${params.toString()}`);
+    setLocalSort(sort);
   };
 
   if (currentView === "add-manual") {
@@ -220,6 +218,35 @@ function VehiclesPageContent() {
   }
 
 
+
+  // Compute filtered & sorted vehicles for the current page
+  const displayedVehicles = vehicles
+    .filter((v) => {
+      if (!searchQuery) return true;
+      const query = searchQuery.toLowerCase();
+      return (
+        v.name.toLowerCase().includes(query) ||
+        v.brand.toLowerCase().includes(query) ||
+        v.category.toLowerCase().includes(query) ||
+        v.chassisNo.toLowerCase().includes(query) ||
+        (v.location && v.location.toLowerCase().includes(query))
+      );
+    })
+    .sort((a, b) => {
+      if (!localSort) return 0;
+      switch (localSort) {
+        case "model_asc":
+          return a.name.localeCompare(b.name);
+        case "model_desc":
+          return b.name.localeCompare(a.name);
+        case "price_asc":
+          return a.dailyPrice - b.dailyPrice;
+        case "price_desc":
+          return b.dailyPrice - a.dailyPrice;
+        default:
+          return 0;
+      }
+    });
 
   if (loading) {
     return (
@@ -269,6 +296,8 @@ function VehiclesPageContent() {
           <div className={styles.toolbar} id="vehicles-toolbar">
             <div className={styles.toolbarLeft}>
               <FilterBar
+                searchValue={searchQuery}
+                onSearchChange={setSearchQuery}
                 filterDropdown={
                   <VehiclesFilterModal
                     isOpen={true}
@@ -326,7 +355,7 @@ function VehiclesPageContent() {
                         <input
                           type="checkbox"
                           className={styles.checkbox}
-                          checked={selectedRows.size === vehicles.length && vehicles.length > 0}
+                          checked={selectedRows.size === displayedVehicles.length && displayedVehicles.length > 0}
                           onChange={toggleSelectAll}
                           aria-label="Select all"
                         />
@@ -348,7 +377,7 @@ function VehiclesPageContent() {
                     </tr>
                   </thead>
                   <tbody>
-                    {vehicles.map((v, idx: number) => (
+                    {displayedVehicles.map((v, idx: number) => (
                       <tr key={idx} className={selectedRows.has(idx) ? styles.rowSelected : ""}>
                         <td className={styles.checkCol}>
                           <input
@@ -425,7 +454,7 @@ function VehiclesPageContent() {
             /* ─── Grid / Card View ─── */
             <>
               <div className={styles.cardGrid} id="vehicles-grid">
-                {vehicles.slice(0, 6).map((v, idx: number) => (
+                {displayedVehicles.slice(0, 6).map((v, idx: number) => (
                   <div key={idx} className={styles.vehicleCard}>
                     {/* Card Image */}
                     <div className={styles.cardImage}>

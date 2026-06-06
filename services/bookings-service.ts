@@ -84,4 +84,16 @@ export const bookingsService = {
       throw error;
     }
   },
+
+  sendReminder: async (bookingRef: string, data: { reason: string }) => {
+    try {
+      const response = await publicApi.post('', data, {
+        params: { path: `api/v1/admin/bookings/send-reminder/`, booking_ref: bookingRef },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to send reminder for booking ${bookingRef}:`, error);
+      throw error;
+    }
+  },
 };
