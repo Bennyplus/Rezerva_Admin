@@ -1,0 +1,143 @@
+.backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 24px;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 440px;
+  overflow: hidden;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+  animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.header {
+  padding: 24px 24px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.title {
+  font-size: 20px;
+  font-weight: 600;
+  color: #1a1c1e;
+  margin: 0;
+}
+
+.closeBtn {
+  background: transparent;
+  border: none;
+  color: #98a2b3;
+  cursor: pointer;
+  padding: 4px;
+  display: flex;
+}
+
+.closeBtn:hover {
+  color: #1a1c1e;
+}
+
+.body {
+  padding: 0 24px 24px;
+}
+
+.message {
+  font-size: 14px;
+  color: #667085;
+  margin: 0 0 24px 0;
+  line-height: 1.5;
+}
+
+.formGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 14px;
+  font-weight: 500;
+  color: #344054;
+}
+
+.required {
+  color: #d92d20;
+}
+
+.textarea {
+  width: 100%;
+  min-height: 120px;
+  padding: 12px;
+  background: #ffffff;
+  border: 1px solid #eef0f2;
+  border-radius: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  resize: none;
+  transition: border-color 0.2s;
+}
+
+.textarea:focus {
+  border-color: #1a1c1e;
+}
+
+.footer {
+  padding: 16px 24px 24px;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+}
+
+.dismissBtn {
+  height: 44px;
+  padding: 0 20px;
+  background: #ffffff;
+  border: 1px solid #eef0f2;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #344054;
+  cursor: pointer;
+}
+
+.confirmBtn {
+  height: 44px;
+  padding: 0 20px;
+  background: #f2f4f7;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #98a2b3;
+  cursor: not-allowed;
+  transition: all 0.2s;
+}
+
+.confirmBtnActive {
+  background: #d92d20;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.confirmBtnActive:hover {
+  opacity: 0.9;
+}

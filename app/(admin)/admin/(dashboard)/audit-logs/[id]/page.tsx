@@ -31,8 +31,13 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
     fetchLog();
   }, [id]);
 
+  // Normalize status: API returns lowercase "success", UI expects "Success"
+  const normalizeStatus = (status: string) =>
+    status ? status.charAt(0).toUpperCase() + status.slice(1).toLowerCase() : "";
+
   const statusClass = (status: string) => {
-    switch (status) {
+    const normalized = normalizeStatus(status);
+    switch (normalized) {
       case "Success": return styles.statusSuccess;
       case "Denied": return styles.statusDenied;
       case "Pending": return styles.statusPending;
@@ -40,7 +45,8 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
     }
   };
 
-  const isStatusSuccess = (statusStr: string) => statusStr === "Success";
+  const isStatusSuccess = (statusStr: string) =>
+    normalizeStatus(statusStr) === "Success";
 
   if (loading) {
     return (
@@ -53,6 +59,28 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
   if (!log) {
     return <div style={{ padding: '24px' }}>Log not found</div>;
   }
+
+  // Derived values from flat API response
+  const displayStatus = normalizeStatus(log.status);
+  const deviceBrowser = [log.device_type, log.device_os]
+    .filter(Boolean)
+    .join(" on ") || log.user_agent || "N/A";
+  const location = log.location_label || (
+    log.latitude && log.longitude ? `${log.latitude}, ${log.longitude}` : null
+  );
+
+  // Change details: build from previous_value / new_value if present
+  const changeDetails: Array<{ field: string; before: string; after: string }> = [];
+  if (log.previous_value != null || log.new_value != null) {
+    changeDetails.push({
+      field: log.object_type || "Value",
+      before: log.previous_value != null ? String(log.previous_value) : "—",
+      after: log.new_value != null ? String(log.new_value) : "—",
+    });
+  }
+
+  // Affected record: show when object_type or object_id is present
+  const hasAffectedRecord = log.object_type || log.object_id;
 
   return (
     <div className={styles.page}>
@@ -67,7 +95,7 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
               <span className={styles.actionTitle}>Action: {log.action}</span>
               <span className={`${styles.badge} ${statusClass(log.status)}`}>
                 <span className={styles.badgeDot}></span>
-                {log.status}
+                {displayStatus}
               </span>
             </div>
             <div className={styles.timestamp}>Timestamp: On {log.timestamp || log.created_at || 'N/A'}</div>
@@ -100,10 +128,10 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Action Performed By</h2>
             <div className={styles.performerGrid}>
-              {log.user?.avatar ? (
+              {log.profile_picture ? (
                 <Image 
-                  src={log.user.avatar} 
-                  alt={log.user.name || 'User'} 
+                  src={log.profile_picture} 
+                  alt={log.user || 'User'} 
                   width={64} 
                   height={64} 
                   className={styles.avatar} 
@@ -112,55 +140,43 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
                 <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#ccc' }} className={styles.avatar} />
               )}
               <div className={styles.infoBlock}>
-                <span className={styles.infoLabel}>Admin Name</span>
-                <span className={styles.infoValue}>{log.user?.name || log.user_name || log.user || 'System'}</span>
+                <span className={styles.infoLabel}>Name</span>
+                <span className={styles.infoValue}>{log.user || 'System'}</span>
               </div>
               <div className={styles.infoBlock}>
                 <span className={styles.infoLabel}>Role</span>
-                <span className={styles.infoValue}>{log.user?.role || log.role || 'N/A'}</span>
+                <span className={styles.infoValue}>{log.actor_type || 'N/A'}</span>
               </div>
               <div className={styles.infoBlock}>
-                <span className={styles.infoLabel}>Email</span>
-                <span className={styles.infoValue}>{log.user?.email || log.email || 'N/A'}</span>
+                <span className={styles.infoLabel}>Category</span>
+                <span className={styles.infoValue}>{log.category || 'N/A'}</span>
               </div>
             </div>
           </div>
 
           {/* Affected Record */}
-          {log.affectedRecord && (
+          {hasAffectedRecord && (
             <div className={styles.section}>
               <h2 className={styles.sectionTitle}>Affected Record</h2>
               <div className={styles.recordGrid}>
-                {log.affectedRecord.bookingId && (
+                {log.object_type && (
                   <div className={styles.infoBlock}>
-                    <span className={styles.infoLabel}>Booking ID</span>
-                    <div className={styles.copyable}>
-                      <span className={styles.infoValue}>{log.affectedRecord.bookingId}</span>
-                      <button className={styles.copyBtn} aria-label="Copy booking ID"><CopyIcon /></button>
-                    </div>
+                    <span className={styles.infoLabel}>Object Type</span>
+                    <span className={styles.infoValue}>{log.object_type}</span>
                   </div>
                 )}
-                {log.affectedRecord.transactionId && (
+                {log.object_id && (
                   <div className={styles.infoBlock}>
-                    <span className={styles.infoLabel}>Transaction ID</span>
+                    <span className={styles.infoLabel}>Object ID</span>
                     <div className={styles.copyable}>
-                      <span className={styles.infoValue}>{log.affectedRecord.transactionId}</span>
-                      <button className={styles.copyBtn} aria-label="Copy transaction ID"><CopyIcon /></button>
-                    </div>
-                  </div>
-                )}
-                {log.affectedRecord.customerName && (
-                  <div className={styles.infoBlock}>
-                    <span className={styles.infoLabel}>Customer Name</span>
-                    <span className={styles.infoValue}>{log.affectedRecord.customerName}</span>
-                  </div>
-                )}
-                {log.affectedRecord.vehicleId && (
-                  <div className={styles.infoBlock}>
-                    <span className={styles.infoLabel}>Vehicle ID</span>
-                    <div className={styles.copyable}>
-                      <span className={styles.infoValue}>{log.affectedRecord.vehicleId}</span>
-                      <button className={styles.copyBtn} aria-label="Copy vehicle ID"><CopyIcon /></button>
+                      <span className={styles.infoValue}>{log.object_id}</span>
+                      <button 
+                        className={styles.copyBtn} 
+                        aria-label="Copy object ID"
+                        onClick={() => navigator.clipboard.writeText(log.object_id)}
+                      >
+                        <CopyIcon />
+                      </button>
                     </div>
                   </div>
                 )}
@@ -169,7 +185,7 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
           )}
 
           {/* Change Details */}
-          {log.changeDetails && log.changeDetails.length > 0 && (
+          {changeDetails.length > 0 && (
             <div className={styles.section}>
               <h2 className={styles.sectionTitle}>Change Details</h2>
               <table className={styles.changesTable}>
@@ -181,7 +197,7 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
                   </tr>
                 </thead>
                 <tbody>
-                  {log.changeDetails.map((change: any, idx: number) => (
+                  {changeDetails.map((change, idx) => (
                     <tr key={idx}>
                       <td style={{ fontWeight: 500 }}>{change.field}</td>
                       <td>
@@ -203,12 +219,12 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
             </div>
           )}
 
-          {/* Admin Notes */}
-          {log.adminNotes && (
+          {/* Admin Notes / Description */}
+          {log.description && (
             <div className={styles.section}>
               <h2 className={styles.sectionTitle}>Admin Notes</h2>
               <div className={styles.notesArea}>
-                {log.adminNotes}
+                {log.description}
               </div>
             </div>
           )}
@@ -216,41 +232,36 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
 
         {/* Right Column */}
         <div className={styles.rightCol}>
-          {/* Activity Timeline */}
-          {log.activityTimeline && log.activityTimeline.length > 0 && (
-            <div className={styles.sidebarCard}>
-              <h3 className={styles.timelineTitle}>Activity Timeline</h3>
-              <div className={styles.timelineList}>
-                {log.activityTimeline.map((step: any, idx: number) => (
-                  <div key={idx} className={styles.timelineItem}>
-                    <div className={styles.timelineLine}></div>
-                    <div className={`${styles.timelineCheckbox} ${step.completed ? styles.checked : ''}`}>
-                      {step.completed && <CheckIcon />}
-                    </div>
-                    <div className={styles.timelineTitleText}>{step.title}</div>
-                    <div className={styles.timelineTime}>{step.timestamp}</div>
-                  </div>
-                ))}
-              </div>
+          {/* Network Info — always rendered from flat fields */}
+          <div className={styles.networkCard}>
+            <div className={styles.networkLabel}>I.P Address</div>
+            <div className={styles.networkValue}>{log.ip_address || 'N/A'}</div>
+          </div>
+          <div className={styles.networkCard}>
+            <div className={styles.networkLabel}>Device / Browser</div>
+            <div className={styles.networkValue}>{deviceBrowser}</div>
+          </div>
+          {log.app_version && (
+            <div className={styles.networkCard}>
+              <div className={styles.networkLabel}>App Version</div>
+              <div className={styles.networkValue}>{log.app_version}</div>
             </div>
           )}
+          <div className={styles.networkCard}>
+            <div className={styles.networkLabel}>Location</div>
+            <div className={styles.networkValue}>{location || 'N/A'}</div>
+          </div>
 
-          {/* Network Info */}
-          {log.networkInfo && (
-            <>
-              <div className={styles.networkCard}>
-                <div className={styles.networkLabel}>I.P Address</div>
-                <div className={styles.networkValue}>{log.networkInfo.ipAddress}</div>
+          {/* Metadata (if present) */}
+          {log.metadata && (
+            <div className={styles.networkCard}>
+              <div className={styles.networkLabel}>Metadata</div>
+              <div className={styles.networkValue} style={{ fontSize: 12, wordBreak: 'break-all' }}>
+                {typeof log.metadata === 'string' 
+                  ? log.metadata 
+                  : JSON.stringify(log.metadata, null, 2)}
               </div>
-              <div className={styles.networkCard}>
-                <div className={styles.networkLabel}>Device/Browser</div>
-                <div className={styles.networkValue}>{log.networkInfo.deviceBrowser}</div>
-              </div>
-              <div className={styles.networkCard}>
-                <div className={styles.networkLabel}>Location</div>
-                <div className={styles.networkValue}>{log.networkInfo.location}</div>
-              </div>
-            </>
+            </div>
           )}
         </div>
       </div>

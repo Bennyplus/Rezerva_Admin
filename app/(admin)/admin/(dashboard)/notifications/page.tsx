@@ -45,6 +45,41 @@ export default function NotificationsPage() {
     }
   };
 
+  const handleDuplicate = async (id: string) => {
+    setActiveDropdown(null);
+    try {
+      await notificationsService.duplicateNotification(id);
+      fetchNotifications();
+    } catch (error) {
+      console.error(`Failed to duplicate notification ${id}`, error);
+    }
+  };
+
+  const handleCancelSchedule = async (id: string) => {
+    setActiveDropdown(null);
+    try {
+      await notificationsService.cancelScheduledNotification(id);
+      fetchNotifications();
+    } catch (error) {
+      console.error(`Failed to cancel schedule for notification ${id}`, error);
+    }
+  };
+
+  const handleDeactivate = async (id: string) => {
+    setActiveDropdown(null);
+    try {
+      await notificationsService.deactivateNotification(id);
+      fetchNotifications();
+    } catch (error) {
+      console.error(`Failed to deactivate notification ${id}`, error);
+    }
+  };
+
+  const handleViewDetails = (id: string) => {
+    setActiveDropdown(null);
+    setSelectedNotificationId(id);
+  };
+
   useEffect(() => {
     fetchNotifications();
   }, [currentPage]);
@@ -200,16 +235,13 @@ export default function NotificationsPage() {
                               <button className={styles.dropdownItem}>Edit Notification</button>
                               <button 
                                 className={styles.dropdownItem}
-                                onClick={() => {
-                                  setSelectedNotificationId(notif.id);
-                                  setActiveDropdown(null);
-                                }}
+                                onClick={() => handleViewDetails(notif.id)}
                               >
                                 View Details
                               </button>
-                              <button className={styles.dropdownItem}>Cancel Schedule</button>
-                              <button className={styles.dropdownItem}>Duplicate</button>
-                              <button className={styles.dropdownItem}>Deactivate</button>
+                              <button className={styles.dropdownItem} onClick={() => handleCancelSchedule(notif.id)}>Cancel Schedule</button>
+                              <button className={styles.dropdownItem} onClick={() => handleDuplicate(notif.id)}>Duplicate</button>
+                              <button className={styles.dropdownItem} onClick={() => handleDeactivate(notif.id)}>Deactivate</button>
                             </div>
                           )}
                         </div>
@@ -233,7 +265,7 @@ export default function NotificationsPage() {
 
       {selectedNotificationId && (
         <NotificationDetailsModal
-          notification={notificationlist.find((n) => n.id === selectedNotificationId)}
+          notificationId={selectedNotificationId}
           onClose={() => setSelectedNotificationId(null)}
         />
       )}

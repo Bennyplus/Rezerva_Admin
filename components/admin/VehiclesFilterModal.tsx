@@ -5,6 +5,7 @@ interface VehiclesFilterModalProps {
   isOpen: boolean;
   onClose: () => void;
   onApply: (filters: Record<string, string>) => void;
+  onClear?: () => void;
   initialFilters: Record<string, string>;
   categoriesMap?: Record<string, string>; // e.g. { '1': 'Sedan', '2': 'SUV' }
 }
@@ -15,6 +16,7 @@ export default function VehiclesFilterModal({
   isOpen,
   onClose,
   onApply,
+  onClear,
   initialFilters,
   categoriesMap = {}
 }: VehiclesFilterModalProps) {
@@ -62,6 +64,7 @@ export default function VehiclesFilterModal({
     setCapacityFilters([]);
     setFuelFilters([]);
     setTransmissionFilters([]);
+    onClear?.();
   };
 
   const handleApply = () => {
@@ -211,41 +214,45 @@ export default function VehiclesFilterModal({
 
   return (
     <div className={styles.dropdownWrap} onClick={e => e.stopPropagation()}>
-      <div className={styles.body}>
-          {/* Sidebar */}
-          <div className={styles.sidebar}>
-            {TABS.map(tab => (
-              <button
-                key={tab.id}
-                className={`${styles.sidebarItem} ${activeTab === tab.id ? styles.sidebarItemActive : ''}`}
-                onClick={() => setActiveTab(tab.id)}
-              >
-                <div className={styles.sidebarItemIcon}>
-                  {renderIcon(tab.id)}
-                  {tab.label}
-                </div>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+      <div className={styles.sidebar}>
+        {TABS.map(tab => (
+          <button
+            key={tab.id}
+            className={`${styles.sidebarItem} ${activeTab === tab.id ? styles.sidebarItemActive : ''}`}
+            onClick={() => setActiveTab(tab.id)}
+          >
+            <div className={styles.sidebarItemIcon}>
+              {renderIcon(tab.id)}
+            </div>
+            {tab.label}
+            {activeTab === tab.id && (
+              <div className={styles.sidebarItemArrow}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="9 18 15 12 9 6" />
                 </svg>
-              </button>
-            ))}
-          </div>
+              </div>
+            )}
+          </button>
+        ))}
+      </div>
 
-          {/* Content */}
-          <div className={styles.content}>
-            <div className={styles.contentHeader}>
-              {renderIcon(activeTab)}
-              {TABS.find(t => t.id === activeTab)?.label}
-            </div>
-            {renderContent()}
+      <div className={styles.content}>
+        <div className={styles.contentHeader}>
+          <div className={styles.sidebarItemIcon}>
+            {renderIcon(activeTab)}
           </div>
+          {TABS.find(t => t.id === activeTab)?.label}
+        </div>
+        
+        <div className={styles.body}>
+          {renderContent()}
         </div>
 
-        {/* Footer */}
         <div className={styles.footer}>
           <button className={styles.clearBtn} onClick={handleClear}>Clear</button>
           <button className={styles.applyBtn} onClick={handleApply}>Apply</button>
         </div>
+      </div>
     </div>
   );
 }

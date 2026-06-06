@@ -62,9 +62,9 @@ export const bookingsService = {
     }
   },
 
-  confirmPickup: async (bookingRef: string) => {
+  confirmPickup: async (bookingRef: string, data?: { otp: string }) => {
     try {
-      const response = await publicApi.post('', null, {
+      const response = await publicApi.post('', data || null, {
         params: { path: `api/v1/admin/bookings/pickup/confirm/`, booking_ref: bookingRef },
       });
       return response.data;
@@ -81,6 +81,18 @@ export const bookingsService = {
       return response.data;
     } catch (error) {
       console.error(`Failed to modify booking ${bookingRef}:`, error);
+      throw error;
+    }
+  },
+
+  sendReminder: async (bookingRef: string, data: { reason: string }) => {
+    try {
+      const response = await publicApi.post('', data, {
+        params: { path: `api/v1/admin/bookings/send-reminder/`, booking_ref: bookingRef },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to send reminder for booking ${bookingRef}:`, error);
       throw error;
     }
   },
