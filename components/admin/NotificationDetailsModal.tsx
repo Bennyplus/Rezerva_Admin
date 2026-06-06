@@ -1,25 +1,43 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import styles from "./NotificationDetailsModal.module.css";
+import { notificationsService } from "@/services/notifications-services";
 
 interface NotificationDetailsModalProps {
   onClose: () => void;
-  notification: any;
+  notificationId: string;
 }
 
-export default function NotificationDetailsModal({ onClose, notification }: NotificationDetailsModalProps) {
-  // We'll mock the missing details to match the design for now, since ADMIN_NOTIFICATIONS
-  // doesn't have all these fields yet.
+export default function NotificationDetailsModal({ onClose, notificationId }: NotificationDetailsModalProps) {
+  const [notification, setNotification] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDetails = async () => {
+      setIsLoading(true);
+      try {
+        const data = await notificationsService.getNotificationById(notificationId);
+        setNotification(data);
+      } catch (error) {
+        console.error("Failed to fetch notification details:", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchDetails();
+  }, [notificationId]);
+
   const details = {
-    title: notification.title || "Drifully Funfair",
-    recipients: notification.recipients || "All Users",
-    cta: "Sign Up Now",
-    content: "Fun Games and Prizes to Win",
-    channel: notification.channel === "Email" ? "Email Notification" : notification.channel,
-    createdOn: notification.createdOn || "30 March 2026",
-    createdBy: "Prosper Edward",
-    updatedOn: "--",
+    title: notification?.title || "--",
+    recipients: notification?.recipient_count?.toString() || "0",
+    cta: notification?.call_to_action || "None",
+    content: notification?.message || "--",
+    channel: notification?.delivery_channel === "email" ? "Email Notification" : "Push Notification",
+    createdOn: notification?.created_at ? new Date(notification.created_at).toLocaleDateString('en-GB') : "--",
+    createdBy: notification?.created_by_name || "--",
+    updatedOn: notification?.updated_at ? new Date(notification.updated_at).toLocaleDateString('en-GB') : "--",
     lastUpdatedBy: "--",
   };
 
@@ -29,7 +47,9 @@ export default function NotificationDetailsModal({ onClose, notification }: Noti
         
         {/* Header */}
         <div className={styles.header}>
-          <h2 className={styles.title}>{details.title}</h2>
+          <h2 className={styles.title}>
+            {isLoading ? <div className={styles.skeletonText} style={{ width: '200px', height: '28px' }} /> : details.title}
+          </h2>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close modal">
             <CloseIcon />
           </button>
@@ -37,87 +57,100 @@ export default function NotificationDetailsModal({ onClose, notification }: Noti
 
         {/* Content Box */}
         <div className={styles.contentBox}>
-          {/* Hero Image */}
-          <div className={styles.heroImage}>
-            <Image 
-              src="/images/admin/notification-hero.jpg" 
-              alt="Notification Hero" 
-              fill 
-              style={{ objectFit: "cover" }} 
-              onError={(e) => {
-                // Fallback if image doesn't exist
-                (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop";
-              }}
-            />
-          </div>
+          {isLoading ? (
+            <div className={styles.skeletonContainer}>
+              <div className={styles.skeletonBox} style={{ height: '160px', marginBottom: '24px' }} />
+              <div className={styles.skeletonText} style={{ width: '100px', height: '24px', marginBottom: '16px' }} />
+              <div className={styles.skeletonText} style={{ width: '100%', height: '20px', marginBottom: '12px' }} />
+              <div className={styles.skeletonText} style={{ width: '100%', height: '20px', marginBottom: '12px' }} />
+              <div className={styles.skeletonText} style={{ width: '80%', height: '20px', marginBottom: '24px' }} />
+            </div>
+          ) : (
+            <>
+              {/* Hero Image */}
+              {notification?.media_attachment && (
+                <div className={styles.heroImage}>
+                  <Image 
+                    src={notification.media_attachment} 
+                    alt="Notification Hero" 
+                    fill 
+                    style={{ objectFit: "cover" }} 
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop";
+                    }}
+                  />
+                </div>
+              )}
 
-          {/* Details Section */}
-          <div className={styles.detailsSection}>
-            <h3 className={styles.sectionTitle}>Details</h3>
-            
-            <div className={styles.detailsGrid}>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Title</span>
-                <span className={styles.detailValue}>{details.title}</span>
+              {/* Details Section */}
+              <div className={styles.detailsSection}>
+                <h3 className={styles.sectionTitle}>Details</h3>
+                
+                <div className={styles.detailsGrid}>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Title</span>
+                    <span className={styles.detailValue}>{details.title}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Recipients</span>
+                    <span className={styles.detailValue}>{details.recipients}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Call To Action</span>
+                    <span className={styles.detailValue}>{details.cta}</span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Content</span>
+                    <span className={styles.detailValue}>
+                      {details.content}
+                      <button className={styles.viewContentBtn}>
+                        <EyeIcon />
+                      </button>
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Delivery Channel</span>
+                    <span className={styles.detailValue}>{details.channel}</span>
+                  </div>
+                </div>
               </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Recipients</span>
-                <span className={styles.detailValue}>{details.recipients}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Call To Action</span>
-                <span className={styles.detailValue}>{details.cta}</span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Content</span>
-                <span className={styles.detailValue}>
-                  {details.content}
-                  <button className={styles.viewContentBtn}>
-                    <EyeIcon />
-                  </button>
-                </span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Delivery Channel</span>
-                <span className={styles.detailValue}>{details.channel}</span>
-              </div>
-            </div>
-          </div>
 
-          {/* Timeline Section */}
-          <div className={styles.timelineSection}>
-            <div className={styles.timelineHeader}>
-              TIMELINE
-            </div>
-            <div className={styles.timelineBody}>
-              <div className={styles.timelineGrid}>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Created On:</span>
-                  <span className={styles.detailValue}>{details.createdOn}</span>
+              {/* Timeline Section */}
+              <div className={styles.timelineSection}>
+                <div className={styles.timelineHeader}>
+                  TIMELINE
                 </div>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Created By:</span>
-                  <span className={styles.detailValue}>{details.createdBy}</span>
-                </div>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Updated On:</span>
-                  <span className={styles.detailValue}>{details.updatedOn}</span>
-                </div>
-                <div className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Last Updated By:</span>
-                  <span className={styles.detailValue}>{details.lastUpdatedBy}</span>
+                <div className={styles.timelineBody}>
+                  <div className={styles.timelineGrid}>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Created On:</span>
+                      <span className={styles.detailValue}>{details.createdOn}</span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Created By:</span>
+                      <span className={styles.detailValue}>{details.createdBy}</span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Updated On:</span>
+                      <span className={styles.detailValue}>{details.updatedOn}</span>
+                    </div>
+                    <div className={styles.detailItem}>
+                      <span className={styles.detailLabel}>Last Updated By:</span>
+                      <span className={styles.detailValue}>{details.lastUpdatedBy}</span>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </>
+          )}
         </div>
 
         {/* Footer */}
         <div className={styles.footer}>
-          <button className={styles.deactivateBtn}>Deactivate</button>
+          <button className={styles.deactivateBtn} disabled={isLoading}>Deactivate</button>
           <div className={styles.footerRight}>
-            <button className={styles.sendBtn}>Send Notification</button>
-            <button className={styles.editBtn}>Edit Notification</button>
+            <button className={styles.sendBtn} disabled={isLoading}>Send Notification</button>
+            <button className={styles.editBtn} disabled={isLoading}>Edit Notification</button>
           </div>
         </div>
 
