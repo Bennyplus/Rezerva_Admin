@@ -39,17 +39,19 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
   const [fuelTypeOptions, setFuelTypeOptions] = useState<{ value: string; label: string }[]>([]);
   const [transmissionOptions, setTransmissionOptions] = useState<{ value: string; label: string }[]>([]);
   const [featureOptions, setFeatureOptions] = useState<{ value: string; label: string }[]>([]);
+  const [categoryOptions, setCategoryOptions] = useState<{ value: string; label: string }[]>([]);
 
   useEffect(() => {
     const fetchOptions = async () => {
       try {
-        const { brands, colors, fuels, transmissions, features } = await vehiclesService.getVehicleOptions();
+        const { brands, colors, fuels, transmissions, features, categories } = await vehiclesService.getVehicleOptions();
 
         setBrandOptions(brands.map((b: any) => ({ value: b.id.toString(), label: b.name })));
         setColorOptions(colors.map((c: any) => ({ value: c.id.toString(), label: c.name })));
         setFuelTypeOptions(fuels.map((f: any) => ({ value: f.value, label: f.label })));
         setTransmissionOptions(transmissions.map((t: any) => ({ value: t.value, label: t.label })));
         setFeatureOptions(features.map((f: any) => ({ value: f.id.toString(), label: f.name })));
+        setCategoryOptions(categories.map((c: any) => ({ value: c.id.toString(), label: c.name })));
       } catch (error) {
         console.error("Failed to fetch vehicle options:", error);
       }
@@ -109,6 +111,9 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
       payload.append("chasis_number", formData.chassisNumber);
       payload.append("vin_number", formData.vin);
       payload.append("transmission", formData.transmission);
+      payload.append("location", formData.location);
+      payload.append("seating_capacity", formData.seatingCapacity);
+      payload.append("category", formData.category);
 
       // Send files
       imagePreviews.forEach((img) => {
@@ -219,16 +224,7 @@ export default function AddVehicleForm({ onCancel, onSave }: AddVehicleFormProps
                 name="category"
                 value={formData.category}
                 placeholder="e.g Sedan"
-                options={[
-                  { value: "sedan", label: "Sedan" },
-                  { value: "hatchback", label: "Hatchback" },
-                  { value: "suv", label: "SUV" },
-                  { value: "coupe", label: "Coupe" },
-                  { value: "convertible", label: "Convertible" },
-                  { value: "wagon", label: "Wagon" },
-                  { value: "truck", label: "Truck" },
-                  { value: "minivan", label: "Minivan" },
-                ]}
+                options={categoryOptions}
                 onChange={handleSelectChange}
               />
             </div>

@@ -1,68 +1,120 @@
+/* ── Overlay ── */
 .overlay {
   position: fixed;
   inset: 0;
   background-color: rgba(0, 0, 0, 0.4);
   backdrop-filter: blur(4px);
-  z-index: 1010; /* higher than bulk upload */
+  z-index: 1010;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: 24px;
 }
 
+/* ── Modal Container ── */
 .modal {
   background-color: #ffffff;
-  border-radius: 12px;
+  border-radius: 16px;
   width: 100%;
-  max-width: 800px;
+  max-width: 720px;
   max-height: 90vh;
   display: flex;
   flex-direction: column;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 24px 48px -12px rgba(0, 0, 0, 0.18);
   overflow: hidden;
+  animation: modalIn 0.2s ease-out;
 }
 
-/* Header */
+@keyframes modalIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* ── Header ── */
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 24px;
+  padding: 20px 24px 16px;
   border-bottom: 1px solid #f1f3f5;
+  flex-shrink: 0;
 }
 
 .titleGroup {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .title {
-  font-size: 20px;
-  font-weight: 600;
+  font-size: 18px;
+  font-weight: 700;
   color: #111827;
   margin: 0;
+  letter-spacing: -0.3px;
 }
 
+/* Status Badges */
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
+  gap: 5px;
+  padding: 3px 10px;
   border-radius: 20px;
   font-size: 12px;
   font-weight: 500;
-  color: #10b981;
-  background-color: #ecfdf5;
 }
 
 .badgeDot {
   width: 6px;
   height: 6px;
   border-radius: 50%;
+}
+
+.badgeAvailable {
+  background-color: #ecfdf5;
+  color: #065f46;
+}
+
+.badgeAvailable .badgeDot {
   background-color: #10b981;
 }
 
+.badgeBooked {
+  background-color: #fff7ed;
+  color: #c2410c;
+}
+
+.badgeBooked .badgeDot {
+  background-color: #f97316;
+}
+
+.badgeMaintenance {
+  background-color: #f3f4f6;
+  color: #374151;
+}
+
+.badgeMaintenance .badgeDot {
+  background-color: #6b7280;
+}
+
+.badgeInactive {
+  background-color: #fef2f2;
+  color: #dc2626;
+}
+
+.badgeInactive .badgeDot {
+  background-color: #ef4444;
+}
+
+/* Close Button */
 .closeBtn {
   background: none;
   border: 1px solid #e5e7eb;
@@ -72,37 +124,39 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 30px;
+  height: 30px;
   padding: 0;
-  transition: all 0.2s;
+  transition: all 0.15s;
+  flex-shrink: 0;
 }
 
 .closeBtn:hover {
   background-color: #f3f4f6;
   color: #111827;
+  border-color: #d1d5db;
 }
 
-/* Body */
+/* ── Body ── */
 .body {
-  padding: 24px;
+  padding: 20px 24px 16px;
   overflow-y: auto;
   flex: 1;
 }
 
-/* Images Gallery */
+/* ── Gallery ── */
 .galleryWrap {
-  background-color: #f9fafb;
+  background-color: #f3f4f6;
   border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 32px;
+  padding: 12px;
+  margin-bottom: 24px;
 }
 
 .gallery {
   display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: 16px;
-  height: 300px;
+  grid-template-columns: 3fr 1fr;
+  gap: 10px;
+  height: 260px;
 }
 
 .mainImage {
@@ -116,7 +170,7 @@
 .sideImages {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 10px;
   height: 100%;
 }
 
@@ -132,18 +186,24 @@
   object-fit: cover;
 }
 
-/* Details Section */
+/* ── Details Section ── */
 .detailsTitle {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   color: #111827;
-  margin: 0 0 16px 0;
+  margin: 0 0 14px 0;
+}
+
+.detailsSection {
+  background-color: #f9fafb;
+  border-radius: 10px;
+  padding: 16px;
 }
 
 .detailsGrid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 24px;
+  gap: 20px 16px;
 }
 
 .detailItem {
@@ -153,7 +213,7 @@
 }
 
 .detailLabel {
-  font-size: 13px;
+  font-size: 12px;
   color: #9ca3af;
   font-weight: 400;
 }
@@ -168,26 +228,29 @@
   grid-column: 1 / -1;
 }
 
-/* Footer */
+/* ── Footer ── */
 .footer {
-  padding: 16px 24px;
+  padding: 14px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   border-top: 1px solid #f1f3f5;
-  background-color: #f9fafb;
+  background-color: #ffffff;
+  flex-shrink: 0;
+  gap: 12px;
 }
 
 .btnDeactivate {
-  background: white;
-  border: 1px solid #ef4444;
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
   border-radius: 8px;
-  padding: 10px 24px;
+  padding: 9px 22px;
   font-size: 14px;
   font-weight: 500;
   color: #ef4444;
   cursor: pointer;
-  transition: all 0.2s;
+  transition: all 0.15s;
+  white-space: nowrap;
 }
 
 .btnDeactivate:hover {
@@ -196,41 +259,111 @@
 
 .footerRight {
   display: flex;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
+}
+
+/* Mark As Wrapper & Dropdown */
+.markAsWrapper {
+  position: relative;
 }
 
 .markAsBtn {
-  background: white;
-  border: 1px solid #e5e7eb;
+  background: #ffffff;
+  border: 1.5px solid #e5e7eb;
   border-radius: 8px;
-  padding: 10px 16px;
+  padding: 9px 16px;
   font-size: 14px;
   font-weight: 500;
-  color: #6b7280;
+  color: #868C98;
   cursor: pointer;
   display: flex;
   align-items: center;
-  gap: 8px;
-  transition: all 0.2s;
+  gap: 6px;
+  transition: all 0.15s;
+  white-space: nowrap;
 }
 
 .markAsBtn:hover {
+  background-color: #f9fafb;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.markAsDropdown {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 0;
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  min-width: 140px;
+  z-index: 10;
+  overflow: hidden;
+}
+
+.markAsOption {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  background: transparent;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.1s;
+}
+
+.markAsOption:hover {
   background-color: #f9fafb;
 }
 
 .btnEdit {
   background-color: #1a1e26;
-  color: white;
+  color: #ffffff;
   border: none;
-  border-radius: 8px;
-  padding: 10px 24px;
+  border-radius: 10px;
+  padding: 9px 26px;
   font-size: 14px;
   font-weight: 500;
   cursor: pointer;
-  transition: background-color 0.2s;
+  transition: background-color 0.15s;
+  white-space: nowrap;
 }
 
 .btnEdit:hover {
   background-color: #2d3748;
+}
+
+/* ── Responsive ── */
+@media (max-width: 640px) {
+  .gallery {
+    grid-template-columns: 1fr;
+    height: auto;
+  }
+
+  .mainImage {
+    height: 200px;
+  }
+
+  .sideImages {
+    flex-direction: row;
+    height: 100px;
+  }
+
+  .detailsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .footer {
+    flex-wrap: wrap;
+  }
+
+  .footerRight {
+    flex: 1;
+    justify-content: flex-end;
+  }
 }

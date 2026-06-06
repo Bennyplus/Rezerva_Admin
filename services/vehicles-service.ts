@@ -7,12 +7,13 @@ export const vehiclesService = {
    */
   getVehicleOptions: async () => {
     try {
-      const [brandsRes, colorsRes, fuelsRes, transRes, featuresRes] = await Promise.all([
+      const [brandsRes, colorsRes, fuelsRes, transRes, featuresRes, categoriesRes] = await Promise.all([
         publicApi.get("", { params: { path: "api/v1/vehicles/brands/" } }),
         publicApi.get("", { params: { path: "api/v1/vehicles/colors/" } }),
         publicApi.get("", { params: { path: "api/v1/vehicles/fuel-types/" } }),
         publicApi.get("", { params: { path: "api/v1/vehicles/transmissions/" } }),
         publicApi.get("", { params: { path: "api/v1/vehicles/features/" } }),
+        publicApi.get("", { params: { path: "api/v1/vehicles/categories/" } }),
       ]);
 
       return {
@@ -21,6 +22,7 @@ export const vehiclesService = {
         fuels: Array.isArray(fuelsRes.data) ? fuelsRes.data : fuelsRes.data?.results || [],
         transmissions: Array.isArray(transRes.data) ? transRes.data : transRes.data?.results || [],
         features: Array.isArray(featuresRes.data) ? featuresRes.data : featuresRes.data?.results || [],
+        categories: Array.isArray(categoriesRes.data) ? categoriesRes.data : categoriesRes.data?.results || [],
       };
     } catch (error) {
       console.error("Failed to fetch vehicle options:", error);

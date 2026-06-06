@@ -6,6 +6,7 @@ const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://drifully-bac
 const API_KEY = process.env.DRIFULLY_BACKEND_API_KEY;
 
 let activeRefreshPromise: Promise<{ access: string; refresh: string }> | null = null;
+let lastRefreshedTokens: { access: string; refresh: string; timestamp: number } | null = null;
 
 async function handleRequest(request: NextRequest, method: string) {
   const { searchParams } = new URL(request.url);
@@ -67,27 +68,6 @@ async function handleRequest(request: NextRequest, method: string) {
       }
     }
 
-    // --- STREAMING BYPASS FOR FILE EXPORTS ---
-    // Axios often corrupts binary buffers in Node.js when passed to NextResponse. 
-    // By using native fetch and piping the ReadableStream directly, we guarantee 100% byte-for-byte accuracy.
-    // if (searchParams.get('export')) {
-    //   const fetchResponse = await fetch(`${BACKEND_URL}/${path}?${forwardParams.toString()}`, {
-    //     method,
-    //     headers: {
-    //       'Authorization': headers['Authorization'],
-    //       'X-API-KEY': API_KEY,
-    //     }
-    //   });
-
-    //   return new NextResponse(fetchResponse.body, {
-    //     status: fetchResponse.status,
-    //     headers: {
-    //       'Content-Type': fetchResponse.headers.get('content-type') || 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-    //       'Content-Disposition': fetchResponse.headers.get('content-disposition') || `attachment; filename="export_${Date.now()}.xlsx"`,
-    //     }
-    //   });
-    // }
-    // -----------------------------------------
     if (searchParams.get('export') === 'xlsx') {
       const fetchResponse = await fetch(
         `${BACKEND_URL}/${path}?${forwardParams.toString()}`,
@@ -131,9 +111,23 @@ async function handleRequest(request: NextRequest, method: string) {
     } catch (error: any) {
       if (error.response?.status === 401) {
         const refreshToken = cookieStore.get('refreshToken')?.value;
+        const failedAccessToken = token;
+
         if (refreshToken) {
           try {
-            if (!activeRefreshPromise) {
+            let newTokens: { access: string; refresh: string } | null = null;
+
+            if (activeRefreshPromise) {
+              newTokens = await activeRefreshPromise;
+            } else if (
+              lastRefreshedTokens &&
+              Date.now() - lastRefreshedTokens.timestamp < 10000 &&
+              failedAccessToken !== lastRefreshedTokens.access
+            ) {
+              // We just refreshed the token recently, and this request failed using the old token.
+              // Reuse the newly minted token instead of refreshing again.
+              newTokens = { access: lastRefreshedTokens.access, refresh: lastRefreshedTokens.refresh };
+            } else {
               activeRefreshPromise = axios.post(
                 `${BACKEND_URL}/api/v1/accounts/token/refresh/`,
                 { refresh: refreshToken },
@@ -144,31 +138,37 @@ async function handleRequest(request: NextRequest, method: string) {
                   }
                 }
               ).then(res => {
-                return {
+                const refreshed = {
                   access: res.data.access,
                   refresh: res.data.refresh || refreshToken,
                 };
+                lastRefreshedTokens = { ...refreshed, timestamp: Date.now() };
+                return refreshed;
               }).finally(() => {
                 // Clear the promise so future 401s will trigger a new refresh
                 activeRefreshPromise = null;
               });
+
+              newTokens = await activeRefreshPromise;
             }
 
-            const newTokens = await activeRefreshPromise;
+            if (newTokens) {
+              // Retry original request with new token
+              headers['Authorization'] = `Bearer ${newTokens.access}`;
+              response = await axios({
+                method,
+                url: `${BACKEND_URL}/${path}`,
+                params: forwardParams,
+                headers,
+                data: body,
+                responseType: 'arraybuffer',
+              });
 
-            // Retry original request with new token
-            headers['Authorization'] = `Bearer ${newTokens.access}`;
-            response = await axios({
-              method,
-              url: `${BACKEND_URL}/${path}`,
-              params: forwardParams,
-              headers,
-              data: body,
-              responseType: 'arraybuffer',
-            });
-
-            // Pass the new tokens down to be set as cookies
-            (response as any)._newTokens = newTokens;
+              // Pass the new tokens down to be set as cookies
+              (response as any)._newTokens = newTokens;
+            } else {
+              throw error;
+            }
           } catch (refreshError) {
             console.error('Token refresh failed');
             throw error; // Throw original 401 to clear cookies
