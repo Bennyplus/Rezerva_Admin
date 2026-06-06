@@ -16,6 +16,7 @@ interface CreateNotificationFormProps {
 
 export default function CreateNotificationForm({ onCancel, onSave }: CreateNotificationFormProps) {
   const [imagePreviews, setImagePreviews] = useState<{ url: string; name: string; size: number }[]>([]);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [formData, setFormData] = useState({
     title: "",
@@ -40,17 +41,20 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files) {
-      const newImages = Array.from(files).map((file) => ({
+      const fileArray = Array.from(files);
+      const newImages = fileArray.map((file) => ({
         url: URL.createObjectURL(file),
         name: file.name,
         size: file.size,
       }));
       setImagePreviews((prev) => [...prev, ...newImages]);
+      setSelectedFiles((prev) => [...prev, ...fileArray]);
     }
   };
 
   const removeImage = (index: number) => {
     setImagePreviews((prev) => prev.filter((_, i) => i !== index));
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
   };
 
   const formatFileSize = (bytes: number) => {
@@ -62,6 +66,32 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
   };
 
   const isFormValid = formData.title && formData.message && formData.recipients && formData.channel;
+
+  const handleSaveClick = () => {
+    const submitData = new FormData();
+    submitData.append("title", formData.title);
+    submitData.append("message", formData.message);
+    submitData.append("recipient_type", formData.recipients);
+    submitData.append("is_scheduled", formData.schedule ? "True" : "False");
+    if (formData.schedule) {
+      submitData.append("scheduled_at", new Date(formData.date).toISOString());
+    }
+    if (formData.cta) {
+      submitData.append("call_to_action", formData.cta);
+    }
+    submitData.append("delivery_channel", formData.channel);
+
+    if (formData.recipients === "specific" && formData.userEmails) {
+      const emails = Array.isArray(formData.userEmails) ? formData.userEmails.join(',') : formData.userEmails;
+      submitData.append("user_emails", emails);
+    }
+
+    selectedFiles.forEach((file) => {
+      submitData.append("media_attachments", file);
+    });
+
+    onSave(submitData);
+  };
 
   const editorConfig = useMemo(() => ({
     readonly: false,
@@ -86,7 +116,7 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
           <button
             className={`${styles.saveBtn} ${isFormValid ? styles.saveBtnActive : ""}`}
             disabled={!isFormValid}
-            onClick={() => onSave(formData)}
+            onClick={handleSaveClick}
           >
             Create & Send Notification
           </button>
@@ -147,11 +177,10 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
                   value={formData.recipients}
                   placeholder="e.g All Users"
                   options={[
-                    { value: "all", label: "All Users" },
-                    { value: "active", label: "Active Users" },
-                    { value: "inactive", label: "Inactive Users" },
-                    { value: "new", label: "New Users" },
-                    { value: "custom", label: "Custom" },
+                    { value: "all_users", label: "All Users" },
+                    { value: "all_vendors", label: "All Vendors" },
+                    { value: "all_admins", label: "All Admins" },
+                    { value: "specific", label: "Specific Users" }
                   ]}
                   onChange={handleSelectChange}
                 />
@@ -164,15 +193,17 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
                   placeholder="e.g Email"
                   options={[
                     { value: "email", label: "Email" },
-                    { value: "push", label: "Push (In-App) Notification" },
-                    { value: "sms", label: "SMS " },
+                    { value: "sms", label: "SMS" },
+                    { value: "push", label: "Push Notification" },
+                    { value: "in_app", label: "In-App" },
+                    { value: "all", label: "All Channels" }
                   ]}
                   onChange={handleSelectChange}
                 />
               </div>
             </div>
 
-            {formData.recipients === "custom" && (
+            {formData.recipients === "specific" && (
               <div className={styles.fieldGroup}>
                 <label className={styles.label}>Users Email</label>
                 <CustomSelect
@@ -280,13 +311,13 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
             </div>
 
             <div className={styles.formFooter}>
-              <button className={styles.secondaryBtn} onClick={() => onSave(formData)}>
+              <button className={styles.secondaryBtn} onClick={handleSaveClick}>
                 Create Notification
               </button>
               <button
                 className={`${styles.saveBtn} ${isFormValid ? styles.saveBtnActive : ""}`}
                 disabled={!isFormValid}
-                onClick={() => onSave(formData)}
+                onClick={handleSaveClick}
               >
                 Create & Send Notification
               </button>

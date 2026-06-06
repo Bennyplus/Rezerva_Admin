@@ -97,9 +97,15 @@ export default function NotificationsPage() {
     return (
       <CreateNotificationForm
         onCancel={() => setCurrentView("list")}
-        onSave={(data) => {
-          console.log("Saving notification:", data);
-          setCurrentView("list");
+        onSave={async (data) => {
+          try {
+            await notificationsService.createNotification(data);
+            setCurrentView("list");
+            fetchNotifications();
+          } catch (error) {
+            console.error("Error creating notification:", error);
+            alert("Failed to create notification. Please try again.");
+          }
         }}
       />
     );
