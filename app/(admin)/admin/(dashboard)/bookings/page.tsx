@@ -7,6 +7,7 @@ import Pagination from "@/components/admin/Pagination";
 import BookingDetailView from "@/components/admin/BookingDetailView";
 import CancelBookingModal from "@/components/admin/CancelBookingModal";
 import SendReminderModal from "@/components/admin/SendReminderModal";
+import OTPVerificationModal from "@/components/admin/OTPVerificationModal";
 import { BOOKING_STATS_EMPTY, Booking } from "@/data/admin-bookings";
 import FilterBar from "@/components/admin/FilterBar";
 import Spinner from "@/components/admin/Spinner";
@@ -31,6 +32,10 @@ export default function BookingsPage() {
   
   const [showSendReminderModal, setShowSendReminderModal] = useState(false);
   const [bookingToSendReminder, setBookingToSendReminder] = useState<string | null>(null);
+
+  const [showOTPModal, setShowOTPModal] = useState(false);
+  const [bookingForOTP, setBookingForOTP] = useState<string | null>(null);
+
   const [isExporting, setIsExporting] = useState(false);
 
 
@@ -132,16 +137,25 @@ export default function BookingsPage() {
     }
   };
 
-  const handleConfirmPickup = async (bookingId: string) => {
+  const handleConfirmPickup = (bookingId: string) => {
+    const booking = bookings.find((b) => b.booking_reference === bookingId);
+    if (!booking) return;
+    setBookingForOTP(booking.booking_reference);
+    setShowOTPModal(true);
+    setOpenMenuIdx(null);
+  };
+
+  const submitOTPVerification = async (bookingId: string, otp: string) => {
     try {
-      await bookingsService.confirmPickup(bookingId);
+      await bookingsService.confirmPickup(bookingId, { otp });
       setBookings((prev) =>
         prev.map((b) =>
           b.booking_reference === bookingId ? { ...b, booking_status: "Confirmed" } : b
         )
       );
     } catch (error) {
-      console.error(`Failed to confirm booking ${bookingId}:`, error);
+      console.error(`Failed to confirm booking ${bookingId} with OTP:`, error);
+      throw error;
     }
   };
 
@@ -385,6 +399,17 @@ export default function BookingsPage() {
         onConfirm={async (reason) => {
           if (bookingToSendReminder) {
             await submitSendReminder(bookingToSendReminder, reason);
+          }
+        }}
+      />
+
+      {/* OTP Verification Modal */}
+      <OTPVerificationModal
+        isOpen={showOTPModal}
+        onClose={() => setShowOTPModal(false)}
+        onVerify={async (otp) => {
+          if (bookingForOTP) {
+            await submitOTPVerification(bookingForOTP, otp);
           }
         }}
       />

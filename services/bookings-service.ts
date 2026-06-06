@@ -62,9 +62,9 @@ export const bookingsService = {
     }
   },
 
-  confirmPickup: async (bookingRef: string) => {
+  confirmPickup: async (bookingRef: string, data?: { otp: string }) => {
     try {
-      const response = await publicApi.post('', null, {
+      const response = await publicApi.post('', data || null, {
         params: { path: `api/v1/admin/bookings/pickup/confirm/`, booking_ref: bookingRef },
       });
       return response.data;
