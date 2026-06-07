@@ -59,9 +59,29 @@ async function handleRequest(request: NextRequest, method: string) {
         headers['Content-Type'] = contentType;
         body = await request.json().catch(() => undefined);
       } else if (contentType.includes('multipart/form-data')) {
-        // Do not set Content-Type header manually here because axios 
-        // needs to automatically set it with the correct boundary
-        body = await request.formData().catch(() => undefined);
+        // Convert the Next.js Web FormData to a Node.js form-data instance.
+        // Axios re-serialises Web FormData and collapses repeated keys into a
+        // single comma-joined string. form-data preserves each entry separately,
+        // which is required for list fields like specific_recipients.
+        const webFormData = await request.formData().catch(() => undefined);
+        if (webFormData) {
+          const NodeFormData = (await import('form-data')).default;
+          const nodeForm = new NodeFormData();
+          for (const [key, value] of webFormData.entries()) {
+            if (value instanceof Blob) {
+              const buffer = Buffer.from(await value.arrayBuffer());
+              nodeForm.append(key, buffer, {
+                filename: (value as File).name || 'upload',
+                contentType: value.type || 'application/octet-stream',
+              });
+            } else {
+              nodeForm.append(key, value);
+            }
+          }
+          body = nodeForm;
+          // Let form-data set the correct Content-Type + boundary automatically
+          Object.assign(headers, nodeForm.getHeaders());
+        }
       } else {
         headers['Content-Type'] = contentType;
         body = await request.text().catch(() => undefined);

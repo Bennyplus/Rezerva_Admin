@@ -20,6 +20,8 @@ export default function NotificationsPage() {
   const [currentPage, setCurrentPage] = useState(2);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
+  const [editingNotification, setEditingNotification] = useState<any>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // data states
   const [notificationlist, setNotificationList] = useState<any[]>([]);
@@ -80,6 +82,20 @@ export default function NotificationsPage() {
     setSelectedNotificationId(id);
   };
 
+  const handleEdit = async (id: string) => {
+    setActiveDropdown(null);
+    try {
+      setIsLoading(true);
+      const notif = await notificationsService.getNotificationById(id);
+      setEditingNotification(notif);
+      setCurrentView("create");
+    } catch (error) {
+      console.error(`Failed to fetch notification ${id}`, error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
   }, [currentPage]);
@@ -95,13 +111,53 @@ export default function NotificationsPage() {
 
   if (currentView === "create") {
     return (
-      <CreateNotificationForm
-        onCancel={() => setCurrentView("list")}
-        onSave={(data) => {
-          console.log("Saving notification:", data);
-          setCurrentView("list");
-        }}
-      />
+      <div style={{ position: "relative" }}>
+        {submitError && (
+          <div style={{
+            position: "sticky", top: 0, zIndex: 100,
+            background: "#FEF2F2", border: "1px solid #FECACA",
+            borderRadius: "10px", padding: "12px 16px", marginBottom: "16px",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            fontSize: "13px", color: "#B91C1C",
+          }}>
+            <span>⚠ {submitError}</span>
+            <button
+              type="button"
+              onClick={() => setSubmitError(null)}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "#B91C1C", fontWeight: 600, fontSize: 16, lineHeight: 1 }}
+              aria-label="Dismiss error"
+            >
+              ×
+            </button>
+          </div>
+        )}
+        <CreateNotificationForm
+          initialData={editingNotification}
+          onCancel={() => { 
+            setCurrentView("list"); 
+            setSubmitError(null); 
+            setEditingNotification(null);
+          }}
+          onSave={async (data) => {
+            setSubmitError(null);
+            try {
+              if (editingNotification) {
+                await notificationsService.editNotification(editingNotification.id, data);
+              } else {
+                await notificationsService.createNotification(data);
+              }
+              setCurrentView("list");
+              setEditingNotification(null);
+              fetchNotifications();
+            } catch (error: any) {
+              const msg = error?.response?.data
+                ? Object.values(error.response.data).flat().join(" ")
+                : `Failed to ${editingNotification ? "update" : "create"} notification. Please try again.`;
+              setSubmitError(msg);
+            }
+          }}
+        />
+      </div>
     );
   }
 
@@ -232,7 +288,12 @@ export default function NotificationsPage() {
                           </button>
                           {activeDropdown === notif.id && (
                             <div className={styles.dropdown}>
-                              <button className={styles.dropdownItem}>Edit Notification</button>
+                              <button 
+                                className={styles.dropdownItem}
+                                onClick={() => handleEdit(notif.id)}
+                              >
+                                Edit Notification
+                              </button>
                               <button 
                                 className={styles.dropdownItem}
                                 onClick={() => handleViewDetails(notif.id)}
