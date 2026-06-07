@@ -33,6 +33,9 @@ export default function CustomDateTimePicker({ value, onChange }: CustomDateTime
   const [minutes, setMinutes] = useState(currentDate.getMinutes());
   const [amPm, setAmPm] = useState<"AM" | "PM">(currentDate.getHours() >= 12 ? "PM" : "AM");
 
+  // Draft string for the time input while the user is typing
+  const [timeInputDraft, setTimeInputDraft] = useState<string | null>(null);
+
   // Dropdown states for month/year selectors
   const [isMonthDropdownOpen, setIsMonthDropdownOpen] = useState(false);
   const [isYearDropdownOpen, setIsYearDropdownOpen] = useState(false);
@@ -58,6 +61,7 @@ export default function CustomDateTimePicker({ value, onChange }: CustomDateTime
       setAmPm(h >= 12 ? "PM" : "AM");
       setHours(h % 12 === 0 ? 12 : h % 12);
       setMinutes(value.getMinutes());
+      setTimeInputDraft(null); // reset draft when external value changes
     }
   }, [value]);
 
@@ -94,26 +98,42 @@ export default function CustomDateTimePicker({ value, onChange }: CustomDateTime
   };
 
   const handleTimeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const timeStr = e.target.value;
-    const [hStr, mStr] = timeStr.split(":");
+    const raw = e.target.value;
+    // Allow only digits and colon, max 5 chars (HH:MM)
+    const sanitized = raw.replace(/[^0-9:]/g, "").slice(0, 5);
+    setTimeInputDraft(sanitized);
+
+    // Auto-parse when a complete HH:MM is entered
+    if (/^\d{1,2}:\d{2}$/.test(sanitized)) {
+      const [hStr, mStr] = sanitized.split(":");
+      let h = parseInt(hStr, 10);
+      let m = parseInt(mStr, 10);
+      if (h > 12) h = 12;
+      if (h < 1) h = 1;
+      if (m > 59) m = 59;
+      if (m < 0) m = 0;
+      setHours(h);
+      setMinutes(m);
+      updateParent(currentDate, h, m, amPm);
+    }
+  };
+
+  const handleTimeBlur = () => {
+    // Commit whatever the user typed on blur
+    const raw = timeInputDraft ?? timeString;
+    const [hStr, mStr] = raw.split(":");
     let h = parseInt(hStr, 10);
     let m = parseInt(mStr, 10);
-    
     if (isNaN(h)) h = 12;
     if (isNaN(m)) m = 0;
-    
-    // Validate bounds
     if (h > 12) h = 12;
     if (h < 1) h = 1;
     if (m > 59) m = 59;
     if (m < 0) m = 0;
-
     setHours(h);
     setMinutes(m);
-  };
-
-  const handleTimeBlur = () => {
-    updateParent(currentDate, hours, minutes, amPm);
+    setTimeInputDraft(null); // clear draft so display reverts to formatted value
+    updateParent(currentDate, h, m, amPm);
   };
 
   const handleAmPmToggle = (newAmPm: "AM" | "PM") => {
@@ -150,14 +170,16 @@ export default function CustomDateTimePicker({ value, onChange }: CustomDateTime
     gridDays.push({ day: i, isCurrentMonth: false, offset: 1 });
   }
 
+  const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
+  // Show the draft while the user is actively editing, otherwise the formatted value
+  const timeDisplayValue = timeInputDraft !== null ? timeInputDraft : timeString;
+
   const formatDisplayDate = (d: Date) => {
     const mm = String(d.getMonth() + 1).padStart(2, '0');
     const dd = String(d.getDate()).padStart(2, '0');
     const yyyy = d.getFullYear();
-    return `${yyyy}-${mm}-${dd}`;
+    return `${yyyy}-${mm}-${dd} ${timeString} ${amPm}`;
   };
-
-  const timeString = `${String(hours).padStart(2, '0')}:${String(minutes).padStart(2, '0')}`;
 
   return (
     <div className={styles.wrapper} ref={wrapperRef}>
@@ -258,10 +280,16 @@ export default function CustomDateTimePicker({ value, onChange }: CustomDateTime
               <div className={styles.timeInputWrapper}>
                 <input 
                   type="text" 
-                  value={timeString}
+                  value={timeDisplayValue}
                   onChange={handleTimeChange}
                   onBlur={handleTimeBlur}
+                  onFocus={(e) => {
+                    // Start a draft from the current formatted value on focus
+                    if (timeInputDraft === null) setTimeInputDraft(timeString);
+                    e.target.select();
+                  }}
                   className={styles.timeInput}
+                  placeholder="HH:MM"
                   maxLength={5}
                 />
               </div>

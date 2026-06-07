@@ -54,11 +54,6 @@
   cursor: not-allowed;
 }
 
-.saveBtnActive {
-  background: #111111;
-  color: #ffffff;
-  cursor: pointer;
-}
 
 /* ─── Main Content ─── */
 .content {
@@ -502,6 +497,13 @@
 .saveBtn:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+.saveBtnActive {
+  background: #111111 !important;
+  color: #ffffff !important;
+  cursor: pointer !important;
+  opacity: 1 !important;
 }
 
 /* ─── Preview Section ─── */
