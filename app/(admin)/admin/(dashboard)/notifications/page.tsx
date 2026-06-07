@@ -20,6 +20,7 @@ export default function NotificationsPage() {
   const [currentPage, setCurrentPage] = useState(2);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   // data states
   const [notificationlist, setNotificationList] = useState<any[]>([]);
@@ -95,19 +96,43 @@ export default function NotificationsPage() {
 
   if (currentView === "create") {
     return (
-      <CreateNotificationForm
-        onCancel={() => setCurrentView("list")}
-        onSave={async (data) => {
-          try {
-            await notificationsService.createNotification(data);
-            setCurrentView("list");
-            fetchNotifications();
-          } catch (error) {
-            console.error("Error creating notification:", error);
-            alert("Failed to create notification. Please try again.");
-          }
-        }}
-      />
+      <div style={{ position: "relative" }}>
+        {submitError && (
+          <div style={{
+            position: "sticky", top: 0, zIndex: 100,
+            background: "#FEF2F2", border: "1px solid #FECACA",
+            borderRadius: "10px", padding: "12px 16px", marginBottom: "16px",
+            display: "flex", alignItems: "center", justifyContent: "space-between",
+            fontSize: "13px", color: "#B91C1C",
+          }}>
+            <span>⚠ {submitError}</span>
+            <button
+              type="button"
+              onClick={() => setSubmitError(null)}
+              style={{ background: "none", border: "none", cursor: "pointer", color: "#B91C1C", fontWeight: 600, fontSize: 16, lineHeight: 1 }}
+              aria-label="Dismiss error"
+            >
+              ×
+            </button>
+          </div>
+        )}
+        <CreateNotificationForm
+          onCancel={() => { setCurrentView("list"); setSubmitError(null); }}
+          onSave={async (data) => {
+            setSubmitError(null);
+            try {
+              await notificationsService.createNotification(data);
+              setCurrentView("list");
+              fetchNotifications();
+            } catch (error: any) {
+              const msg = error?.response?.data
+                ? Object.values(error.response.data).flat().join(" ")
+                : "Failed to create notification. Please try again.";
+              setSubmitError(msg);
+            }
+          }}
+        />
+      </div>
     );
   }
 

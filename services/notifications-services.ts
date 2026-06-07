@@ -32,6 +32,21 @@ export const notificationsService = {
   },
 
   /**
+   * Fetches available delivery channel choices.
+   */
+  getDeliveryChannels: async () => {
+    try {
+      const response = await publicApi.get("", {
+        params: { path: "api/v1/admin/notifications/choices/delivery-channels/" },
+      });
+      return Array.isArray(response.data) ? response.data : response.data?.results || [];
+    } catch (error) {
+      console.error("Failed to fetch delivery channels:", error);
+      throw error;
+    }
+  },
+
+  /**
    * Fetches available recipient type choices.
    */
   getRecipientTypes: async () => {

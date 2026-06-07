@@ -145,10 +145,61 @@
   border-color: #111111;
 }
 
+.input:disabled {
+  background: #F6F8FA;
+  color: #CDD0D5;
+  cursor: not-allowed;
+}
+
+.inputError {
+  border-color: #EF4444 !important;
+}
+
+.inputError:focus {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
+}
+
+.fieldError {
+  margin: 0;
+  font-size: 12px;
+  color: #EF4444;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.fetchError {
+  padding: 10px 14px;
+  border: 1px dashed #E2E4E9;
+  border-radius: 10px;
+  font-size: 13px;
+  color: #868C98;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.retryBtn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111111;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.retryBtn:hover {
+  color: #525866;
+}
+
 .textarea {
   min-height: 100px;
   resize: vertical;
 }
+
 
 /* Jodit Editor Wrapper */
 .editorContainer {
@@ -161,6 +212,15 @@
 
 .editorContainer:focus-within {
   border-color: #111111;
+}
+
+.editorError {
+  border-color: #EF4444 !important;
+}
+
+.editorError:focus-within {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.08);
 }
 
 .editorContainer :global(.jodit-container) {
