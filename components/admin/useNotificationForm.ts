@@ -61,19 +61,20 @@ export function formatFileSize(bytes: number): string {
 
 interface UseNotificationFormOptions {
   onSave: (data: FormData) => void;
+  initialData?: any;
 }
 
-export function useNotificationForm({ onSave }: UseNotificationFormOptions) {
+export function useNotificationForm({ onSave, initialData }: UseNotificationFormOptions) {
 
   // ── Form ────────────────────────────────────────────────────────────────────
   const [formData, setFormData] = useState<FormState>({
-    title: "",
-    message: "",
-    cta: "",
-    recipients: "",
-    channel: "",
-    date: new Date().toISOString(),
-    schedule: false,
+    title: initialData?.title || "",
+    message: initialData?.message || "",
+    cta: initialData?.call_to_action || "",
+    recipients: initialData?.recipient_type || "",
+    channel: initialData?.delivery_channel || "",
+    date: initialData?.scheduled_at ? new Date(initialData.scheduled_at).toISOString() : new Date().toISOString(),
+    schedule: initialData?.is_scheduled || false,
     userEmails: "",
   });
   const [errors, setErrors] = useState<FormErrors>({});
@@ -138,13 +139,24 @@ export function useNotificationForm({ onSave }: UseNotificationFormOptions) {
       .getUsersForNotifications()
       .then((users: { id: number; email: string }[]) => {
         const map: Record<string, number> = {};
-        users.forEach((u) => { map[u.email] = u.id; });
+        const reverseMap: Record<number, string> = {};
+        users.forEach((u) => { 
+          map[u.email] = u.id; 
+          reverseMap[u.id] = u.email;
+        });
         userIdMapRef.current = map;
         setAvailableUsers(users.map((u) => ({ value: u.email, label: u.email })));
+
+        if (initialData?.specific_recipients?.length > 0) {
+          const emails = initialData.specific_recipients
+            .map((id: number) => reverseMap[id])
+            .filter(Boolean);
+          setFormData((prev) => ({ ...prev, userEmails: emails.join(", ") }));
+        }
       })
       .catch(() => setUsersError(true))
       .finally(() => setUsersLoading(false));
-  }, []);
+  }, [initialData]);
 
   // All three fetched eagerly on mount — no waiting for user interaction
   useEffect(() => {
@@ -292,28 +304,46 @@ export function useNotificationForm({ onSave }: UseNotificationFormOptions) {
     setIsSubmitting(true);
     try {
       const payload = new FormData();
-      payload.append("title", formData.title.trim());
-      payload.append("message", formData.message);
-      payload.append("recipient_type", formData.recipients);
-      payload.append("is_scheduled", formData.schedule ? "True" : "False");
+      
+      const appendIfChanged = (key: string, newValue: any, oldValue: any) => {
+        if (!initialData) {
+          payload.append(key, newValue);
+        } else if (newValue !== oldValue) {
+          payload.append(key, newValue);
+        }
+      };
+
+      appendIfChanged("title", formData.title.trim(), initialData?.title);
+      appendIfChanged("message", formData.message, initialData?.message);
+      appendIfChanged("recipient_type", formData.recipients, initialData?.recipient_type);
+      
+      const isScheduledValue = formData.schedule ? "True" : "False";
+      const initialIsScheduledValue = initialData?.is_scheduled ? "True" : "False";
+      appendIfChanged("is_scheduled", isScheduledValue, initialIsScheduledValue);
+
       if (formData.schedule) {
-        payload.append("scheduled_at", new Date(formData.date).toISOString());
+        const currentIso = new Date(formData.date).toISOString();
+        const initialIso = initialData?.scheduled_at ? new Date(initialData.scheduled_at).toISOString() : undefined;
+        appendIfChanged("scheduled_at", currentIso, initialIso);
       }
-      if (formData.cta.trim()) {
-        payload.append("call_to_action", formData.cta.trim());
+      
+      const currentCta = formData.cta.trim();
+      const initialCta = initialData?.call_to_action || "";
+      if (!initialData || currentCta !== initialCta) {
+        payload.append("call_to_action", currentCta);
       }
-      payload.append("delivery_channel", formData.channel);
+      
+      appendIfChanged("delivery_channel", formData.channel, initialData?.delivery_channel);
 
       // Each ID as a separate entry — backend expects integer PKs, not a comma string
       if (formData.recipients === "specific" && formData.userEmails) {
-        formData.userEmails
-          .split(",")
-          .map((v) => v.trim())
-          .filter(Boolean)
-          .forEach((email) => {
-            const id = userIdMapRef.current[email];
-            if (id != null) payload.append("specific_recipients", String(id));
-          });
+        const newEmails = formData.userEmails.split(",").map(v => v.trim()).filter(Boolean);
+        const newIds = newEmails.map(email => userIdMapRef.current[email]).filter(id => id != null).sort();
+        const oldIds = initialData?.specific_recipients ? [...initialData.specific_recipients].sort() : [];
+        
+        if (!initialData || JSON.stringify(newIds) !== JSON.stringify(oldIds)) {
+           newIds.forEach(id => payload.append("specific_recipients", String(id)));
+        }
       }
 
       selectedFiles.forEach((file) => payload.append("media_attachments", file));
@@ -321,7 +351,7 @@ export function useNotificationForm({ onSave }: UseNotificationFormOptions) {
     } finally {
       setIsSubmitting(false);
     }
-  }, [formData, selectedFiles, validate, onSave]);
+  }, [formData, selectedFiles, validate, onSave, initialData]);
 
   return {
     // Form data

@@ -112,7 +112,7 @@ export const notificationsService = {
   editNotification: async (id: string, data: any) => {
     try {
       const response = await publicApi.put("", data, {
-        params: { path: `api/v1/admin/notifications/${id}/` },
+        params: { path: "api/v1/admin/notifications/", notification_id: id },
       });
       return response.data;
     } catch (error) {

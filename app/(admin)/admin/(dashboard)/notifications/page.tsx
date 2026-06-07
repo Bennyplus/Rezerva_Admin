@@ -20,6 +20,7 @@ export default function NotificationsPage() {
   const [currentPage, setCurrentPage] = useState(2);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
+  const [editingNotification, setEditingNotification] = useState<any>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   // data states
@@ -81,6 +82,20 @@ export default function NotificationsPage() {
     setSelectedNotificationId(id);
   };
 
+  const handleEdit = async (id: string) => {
+    setActiveDropdown(null);
+    try {
+      setIsLoading(true);
+      const notif = await notificationsService.getNotificationById(id);
+      setEditingNotification(notif);
+      setCurrentView("create");
+    } catch (error) {
+      console.error(`Failed to fetch notification ${id}`, error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchNotifications();
   }, [currentPage]);
@@ -117,17 +132,27 @@ export default function NotificationsPage() {
           </div>
         )}
         <CreateNotificationForm
-          onCancel={() => { setCurrentView("list"); setSubmitError(null); }}
+          initialData={editingNotification}
+          onCancel={() => { 
+            setCurrentView("list"); 
+            setSubmitError(null); 
+            setEditingNotification(null);
+          }}
           onSave={async (data) => {
             setSubmitError(null);
             try {
-              await notificationsService.createNotification(data);
+              if (editingNotification) {
+                await notificationsService.editNotification(editingNotification.id, data);
+              } else {
+                await notificationsService.createNotification(data);
+              }
               setCurrentView("list");
+              setEditingNotification(null);
               fetchNotifications();
             } catch (error: any) {
               const msg = error?.response?.data
                 ? Object.values(error.response.data).flat().join(" ")
-                : "Failed to create notification. Please try again.";
+                : `Failed to ${editingNotification ? "update" : "create"} notification. Please try again.`;
               setSubmitError(msg);
             }
           }}
@@ -263,7 +288,12 @@ export default function NotificationsPage() {
                           </button>
                           {activeDropdown === notif.id && (
                             <div className={styles.dropdown}>
-                              <button className={styles.dropdownItem}>Edit Notification</button>
+                              <button 
+                                className={styles.dropdownItem}
+                                onClick={() => handleEdit(notif.id)}
+                              >
+                                Edit Notification
+                              </button>
                               <button 
                                 className={styles.dropdownItem}
                                 onClick={() => handleViewDetails(notif.id)}

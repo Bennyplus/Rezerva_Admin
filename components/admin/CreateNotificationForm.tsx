@@ -35,10 +35,13 @@ Bring your friends and family—there's something for everyone.<br/>We can't wai
 interface CreateNotificationFormProps {
   onCancel: () => void;
   onSave: (data: FormData) => void;
+  initialData?: any;
 }
 
-export default function CreateNotificationForm({ onCancel, onSave }: CreateNotificationFormProps) {
-  const form = useNotificationForm({ onSave });
+export default function CreateNotificationForm({ onCancel, onSave, initialData }: CreateNotificationFormProps) {
+  const form = useNotificationForm({ onSave, initialData });
+
+  const isEditing = !!initialData;
 
   return (
     <div className={styles.container}>
@@ -59,7 +62,7 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
             onClick={form.handleSaveClick}
             aria-busy={form.isSubmitting}
           >
-            {form.isSubmitting ? "Sending…" : "Create & Send Notification"}
+            {form.isSubmitting ? "Saving…" : isEditing ? "Update Notification" : "Create & Send Notification"}
           </button>
         </div>
       </div>
@@ -69,8 +72,10 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
         {/* ─── Form Card ─── */}
         <div className={styles.formCard}>
           <div className={styles.cardHeader}>
-            <h2 className={styles.cardTitle}>Create New Notification</h2>
-            <p className={styles.cardSubtitle}>Fill in the details to compose and send your notification.</p>
+            <h2 className={styles.cardTitle}>{isEditing ? "Edit Notification" : "Create New Notification"}</h2>
+            <p className={styles.cardSubtitle}>
+              {isEditing ? "Update the details of your notification." : "Fill in the details to compose and send your notification."}
+            </p>
           </div>
 
           <div className={styles.formGrid}>
@@ -269,7 +274,7 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
             {/* Footer */}
             <div className={styles.formFooter}>
               <button type="button" className={styles.secondaryBtn} onClick={form.handleSaveClick} disabled={form.isSubmitting}>
-                {form.isSubmitting ? "Saving…" : "Create Notification"}
+                {form.isSubmitting ? "Saving…" : isEditing ? "Save Changes" : "Create Notification"}
               </button>
               <button
                 type="button"
@@ -278,7 +283,7 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
                 onClick={form.handleSaveClick}
                 aria-busy={form.isSubmitting}
               >
-                {form.isSubmitting ? "Sending…" : "Create & Send Notification"}
+                {form.isSubmitting ? "Saving…" : isEditing ? "Update Notification" : "Create & Send Notification"}
               </button>
             </div>
 
