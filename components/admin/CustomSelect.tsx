@@ -50,7 +50,7 @@ export default function CustomSelect({
   const selectedOptions = multiple ? options.filter((opt) => selectedValues.includes(opt.value)) : [];
 
   const filteredOptions = options.filter((opt) =>
-    opt.label.toLowerCase().includes(searchTerm.toLowerCase())
+    opt?.label?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   return (
@@ -60,7 +60,7 @@ export default function CustomSelect({
         onClick={() => setIsOpen(!isOpen)}
       >
         <span className={(multiple ? selectedOptions.length > 0 : selectedOption) ? styles.value : styles.placeholder}>
-          {multiple 
+          {multiple
             ? (selectedOptions.length > 0 ? selectedOptions.map(o => o.label).join(', ') : placeholder)
             : (selectedOption ? selectedOption.label : placeholder)}
         </span>
@@ -107,16 +107,8 @@ export default function CustomSelect({
                       }
                     }}
                   >
-                    {multiple && (
-                      <input 
-                        type="checkbox" 
-                        checked={isSelected} 
-                        readOnly 
-                        style={{ marginRight: '8px', cursor: 'pointer' }}
-                      />
-                    )}
                     {option.label}
-                    {!multiple && isSelected && <CheckIcon />}
+                    {isSelected && <CheckIcon />}
                   </li>
                 );
               })

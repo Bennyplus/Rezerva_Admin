@@ -29,7 +29,7 @@
 .value {
   font-size: 14px;
   color: #111111;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .placeholder {
@@ -91,7 +91,8 @@
   justify-content: space-between;
   padding: 10px 12px;
   font-size: 14px;
-  color: #525866;
+  font-weight: 400;
+  color: #111111;
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.15s ease;
@@ -104,15 +105,10 @@
   text-align: center;
 }
 
-.option:hover {
-  background: #F6F8FA;
-  color: #111111;
-}
-
 .optionSelected {
   background: #F6F8FA;
   color: #111111;
-  font-weight: 600;
+  font-weight: 400;
 }
 
 @keyframes slideDown {
@@ -120,11 +116,13 @@
     opacity: 0;
     transform: translateY(-8px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
+
 .triggerMinimal {
   border: none !important;
   border-radius: 0 !important;

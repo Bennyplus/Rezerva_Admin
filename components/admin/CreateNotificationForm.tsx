@@ -6,6 +6,7 @@ import dynamic from "next/dynamic";
 import CustomSelect from "./CustomSelect";
 import CustomDateTimePicker from "./CustomDateTimePicker";
 import styles from "./CreateNotificationForm.module.css";
+import { notificationsService } from "@/services/notifications-services";
 
 const JoditEditor = dynamic(() => import("jodit-react"), { ssr: false });
 
@@ -18,6 +19,10 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
   const [imagePreviews, setImagePreviews] = useState<{ url: string; name: string; size: number }[]>([]);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [availableUsers, setAvailableUsers] = useState<{ value: string; label: string }[]>([]);
+  const [usersLoading, setUsersLoading] = useState(false);
+  const [recipientTypes, setRecipientTypes] = useState<{ value: string; label: string }[]>([]);
+  const userIdMapRef = useRef<Record<string, number>>({});
   const [formData, setFormData] = useState({
     title: "",
     message: "",
@@ -37,6 +42,33 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  useEffect(() => {
+    notificationsService
+      .getRecipientTypes()
+      .then((types: { value: string; label: string; display_name?: string }[]) => {
+        setRecipientTypes(types.map((t) => ({ value: t.value, label: t.label ?? t.display_name ?? t.value })));
+      })
+      .catch(() => { });
+  }, []);
+
+  useEffect(() => {
+    if (formData.recipients !== "specific") return;
+    if (availableUsers.length > 0) return; // already fetched
+    setUsersLoading(true);
+    notificationsService
+      .getUsersForNotifications()
+      .then((users: { id: number; email: string }[]) => {
+        const map: Record<string, number> = {};
+        users.forEach((u) => { map[u.email] = u.id; });
+        userIdMapRef.current = map;
+        setAvailableUsers(users.map((u) => ({ value: u.email, label: u.email })));
+      })
+      .catch(() => {
+        // silently fail — user can retry by switching recipients
+      })
+      .finally(() => setUsersLoading(false));
+  }, [formData.recipients]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -82,8 +114,9 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
     submitData.append("delivery_channel", formData.channel);
 
     if (formData.recipients === "specific" && formData.userEmails) {
-      const emails = Array.isArray(formData.userEmails) ? formData.userEmails.join(',') : formData.userEmails;
-      submitData.append("user_emails", emails);
+      const selectedEmails = formData.userEmails.split(',').map((v) => v.trim()).filter(Boolean);
+      const ids = selectedEmails.map((email) => userIdMapRef.current[email]).filter(Boolean);
+      submitData.append("specific_recipients", ids.join(','));
     }
 
     selectedFiles.forEach((file) => {
@@ -176,12 +209,7 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
                   name="recipients"
                   value={formData.recipients}
                   placeholder="e.g All Users"
-                  options={[
-                    { value: "all_users", label: "All Users" },
-                    { value: "all_vendors", label: "All Vendors" },
-                    { value: "all_admins", label: "All Admins" },
-                    { value: "specific", label: "Specific Users" }
-                  ]}
+                  options={recipientTypes}
                   onChange={handleSelectChange}
                 />
               </div>
@@ -209,13 +237,8 @@ export default function CreateNotificationForm({ onCancel, onSave }: CreateNotif
                 <CustomSelect
                   name="userEmails"
                   value={formData.userEmails}
-                  placeholder="propseredward001@gmail.com, prosperdtyrant@yahoo.com"
-                  options={[
-                    { value: "propseredward001@gmail.com", label: "propseredward001@gmail.com" },
-                    { value: "prosperdtyrant@yahoo.com", label: "prosperdtyrant@yahoo.com" },
-                    { value: "jane.doe@example.com", label: "jane.doe@example.com" },
-                    { value: "john.smith@example.com", label: "john.smith@example.com" }
-                  ]}
+                  placeholder={usersLoading ? "Loading users…" : "Select users"}
+                  options={availableUsers}
                   onChange={handleSelectChange}
                   showSearch
                   multiple
