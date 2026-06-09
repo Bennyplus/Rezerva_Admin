@@ -5,6 +5,7 @@ import Image from "next/image";
 import Pagination from "@/components/admin/Pagination";
 import RolePermissionsForm from "@/components/admin/RolePermissionsForm";
 import AddTeamMemberModal from "@/components/admin/AddTeamMemberModal";
+import ConfirmActionModal from "@/components/admin/ConfirmActionModal";
 import { ADMIN_ROLES, ADMIN_TEAM_MEMBERS, formatPermissions, type Role, type TeamMember } from "@/data/admin-teams";
 import { accountsService } from "@/services/accounts-service";
 import { teamService } from "@/services/teams-services";
@@ -33,6 +34,18 @@ export default function TeamsPage() {
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [actionType, setActionType] = useState<"deactivate" | "remove" | null>(null);
+
+  const [confirmModalState, setConfirmModalState] = useState<{
+    isOpen: boolean;
+    type: "deactivate" | "remove" | null;
+    roleId: string | null;
+    roleName: string | null;
+  }>({
+    isOpen: false,
+    type: null,
+    roleId: null,
+    roleName: null,
+  });
 
   const resultsPerPage = 10;
 
@@ -211,6 +224,29 @@ export default function TeamsPage() {
       setActionType(null);
       setActiveDropdown(null);
     }
+  };
+
+  const triggerRemove = (id: string, name: string) => {
+    setConfirmModalState({ isOpen: true, type: "remove", roleId: id, roleName: name });
+    setActiveDropdown(null);
+  };
+
+  const triggerDeactivate = (id: string, name: string) => {
+    setConfirmModalState({ isOpen: true, type: "deactivate", roleId: id, roleName: name });
+    setActiveDropdown(null);
+  };
+
+  const handleConfirmAction = async () => {
+    const { type, roleId, roleName } = confirmModalState;
+    if (!roleId || !type) return;
+
+    if (type === "remove") {
+      await handleDeleteRole(roleId, roleName || "");
+    } else if (type === "deactivate") {
+      await handleDeactivateRole(roleId, roleName || "");
+    }
+
+    setConfirmModalState(prev => ({ ...prev, isOpen: false }));
   };
 
   /* Handle Add Team Member */
@@ -393,14 +429,14 @@ export default function TeamsPage() {
                                 </button>
                                 <button
                                   className={`${styles.actionItem}`}
-                                  onClick={() => handleDeactivateRole(role.id, role.name)}
+                                  onClick={() => triggerDeactivate(role.id, role.name)}
                                   disabled={actionLoadingId === role.id && actionType === "deactivate"}
                                 >
                                   {actionLoadingId === role.id && actionType === "deactivate" ? "Deactivating..." : "Deactivate Role"}
                                 </button>
                                 <button
                                   className={`${styles.actionItem}`}
-                                  onClick={() => handleDeleteRole(role.id, role.name)}
+                                  onClick={() => triggerRemove(role.id, role.name)}
                                   disabled={actionLoadingId === role.id && actionType === "remove"}
                                 >
                                   {actionLoadingId === role.id && actionType === "remove" ? "Removing..." : "Remove Role"}
@@ -520,6 +556,21 @@ export default function TeamsPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={handleAddMemberSubmit}
+      />
+
+      <ConfirmActionModal
+        isOpen={confirmModalState.isOpen}
+        onClose={() => setConfirmModalState(prev => ({ ...prev, isOpen: false }))}
+        onConfirm={handleConfirmAction}
+        title={confirmModalState.type === "deactivate" ? "Deactivate Role?" : "Remove Role?"}
+        message={
+          confirmModalState.type === "deactivate" 
+            ? "Are you sure you want to deactivate this role? Users assigned to this role may lose access to certain permissions."
+            : "Are you sure you want to completely remove this role? This action cannot be undone."
+        }
+        confirmText={confirmModalState.type === "deactivate" ? "Deactivate Role" : "Remove Role"}
+        isDanger={true}
+        isLoading={actionLoadingId !== null}
       />
     </div>
   );
