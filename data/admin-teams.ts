@@ -6,6 +6,7 @@ export type RoleStatus = "Active" | "Inactive";
 export interface Role {
   id: string;
   name: string;
+  description?: string;
   permissions: string[];
   createdAt: string;
   status: RoleStatus;
@@ -177,9 +178,21 @@ export const ADMIN_TEAM_MEMBERS: TeamMember[] = [
 ];
 
 /* ─── Helper — format permissions for display ─── */
-export function formatPermissions(permissions: string[], maxChars = 40): string {
-  const labels = permissions.map((p) => p.split(":")[0]);
-  const unique = [...new Set(labels)];
+export function formatPermissions(permissions: any[], maxChars = 40): string {
+  if (!Array.isArray(permissions)) return "";
+  const labels = permissions.map((p) => {
+    if (typeof p === "string") {
+      return p.split(/[.:]/)[0];
+    }
+    if (p && typeof p === "object") {
+      const val = p.resource || p.codename || p.name || p.module || p.id || JSON.stringify(p);
+      return typeof val === "string" ? val.split(/[.:]/)[0] : String(val).split(/[.:]/)[0];
+    }
+    return String(p).split(/[.:]/)[0];
+  });
+  
+  const capitalizedLabels = labels.map(l => l.charAt(0).toUpperCase() + l.slice(1));
+  const unique = [...new Set(capitalizedLabels)];
   const joined = unique.join(", ");
   if (joined.length <= maxChars) return joined;
   return joined.slice(0, maxChars) + "...";

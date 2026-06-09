@@ -2,7 +2,7 @@ import axios from 'axios';
 
 export const publicApi = axios.create({
   baseURL: '/api/proxy',
-  timeout: 20000,
+  timeout: 30000,   // 30 seconds
 });
 
 publicApi.interceptors.response.use(

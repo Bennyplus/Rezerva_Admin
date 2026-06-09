@@ -87,7 +87,7 @@ export const accountsService = {
    */
   updateRole: async (id: string, payload: any): Promise<any> => {
     const response = await publicApi.put('', payload, {
-      params: { path: `api/v1/admin/roles/${id}/` }
+      params: { path: `api/v1/admin/roles/`, role_id: id }
     });
     return response.data;
   },
@@ -108,6 +108,16 @@ export const accountsService = {
   getRoles: async (): Promise<any> => {
     const response = await publicApi.get('', {
       params: { path: 'api/v1/admin/roles/' }
+    });
+    return response.data;
+  },
+  
+  /**
+   * Gets all team members from the admin account at admin/members/
+   */
+  getTeamMembers: async (): Promise<any> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/admin/members/' }
     });
     return response.data;
   },

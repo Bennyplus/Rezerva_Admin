@@ -1,29 +1,48 @@
 "use client";
 
-import { useState } from "react";
-import { PERMISSION_MATRIX, ALL_PERMISSIONS } from "@/data/admin-teams";
+import { useState, useMemo } from "react";
 import styles from "./RolePermissionsForm.module.css";
 
 interface RolePermissionsFormProps {
   onBack: () => void;
-  onSubmit: (name: string, permissions: string[]) => Promise<void>;
+  onSubmit: (name: string, description: string, permissions: number[]) => Promise<void>;
   initialName?: string;
-  initialPermissions?: string[];
+  initialDescription?: string;
+  initialPermissions?: any[];
+  allPermissions: any[];
 }
 
-export default function RolePermissionsForm({ onBack, onSubmit, initialName, initialPermissions }: RolePermissionsFormProps) {
+export default function RolePermissionsForm({ onBack, onSubmit, initialName, initialDescription, initialPermissions, allPermissions }: RolePermissionsFormProps) {
   const [roleName, setRoleName] = useState(initialName || "");
-  const [selected, setSelected] = useState<Set<string>>(new Set(initialPermissions || []));
+  const [description, setDescription] = useState(initialDescription || "");
+  
+  // Initialize with IDs
+  const initialIds = (initialPermissions || []).map(p => typeof p === 'object' && p !== null ? p.id : Number(p)).filter(Boolean);
+  const [selected, setSelected] = useState<Set<number>>(new Set(initialIds));
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const isValid = roleName.trim().length > 0;
-  const isAllSelected = selected.size === ALL_PERMISSIONS.length;
+  const isAllSelected = selected.size === allPermissions.length && allPermissions.length > 0;
+
+  // Build the matrix dynamically from allPermissions
+  const permissionMatrix = useMemo(() => {
+    const matrix: Record<string, any[]> = {};
+    allPermissions.forEach((p) => {
+      const resource = p.resource || p.module || "Other";
+      const resourceName = resource.charAt(0).toUpperCase() + resource.slice(1);
+      if (!matrix[resourceName]) {
+        matrix[resourceName] = [];
+      }
+      matrix[resourceName].push(p);
+    });
+    return Object.entries(matrix).map(([module, permissions]) => ({ module, permissions }));
+  }, [allPermissions]);
 
   /* Toggle a single permission */
-  const togglePermission = (key: string) => {
+  const togglePermission = (id: number) => {
     const next = new Set(selected);
-    if (next.has(key)) next.delete(key);
-    else next.add(key);
+    if (next.has(id)) next.delete(id);
+    else next.add(id);
     setSelected(next);
   };
 
@@ -32,7 +51,7 @@ export default function RolePermissionsForm({ onBack, onSubmit, initialName, ini
     if (isAllSelected) {
       setSelected(new Set());
     } else {
-      setSelected(new Set(ALL_PERMISSIONS));
+      setSelected(new Set(allPermissions.map(p => p.id)));
     }
   };
 
@@ -41,7 +60,7 @@ export default function RolePermissionsForm({ onBack, onSubmit, initialName, ini
     if (!isValid || isSubmitting) return;
     setIsSubmitting(true);
     try {
-      await onSubmit(roleName.trim(), [...selected]);
+      await onSubmit(roleName.trim(), description.trim(), [...selected]);
     } finally {
       setIsSubmitting(false);
     }
@@ -75,6 +94,20 @@ export default function RolePermissionsForm({ onBack, onSubmit, initialName, ini
             value={roleName}
             onChange={(e) => setRoleName(e.target.value)}
             autoFocus
+          />
+        </div>
+
+        <div className={styles.nameField}>
+          <label htmlFor="role-description-input" className={styles.nameLabel}>
+            Description
+          </label>
+          <input
+            id="role-description-input"
+            type="text"
+            className={styles.nameInput}
+            placeholder="Brief description of this role"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
           />
         </div>
 
@@ -114,22 +147,24 @@ export default function RolePermissionsForm({ onBack, onSubmit, initialName, ini
         </div>
 
         <div className={styles.scrollArea}>
-          {PERMISSION_MATRIX.map((group) => (
+          {permissionMatrix.map((group) => (
             <div key={group.module} className={styles.group} id={`perm-group-${group.module.toLowerCase()}`}>
               <h3 className={styles.groupTitle}>{group.module}</h3>
               <div className={styles.permRow}>
                 {group.permissions.map((perm) => {
-                  const key = `${group.module}:${perm}`;
+                  const key = perm.id;
+                  const label = perm.action || perm.codename || String(perm.id);
+                  const displayLabel = label.split("_").map((s: string) => s.charAt(0).toUpperCase() + s.slice(1)).join(" ");
                   return (
-                    <label key={key} className={styles.checkLabel} id={`perm-${key.replace(/[/:]/g, "-")}`}>
+                    <label key={key} className={styles.checkLabel} id={`perm-${key}`}>
                       <input
                         type="checkbox"
                         className={styles.checkbox}
                         checked={selected.has(key)}
                         onChange={() => togglePermission(key)}
-                        aria-label={`${group.module} — ${perm}`}
+                        aria-label={`${group.module} — ${displayLabel}`}
                       />
-                      <span style={{ color: "rgba(134, 140, 152, 1)" }}>{perm}</span>
+                      <span style={{ color: "rgba(134, 140, 152, 1)" }}>{displayLabel}</span>
                     </label>
                   );
                 })}
@@ -160,3 +195,4 @@ function ArrowLeftIcon() {
     </svg>
   );
 }
+

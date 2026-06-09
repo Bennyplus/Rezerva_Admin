@@ -13,6 +13,20 @@ interface NotificationDetailsModalProps {
 export default function NotificationDetailsModal({ onClose, notificationId }: NotificationDetailsModalProps) {
   const [notification, setNotification] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isContentExpanded, setIsContentExpanded] = useState(false);
+
+  // Helper to strip HTML tags from a string
+  const stripHtml = (html: string) => {
+    return html.replace(/<[^>]+>/g, "").trim();
+  };
+
+  // Helper to truncate to the first 3 words
+  const getTruncatedContent = (html: string) => {
+    const plainText = stripHtml(html);
+    const words = plainText.split(/\s+/);
+    if (words.length <= 3) return plainText;
+    return words.slice(0, 3).join(" ") + "...";
+  };
 
   useEffect(() => {
     const fetchDetails = async () => {
@@ -99,14 +113,24 @@ export default function NotificationDetailsModal({ onClose, notificationId }: No
                     <span className={styles.detailLabel}>Call To Action</span>
                     <span className={styles.detailValue}>{details.cta}</span>
                   </div>
-                  <div className={styles.detailItem}>
+                  <div className={styles.detailItem} style={isContentExpanded ? { gridColumn: '1 / -1' } : {}}>
                     <span className={styles.detailLabel}>Content</span>
-                    <span className={styles.detailValue}>
-                      {details.content}
-                      <button className={styles.viewContentBtn}>
+                    <div className={styles.detailValue} style={{ alignItems: isContentExpanded ? 'flex-start' : 'center' }}>
+                      <div style={isContentExpanded ? { flex: 1, overflow: 'hidden' } : {}}>
+                        {isContentExpanded ? (
+                          <div dangerouslySetInnerHTML={{ __html: details.content }} />
+                        ) : (
+                          getTruncatedContent(details.content)
+                        )}
+                      </div>
+                      <button 
+                        className={styles.viewContentBtn}
+                        onClick={() => setIsContentExpanded(!isContentExpanded)}
+                        style={isContentExpanded ? { marginTop: '4px' } : {}}
+                      >
                         <EyeIcon />
                       </button>
-                    </span>
+                    </div>
                   </div>
                   <div className={styles.detailItem}>
                     <span className={styles.detailLabel}>Delivery Channel</span>

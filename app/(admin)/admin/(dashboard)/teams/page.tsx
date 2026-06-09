@@ -36,20 +36,39 @@ export default function TeamsPage() {
   const resultsPerPage = 9;
 
   useEffect(() => {
-    fetchRoles();
+    const init = async () => {
+      let perms = [];
+      try {
+        const data = await teamService.getPermissions();
+        perms = Array.isArray(data) ? data : data?.results || data?.data || [];
+        setPermissions(perms);
+      } catch (error) {
+        console.error("Failed to fetch permissions:", error);
+      }
+      fetchRoles(perms);
+      fetchTeamMembers();
+    };
+    init();
   }, []);
 
-  const fetchRoles = async () => {
+  const fetchRoles = async (allPerms: any[] = permissions) => {
     try {
       setLoadingRoles(true);
       const data = await accountsService.getRoles();
-      const rolesData = Array.isArray(data) ? data : data?.results || [];
+      const rolesData = Array.isArray(data) ? data : data?.results || data?.data || [];
       const mapped = rolesData.map((r: any) => ({
         id: r.id || r._id,
         name: r.name,
-        permissions: (r.permissions || []).map((p: any) => typeof p === 'string' ? p : p.name || p.module || p.id || JSON.stringify(p)),
-        createdAt: r.createdAt || new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }),
-        status: r.status || "Active",
+        description: r.description,
+        permissions: (r.permissions || []).map((p: any) => {
+          if (typeof p === "number" || typeof p === "string") {
+            const found = allPerms.find((ap: any) => String(ap.id) === String(p));
+            return found || p;
+          }
+          return p;
+        }),
+        createdAt: r.created_at ? new Date(r.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : (r.createdAt || new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })),
+        status: r.is_active === true ? "Active" : (r.is_active === false ? "Inactive" : (r.status || "Active")),
       }));
       setRoles(mapped.length > 0 ? mapped : ADMIN_ROLES);
     } catch (error) {
@@ -60,11 +79,35 @@ export default function TeamsPage() {
     }
   };
 
+  const fetchTeamMembers = async () => {
+    try {
+      const data = await accountsService.getTeamMembers();
+      const membersData = Array.isArray(data) ? data : data?.results || data?.data || [];
+      const mapped = membersData.map((m: any) => ({
+        id: m.id || m._id || `tm-${Date.now()}-${Math.random()}`,
+        name: m.user_name || m.name,
+        email: m.user_email || m.email,
+        avatar: "/images/admin/profile-Avatar.svg",
+        role: (m.role_names && m.role_names.length > 0) ? m.role_names[0] : (m.role || "Member"),
+        status: m.is_active === true ? "Active" : (m.is_active === false ? "Inactive" : (m.status || "Active")),
+        joinedAt: m.created_at ? new Date(m.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : (m.joinedAt || m.createdAt || new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })),
+      }));
+      setTeamMembers(mapped.length > 0 ? mapped : ADMIN_TEAM_MEMBERS);
+    } catch (error) {
+      console.error("Failed to fetch team members:", error);
+      setTeamMembers(ADMIN_TEAM_MEMBERS);
+    }
+  };
+
   /* Filter roles by search */
-  const filteredRoles = roles.filter((r) =>
-    r.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    r.permissions.some((p) => p.toLowerCase().includes(searchQuery.toLowerCase()))
-  );
+  const filteredRoles = roles.filter((r) => {
+    const searchLower = searchQuery.toLowerCase();
+    if (r.name.toLowerCase().includes(searchLower)) return true;
+    return r.permissions.some((p: any) => {
+      const pStr = typeof p === "string" ? p : p?.resource || p?.codename || p?.name || p?.module || p?.id || JSON.stringify(p);
+      return String(pStr).toLowerCase().includes(searchLower);
+    });
+  });
 
   /* Filter team members by search */
   const filteredTeamMembers = teamMembers.filter((m) =>
@@ -74,16 +117,34 @@ export default function TeamsPage() {
   );
 
   /* Handle role creation */
-  const handleCreateRole = async (name: string, permissions: string[]) => {
+  const handleCreateRole = async (name: string, description: string, selectedPerms: number[]) => {
     try {
       if (editingRole) {
-        await accountsService.updateRole(editingRole.id, { name, permissions });
-        setToastMessage(`Role "${name}" updated successfully.`);
+        const isNameChanged = name !== editingRole.name;
+        const isDescChanged = description !== (editingRole.description || "");
+
+        // Check if permissions changed
+        const initialPermIds = (editingRole.permissions || []).map((p: any) => p.id).sort().join(",");
+        const newPermIdsStr = [...selectedPerms].sort().join(",");
+        const isPermsChanged = initialPermIds !== newPermIdsStr;
+
+        if (isNameChanged || isDescChanged || isPermsChanged) {
+          // The backend requires all fields to be present in the PUT request
+          const payload = {
+            name,
+            description,
+            permission_ids: selectedPerms
+          };
+          await accountsService.updateRole(editingRole.id, payload);
+          setToastMessage(`Role "${name}" updated successfully.`);
+        } else {
+          setToastMessage(`No changes made to role "${name}".`);
+        }
       } else {
-        await accountsService.createRole({ name, permissions });
+        await accountsService.createRole({ name, description, permission_ids: selectedPerms });
         setToastMessage(`Role "${name}" created successfully.`);
       }
-      await fetchRoles();
+      await fetchRoles(permissions);
       setCurrentView("list");
       setEditingRole(null);
     } catch (error: any) {
@@ -150,7 +211,9 @@ export default function TeamsPage() {
         }}
         onSubmit={handleCreateRole}
         initialName={editingRole?.name}
+        initialDescription={editingRole?.description}
         initialPermissions={editingRole?.permissions}
+        allPermissions={permissions}
       />
     );
   }
@@ -249,14 +312,7 @@ export default function TeamsPage() {
                 <table className={styles.table}>
                   <thead>
                     <tr>
-                      <th className={styles.checkCol}>
-                        <input
-                          type="checkbox"
-                          className={styles.checkbox}
-                          aria-label="Select all roles"
-                          id="select-all-roles"
-                        />
-                      </th>
+                      <th>Role Name</th>
                       <th>Permissions</th>
                       <th>Created On</th>
                       <th>Status</th>
@@ -266,16 +322,10 @@ export default function TeamsPage() {
                   <tbody>
                     {filteredRoles.map((role) => (
                       <tr key={role.id}>
-                        <td className={styles.checkCol}>
-                          <input
-                            type="checkbox"
-                            className={styles.checkbox}
-                            aria-label={`Select ${role.name}`}
-                          />
-                        </td>
+                        <td>{role.name}</td>
                         <td>
-                          <span className={styles.rolePermText} title={role.permissions.map((p: any) => typeof p === 'string' ? p.split(":")[0] : (p?.name || "").split(":")[0]).join(", ")}>
-                            {formatPermissions(role.permissions as string[])}
+                          <span className={styles.rolePermText} title={formatPermissions(role.permissions, 1000)}>
+                            {formatPermissions(role.permissions)}
                           </span>
                         </td>
                         <td className={styles.dateCell}>{role.createdAt}</td>
@@ -306,10 +356,16 @@ export default function TeamsPage() {
                                   Edit Role
                                 </button>
                                 <button
-                                  className={`${styles.actionItem} ${styles.actionItemDanger}`}
-                                  onClick={() => handleDeleteRole(role.id, role.name)}
+                                  className={`${styles.actionItem}`}
+                                  onClick={() => console.log('edit')}
                                 >
-                                  Delete
+                                  Deactivate Role
+                                </button>
+                                <button
+                                  className={`${styles.actionItem}`}
+                                  onClick={() => console.log('edit')}
+                                >
+                                  Remove Role
                                 </button>
                               </div>
                             )}
