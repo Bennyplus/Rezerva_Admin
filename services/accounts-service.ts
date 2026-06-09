@@ -92,12 +92,22 @@ export const accountsService = {
     return response.data;
   },
   /**
-   * Deletes a role from the admin account at admin/roles/{id}/
+   * Deletes a role from the admin account at admin/roles/?role_id={id}
    * @param id - The ID of the role to delete
    */
   deleteRole: async (id: string): Promise<any> => {
     const response = await publicApi.delete('', {
-      params: { path: `api/v1/admin/roles/${id}/` }
+      params: { path: `api/v1/admin/roles/`, role_id: id }
+    });
+    return response.data;
+  },
+  /**
+   * Deactivates a role from the admin account at admin/roles/deactivate/?role_id={id}
+   * @param id - The ID of the role to deactivate
+   */
+  deactivateRole: async (id: string): Promise<any> => {
+    const response = await publicApi.patch('', {}, {
+      params: { path: `api/v1/admin/roles/deactivate/`, role_id: id }
     });
     return response.data;
   },
@@ -111,7 +121,7 @@ export const accountsService = {
     });
     return response.data;
   },
-  
+
   /**
    * Gets all team members from the admin account at admin/members/
    */
@@ -121,7 +131,7 @@ export const accountsService = {
     });
     return response.data;
   },
-  
+
   /**
    * Logs the user out by hitting the custom proxy logout route which clears cookies
    */

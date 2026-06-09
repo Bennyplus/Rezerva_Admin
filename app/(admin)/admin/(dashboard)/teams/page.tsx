@@ -22,7 +22,7 @@ export default function TeamsPage() {
   const [permissions, setPermissions] = useState<any[]>([]);
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>(ADMIN_TEAM_MEMBERS);
 
-  const [currentPage, setCurrentPage] = useState(2);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -31,9 +31,10 @@ export default function TeamsPage() {
   const [loadingRoles, setLoadingRoles] = useState(true);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
+  const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
+  const [actionType, setActionType] = useState<"deactivate" | "remove" | null>(null);
 
-  const totalPages = 16;
-  const resultsPerPage = 9;
+  const resultsPerPage = 10;
 
   useEffect(() => {
     const init = async () => {
@@ -50,6 +51,15 @@ export default function TeamsPage() {
     };
     init();
   }, []);
+
+  useEffect(() => {
+    if (toastMessage) {
+      const timer = setTimeout(() => {
+        setToastMessage(null);
+      }, 5000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastMessage]);
 
   const fetchRoles = async (allPerms: any[] = permissions) => {
     try {
@@ -116,6 +126,13 @@ export default function TeamsPage() {
     m.role.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
+  /* Client-side Pagination Logic */
+  const rolesTotalPages = Math.ceil(filteredRoles.length / resultsPerPage);
+  const paginatedRoles = filteredRoles.slice((currentPage - 1) * resultsPerPage, currentPage * resultsPerPage);
+
+  const teamTotalPages = Math.ceil(filteredTeamMembers.length / resultsPerPage);
+  const paginatedTeamMembers = filteredTeamMembers.slice((currentPage - 1) * resultsPerPage, currentPage * resultsPerPage);
+
   /* Handle role creation */
   const handleCreateRole = async (name: string, description: string, selectedPerms: number[]) => {
     try {
@@ -161,17 +178,39 @@ export default function TeamsPage() {
   };
 
   const handleDeleteRole = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete the role "${name}"?`)) return;
+    setActionLoadingId(id);
+    setActionType("remove");
     try {
       await accountsService.deleteRole(id);
-      setToastMessage(`Role "${name}" deleted successfully.`);
+      setToastMessage(`Role "${name}" removed successfully.`);
       await fetchRoles();
     } catch (error: any) {
-      console.error("Failed to delete role:", error);
+      console.error("Failed to remove role:", error);
       const serverMessage = error.response?.data?.message || error.message;
       setToastMessage(`Error: ${serverMessage}`);
+    } finally {
+      setActionLoadingId(null);
+      setActionType(null);
+      setActiveDropdown(null);
     }
-    setActiveDropdown(null);
+  };
+
+  const handleDeactivateRole = async (id: string, name: string) => {
+    setActionLoadingId(id);
+    setActionType("deactivate");
+    try {
+      await accountsService.deactivateRole(id);
+      setToastMessage(`Role "${name}" deactivated successfully.`);
+      await fetchRoles();
+    } catch (error: any) {
+      console.error("Failed to deactivate role:", error);
+      const serverMessage = error.response?.data?.message || error.message;
+      setToastMessage(`Error: ${serverMessage}`);
+    } finally {
+      setActionLoadingId(null);
+      setActionType(null);
+      setActiveDropdown(null);
+    }
   };
 
   /* Handle Add Team Member */
@@ -196,9 +235,6 @@ export default function TeamsPage() {
 
     // Show toast
     setToastMessage(`${name} has been successfully assigned ${roleName}`);
-    setTimeout(() => {
-      setToastMessage(null);
-    }, 4000);
   };
 
   /* ─── Create Role View ─── */
@@ -274,14 +310,14 @@ export default function TeamsPage() {
             <button
               id="tab-role-management"
               className={`${styles.tab} ${activeTab === "roles" ? styles.tabActive : ""}`}
-              onClick={() => setActiveTab("roles")}
+              onClick={() => { setActiveTab("roles"); setCurrentPage(1); }}
             >
               Role Management
             </button>
             <button
               id="tab-team-management"
               className={`${styles.tab} ${activeTab === "team" ? styles.tabActive : ""}`}
-              onClick={() => setActiveTab("team")}
+              onClick={() => { setActiveTab("team"); setCurrentPage(1); }}
             >
               Team Management
             </button>
@@ -320,7 +356,7 @@ export default function TeamsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredRoles.map((role) => (
+                    {paginatedRoles.map((role) => (
                       <tr key={role.id}>
                         <td>{role.name}</td>
                         <td>
@@ -357,15 +393,17 @@ export default function TeamsPage() {
                                 </button>
                                 <button
                                   className={`${styles.actionItem}`}
-                                  onClick={() => console.log('edit')}
+                                  onClick={() => handleDeactivateRole(role.id, role.name)}
+                                  disabled={actionLoadingId === role.id && actionType === "deactivate"}
                                 >
-                                  Deactivate Role
+                                  {actionLoadingId === role.id && actionType === "deactivate" ? "Deactivating..." : "Deactivate Role"}
                                 </button>
                                 <button
                                   className={`${styles.actionItem}`}
-                                  onClick={() => console.log('edit')}
+                                  onClick={() => handleDeleteRole(role.id, role.name)}
+                                  disabled={actionLoadingId === role.id && actionType === "remove"}
                                 >
-                                  Remove Role
+                                  {actionLoadingId === role.id && actionType === "remove" ? "Removing..." : "Remove Role"}
                                 </button>
                               </div>
                             )}
@@ -378,13 +416,15 @@ export default function TeamsPage() {
               </div>
 
               {/* Pagination */}
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                resultsPerPage={resultsPerPage}
-                onPageChange={setCurrentPage}
-                variant="table"
-              />
+              {rolesTotalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={rolesTotalPages}
+                  resultsPerPage={resultsPerPage}
+                  onPageChange={setCurrentPage}
+                  variant="table"
+                />
+              )}
             </>
           ) : (
             /* ─── Team Management Tab ─── */
@@ -419,7 +459,7 @@ export default function TeamsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredTeamMembers.map((member) => (
+                    {paginatedTeamMembers.map((member) => (
                       <tr key={member.id}>
                         <td>{member.name}</td>
                         <td>{member.email}</td>
@@ -447,20 +487,22 @@ export default function TeamsPage() {
               </div>
 
               {/* Pagination */}
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                resultsPerPage={resultsPerPage}
-                onPageChange={setCurrentPage}
-                variant="table"
-              />
+              {teamTotalPages > 1 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={teamTotalPages}
+                  resultsPerPage={resultsPerPage}
+                  onPageChange={setCurrentPage}
+                  variant="table"
+                />
+              )}
             </>
           )}
         </div>
       )}
 
       {/* Dev toggle — switch empty/populated */}
-      <div className={styles.devToggleWrap}>
+      {/* <div className={styles.devToggleWrap}>
         <button
           className={styles.stateToggle}
           onClick={() => {
@@ -472,7 +514,7 @@ export default function TeamsPage() {
         >
           {roles.length > 0 ? "Show Empty State" : "Show Populated State"} →
         </button>
-      </div>
+      </div> */}
 
       <AddTeamMemberModal
         isOpen={isAddModalOpen}
