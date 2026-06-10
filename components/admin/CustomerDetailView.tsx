@@ -42,7 +42,9 @@ export default function CustomerDetailView({
 
   // Modal & action states
   const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false);
+  const [isUnsuspendModalOpen, setIsUnsuspendModalOpen] = useState(false);
   const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [isReactivateModalOpen, setIsReactivateModalOpen] = useState(false);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
   // Fetch full details on mount
@@ -151,6 +153,38 @@ export default function CustomerDetailView({
     }
   };
 
+  const handleReactivate = async () => {
+    if (!customer.userId) return;
+    setIsActionLoading(true);
+    try {
+      await customersService.reactivateCustomer(customer.userId);
+      showToast(`${customer.name} reactivated successfully.`);
+      setIsReactivateModalOpen(false);
+      onBack(true);
+    } catch (error) {
+      console.error("Reactivate failed:", error);
+      showToast(`Error: Failed to reactivate ${customer.name}`);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleUnsuspend = async () => {
+    if (!customer.userId) return;
+    setIsActionLoading(true);
+    try {
+      await customersService.unsuspendCustomer(customer.userId);
+      showToast(`${customer.name} unsuspended successfully.`);
+      setIsUnsuspendModalOpen(false);
+      onBack(true);
+    } catch (error) {
+      console.error("Unsuspend failed:", error);
+      showToast(`Error: Failed to unsuspend ${customer.name}`);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
   const filteredBookings = bookingsData.filter(
     (b) =>
       b.vehicle.toLowerCase().includes(bookingSearch.toLowerCase()) ||
@@ -167,11 +201,25 @@ export default function CustomerDetailView({
         <div className={styles.topBarActions}>
           <button
             className={styles.deactivateBtn}
+            onClick={() => setIsReactivateModalOpen(true)}
+            disabled={isActionLoading}
+          >
+            Reactivate Account
+          </button>
+          <button
+            className={styles.deactivateBtn}
             onClick={() => setIsDeactivateModalOpen(true)}
             disabled={isActionLoading}
             id="customer-deactivate-btn"
           >
             Deactivate Account
+          </button>
+          <button
+            className={styles.suspendBtn}
+            onClick={() => setIsUnsuspendModalOpen(true)}
+            disabled={isActionLoading}
+          >
+            Unsuspend User
           </button>
           <button
             className={styles.suspendBtn}
@@ -506,6 +554,32 @@ export default function CustomerDetailView({
           onClose={() => setIsDeactivateModalOpen(false)}
           isLoading={isActionLoading}
           isDanger
+        />
+      )}
+
+      {isReactivateModalOpen && (
+        <ConfirmActionModal
+          isOpen={isReactivateModalOpen}
+          title="Reactivate Account"
+          message={`Are you sure you want to reactivate ${customer.name}'s account? They will be able to log in again.`}
+          confirmText="Reactivate"
+          onConfirm={handleReactivate}
+          onClose={() => setIsReactivateModalOpen(false)}
+          isLoading={isActionLoading}
+          isDanger={false}
+        />
+      )}
+
+      {isUnsuspendModalOpen && (
+        <ConfirmActionModal
+          isOpen={isUnsuspendModalOpen}
+          title="Unsuspend User"
+          message={`Are you sure you want to unsuspend ${customer.name}'s account?`}
+          confirmText="Unsuspend"
+          onConfirm={handleUnsuspend}
+          onClose={() => setIsUnsuspendModalOpen(false)}
+          isLoading={isActionLoading}
+          isDanger={false}
         />
       )}
     </div>

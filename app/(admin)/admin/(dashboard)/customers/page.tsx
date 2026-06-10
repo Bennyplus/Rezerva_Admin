@@ -28,7 +28,9 @@ export default function CustomersPage() {
 
   // Modal & action states
   const [suspendUser, setSuspendUser] = useState<Customer | null>(null);
+  const [unsuspendUser, setUnsuspendUser] = useState<Customer | null>(null);
   const [deactivateUser, setDeactivateUser] = useState<Customer | null>(null);
+  const [reactivateUser, setReactivateUser] = useState<Customer | null>(null);
   const [isActionLoading, setIsActionLoading] = useState(false);
 
   // Toast state
@@ -132,6 +134,38 @@ export default function CustomersPage() {
     } finally {
       setIsActionLoading(false);
       setDeactivateUser(null);
+    }
+  };
+
+  const handleReactivate = async () => {
+    if (!reactivateUser?.userId) return;
+    setIsActionLoading(true);
+    try {
+      await customersService.reactivateCustomer(reactivateUser.userId);
+      setToastMessage(`${reactivateUser.name} reactivated successfully.`);
+      await fetchCustomers();
+    } catch (error) {
+      console.error("Reactivate failed:", error);
+      setToastMessage(`Error: Failed to reactivate ${reactivateUser.name}`);
+    } finally {
+      setIsActionLoading(false);
+      setReactivateUser(null);
+    }
+  };
+
+  const handleUnsuspend = async () => {
+    if (!unsuspendUser?.userId) return;
+    setIsActionLoading(true);
+    try {
+      await customersService.unsuspendCustomer(unsuspendUser.userId);
+      setToastMessage(`${unsuspendUser.name} unsuspended successfully.`);
+      await fetchCustomers();
+    } catch (error) {
+      console.error("Unsuspend failed:", error);
+      setToastMessage(`Error: Failed to unsuspend ${unsuspendUser.name}`);
+    } finally {
+      setIsActionLoading(false);
+      setUnsuspendUser(null);
     }
   };
 
@@ -345,10 +379,30 @@ export default function CustomersPage() {
                                   onClick={(e) => {
                                     e.stopPropagation();
                                     setOpenKebab(null);
+                                    setReactivateUser(customer);
+                                  }}
+                                >
+                                  Reactivate Account
+                                </button>
+                                <button
+                                  className={styles.kebabItem}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenKebab(null);
                                     setDeactivateUser(customer);
                                   }}
                                 >
                                   Deactivate Account
+                                </button>
+                                <button
+                                  className={styles.kebabItem}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setOpenKebab(null);
+                                    setUnsuspendUser(customer);
+                                  }}
+                                >
+                                  Unsuspend User
                                 </button>
                                 <button
                                   className={`${styles.kebabItem} ${styles.kebabItemDanger}`}
@@ -411,6 +465,32 @@ export default function CustomersPage() {
           onClose={() => setDeactivateUser(null)}
           isLoading={isActionLoading}
           isDanger
+        />
+      )}
+
+      {reactivateUser && (
+        <ConfirmActionModal
+          isOpen={!!reactivateUser}
+          title="Reactivate Account"
+          message={`Are you sure you want to reactivate ${reactivateUser.name}'s account? They will be able to log in again.`}
+          confirmText="Reactivate"
+          onConfirm={handleReactivate}
+          onClose={() => setReactivateUser(null)}
+          isLoading={isActionLoading}
+          isDanger={false}
+        />
+      )}
+
+      {unsuspendUser && (
+        <ConfirmActionModal
+          isOpen={!!unsuspendUser}
+          title="Unsuspend User"
+          message={`Are you sure you want to unsuspend ${unsuspendUser.name}'s account?`}
+          confirmText="Unsuspend"
+          onConfirm={handleUnsuspend}
+          onClose={() => setUnsuspendUser(null)}
+          isLoading={isActionLoading}
+          isDanger={false}
         />
       )}
     </div>

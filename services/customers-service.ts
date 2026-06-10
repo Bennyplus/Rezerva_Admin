@@ -88,5 +88,27 @@ export const customersService = {
       params: { path: `api/v1/admin/customers/deactivate/`, user_id: userId }
     });
     return response.data;
+  },
+
+  /**
+   * Reactivates a customer account
+   * @param userId The ID of the customer
+   */
+  reactivateCustomer: async (userId: number | string): Promise<any> => {
+    const response = await publicApi.post('', {}, {
+      params: { path: `api/v1/admin/customers/reactivate/`, user_id: userId }
+    });
+    return response.data;
+  },
+
+  /**
+   * Unsuspends a customer account
+   * @param userId The ID of the customer
+   */
+  unsuspendCustomer: async (userId: number | string): Promise<any> => {
+    const response = await publicApi.post('', {}, {
+      params: { path: `api/v1/admin/customers/unsuspend/`, user_id: userId }
+    });
+    return response.data;
   }
 };
