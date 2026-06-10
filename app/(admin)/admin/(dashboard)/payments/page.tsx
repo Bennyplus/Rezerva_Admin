@@ -4,9 +4,6 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
-  ADMIN_TRANSACTIONS,
-  ADMIN_PAYOUTS,
-  PAYMENT_STATS,
   Transaction,
   Payout,
   TransactionStatus,
@@ -14,6 +11,8 @@ import {
 } from "@/data/admin-payments";
 import Pagination from "@/components/admin/Pagination";
 import FilterBar from "@/components/admin/FilterBar";
+import Spinner from "@/components/admin/Spinner";
+import StatCard from "@/components/admin/StatCard";
 import styles from "./payments.module.css";
 import { paymentsService } from "@/services/payments-service";
 
@@ -26,36 +25,51 @@ export default function PaymentsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openKebab, setOpenKebab] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(8);
+  const resultsPerPage = 10;
 
   // Data states
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [payouts, setPayouts] = useState<Payout[]>([]);
-  const [stats, setStats] = useState(PAYMENT_STATS);
   const [isLoading, setIsLoading] = useState(true);
+  const [statsMetrics, setStatsMetrics] = useState<{
+    total_revenue: number;
+    total_payouts: number;
+    pending_transactions: number;
+    total_commissions: number;
+  } | null>(null);
 
   // Fetch data
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
+
       try {
         if (activeTab === "transactions") {
           const data = await paymentsService.getTransactions(currentPage, searchQuery);
-          setTransactions(data.length > 0 ? data : ADMIN_TRANSACTIONS);
+          setTransactions(data || []);
         } else {
           const data = await paymentsService.getPayouts(currentPage, searchQuery);
-          setPayouts(data.length > 0 ? data : ADMIN_PAYOUTS);
-        }
-        
-        const statsData = await paymentsService.getPaymentStats();
-        if (statsData && statsData.totalRevenue !== undefined) {
-          setStats(statsData);
+          setPayouts(data || []);
         }
       } catch (error) {
-        console.error("Failed to fetch payments data, using mock data fallback:", error);
-        setTransactions(ADMIN_TRANSACTIONS);
-        setPayouts(ADMIN_PAYOUTS);
-        setStats(PAYMENT_STATS);
+        console.error("Failed to fetch table data:", error);
+        if (activeTab === "transactions") setTransactions([]);
+        else setPayouts([]);
+      }
+
+      try {
+        const statsData = await paymentsService.getPaymentStats();
+        const m = statsData?.metrics;
+        if (m) {
+          setStatsMetrics({
+            total_revenue: m.total_revenue ?? 0,
+            total_payouts: m.total_payouts ?? 0,
+            pending_transactions: m.pending_transactions ?? 0,
+            total_commissions: m.total_commissions ?? 0,
+          });
+        }
+      } catch (error) {
+        console.error("Failed to fetch payment stats:", error);
       } finally {
         setIsLoading(false);
       }
@@ -65,7 +79,16 @@ export default function PaymentsPage() {
       fetchData();
     }, 300);
     return () => clearTimeout(timer);
-  }, [activeTab, currentPage, searchQuery]);
+  }, [activeTab]); // ← client-side pagination: only re-fetch when tab changes
+
+  const handleMarkAsSuccessful = async (id: string) => {
+    try {
+      await paymentsService.markAsSuccessful(id);
+      setTransactions((prev) => prev.map(t => t.id === id ? { ...t, status: "Completed" } : t));
+    } catch (error) {
+      console.error("Failed to mark payment as successful:", error);
+    }
+  };
 
   const filteredTransactions = transactions.filter(
     (t) =>
@@ -79,28 +102,34 @@ export default function PaymentsPage() {
       p.id.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  const fourthStatLabel =
-    activeTab === "transactions" ? "Total Refunds" : "Total Commissions";
-  const fourthStatValue =
-    activeTab === "transactions"
-      ? stats.totalRefunds
-      : stats.totalCommissions;
+  // Reset to page 1 whenever search or tab changes
+  useEffect(() => { setCurrentPage(1); }, [searchQuery, activeTab]);
+
+  const paginatedTransactions = filteredTransactions.slice(
+    (currentPage - 1) * resultsPerPage,
+    currentPage * resultsPerPage
+  );
+
+  const paginatedPayouts = filteredPayouts.slice(
+    (currentPage - 1) * resultsPerPage,
+    currentPage * resultsPerPage
+  );
+
+  // const fourthStatLabel =
+  //   activeTab === "transactions" ? "Total Refunds" : "Total Commissions";
+  // const fourthStatValue =
+  //   activeTab === "transactions"
+  //     ? stats?.totalRefunds
+  //     : stats?.totalCommissions;
 
   return (
     <div className={styles.page} onClick={() => setOpenKebab(null)}>
       {/* ─── Stats ─── */}
       <div className={styles.statsGrid}>
-        {[
-          { label: "Total Revenue", value: stats.totalRevenue },
-          { label: "Total Payouts", value: stats.totalPayouts },
-          { label: "Pending Transactions", value: stats.pendingTransactions },
-          { label: fourthStatLabel, value: fourthStatValue },
-        ].map((stat) => (
-          <div key={stat.label} className={styles.statCard}>
-            <span className={styles.statLabel}>{stat.label}</span>
-            <span className={styles.statValue}>{stat.value}</span>
-          </div>
-        ))}
+        <StatCard label="Total Revenue" value={statsMetrics ? statsMetrics.total_revenue.toLocaleString("en-NG", { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : "—"} id="stat-revenue" />
+        <StatCard label="Total Payouts" value={statsMetrics ? statsMetrics.total_payouts : "—"} id="stat-payouts" />
+        <StatCard label="Pending Transactions" value={statsMetrics ? statsMetrics.pending_transactions : "—"} id="stat-pending" />
+        <StatCard label="Total Commissions" value={statsMetrics ? statsMetrics.total_commissions : "—"} id="stat-fourth" />
       </div>
 
       {/* ─── Tabs ─── */}
@@ -121,7 +150,11 @@ export default function PaymentsPage() {
         </button>
       </div>
 
-      {isEmpty ? (
+      {isLoading ? (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "300px" }}>
+          <Spinner />
+        </div>
+      ) : isEmpty || (activeTab === "transactions" && transactions.length === 0) || (activeTab === "payouts" && payouts.length === 0) ? (
         /* ─── Empty State ─── */
         <div className={styles.emptyCard} id="payments-empty-state">
           <div className={styles.illustration} aria-hidden="true">
@@ -145,7 +178,9 @@ export default function PaymentsPage() {
       ) : activeTab === "transactions" ? (
         /* ─── Transactions Table ─── */
         <div className={styles.tableCard} id="transactions-table">
-          <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} />
+          <div className={styles.toolbar} style={{ display: 'flex', alignItems: 'center' }}>
+            <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} />
+          </div>
 
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -155,7 +190,6 @@ export default function PaymentsPage() {
                     <input type="checkbox" className={styles.checkbox} aria-label="Select all" />
                   </th>
                   <th>Transaction ID</th>
-                  <th>Customer</th>
                   <th>Amount</th>
                   <th>Transaction Type</th>
                   <th>Date</th>
@@ -164,13 +198,12 @@ export default function PaymentsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredTransactions.map((t, i) => (
+                {paginatedTransactions.map((t, i) => (
                   <tr key={`${t.id}-${i}`}>
                     <td className={styles.checkCol}>
                       <input type="checkbox" className={styles.checkbox} aria-label={`Select ${t.customerName}`} />
                     </td>
                     <td>{t.id}</td>
-                    <td>{t.customerName}</td>
                     <td>{t.amount}</td>
                     <td>{t.type}</td>
                     <td>{t.date}</td>
@@ -183,13 +216,14 @@ export default function PaymentsPage() {
                         openKebab={openKebab}
                         setOpenKebab={setOpenKebab}
                         onViewDetails={() => router.push(`/admin/payments/${t.customerId}`)}
+                        onMarkAsSuccessful={() => handleMarkAsSuccessful(t.id)}
                       />
                     </td>
                   </tr>
                 ))}
-                {filteredTransactions.length === 0 && (
+                {paginatedTransactions.length === 0 && (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: "center", padding: "32px", color: "#868C98" }}>
+                    <td colSpan={6} style={{ textAlign: "center", padding: "32px", color: "#868C98" }}>
                       No transactions found.
                     </td>
                   </tr>
@@ -198,18 +232,22 @@ export default function PaymentsPage() {
             </table>
           </div>
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            resultsPerPage={9}
-            onPageChange={setCurrentPage}
-            variant="table"
-          />
+          {filteredTransactions.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.max(1, Math.ceil(filteredTransactions.length / resultsPerPage))}
+              resultsPerPage={resultsPerPage}
+              onPageChange={setCurrentPage}
+              variant="table"
+            />
+          )}
         </div>
       ) : (
         /* ─── Payouts Table ─── */
         <div className={styles.tableCard} id="payouts-table">
-          <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} />
+          <div className={styles.toolbar} style={{ display: 'flex', alignItems: 'center' }}>
+            <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} />
+          </div>
 
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -228,7 +266,7 @@ export default function PaymentsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredPayouts.map((p, i) => (
+                {paginatedPayouts.map((p, i) => (
                   <tr key={`${p.id}-${i}`}>
                     <td className={styles.checkCol}>
                       <input type="checkbox" className={styles.checkbox} aria-label={`Select ${p.driverName}`} />
@@ -250,9 +288,9 @@ export default function PaymentsPage() {
                     </td>
                   </tr>
                 ))}
-                {filteredPayouts.length === 0 && (
+                {paginatedPayouts.length === 0 && (
                   <tr>
-                    <td colSpan={8} style={{ textAlign: "center", padding: "32px", color: "#868C98" }}>
+                    <td colSpan={7} style={{ textAlign: "center", padding: "32px", color: "#868C98" }}>
                       No payouts found.
                     </td>
                   </tr>
@@ -261,22 +299,18 @@ export default function PaymentsPage() {
             </table>
           </div>
 
-          <Pagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            resultsPerPage={9}
-            onPageChange={setCurrentPage}
-            variant="table"
-          />
+          {filteredPayouts.length > 0 && (
+            <Pagination
+              currentPage={currentPage}
+              totalPages={Math.max(1, Math.ceil(filteredPayouts.length / resultsPerPage))}
+              resultsPerPage={resultsPerPage}
+              onPageChange={setCurrentPage}
+              variant="table"
+            />
+          )}
         </div>
       )}
 
-      {/* Dev toggle */}
-      <div className={styles.devToggleWrap}>
-        <button className={styles.stateToggle} onClick={() => setIsEmpty((v) => !v)} id="toggle-payments-state">
-          {isEmpty ? "Show Populated State" : "Show Empty State"} →
-        </button>
-      </div>
     </div>
   );
 }
@@ -310,12 +344,13 @@ function PayoutBadge({ status }: { status: PayoutStatus }) {
 
 /* ─── Kebab menus ─── */
 function TransactionKebab({
-  rowId, openKebab, setOpenKebab, onViewDetails,
+  rowId, openKebab, setOpenKebab, onViewDetails, onMarkAsSuccessful
 }: {
   rowId: string;
   openKebab: string | null;
   setOpenKebab: (v: string | null) => void;
   onViewDetails: () => void;
+  onMarkAsSuccessful: () => void;
 }) {
   return (
     <div className={styles.kebabWrap}>
@@ -329,7 +364,7 @@ function TransactionKebab({
       {openKebab === rowId && (
         <div className={styles.kebabMenu}>
           <button className={styles.kebabItem} onClick={onViewDetails}>View Details</button>
-          <button className={styles.kebabItem}>Mark As Successful</button>
+          <button className={styles.kebabItem} onClick={onMarkAsSuccessful}>Mark As Successful</button>
         </div>
       )}
     </div>
