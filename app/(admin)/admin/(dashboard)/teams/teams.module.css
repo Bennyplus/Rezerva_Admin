@@ -30,14 +30,14 @@
   display: inline-flex;
   align-items: center;
   gap: 10px;
-  background: #059669;
+  background: #008236;
   /* emerald-600 */
   color: #ffffff;
   padding: 10px 16px;
   border-radius: 8px;
   font-family: var(--font-body);
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   pointer-events: auto;
   animation: slideDown 0.3s ease-out;

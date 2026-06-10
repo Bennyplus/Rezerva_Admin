@@ -3,22 +3,24 @@
 import { useState } from "react";
 import CustomSelect from "./CustomSelect";
 import styles from "./AddTeamMemberModal.module.css";
-import { ADMIN_ROLES } from "@/data/admin-teams";
+import { ADMIN_ROLES, type Role } from "@/data/admin-teams";
 
 interface AddTeamMemberModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string, email: string, roleId: string) => void;
+  onSubmit: (name: string, email: string, roleId: string, phone_number: string) => void;
+  roles?: Role[];
 }
 
-export default function AddTeamMemberModal({ isOpen, onClose, onSubmit }: AddTeamMemberModalProps) {
+export default function AddTeamMemberModal({ isOpen, onClose, onSubmit, roles = ADMIN_ROLES }: AddTeamMemberModalProps) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
   const [roleId, setRoleId] = useState("");
 
   if (!isOpen) return null;
 
-  const roleOptions = ADMIN_ROLES.map(role => ({
+  const roleOptions = roles.map(role => ({
     value: role.id,
     label: role.name
   }));
@@ -27,10 +29,11 @@ export default function AddTeamMemberModal({ isOpen, onClose, onSubmit }: AddTea
 
   const handleSubmit = () => {
     if (isValid) {
-      onSubmit(name, email, roleId);
+      onSubmit(name, email, roleId, phoneNumber);
       // Reset after submit
       setName("");
       setEmail("");
+      setPhoneNumber("");
       setRoleId("");
     }
   };
@@ -38,6 +41,7 @@ export default function AddTeamMemberModal({ isOpen, onClose, onSubmit }: AddTea
   const handleClose = () => {
     setName("");
     setEmail("");
+    setPhoneNumber("");
     setRoleId("");
     onClose();
   };
@@ -76,6 +80,17 @@ export default function AddTeamMemberModal({ isOpen, onClose, onSubmit }: AddTea
               placeholder="e.g Prosper@gmail.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+            />
+          </div>
+
+          <div className={styles.field}>
+            <label className={styles.label}>Phone Number</label>
+            <input
+              type="tel"
+              className={styles.input}
+              placeholder="e.g 09132323232"
+              value={phoneNumber}
+              onChange={(e) => setPhoneNumber(e.target.value)}
             />
           </div>
 

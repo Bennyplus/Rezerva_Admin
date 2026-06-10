@@ -69,7 +69,7 @@ export default function TeamsPage() {
     if (toastMessage) {
       const timer = setTimeout(() => {
         setToastMessage(null);
-      }, 5000);
+      }, 30000);
       return () => clearTimeout(timer);
     }
   }, [toastMessage]);
@@ -250,27 +250,31 @@ export default function TeamsPage() {
   };
 
   /* Handle Add Team Member */
-  const handleAddMemberSubmit = (name: string, email: string, roleId: string) => {
-    const assignedRole = roles.find(r => r.id === roleId);
-    const roleName = assignedRole?.name || "Member";
-    const newMember: TeamMember = {
-      id: `tm-${Date.now()}`,
-      name,
-      email,
-      avatar: "/images/admin/profile-Avatar.svg",
-      role: roleName,
-      status: "Active",
-      joinedAt: new Date().toLocaleDateString("en-GB", {
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }),
-    };
-    setTeamMembers(prev => [newMember, ...prev]);
-    setIsAddModalOpen(false);
+  const handleAddMemberSubmit = async (name: string, email: string, roleId: string, phone_number: string) => {
+    try {
+      const payload = {
+        full_name: name,
+        email,
+        phone_number,
+        role: [Number(roleId)]
+      };
 
-    // Show toast
-    setToastMessage(`${name} has been successfully assigned ${roleName}`);
+      await accountsService.addTeamMember(payload);
+      
+      // Re-fetch members to update the list
+      await fetchTeamMembers();
+      
+      setIsAddModalOpen(false);
+
+      const assignedRole = roles.find(r => r.id === roleId);
+      const roleName = assignedRole?.name || "Member";
+      // Show toast
+      setToastMessage(`${name} has been successfully assigned ${roleName}`);
+    } catch (error: any) {
+      console.error("Failed to add team member:", error);
+      const serverMessage = error.response?.data?.message || error.message;
+      setToastMessage(`Error: ${serverMessage}`);
+    }
   };
 
   /* ─── Create Role View ─── */
@@ -556,6 +560,7 @@ export default function TeamsPage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={handleAddMemberSubmit}
+        roles={roles}
       />
 
       <ConfirmActionModal
@@ -564,7 +569,7 @@ export default function TeamsPage() {
         onConfirm={handleConfirmAction}
         title={confirmModalState.type === "deactivate" ? "Deactivate Role?" : "Remove Role?"}
         message={
-          confirmModalState.type === "deactivate" 
+          confirmModalState.type === "deactivate"
             ? "Are you sure you want to deactivate this role? Users assigned to this role may lose access to certain permissions."
             : "Are you sure you want to completely remove this role? This action cannot be undone."
         }
@@ -616,10 +621,7 @@ function MoreIcon() {
 }
 function CheckCircleIcon() {
   return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
-      <polyline points="22 4 12 14.01 9 11.01" />
-    </svg>
+    <Image src={"/images/admin/checkmark.svg"} alt="check" width={18} height={18} />
   );
 }
 function CloseSmallIcon() {

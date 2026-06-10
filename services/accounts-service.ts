@@ -133,6 +133,17 @@ export const accountsService = {
   },
 
   /**
+   * Adds a team member to the admin account at admin/members/
+   * @param payload - Team member payload object
+   */
+  addTeamMember: async (payload: any): Promise<any> => {
+    const response = await publicApi.post('', payload, {
+      params: { path: 'api/v1/admin/members/' }
+    });
+    return response.data;
+  },
+
+  /**
    * Logs the user out by hitting the custom proxy logout route which clears cookies
    */
   logout: async () => {
