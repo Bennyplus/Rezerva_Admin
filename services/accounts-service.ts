@@ -87,17 +87,27 @@ export const accountsService = {
    */
   updateRole: async (id: string, payload: any): Promise<any> => {
     const response = await publicApi.put('', payload, {
-      params: { path: `api/v1/admin/roles/${id}/` }
+      params: { path: `api/v1/admin/roles/`, role_id: id }
     });
     return response.data;
   },
   /**
-   * Deletes a role from the admin account at admin/roles/{id}/
+   * Deletes a role from the admin account at admin/roles/?role_id={id}
    * @param id - The ID of the role to delete
    */
   deleteRole: async (id: string): Promise<any> => {
     const response = await publicApi.delete('', {
-      params: { path: `api/v1/admin/roles/${id}/` }
+      params: { path: `api/v1/admin/roles/`, role_id: id }
+    });
+    return response.data;
+  },
+  /**
+   * Deactivates a role from the admin account at admin/roles/deactivate/?role_id={id}
+   * @param id - The ID of the role to deactivate
+   */
+  deactivateRole: async (id: string): Promise<any> => {
+    const response = await publicApi.patch('', {}, {
+      params: { path: `api/v1/admin/roles/deactivate/`, role_id: id }
     });
     return response.data;
   },
@@ -111,7 +121,48 @@ export const accountsService = {
     });
     return response.data;
   },
-  
+
+  /**
+   * Gets all team members from the admin account at admin/members/
+   */
+  getTeamMembers: async (): Promise<any> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/admin/members/' }
+    });
+    return response.data;
+  },
+
+  /**
+   * Adds a team member to the admin account at admin/members/
+   * @param payload - Team member payload object
+   */
+  addTeamMember: async (payload: any): Promise<any> => {
+    const response = await publicApi.post('', payload, {
+      params: { path: 'api/v1/admin/members/' }
+    });
+    return response.data;
+  },
+
+  /**
+   * Updates a team member's role
+   */
+  updateTeamMember: async (id: string, payload: any): Promise<any> => {
+    const response = await publicApi.put('', payload, {
+      params: { path: `api/v1/admin/member/update-role/`, member_id: id }
+    });
+    return response.data;
+  },
+
+  /**
+   * Suspends a team member
+   */
+  suspendTeamMember: async (id: string, payload: { reason: string }): Promise<any> => {
+    const response = await publicApi.post('', payload, {
+      params: { path: `api/v1/admin/members/suspend/`, member_id: id }
+    });
+    return response.data;
+  },
+
   /**
    * Logs the user out by hitting the custom proxy logout route which clears cookies
    */

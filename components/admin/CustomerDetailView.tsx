@@ -1,31 +1,191 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Pagination from "@/components/admin/Pagination";
 import { type Customer, type CustomerBooking } from "@/data/admin-customers";
+import { customersService } from "@/services/customers-service";
+import ConfirmActionModal from "@/components/admin/ConfirmActionModal";
+import SuspendUserModal from "@/components/admin/SuspendUserModal";
+import Spinner from "@/components/admin/Spinner";
 import styles from "./CustomerDetailView.module.css";
 
-type DetailTab = "user-details" | "bookings" | "activity-log";
+type DetailTab = "user-details" | "bookings" | "reviews" | "activity-log";
 
 interface CustomerDetailViewProps {
-  customer: Customer;
-  onBack: () => void;
-  onDeactivate: (id: string) => void;
-  onSuspend: (id: string) => void;
+  customer: Customer; // Base row data
+  onBack: (refresh?: boolean) => void;
+  showToast: (msg: string) => void;
 }
 
 export default function CustomerDetailView({
   customer,
   onBack,
-  onDeactivate,
-  onSuspend,
+  showToast
 }: CustomerDetailViewProps) {
   const [activeTab, setActiveTab] = useState<DetailTab>("user-details");
+
+  // Data states
+  const [detailData, setDetailData] = useState<Customer>(customer);
+  const [detailLoading, setDetailLoading] = useState(true);
+  const [bookingsData, setBookingsData] = useState<CustomerBooking[]>([]);
+  const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [bookingsFetched, setBookingsFetched] = useState(false);
+  const [reviewsData, setReviewsData] = useState<any[]>([]);
+  const [reviewsLoading, setReviewsLoading] = useState(false);
+  const [reviewsFetched, setReviewsFetched] = useState(false);
+
+  // Pagination & Search
   const [bookingSearch, setBookingSearch] = useState("");
   const [bookingPage, setBookingPage] = useState(1);
+  const [reviewPage, setReviewPage] = useState(1);
 
-  const filteredBookings = customer.bookings.filter(
+  // Modal & action states
+  const [isSuspendModalOpen, setIsSuspendModalOpen] = useState(false);
+  const [isUnsuspendModalOpen, setIsUnsuspendModalOpen] = useState(false);
+  const [isDeactivateModalOpen, setIsDeactivateModalOpen] = useState(false);
+  const [isReactivateModalOpen, setIsReactivateModalOpen] = useState(false);
+  const [isActionLoading, setIsActionLoading] = useState(false);
+
+  // Fetch full details on mount
+  useEffect(() => {
+    if (customer.userId) {
+      fetchDetails(customer.userId);
+    } else {
+      setDetailLoading(false); // mock data fallback
+    }
+  }, [customer.userId]);
+
+  const fetchDetails = async (userId: number) => {
+    setDetailLoading(true);
+    try {
+      const data = await customersService.getCustomerInfo(userId);
+      setDetailData(prev => ({
+        ...prev,
+        emergencyContact: data?.emergency_contact?.[0] ? `${data.emergency_contact[0].name} (${data.emergency_contact[0].phone_number})` : prev.emergencyContact,
+        address: data?.address || prev.address,
+      }));
+    } catch (error) {
+      console.error("Failed to fetch customer details:", error);
+    } finally {
+      setDetailLoading(false);
+    }
+  };
+
+  // Fetch bookings lazily when tab is clicked
+  useEffect(() => {
+    if (activeTab === "bookings" && !bookingsFetched && customer.userId) {
+      fetchBookings(customer.userId);
+    }
+  }, [activeTab, bookingsFetched, customer.userId]);
+
+  const fetchBookings = async (userId: number) => {
+    setBookingsLoading(true);
+    try {
+      const data = await customersService.getCustomerBookings(userId);
+      const mappedBookings: CustomerBooking[] = (data || []).map((b: any) => ({
+        id: b.booking_id,
+        vehicle: b.vehicle,
+        startDate: b.start_date || "",
+        endDate: b.end_date || "",
+        amountPaid: b.amount_paid,
+        bookingType: b.booking_type,
+        status: b.status === "scheduled" ? "Active" : b.status === "completed" ? "Completed" : "Cancelled"
+      }));
+      setBookingsData(mappedBookings);
+      setBookingsFetched(true);
+    } catch (error) {
+      console.error("Failed to fetch customer bookings:", error);
+    } finally {
+      setBookingsLoading(false);
+    }
+  };
+
+  // Fetch reviews lazily
+  useEffect(() => {
+    if (activeTab === "reviews" && !reviewsFetched && customer.userId) {
+      fetchReviews(customer.userId);
+    }
+  }, [activeTab, reviewsFetched, customer.userId]);
+
+  const fetchReviews = async (userId: number) => {
+    setReviewsLoading(true);
+    try {
+      const data = await customersService.getCustomerReviews(userId);
+      setReviewsData(data || []);
+      setReviewsFetched(true);
+    } catch (error) {
+      console.error("Failed to fetch customer reviews:", error);
+    } finally {
+      setReviewsLoading(false);
+    }
+  };
+
+  const handleSuspend = async (reason: string) => {
+    if (!customer.userId) return;
+    setIsActionLoading(true);
+    try {
+      await customersService.suspendCustomer(customer.userId, { reason });
+      showToast(`${customer.name} suspended successfully.`);
+      setIsSuspendModalOpen(false);
+      onBack(true); // Return and refresh list
+    } catch (error) {
+      console.error("Suspend failed:", error);
+      showToast(`Error: Failed to suspend ${customer.name}`);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleDeactivate = async () => {
+    if (!customer.userId) return;
+    setIsActionLoading(true);
+    try {
+      await customersService.deactivateCustomer(customer.userId);
+      showToast(`${customer.name} deactivated successfully.`);
+      setIsDeactivateModalOpen(false);
+      onBack(true); // Return and refresh list
+    } catch (error) {
+      console.error("Deactivate failed:", error);
+      showToast(`Error: Failed to deactivate ${customer.name}`);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleReactivate = async () => {
+    if (!customer.userId) return;
+    setIsActionLoading(true);
+    try {
+      await customersService.reactivateCustomer(customer.userId);
+      showToast(`${customer.name} reactivated successfully.`);
+      setIsReactivateModalOpen(false);
+      onBack(true);
+    } catch (error) {
+      console.error("Reactivate failed:", error);
+      showToast(`Error: Failed to reactivate ${customer.name}`);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const handleUnsuspend = async () => {
+    if (!customer.userId) return;
+    setIsActionLoading(true);
+    try {
+      await customersService.unsuspendCustomer(customer.userId);
+      showToast(`${customer.name} unsuspended successfully.`);
+      setIsUnsuspendModalOpen(false);
+      onBack(true);
+    } catch (error) {
+      console.error("Unsuspend failed:", error);
+      showToast(`Error: Failed to unsuspend ${customer.name}`);
+    } finally {
+      setIsActionLoading(false);
+    }
+  };
+
+  const filteredBookings = bookingsData.filter(
     (b) =>
       b.vehicle.toLowerCase().includes(bookingSearch.toLowerCase()) ||
       b.id.toLowerCase().includes(bookingSearch.toLowerCase())
@@ -35,20 +195,36 @@ export default function CustomerDetailView({
     <div className={styles.page}>
       {/* Top bar */}
       <div className={styles.topBar}>
-        <button className={styles.backBtn} onClick={onBack} id="customer-detail-back" aria-label="Go back">
+        <button className={styles.backBtn} onClick={() => onBack(false)} id="customer-detail-back" aria-label="Go back">
           <BackIcon />
         </button>
         <div className={styles.topBarActions}>
           <button
             className={styles.deactivateBtn}
-            onClick={() => onDeactivate(customer.id)}
+            onClick={() => setIsReactivateModalOpen(true)}
+            disabled={isActionLoading}
+          >
+            Reactivate Account
+          </button>
+          <button
+            className={styles.deactivateBtn}
+            onClick={() => setIsDeactivateModalOpen(true)}
+            disabled={isActionLoading}
             id="customer-deactivate-btn"
           >
             Deactivate Account
           </button>
           <button
             className={styles.suspendBtn}
-            onClick={() => onSuspend(customer.id)}
+            onClick={() => setIsUnsuspendModalOpen(true)}
+            disabled={isActionLoading}
+          >
+            Unsuspend User
+          </button>
+          <button
+            className={styles.suspendBtn}
+            onClick={() => setIsSuspendModalOpen(true)}
+            disabled={isActionLoading}
             id="customer-suspend-btn"
           >
             Suspend User
@@ -58,14 +234,14 @@ export default function CustomerDetailView({
 
       {/* Tabs */}
       <div className={styles.tabBar}>
-        {(["user-details", "bookings", "activity-log"] as DetailTab[]).map((tab) => (
+        {(["user-details", "bookings", "reviews", "activity-log"] as DetailTab[]).map((tab) => (
           <button
             key={tab}
             className={`${styles.tab} ${activeTab === tab ? styles.tabActive : ""}`}
             onClick={() => setActiveTab(tab)}
             id={`customer-tab-${tab}`}
           >
-            {tab === "user-details" ? "User Details" : tab === "bookings" ? "Bookings" : "Activity Log"}
+            {tab === "user-details" ? "User Details" : tab === "bookings" ? "Bookings" : tab === "reviews" ? "Reviews" : "Activity Log"}
           </button>
         ))}
       </div>
@@ -78,8 +254,8 @@ export default function CustomerDetailView({
             {/* Photo */}
             <div className={styles.photoWrap}>
               <Image
-                src={customer.avatar}
-                alt={customer.name}
+                src={detailData.avatar}
+                alt={detailData.name}
                 width={320}
                 height={200}
                 className={styles.photo}
@@ -91,36 +267,48 @@ export default function CustomerDetailView({
               {/* Name + Phone side by side */}
               <div className={styles.infoGroup}>
                 <span className={styles.infoLabel}>Name</span>
-                <span className={styles.infoValue}>{customer.name}</span>
+                <span className={styles.infoValue}>{detailData.name}</span>
               </div>
               <div className={styles.infoGroup}>
                 <div className={styles.phoneHeader}>
                   <span className={styles.infoLabel}>Phone Number</span>
-                  <VerificationBadge status={customer.verificationStatus} />
+                  <VerificationBadge status={detailData.verificationStatus} />
                 </div>
-                <span className={styles.infoValue}>{customer.phone}</span>
+                <span className={styles.infoValue}>{detailData.phone}</span>
               </div>
 
               {/* Email + Emergency Contact */}
               <div className={styles.infoGroup}>
                 <span className={styles.infoLabel}>Email</span>
-                <span className={styles.infoValue}>{customer.email}</span>
+                <span className={styles.infoValue}>{detailData.email}</span>
               </div>
               <div className={styles.infoGroup}>
                 <span className={styles.infoLabel}>Emergency Contact</span>
-                <span className={styles.infoValue}>{customer.emergencyContact}</span>
+                <span className={styles.infoValue}>
+                  {detailLoading ? (
+                    <Spinner size={16} color="#868C98" />
+                  ) : (
+                    detailData.emergencyContact || "—"
+                  )}
+                </span>
               </div>
 
               {/* License Status */}
               <div className={styles.infoGroup}>
-                <span className={styles.infoLabel}>License Status</span>
-                <span className={`${styles.infoValue} ${customer.licenseStatus === "Expired" ? styles.expiredText : ""}`}>
-                  {customer.licenseStatus}
+                <span className={styles.infoLabel}>Verification Status</span>
+                <span className={`${styles.infoValue} ${detailData.licenseStatus === "Expired" ? styles.expiredText : ""}`}>
+                  {detailData.licenseStatus}
                 </span>
               </div>
               <div className={styles.infoGroupFull}>
                 <span className={styles.infoLabel}>Address</span>
-                <span className={styles.infoValue}>{customer.address}</span>
+                <span className={styles.infoValue}>
+                  {detailLoading ? (
+                    <Spinner size={16} color="#868C98" />
+                  ) : (
+                    detailData.address || "—"
+                  )}
+                </span>
               </div>
             </div>
 
@@ -132,8 +320,8 @@ export default function CustomerDetailView({
                   <div className={styles.docTile}>
                     <PdfIcon />
                     <div className={styles.docInfo}>
-                      <span className={styles.docName}>{customer.documents.driversLicense.filename}</span>
-                      <span className={styles.docMeta}>0 KB of {customer.documents.driversLicense.size} •</span>
+                      <span className={styles.docName}>{detailData.documents.driversLicense.filename || "No document"}</span>
+                      <span className={styles.docMeta}>0 KB of {detailData.documents.driversLicense.size || "0 KB"} •</span>
                     </div>
                   </div>
                 </div>
@@ -142,8 +330,8 @@ export default function CustomerDetailView({
                   <div className={styles.docTile}>
                     <PdfIcon />
                     <div className={styles.docInfo}>
-                      <span className={styles.docName}>{customer.documents.citizenshipDocument.filename}</span>
-                      <span className={styles.docMeta}>0 KB of {customer.documents.citizenshipDocument.size} •</span>
+                      <span className={styles.docName}>{detailData.documents.citizenshipDocument.filename || "No document"}</span>
+                      <span className={styles.docMeta}>0 KB of {detailData.documents.citizenshipDocument.size || "0 KB"} •</span>
                     </div>
                   </div>
                 </div>
@@ -156,18 +344,18 @@ export default function CustomerDetailView({
             <div className={styles.flagsCard}>
               <div className={styles.flagsHeader}>
                 <h3 className={styles.flagsTitle}>Flags And Reports</h3>
-                {customer.flagsCount > 0 && (
+                {detailData.flagsCount > 0 && (
                   <span className={styles.flagsBadge}>
                     <FlagIcon />
-                    {customer.flagsCount} New Flag{customer.flagsCount !== 1 ? "s" : ""}
+                    {detailData.flagsCount} New Flag{detailData.flagsCount !== 1 ? "s" : ""}
                   </span>
                 )}
               </div>
-              {customer.flagsCount === 0 ? (
+              {detailData.flagsCount === 0 ? (
                 <p className={styles.flagsEmpty}>No flags or reports for this user.</p>
               ) : (
                 <div className={styles.flagsList}>
-                  {Array.from({ length: customer.flagsCount }).map((_, i) => (
+                  {Array.from({ length: detailData.flagsCount }).map((_, i) => (
                     <div key={i} className={styles.flagItem}>
                       <WarningIcon />
                       <div className={styles.flagContent}>
@@ -221,17 +409,28 @@ export default function CustomerDetailView({
                   <th>Amount Paid</th>
                   <th>Booking Type</th>
                   <th>Status</th>
-                  <th className={styles.actionsCol} />
                 </tr>
               </thead>
               <tbody>
-                {filteredBookings.map((booking, i) => (
-                  <BookingRow key={i} booking={booking} />
-                ))}
-                {filteredBookings.length === 0 && (
+                {bookingsLoading ? (
                   <tr>
-                    <td colSpan={8} className={styles.emptyRow}>No bookings found.</td>
+                    <td colSpan={8} style={{ padding: "40px" }}>
+                      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                        <Spinner />
+                      </div>
+                    </td>
                   </tr>
+                ) : (
+                  <>
+                    {filteredBookings.map((booking, i) => (
+                      <BookingRow key={i} booking={booking} />
+                    ))}
+                    {filteredBookings.length === 0 && (
+                      <tr>
+                        <td colSpan={8} className={styles.emptyRow}>No bookings found.</td>
+                      </tr>
+                    )}
+                  </>
                 )}
               </tbody>
             </table>
@@ -241,6 +440,63 @@ export default function CustomerDetailView({
             totalPages={Math.max(1, Math.ceil(filteredBookings.length / 9))}
             resultsPerPage={9}
             onPageChange={setBookingPage}
+            variant="table"
+          />
+        </div>
+      )}
+
+      {/* ─── Reviews Tab ─── */}
+      {activeTab === "reviews" && (
+        <div className={styles.tableCard}>
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Date Posted</th>
+                  <th>Rating</th>
+                  <th>Status</th>
+                  <th>Review</th>
+                </tr>
+              </thead>
+              <tbody>
+                {reviewsLoading ? (
+                  <tr>
+                    <td colSpan={4} style={{ padding: "40px" }}>
+                      <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                        <Spinner />
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  <>
+                    {reviewsData.slice((reviewPage - 1) * 9, reviewPage * 9).map((review, i) => (
+                      <tr key={i}>
+                        <td className={styles.dateCell}>{review.date_posted || "—"}</td>
+                        <td>{review.rating ? `${review.rating} ⭐` : "—"}</td>
+                        <td>
+                          <span className={`${styles.badge} ${review.status === 'Active' ? styles.bsBadgeGreen : styles.bsBadgeGray}`}>
+                            <span className={styles.badgeDot} />
+                            {review.status || "—"}
+                          </span>
+                        </td>
+                        <td>{review.review || "—"}</td>
+                      </tr>
+                    ))}
+                    {reviewsData.length === 0 && (
+                      <tr>
+                        <td colSpan={4} className={styles.emptyRow}>No reviews found.</td>
+                      </tr>
+                    )}
+                  </>
+                )}
+              </tbody>
+            </table>
+          </div>
+          <Pagination
+            currentPage={reviewPage}
+            totalPages={Math.max(1, Math.ceil(reviewsData.length / 9))}
+            resultsPerPage={9}
+            onPageChange={setReviewPage}
             variant="table"
           />
         </div>
@@ -259,14 +515,14 @@ export default function CustomerDetailView({
                 </tr>
               </thead>
               <tbody>
-                {customer.activityLog.map((entry) => (
+                {detailData.activityLog.map((entry) => (
                   <tr key={entry.id}>
                     <td className={styles.activityAction}>{entry.action}</td>
                     <td>{entry.details}</td>
                     <td className={styles.dateCell}>{entry.timestamp}</td>
                   </tr>
                 ))}
-                {customer.activityLog.length === 0 && (
+                {detailData.activityLog.length === 0 && (
                   <tr>
                     <td colSpan={3} className={styles.emptyRow}>No activity yet.</td>
                   </tr>
@@ -276,6 +532,56 @@ export default function CustomerDetailView({
           </div>
         </div>
       )}
+
+      {/* Modals */}
+      {isSuspendModalOpen && (
+        <SuspendUserModal
+          isOpen={isSuspendModalOpen}
+          onClose={() => setIsSuspendModalOpen(false)}
+          onSubmit={handleSuspend}
+          userName={customer.name}
+          isLoading={isActionLoading}
+        />
+      )}
+
+      {isDeactivateModalOpen && (
+        <ConfirmActionModal
+          isOpen={isDeactivateModalOpen}
+          title="Deactivate Account"
+          message={`Are you sure you want to deactivate ${customer.name}'s account? They will not be able to log in until the account is reactivated.`}
+          confirmText="Deactivate"
+          onConfirm={handleDeactivate}
+          onClose={() => setIsDeactivateModalOpen(false)}
+          isLoading={isActionLoading}
+          isDanger
+        />
+      )}
+
+      {isReactivateModalOpen && (
+        <ConfirmActionModal
+          isOpen={isReactivateModalOpen}
+          title="Reactivate Account"
+          message={`Are you sure you want to reactivate ${customer.name}'s account? They will be able to log in again.`}
+          confirmText="Reactivate"
+          onConfirm={handleReactivate}
+          onClose={() => setIsReactivateModalOpen(false)}
+          isLoading={isActionLoading}
+          isDanger={false}
+        />
+      )}
+
+      {isUnsuspendModalOpen && (
+        <ConfirmActionModal
+          isOpen={isUnsuspendModalOpen}
+          title="Unsuspend User"
+          message={`Are you sure you want to unsuspend ${customer.name}'s account?`}
+          confirmText="Unsuspend"
+          onConfirm={handleUnsuspend}
+          onClose={() => setIsUnsuspendModalOpen(false)}
+          isLoading={isActionLoading}
+          isDanger={false}
+        />
+      )}
     </div>
   );
 }
@@ -283,9 +589,9 @@ export default function CustomerDetailView({
 /* ─── Booking row sub-component ─── */
 function BookingRow({ booking }: { booking: CustomerBooking }) {
   const badgeCls =
-    booking.status === "Active"     ? styles.bsBadgeGreen :
-    booking.status === "Completed"  ? styles.bsBadgeGray :
-    styles.bsBadgeRed;
+    booking.status === "Active" ? styles.bsBadgeGreen :
+      booking.status === "Completed" ? styles.bsBadgeGray :
+        styles.bsBadgeRed;
 
   return (
     <tr>
@@ -300,11 +606,6 @@ function BookingRow({ booking }: { booking: CustomerBooking }) {
           <span className={styles.badgeDot} />
           {booking.status}
         </span>
-      </td>
-      <td className={styles.actionsCol}>
-        <button className={styles.moreBtn} aria-label="More actions">
-          <MoreIcon />
-        </button>
       </td>
     </tr>
   );

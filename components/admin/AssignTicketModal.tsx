@@ -3,18 +3,13 @@
 import { useEffect, useState } from "react";
 import styles from "./TicketModals.module.css";
 import CustomSelect from "./CustomSelect";
+import { notificationsService } from "@/services/notifications-services";
 
 interface AssignTicketModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAssign: (admin: string, notes: string) => void;
 }
-
-const ADMIN_OPTIONS = [
-  { value: "Prosper Edward", label: "Prosper Edward" },
-  { value: "Sarah Johnson", label: "Sarah Johnson" },
-  { value: "James Brown", label: "James Brown" },
-];
 
 export default function AssignTicketModal({
   isOpen,
@@ -23,15 +18,38 @@ export default function AssignTicketModal({
 }: AssignTicketModalProps) {
   const [admin, setAdmin] = useState("");
   const [notes, setNotes] = useState("");
+  const [adminOptions, setAdminOptions] = useState<{ value: string; label: string }[]>([]);
+  const [isLoadingAdmins, setIsLoadingAdmins] = useState(false);
 
+  // Fetch real admin users when modal opens
   useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = "hidden";
-      setAdmin("");
-      setNotes("");
-    } else {
+    if (!isOpen) {
       document.body.style.overflow = "unset";
+      return;
     }
+
+    document.body.style.overflow = "hidden";
+    setAdmin("");
+    setNotes("");
+
+    const fetchAdmins = async () => {
+      setIsLoadingAdmins(true);
+      try {
+        const users = await notificationsService.getUsersForNotifications();
+        const mapped = users.map((u: any) => ({
+          value: String(u?.id || u?.user_id || u?.admin_id || ""),
+          label: u?.name || u?.full_name || u?.username || u?.email || `Admin ${u?.id}`,
+        })).filter((o: any) => o.value !== "");
+        setAdminOptions(mapped);
+      } catch {
+        setAdminOptions([]);
+      } finally {
+        setIsLoadingAdmins(false);
+      }
+    };
+
+    fetchAdmins();
+
     return () => { document.body.style.overflow = "unset"; };
   }, [isOpen]);
 
@@ -59,13 +77,17 @@ export default function AssignTicketModal({
         <div className={styles.content}>
           <div className={styles.formGroup}>
             <label className={styles.label}>Admin</label>
-            <CustomSelect
-              name="admin"
-              value={admin}
-              placeholder="eg Prosper Edward"
-              options={ADMIN_OPTIONS}
-              onChange={(_, v) => setAdmin(v)}
-            />
+            {isLoadingAdmins ? (
+              <p style={{ fontSize: 13, color: "#868C98" }}>Loading admins…</p>
+            ) : (
+              <CustomSelect
+                name="admin"
+                value={admin}
+                placeholder="Select an admin"
+                options={adminOptions.length > 0 ? adminOptions : [{ value: "", label: "No admins available" }]}
+                onChange={(_, v) => setAdmin(v)}
+              />
+            )}
           </div>
 
           <div className={styles.formGroup}>
@@ -83,7 +105,7 @@ export default function AssignTicketModal({
           <button className={styles.cancelBtn} onClick={onClose}>Cancel</button>
           <button
             className={styles.submitBtn}
-            disabled={!isValid}
+            disabled={!isValid || isLoadingAdmins}
             onClick={() => isValid && onAssign(admin, notes)}
           >
             Assign Ticket
