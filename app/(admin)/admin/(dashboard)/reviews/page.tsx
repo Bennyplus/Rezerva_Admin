@@ -26,7 +26,7 @@ export default function ReviewsPage() {
   const [isActionLoading, setIsActionLoading] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  const resultsPerPage = 9;
+  const resultsPerPage = 10;
 
   useEffect(() => {
     fetchReviews();
@@ -220,7 +220,7 @@ export default function ReviewsPage() {
             </table>
           </div>
 
-          {!isLoading && (
+          {!isLoading && filteredReviews.length > 10 && (
             <Pagination
               currentPage={currentPage}
               totalPages={Math.max(1, Math.ceil(filteredReviews.length / resultsPerPage))}
@@ -233,7 +233,7 @@ export default function ReviewsPage() {
       )}
 
       {/* Dev toggle */}
-      <div className={styles.devToggleWrap}>
+      {/* <div className={styles.devToggleWrap}>
         <button
           className={styles.stateToggle}
           onClick={() => setIsEmpty((v) => !v)}
@@ -241,7 +241,7 @@ export default function ReviewsPage() {
         >
           {isEmpty ? "Show Populated State" : "Show Empty State"} →
         </button>
-      </div>
+      </div> */}
 
       {/* Modals */}
       {selectedReview && (
@@ -267,19 +267,18 @@ export default function ReviewsPage() {
 
       {/* Toast Notification */}
       {toastMessage && (
-        <div style={{
-          position: "fixed",
-          bottom: "24px",
-          right: "24px",
-          backgroundColor: toastMessage.startsWith("Error") ? "#EF4444" : "#10B981",
-          color: "#fff",
-          padding: "12px 24px",
-          borderRadius: "8px",
-          boxShadow: "0 4px 12px rgba(0,0,0,0.15)",
-          zIndex: 9999,
-          fontWeight: 500
-        }}>
-          {toastMessage}
+        <div className={styles.toastWrapper}>
+          <div className={`${styles.toast} ${toastMessage.startsWith("Error") ? styles.toastError : ""}`}>
+            {!toastMessage.startsWith("Error") && <CheckCircleIcon />}
+            {toastMessage}
+            <button
+              className={styles.toastClose}
+              onClick={() => setToastMessage(null)}
+              aria-label="Close notification"
+            >
+              <CloseIcon />
+            </button>
+          </div>
         </div>
       )}
     </div>
@@ -288,3 +287,18 @@ export default function ReviewsPage() {
 
 /* ─── Inline Icons ─── */
 function MoreIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }
+
+function CheckCircleIcon() {
+  return (
+    <img src="/images/admin/checkmark.svg" alt="Check circle" />
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+      <line x1="18" y1="6" x2="6" y2="18" />
+      <line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
