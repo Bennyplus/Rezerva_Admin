@@ -144,6 +144,26 @@ export const accountsService = {
   },
 
   /**
+   * Updates a team member's role
+   */
+  updateTeamMember: async (id: string, payload: any): Promise<any> => {
+    const response = await publicApi.put('', payload, {
+      params: { path: `api/v1/admin/member/update-role/`, member_id: id }
+    });
+    return response.data;
+  },
+
+  /**
+   * Suspends a team member
+   */
+  suspendTeamMember: async (id: string, payload: { reason: string }): Promise<any> => {
+    const response = await publicApi.post('', payload, {
+      params: { path: `api/v1/admin/members/suspend/`, member_id: id }
+    });
+    return response.data;
+  },
+
+  /**
    * Logs the user out by hitting the custom proxy logout route which clears cookies
    */
   logout: async () => {

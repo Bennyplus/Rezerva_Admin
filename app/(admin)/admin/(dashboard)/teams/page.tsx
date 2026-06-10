@@ -6,11 +6,14 @@ import Pagination from "@/components/admin/Pagination";
 import RolePermissionsForm from "@/components/admin/RolePermissionsForm";
 import AddTeamMemberModal from "@/components/admin/AddTeamMemberModal";
 import ConfirmActionModal from "@/components/admin/ConfirmActionModal";
+import SuspendUserModal from "@/components/admin/SuspendUserModal";
+import EditUserModal from "@/components/admin/EditUserModal";
 import { ADMIN_ROLES, ADMIN_TEAM_MEMBERS, formatPermissions, type Role, type TeamMember } from "@/data/admin-teams";
 import { accountsService } from "@/services/accounts-service";
 import { teamService } from "@/services/teams-services";
 import FilterBar from "@/components/admin/FilterBar";
 import styles from "./teams.module.css";
+import Spinner from "@/components/admin/Spinner";
 
 type View = "list" | "create-role";
 type Tab = "roles" | "team";
@@ -30,10 +33,15 @@ export default function TeamsPage() {
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const [loadingRoles, setLoadingRoles] = useState(true);
+  const [loadingTeamMembers, setLoadingTeamMembers] = useState(true);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [editingRole, setEditingRole] = useState<Role | null>(null);
   const [actionLoadingId, setActionLoadingId] = useState<string | null>(null);
   const [actionType, setActionType] = useState<"deactivate" | "remove" | null>(null);
+
+  const [suspendModalUser, setSuspendModalUser] = useState<{ id: string; name: string } | null>(null);
+  const [editModalUser, setEditModalUser] = useState<{ id: string; name: string; roleId?: string } | null>(null);
+  const [isModalActionLoading, setIsModalActionLoading] = useState(false);
 
   const [confirmModalState, setConfirmModalState] = useState<{
     isOpen: boolean;
@@ -104,14 +112,16 @@ export default function TeamsPage() {
 
   const fetchTeamMembers = async () => {
     try {
+      setLoadingTeamMembers(true);
       const data = await accountsService.getTeamMembers();
       const membersData = Array.isArray(data) ? data : data?.results || data?.data || [];
       const mapped = membersData.map((m: any) => ({
         id: m.id || m._id || `tm-${Date.now()}-${Math.random()}`,
-        name: m.user_name || m.name,
+        name: m.user_name || m.name || m.full_name,
         email: m.user_email || m.email,
         avatar: "/images/admin/profile-Avatar.svg",
         role: (m.role_names && m.role_names.length > 0) ? m.role_names[0] : (m.role || "Member"),
+        roleId: (m.role && Array.isArray(m.role) && m.role.length > 0) ? String(m.role[0]) : (m.role_id ? String(m.role_id) : undefined),
         status: m.is_active === true ? "Active" : (m.is_active === false ? "Inactive" : (m.status || "Active")),
         joinedAt: m.created_at ? new Date(m.created_at).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" }) : (m.joinedAt || m.createdAt || new Date().toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })),
       }));
@@ -119,6 +129,8 @@ export default function TeamsPage() {
     } catch (error) {
       console.error("Failed to fetch team members:", error);
       setTeamMembers(ADMIN_TEAM_MEMBERS);
+    } finally {
+      setLoadingTeamMembers(false);
     }
   };
 
@@ -260,10 +272,10 @@ export default function TeamsPage() {
       };
 
       await accountsService.addTeamMember(payload);
-      
+
       // Re-fetch members to update the list
       await fetchTeamMembers();
-      
+
       setIsAddModalOpen(false);
 
       const assignedRole = roles.find(r => r.id === roleId);
@@ -274,6 +286,42 @@ export default function TeamsPage() {
       console.error("Failed to add team member:", error);
       const serverMessage = error.response?.data?.message || error.message;
       setToastMessage(`Error: ${serverMessage}`);
+    }
+  };
+
+  /* Handle Update Team Member */
+  const handleUpdateTeamMember = async (roleId: string) => {
+    if (!editModalUser) return;
+    setIsModalActionLoading(true);
+    try {
+      await accountsService.updateTeamMember(editModalUser.id, { role_ids: [Number(roleId)] });
+      setToastMessage(`${editModalUser.name}'s role updated successfully.`);
+      await fetchTeamMembers();
+      setEditModalUser(null);
+    } catch (error: any) {
+      console.error("Failed to update team member:", error);
+      const serverMessage = error.response?.data?.message || error.message;
+      setToastMessage(`Error: ${serverMessage}`);
+    } finally {
+      setIsModalActionLoading(false);
+    }
+  };
+
+  /* Handle Suspend Team Member */
+  const handleSuspendTeamMember = async (reason: string) => {
+    if (!suspendModalUser) return;
+    setIsModalActionLoading(true);
+    try {
+      await accountsService.suspendTeamMember(suspendModalUser.id, { reason });
+      setToastMessage(`${suspendModalUser.name} suspended successfully.`);
+      await fetchTeamMembers();
+      setSuspendModalUser(null);
+    } catch (error: any) {
+      console.error("Failed to suspend team member:", error);
+      const serverMessage = error.response?.data?.message || error.message;
+      setToastMessage(`Error: ${serverMessage}`);
+    } finally {
+      setIsModalActionLoading(false);
     }
   };
 
@@ -302,8 +350,8 @@ export default function TeamsPage() {
       {/* Toast Notification */}
       {toastMessage && (
         <div className={styles.toastWrapper}>
-          <div className={styles.toast}>
-            <CheckCircleIcon />
+          <div className={`${styles.toast} ${toastMessage.startsWith("Error:") ? styles.toastError : ""}`}>
+            {!toastMessage.startsWith("Error:") && <CheckCircleIcon />}
             {toastMessage}
             <button
               className={styles.toastClose}
@@ -396,61 +444,71 @@ export default function TeamsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedRoles.map((role) => (
-                      <tr key={role.id}>
-                        <td>{role.name}</td>
-                        <td>
-                          <span className={styles.rolePermText} title={formatPermissions(role.permissions, 1000)}>
-                            {formatPermissions(role.permissions)}
-                          </span>
-                        </td>
-                        <td className={styles.dateCell}>{role.createdAt}</td>
-                        <td>
-                          <span
-                            className={`${styles.badge} ${role.status === "Active" ? styles.badgeActive : styles.badgeInactive
-                              }`}
-                          >
-                            <span className={styles.badgeDot} />
-                            {role.status}
-                          </span>
-                        </td>
-                        <td className={styles.actionsCol}>
-                          <div className={styles.actionsWrapper}>
-                            <button
-                              className={styles.moreBtn}
-                              aria-label={`More actions for ${role.name}`}
-                              onClick={() => setActiveDropdown(activeDropdown === role.id ? null : role.id)}
-                            >
-                              <MoreIcon />
-                            </button>
-                            {activeDropdown === role.id && (
-                              <div className={styles.actionsMenu}>
-                                <button
-                                  className={styles.actionItem}
-                                  onClick={() => handleEditRole(role)}
-                                >
-                                  Edit Role
-                                </button>
-                                <button
-                                  className={`${styles.actionItem}`}
-                                  onClick={() => triggerDeactivate(role.id, role.name)}
-                                  disabled={actionLoadingId === role.id && actionType === "deactivate"}
-                                >
-                                  {actionLoadingId === role.id && actionType === "deactivate" ? "Deactivating..." : "Deactivate Role"}
-                                </button>
-                                <button
-                                  className={`${styles.actionItem}`}
-                                  onClick={() => triggerRemove(role.id, role.name)}
-                                  disabled={actionLoadingId === role.id && actionType === "remove"}
-                                >
-                                  {actionLoadingId === role.id && actionType === "remove" ? "Removing..." : "Remove Role"}
-                                </button>
-                              </div>
-                            )}
+                    {loadingRoles ? (
+                      <tr>
+                        <td colSpan={5} style={{ paddingTop: "180px" }}>
+                          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                            <Spinner />
                           </div>
                         </td>
                       </tr>
-                    ))}
+                    ) : (
+                      paginatedRoles.map((role) => (
+                        <tr key={role.id}>
+                          <td>{role.name}</td>
+                          <td>
+                            <span className={styles.rolePermText} title={formatPermissions(role.permissions, 1000)}>
+                              {formatPermissions(role.permissions)}
+                            </span>
+                          </td>
+                          <td className={styles.dateCell}>{role.createdAt}</td>
+                          <td>
+                            <span
+                              className={`${styles.badge} ${role.status === "Active" ? styles.badgeActive : styles.badgeInactive
+                                }`}
+                            >
+                              <span className={styles.badgeDot} />
+                              {role.status}
+                            </span>
+                          </td>
+                          <td className={styles.actionsCol}>
+                            <div className={styles.actionsWrapper}>
+                              <button
+                                className={styles.moreBtn}
+                                aria-label={`More actions for ${role.name}`}
+                                onClick={() => setActiveDropdown(activeDropdown === role.id ? null : role.id)}
+                              >
+                                <MoreIcon />
+                              </button>
+                              {activeDropdown === role.id && (
+                                <div className={styles.actionsMenu}>
+                                  <button
+                                    className={styles.actionItem}
+                                    onClick={() => handleEditRole(role)}
+                                  >
+                                    Edit Role
+                                  </button>
+                                  <button
+                                    className={`${styles.actionItem}`}
+                                    onClick={() => triggerDeactivate(role.id, role.name)}
+                                    disabled={actionLoadingId === role.id && actionType === "deactivate"}
+                                  >
+                                    {actionLoadingId === role.id && actionType === "deactivate" ? "Deactivating..." : "Deactivate Role"}
+                                  </button>
+                                  <button
+                                    className={`${styles.actionItem}`}
+                                    onClick={() => triggerRemove(role.id, role.name)}
+                                    disabled={actionLoadingId === role.id && actionType === "remove"}
+                                  >
+                                    {actionLoadingId === role.id && actionType === "remove" ? "Removing..." : "Remove Role"}
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))
+                    )}
                   </tbody>
                 </table>
               </div>
@@ -499,28 +557,65 @@ export default function TeamsPage() {
                     </tr>
                   </thead>
                   <tbody>
-                    {paginatedTeamMembers.map((member) => (
-                      <tr key={member.id}>
-                        <td>{member.name}</td>
-                        <td>{member.email}</td>
-                        <td>{member.role}</td>
-                        <td className={styles.dateCell}>{member.joinedAt}</td>
-                        <td className={styles.actionsCol}>
-                          <button
-                            className={styles.moreBtn}
-                            aria-label={`More actions for ${member.name}`}
-                          >
-                            <MoreIcon />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredTeamMembers.length === 0 && (
+                    {loadingTeamMembers ? (
                       <tr>
-                        <td colSpan={5} style={{ textAlign: "center", padding: "40px" }}>
-                          No team members found.
+                        <td colSpan={5} style={{ paddingTop: "180px" }}>
+                          <div style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>
+                            <Spinner />
+                          </div>
                         </td>
                       </tr>
+                    ) : (
+                      <>
+                        {paginatedTeamMembers.map((member: any) => (
+                          <tr key={member.id}>
+                            <td>{member.name}</td>
+                            <td>{member.email}</td>
+                            <td>{member.role}</td>
+                            <td className={styles.dateCell}>{member.joinedAt}</td>
+                            <td className={styles.actionsCol}>
+                              <div className={styles.actionsWrapper}>
+                                <button
+                                  className={styles.moreBtn}
+                                  aria-label={`More actions for ${member.name}`}
+                                  onClick={() => setActiveDropdown(activeDropdown === member.id ? null : member.id)}
+                                >
+                                  <MoreIcon />
+                                </button>
+                                {activeDropdown === member.id && (
+                                  <div className={styles.actionsMenu}>
+                                    <button
+                                      className={styles.actionItem}
+                                      onClick={() => {
+                                        setEditModalUser({ id: member.id, name: member.name, roleId: member.roleId });
+                                        setActiveDropdown(null);
+                                      }}
+                                    >
+                                      Edit User
+                                    </button>
+                                    <button
+                                      className={`${styles.actionItem}`}
+                                      onClick={() => {
+                                        setSuspendModalUser({ id: member.id, name: member.name });
+                                        setActiveDropdown(null);
+                                      }}
+                                    >
+                                      Suspend User
+                                    </button>
+                                  </div>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                        {filteredTeamMembers.length === 0 && (
+                          <tr>
+                            <td colSpan={5} style={{ textAlign: "center", padding: "40px" }}>
+                              No team members found.
+                            </td>
+                          </tr>
+                        )}
+                      </>
                     )}
                   </tbody>
                 </table>
@@ -561,6 +656,23 @@ export default function TeamsPage() {
         onClose={() => setIsAddModalOpen(false)}
         onSubmit={handleAddMemberSubmit}
         roles={roles}
+      />
+
+      <EditUserModal
+        isOpen={!!editModalUser}
+        onClose={() => setEditModalUser(null)}
+        onSubmit={handleUpdateTeamMember}
+        roles={roles}
+        user={editModalUser}
+        isLoading={isModalActionLoading}
+      />
+
+      <SuspendUserModal
+        isOpen={!!suspendModalUser}
+        onClose={() => setSuspendModalUser(null)}
+        onSubmit={handleSuspendTeamMember}
+        userName={suspendModalUser?.name || ""}
+        isLoading={isModalActionLoading}
       />
 
       <ConfirmActionModal
