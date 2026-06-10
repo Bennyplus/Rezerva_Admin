@@ -155,8 +155,13 @@
   transition: opacity 0.15s ease;
 }
 
-.exportBtn:hover {
+.exportBtn:hover:not(:disabled) {
   opacity: 0.88;
+}
+
+.exportBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 /* ─── Table ─── */
@@ -448,5 +453,66 @@
   .searchBox {
     min-width: 0;
     flex: 1;
+  }
+}
+
+/* ─── Toast Notifications ─── */
+.toastWrapper {
+  position: absolute;
+  top: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  display: flex;
+  justify-content: center;
+  width: 100%;
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--admin-active-bg, #111111);
+  color: #ffffff;
+  padding: 12px 16px;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  pointer-events: auto;
+  animation: toastSlideDown 0.3s ease forwards;
+}
+
+.toastError {
+  background: #EF4444;
+}
+
+.toastClose {
+  background: none;
+  border: none;
+  color: #ffffff;
+  opacity: 0.7;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.15s ease;
+}
+
+.toastClose:hover {
+  opacity: 1;
+}
+
+@keyframes toastSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

@@ -26,8 +26,24 @@ export interface CustomerDocument {
   size: string;
 }
 
+export interface CustomerReview {
+  id?: string;
+  customerName: string;
+  email: string;
+  phone: string;
+  rating: number;
+  review: string;
+  datePosted: string;
+  status: string;
+  bookingId: string;
+  bookingDate: string;
+  vehicleName: string;
+  bookingType: string;
+}
+
 export interface Customer {
   id: string;
+  userId?: number;
   name: string;
   avatar: string;
   phone: string;
@@ -40,6 +56,7 @@ export interface Customer {
   flagsCount: number;
   bookings: CustomerBooking[];
   activityLog: CustomerActivity[];
+  reviews?: CustomerReview[];
   documents: {
     driversLicense: CustomerDocument;
     citizenshipDocument: CustomerDocument;
