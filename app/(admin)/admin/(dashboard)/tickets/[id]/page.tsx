@@ -1,40 +1,110 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { ADMIN_TICKETS, TicketStatus, TicketPriority } from "@/data/admin-tickets";
+import { TicketStatus } from "@/data/admin-tickets";
 import AssignTicketModal from "@/components/admin/AssignTicketModal";
 import ResolveTicketModal from "@/components/admin/ResolveTicketModal";
+import EscalateTicketModal from "@/components/admin/EscalateTicketModal";
+import Spinner from "@/components/admin/Spinner";
+import { ticketsService } from "@/services/tickets-service";
 import styles from "./ticket-detail.module.css";
 
 export default function TicketDetailPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const ticketId = params.id;
 
-  // Find matching ticket by id; fallback to first ticket for demo
-  const ticket = ADMIN_TICKETS.find((t) => t.id === params.id) ?? ADMIN_TICKETS[0];
-
-  const [adminNotes, setAdminNotes] = useState(ticket.adminNotes);
+  const [ticket, setTicket] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [adminNotes, setAdminNotes] = useState("");
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isResolveOpen, setIsResolveOpen] = useState(false);
+  const [isEscalateOpen, setIsEscalateOpen] = useState(false);
 
-  const statusBadgeClass: Record<TicketStatus, string> = {
-    "TO DO": styles.badgeTodo,
-    "IN PROGRESS": styles.badgeInProgress,
-    RESOLVED: styles.badgeResolved,
-    CLOSED: styles.badgeClosed,
+  useEffect(() => {
+    const fetchTicket = async () => {
+      setIsLoading(true);
+      try {
+        const data = await ticketsService.getTicket(ticketId);
+        setTicket(data);
+      } catch (error) {
+        console.error("Failed to fetch ticket:", error);
+        setTicket(null);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchTicket();
+  }, [ticketId]);
+
+  const handleAssign = async (adminId: string) => {
+    try {
+      await ticketsService.assignTicket(ticketId, adminId);
+      setTicket((prev: any) => prev ? { ...prev, status: "In Progress" as TicketStatus } : prev);
+    } catch (error) {
+      console.error("Failed to assign ticket:", error);
+    } finally {
+      setIsAssignOpen(false);
+    }
   };
 
-  const priorityBadgeClass: Record<TicketPriority, string> = {
-    Low: styles.priorityLow,
-    Medium: styles.priorityMedium,
-    High: styles.priorityHigh,
+  const handleEscalate = async (reason: string) => {
+    try {
+      await ticketsService.escalateTicket(ticketId, reason);
+      setTicket((prev: any) => prev ? { ...prev, status: "Escalated", priority: "High" } : prev);
+    } catch (error) {
+      console.error("Failed to escalate ticket:", error);
+    } finally {
+      setIsEscalateOpen(false);
+    }
   };
 
-  const initials = ticket.customerName
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .slice(0, 2);
+  const handleResolve = async (notes: string) => {
+    try {
+      await ticketsService.resolveTicket(ticketId, notes);
+      setTicket((prev: any) => prev ? { ...prev, status: "Resolved" as TicketStatus } : prev);
+    } catch (error) {
+      console.error("Failed to resolve ticket:", error);
+    } finally {
+      setIsResolveOpen(false);
+    }
+  };
+
+  const statusBadgeClass = (status: string) => {
+    switch (status) {
+      case "Pending":     return styles.badgeTodo;
+      case "In Progress": return styles.badgeInProgress;
+      case "Resolved":    return styles.badgeResolved;
+      case "Escalated":   return styles.badgeEscalated;
+      case "Closed":      return styles.badgeClosed;
+      default:            return styles.badgeTodo;
+    }
+  };
+
+  const initials = ticket?.customerName
+    ? ticket.customerName.split(" ").map((n: string) => n[0]).join("").slice(0, 2).toUpperCase()
+    : "?";
+
+  if (isLoading) {
+    return (
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "60vh" }}>
+        <Spinner />
+      </div>
+    );
+  }
+
+  if (!ticket) {
+    return (
+      <div className={styles.page}>
+        <button className={styles.backBtn} onClick={() => router.back()} aria-label="Go back">
+          <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+            <path d="M19 12H5M12 5l-7 7 7 7" />
+          </svg>
+        </button>
+        <p style={{ padding: "32px", color: "#868C98", textAlign: "center" }}>Ticket not found.</p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -45,7 +115,6 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
             <path d="M19 12H5M12 5l-7 7 7 7" />
           </svg>
         </button>
-
         <div className={styles.topBarRight}>
           <button className={styles.updateStatusBtn}>
             Update Status
@@ -57,7 +126,7 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
         </div>
       </div>
 
-      {/* ─── Ticket ID + Assigned Admin ─── */}
+      {/* ─── Ticket ID Header ─── */}
       <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 16, borderBottom: "1px solid #E2E4E9" }}>
         <div className={styles.ticketInfo}>
           <span className={styles.ticketIdLabel}>Ticket ID</span>
@@ -69,18 +138,15 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
                 <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
               </svg>
             </button>
-            <span className={`${styles.badge} ${statusBadgeClass[ticket.status]}`}>
+            <span className={`${styles.badge} ${statusBadgeClass(ticket.status)}`}>
               <span className={styles.badgeDot} />
               {ticket.status}
             </span>
-            <span className={`${styles.priorityBadge} ${priorityBadgeClass[ticket.priority]}`}>
-              <FlagIcon />
-              {ticket.priority}
-            </span>
+            {/* Priority not available from API */}
+            <span className={styles.naLabel}>Priority: N/A</span>
           </div>
-          <span className={styles.ticketDate}>On {ticket.date} 11:12AM</span>
+          <span className={styles.ticketDate}>Created: {ticket.date}</span>
         </div>
-
         <div className={styles.assignedRow} style={{ marginTop: "auto" }}>
           Assigned Admin:&nbsp;<span className={styles.assignedName}>{ticket.assignedAdmin}</span>
         </div>
@@ -117,15 +183,36 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
             <h2 className={styles.cardTitle}>Customer Report</h2>
             <div className={styles.reportBox}>
               <span className={styles.reportCategory}>{ticket.category}</span>
-              <p className={styles.reportDesc}>{ticket.reportDescription}</p>
+              <p className={styles.reportDesc}>{ticket.description}</p>
             </div>
-            <div className={styles.attachment}>
-              <div className={styles.attachmentIcon}>JPG</div>
-              <div>
-                <div className={styles.attachmentName}>{ticket.evidenceFileName}</div>
-                <div className={styles.attachmentSize}>{ticket.evidenceFileSize} •</div>
+
+            {/* Attachments from API */}
+            {ticket.attachments?.length > 0 ? (
+              ticket.attachments.map((att: any) => {
+                const ext = att.file?.split('.').pop()?.split('?')[0]?.toUpperCase() || "FILE";
+                const name = att.file?.split('/').pop()?.split('?')[0] || "attachment";
+                return (
+                  <a
+                    key={att.id}
+                    href={att.file}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={styles.attachment}
+                    style={{ textDecoration: "none" }}
+                  >
+                    <div className={styles.attachmentIcon}>{ext.slice(0, 3)}</div>
+                    <div>
+                      <div className={styles.attachmentName}>{name}</div>
+                      <div className={styles.attachmentSize}>Uploaded: {att.uploaded_at ? new Date(att.uploaded_at).toLocaleDateString() : "N/A"}</div>
+                    </div>
+                  </a>
+                );
+              })
+            ) : (
+              <div className={styles.attachment} style={{ color: "#868C98", fontSize: 13 }}>
+                No attachments
               </div>
-            </div>
+            )}
           </div>
 
           {/* Admin Notes */}
@@ -142,40 +229,21 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
 
         {/* Right Column */}
         <div className={styles.rightCol}>
-          {/* Activity Timeline */}
+          {/* Activity Timeline — not in API yet */}
           <div className={styles.sideCard}>
             <h2 className={styles.timelineTitle}>Activity Timeline</h2>
-            <div className={styles.timeline}>
-              {ticket.activities.map((activity, i) => (
-                <div key={i} className={styles.timelineItem}>
-                  <div className={styles.timelineIconWrap}>
-                    <div className={styles.timelineIcon}>
-                      <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
-                        <polyline points="20 6 9 17 4 12" />
-                      </svg>
-                    </div>
-                    {i < ticket.activities.length - 1 && (
-                      <svg className={styles.timelineLineSvg} width="2" height="100%" preserveAspectRatio="none">
-                        <line x1="1" y1="0" x2="1" y2="100%" stroke="#E2E4E9" strokeWidth="2" strokeDasharray="4 6" />
-                      </svg>
-                    )}
-                  </div>
-                  <div className={styles.timelineContent}>
-                    <span className={styles.timelineLabel}>{activity.label}</span>
-                    <span className={styles.timelineMeta}>{activity.date}  {activity.time}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <p style={{ fontSize: 13, color: "#868C98", padding: "8px 0" }}>
+              N/A — activity timeline not returned by API
+            </p>
           </div>
 
           {/* Action Buttons */}
           <div className={styles.actionsGroup}>
             {[
-              { label: "Assign Ticket", onClick: () => setIsAssignOpen(true) },
-              { label: "Resolve Ticket", onClick: () => setIsResolveOpen(true) },
-              { label: "Close Ticket", onClick: () => { } },
-              { label: "Escalate", onClick: () => { } },
+              { label: "Assign Ticket",   onClick: () => setIsAssignOpen(true) },
+              { label: "Resolve Ticket",  onClick: () => setIsResolveOpen(true) },
+              { label: "Close Ticket",    onClick: () => {} },
+              { label: "Escalate",        onClick: () => setIsEscalateOpen(true) },
             ].map((action) => (
               <button key={action.label} className={styles.actionBtn} onClick={action.onClick}>
                 {action.label}
@@ -186,37 +254,27 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
         </div>
       </div>
 
-      {/* Modals */}
+      {/* ─── Modals ─── */}
       <AssignTicketModal
         isOpen={isAssignOpen}
         onClose={() => setIsAssignOpen(false)}
-        onAssign={(admin, notes) => {
-          console.log("Assigned to", admin, notes);
-          setIsAssignOpen(false);
-        }}
+        onAssign={(adminId, _notes) => handleAssign(adminId)}
       />
       <ResolveTicketModal
         isOpen={isResolveOpen}
         onClose={() => setIsResolveOpen(false)}
-        onResolve={(notes, email) => {
-          console.log("Resolved with", notes, email);
-          setIsResolveOpen(false);
-        }}
+        onResolve={(notes, _email) => handleResolve(notes)}
+      />
+      <EscalateTicketModal
+        isOpen={isEscalateOpen}
+        onClose={() => setIsEscalateOpen(false)}
+        onEscalate={handleEscalate}
       />
     </div>
   );
 }
 
 /* ─── Inline Icons ─── */
-function FlagIcon() {
-  return (
-    <svg width={11} height={11} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
-      <line x1="4" y1="22" x2="4" y2="15" />
-    </svg>
-  );
-}
-
 function ChevronIcon({ className }: { className?: string }) {
   return (
     <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" className={className}>

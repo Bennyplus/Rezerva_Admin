@@ -3,95 +3,126 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import {
-  ADMIN_TICKETS,
-  TICKET_STATS,
-  Ticket,
-  TicketStatus,
-  TicketPriority,
-} from "@/data/admin-tickets";
+import { Ticket, TicketStatus } from "@/data/admin-tickets";
 import FilterBar from "@/components/admin/FilterBar";
 import StatCard from "@/components/admin/StatCard";
+import Spinner from "@/components/admin/Spinner";
 import AssignTicketModal from "@/components/admin/AssignTicketModal";
 import ResolveTicketModal from "@/components/admin/ResolveTicketModal";
+import EscalateTicketModal from "@/components/admin/EscalateTicketModal";
+import { ticketsService } from "@/services/tickets-service";
 import styles from "./tickets.module.css";
-
-
 
 export default function TicketsPage() {
   const router = useRouter();
-  const [isEmpty, setIsEmpty] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
-
   const [activeTab, setActiveTab] = useState<"All" | "Critical">("All");
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
-
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [assignModalTicketId, setAssignModalTicketId] = useState<string | null>(null);
   const [resolveModalTicketId, setResolveModalTicketId] = useState<string | null>(null);
+  const [escalateModalTicketId, setEscalateModalTicketId] = useState<string | null>(null);
+
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+
+  // Fetch tickets on mount
+  useEffect(() => {
+    const fetchTickets = async () => {
+      setIsLoading(true);
+      try {
+        const data = await ticketsService.getTickets();
+        setTickets(data || []);
+      } catch (error) {
+        console.error("Failed to fetch tickets:", error);
+        setTickets([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchTickets();
+  }, []);
 
   // Close menu on click outside
   useEffect(() => {
     const handleWindowClick = () => setOpenMenuId(null);
-    if (openMenuId) {
-      window.addEventListener("click", handleWindowClick);
-    }
+    if (openMenuId) window.addEventListener("click", handleWindowClick);
     return () => window.removeEventListener("click", handleWindowClick);
   }, [openMenuId]);
 
-  const baseFiltered = ADMIN_TICKETS.filter(
-    (t) =>
-      t.category.toLowerCase().includes(searchQuery.toLowerCase()) ||
+  const filtered = tickets.filter((t) => {
+    const matchesSearch =
       t.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.id.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+      t.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.description.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesTab = activeTab === "Critical" ? t.priority === "High" : true;
+    return matchesSearch && matchesTab;
+  });
 
-  const filtered = baseFiltered.filter((t) => activeTab === "Critical" ? t.priority === "High" : true);
+  // Derived stat counts from live data
+  const totalTickets = tickets.length;
+  const pendingCount = tickets.filter(t => t.status === "Pending").length;
+  const resolvedCount = tickets.filter(t => t.status === "Resolved").length;
+  const escalatedCount = tickets.filter(t => t.status === "Escalated").length;
 
-  const statusClass = (status: TicketStatus) => {
-    switch (status) {
-      case "TO DO": return styles.statusPending;
-      case "IN PROGRESS": return styles.statusInProgress;
-      case "RESOLVED": return styles.statusResolved;
-      case "CLOSED": return styles.statusClosed;
-      default: return "";
+  // Action handlers
+  const handleAssign = async (ticketNumber: string, adminId: string) => {
+    try {
+      await ticketsService.assignTicket(ticketNumber, adminId);
+      setTickets(prev => prev.map(t => t.id === ticketNumber ? { ...t, status: "In Progress" as TicketStatus } : t));
+    } catch (error) {
+      console.error("Failed to assign ticket:", error);
+    } finally {
+      setAssignModalTicketId(null);
     }
   };
 
-  const statusLabel = (status: TicketStatus) => {
-    if (status === "TO DO") return "Pending";
-    if (status === "IN PROGRESS") return "In Progress";
-    if (status === "RESOLVED") return "Resolved";
-    if (status === "CLOSED") return "Closed";
-    return status;
+  const handleResolve = async (ticketNumber: string, notes: string) => {
+    try {
+      await ticketsService.resolveTicket(ticketNumber, notes);
+      setTickets(prev => prev.map(t => t.id === ticketNumber ? { ...t, status: "Resolved" as TicketStatus } : t));
+    } catch (error) {
+      console.error("Failed to resolve ticket:", error);
+    } finally {
+      setResolveModalTicketId(null);
+    }
   };
 
-  const priorityClass: Record<TicketPriority, string> = {
-    Low: styles.priorityLow,
-    Medium: styles.priorityMedium,
-    High: styles.priorityHigh,
+  const handleEscalate = async (ticketId: string, reason: string) => {
+    try {
+      await ticketsService.escalateTicket(ticketId, reason);
+      setTickets(prev => prev.map(t =>
+        t.id === ticketId ? { ...t, status: "Escalated" as any, priority: "High" } : t
+      ));
+    } catch (error) {
+      console.error("Failed to escalate ticket:", error);
+    } finally {
+      setEscalateModalTicketId(null);
+    }
+  };
+
+  const statusClass = (status: TicketStatus | string) => {
+    switch (status) {
+      case "Pending":     return styles.statusPending;
+      case "In Progress": return styles.statusInProgress;
+      case "Resolved":    return styles.statusResolved;
+      case "Escalated":   return styles.statusEscalated;
+      case "Closed":      return styles.statusClosed;
+      default:            return "";
+    }
   };
 
   return (
     <div className={styles.page}>
       {/* ─── Stats ─── */}
       <div className={styles.statsGrid}>
-        {[
-          { label: "Total Tickets", value: TICKET_STATS.totalTickets },
-          { label: "Total Open Tickets", value: TICKET_STATS.totalOpenTickets },
-          { label: "Total Pending Tickets", value: TICKET_STATS.totalPendingTickets },
-          { label: "Total Resolved Tickets", value: TICKET_STATS.totalResolvedTickets },
-        ].map((stat) => (
-          <StatCard
-            key={stat.label}
-            label={stat.label}
-            value={stat.value}
-            id={`stat-${stat.label.replace(/\s+/g, '-').toLowerCase()}`}
-          />
-        ))}
+        <StatCard label="Total Tickets"    value={totalTickets}   id="stat-total" />
+        <StatCard label="Pending Tickets"  value={pendingCount}   id="stat-pending" />
+        <StatCard label="Resolved Tickets" value={resolvedCount}  id="stat-resolved" />
+        <StatCard label="Escalated"        value={escalatedCount} id="stat-escalated" />
       </div>
 
-      {/* ─── Tabs & Toolbar ─── */}
+      {/* ─── Tabs ─── */}
       <div className={styles.tabs}>
         <button
           className={`${styles.tab} ${activeTab === "All" ? styles.tabActive : ""}`}
@@ -107,18 +138,24 @@ export default function TicketsPage() {
         </button>
       </div>
 
+      {/* ─── Toolbar ─── */}
       <div className={styles.toolbar}>
         <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideSort />
         <button className={styles.toolBtn} id="tickets-export" style={{ marginLeft: "auto" }}>Export</button>
       </div>
 
-      {isEmpty || filtered.length === 0 ? (
+      {/* ─── Content ─── */}
+      {isLoading ? (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "300px" }}>
+          <Spinner />
+        </div>
+      ) : filtered.length === 0 ? (
         /* ─── Empty State ─── */
         <div className={styles.emptyCard} id="tickets-empty-state">
           <div className={styles.emptyIllustration} aria-hidden="true">
             <Image
               src="/images/admin/Items.png"
-              alt="No roles illustration"
+              alt="No tickets illustration"
               width={460}
               height={380}
               className={styles.illustrationImg}
@@ -128,7 +165,7 @@ export default function TicketsPage() {
           <p className={styles.emptySubtitle}>Support requests and reports will appear here</p>
         </div>
       ) : (
-        /* ─── Table View ─── */
+        /* ─── Table ─── */
         <div className={styles.tableCard} id="tickets-table">
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -140,18 +177,14 @@ export default function TicketsPage() {
                       className={styles.checkbox}
                       checked={selectedRows.size === filtered.length && filtered.length > 0}
                       onChange={() => {
-                        if (selectedRows.size === filtered.length) {
-                          setSelectedRows(new Set());
-                        } else {
-                          setSelectedRows(new Set(filtered.map((_, i) => i)));
-                        }
+                        if (selectedRows.size === filtered.length) setSelectedRows(new Set());
+                        else setSelectedRows(new Set(filtered.map((_, i) => i)));
                       }}
                     />
                   </th>
                   <th>Ticket ID</th>
                   <th>Customer Name</th>
-                  <th>Ticket Type</th>
-                  <th>Priority</th>
+                  <th>Description</th>
                   <th>Assigned Admin</th>
                   <th>Status</th>
                   <th>Created On</th>
@@ -160,7 +193,7 @@ export default function TicketsPage() {
               </thead>
               <tbody>
                 {filtered.map((ticket, idx) => (
-                  <tr key={idx} className={selectedRows.has(idx) ? styles.rowSelected : ""}>
+                  <tr key={`${ticket.id}-${idx}`} className={selectedRows.has(idx) ? styles.rowSelected : ""}>
                     <td className={styles.checkCol}>
                       <input
                         type="checkbox"
@@ -176,18 +209,18 @@ export default function TicketsPage() {
                     </td>
                     <td>{ticket.id}</td>
                     <td>{ticket.customerName}</td>
-                    <td>{ticket.category}</td>
-                    <td>
-                      <span className={`${styles.priorityBadge} ${priorityClass[ticket.priority]}`}>
-                        <FlagIcon />
-                        {ticket.priority}
+                    <td style={{ maxWidth: 260 }}>
+                      <span title={ticket.description}>
+                        {ticket.description.length > 55
+                          ? ticket.description.slice(0, 55) + "…"
+                          : ticket.description}
                       </span>
                     </td>
                     <td>{ticket.assignedAdmin}</td>
                     <td>
                       <span className={`${styles.badge} ${statusClass(ticket.status)}`}>
                         <span className={styles.badgeDot} />
-                        {statusLabel(ticket.status)}
+                        {ticket.status}
                       </span>
                     </td>
                     <td>{ticket.date}</td>
@@ -199,33 +232,23 @@ export default function TicketsPage() {
                         >
                           <MoreIcon />
                         </button>
-
                         {openMenuId === `${ticket.id}-${idx}` && (
                           <div className={styles.dropdownMenu}>
                             <button
                               className={styles.menuItem}
-                              onClick={() => {
-                                router.push(`/admin/tickets/${ticket.id}`);
-                                setOpenMenuId(null);
-                              }}
+                              onClick={() => { router.push(`/admin/tickets/${ticket.id}`); setOpenMenuId(null); }}
                             >
                               View Details
                             </button>
                             <button
                               className={styles.menuItem}
-                              onClick={() => {
-                                setAssignModalTicketId(ticket.id);
-                                setOpenMenuId(null);
-                              }}
+                              onClick={() => { setAssignModalTicketId(ticket.id); setOpenMenuId(null); }}
                             >
                               Assign Ticket
                             </button>
                             <button
                               className={styles.menuItem}
-                              onClick={() => {
-                                setResolveModalTicketId(ticket.id);
-                                setOpenMenuId(null);
-                              }}
+                              onClick={() => { setResolveModalTicketId(ticket.id); setOpenMenuId(null); }}
                             >
                               Resolve Ticket
                             </button>
@@ -237,7 +260,7 @@ export default function TicketsPage() {
                             </button>
                             <button
                               className={styles.menuItem}
-                              onClick={() => setOpenMenuId(null)}
+                              onClick={() => { setEscalateModalTicketId(ticket.id); setOpenMenuId(null); }}
                             >
                               Escalate
                             </button>
@@ -253,38 +276,41 @@ export default function TicketsPage() {
         </div>
       )}
 
-      {/* Dev toggle */}
-      <div className={styles.devToggleWrap}>
-        <button className={styles.stateToggle} onClick={() => setIsEmpty((v) => !v)} id="toggle-tickets-state">
-          {isEmpty ? "Show Populated State" : "Show Empty State"} →
-        </button>
-      </div>
-
-      {/* Modals */}
+      {/* ─── Modals ─── */}
       <AssignTicketModal
         isOpen={!!assignModalTicketId}
         onClose={() => setAssignModalTicketId(null)}
-        onAssign={(admin, notes) => {
-          console.log(`Assigned ticket ${assignModalTicketId} to ${admin} with notes: ${notes}`);
-          setAssignModalTicketId(null);
+        onAssign={(adminId, _notes) => {
+          if (assignModalTicketId) handleAssign(assignModalTicketId, adminId);
         }}
       />
-      
+
       <ResolveTicketModal
         isOpen={!!resolveModalTicketId}
         onClose={() => setResolveModalTicketId(null)}
-        onResolve={(notes, email) => {
-          console.log(`Resolved ticket ${resolveModalTicketId}. Notes: ${notes}. Notify: ${email}`);
-          setResolveModalTicketId(null);
+        onResolve={(notes, _email) => {
+          if (resolveModalTicketId) handleResolve(resolveModalTicketId, notes);
+        }}
+      />
+
+      <EscalateTicketModal
+        isOpen={!!escalateModalTicketId}
+        onClose={() => setEscalateModalTicketId(null)}
+        onEscalate={(reason) => {
+          if (escalateModalTicketId) handleEscalate(escalateModalTicketId, reason);
         }}
       />
     </div>
   );
 }
 
-
-
 /* ─── Inline Icons ─── */
-const ip = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-function FlagIcon() { return <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path fill="currentColor" stroke="none" d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="3" /></svg>; }
-function MoreIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }
+function MoreIcon() {
+  return (
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+      <circle cx="12" cy="5" r="1" />
+      <circle cx="12" cy="12" r="1" />
+      <circle cx="12" cy="19" r="1" />
+    </svg>
+  );
+}
