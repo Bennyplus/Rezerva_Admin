@@ -7,9 +7,10 @@ interface RemoveReviewModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
+  isLoading?: boolean;
 }
 
-export default function RemoveReviewModal({ isOpen, onClose, onConfirm }: RemoveReviewModalProps) {
+export default function RemoveReviewModal({ isOpen, onClose, onConfirm, isLoading }: RemoveReviewModalProps) {
   // Prevent body scroll when open
   useEffect(() => {
     if (isOpen) {
@@ -39,11 +40,11 @@ export default function RemoveReviewModal({ isOpen, onClose, onConfirm }: Remove
           </div>
         </div>
         <div className={styles.footer}>
-          <button className={styles.btnDismiss} onClick={onClose}>
+          <button className={styles.btnDismiss} onClick={onClose} disabled={isLoading}>
             Dismiss
           </button>
-          <button className={styles.btnRemove} onClick={onConfirm}>
-            Remove Review
+          <button className={styles.btnRemove} onClick={onConfirm} disabled={isLoading}>
+            {isLoading ? "Removing..." : "Remove Review"}
           </button>
         </div>
       </div>

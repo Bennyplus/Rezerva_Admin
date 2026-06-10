@@ -6,8 +6,7 @@ export interface Review {
   reviewText: string;
   starRating: number;
   datePosted: string;
-  status: "Published" | "Removed";
-  
+  status: "Published" | "Removed" | "Approved" | string;
   // Related booking details
   bookingId: string;
   bookingDate: string;

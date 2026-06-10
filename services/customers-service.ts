@@ -35,12 +35,27 @@ export const customersService = {
   },
 
   /**
-   * Fetches a specific customer's reviews
-   * @param userId The ID of the customer
+   * Fetches a specific customer's reviews or all reviews if no userId is provided
+   * @param userId The ID of the customer (optional)
    */
-  getCustomerReviews: async (userId: number | string): Promise<any> => {
-    const response = await publicApi.get('', {
-      params: { path: `api/v1/admin/customers/reviews/`, user_id: userId }
+  getCustomerReviews: async (userId?: number | string): Promise<any> => {
+    const params: any = { path: `api/v1/admin/customers/reviews/` };
+    if (userId) params.user_id = userId;
+    
+    const response = await publicApi.get('', { params });
+    return response.data;
+  },
+
+  /**
+   * Removes a specific customer review
+   * @param reviewId The ID of the review
+   */
+  removeReview: async (reviewId: string): Promise<any> => {
+    const formData = new FormData();
+    formData.append("is_active", "False");
+
+    const response = await publicApi.put('', formData, {
+      params: { path: `api/v1/admin/customers/reviews/`, review_id: reviewId }
     });
     return response.data;
   },
