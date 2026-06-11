@@ -108,6 +108,7 @@ export default function Features() {
                 src={FEATURES[0].image!}
                 alt="Flexible Rentals"
                 fill
+                sizes="(max-width: 768px) 100vw, 33vw"
                 style={{ objectFit: "cover" }}
               />
             </div>
@@ -129,6 +130,7 @@ export default function Features() {
                 src={FEATURES[1].image!}
                 alt="Reliable and Secure"
                 fill
+                sizes="(max-width: 768px) 100vw, 50vw"
                 style={{ objectFit: "cover" }}
               />
             </div>
@@ -141,7 +143,7 @@ export default function Features() {
             id="fast-booking"
           >
             <div className={styles['feature-card__image-container']} style={{ marginBottom: "16px" }}>
-              <Image src={FEATURES[2].image!} alt={FEATURES[2].title} fill style={{ objectFit: "cover" }} />
+              <Image src={FEATURES[2].image!} alt={FEATURES[2].title} fill sizes="(max-width: 768px) 100vw, 25vw" style={{ objectFit: "cover" }} />
             </div>
             <div className={styles['feature-card__header']}>
               <div className={styles['feature-card__icon']}>
@@ -165,7 +167,7 @@ export default function Features() {
             </div>
             <p className={styles['feature-card__desc']}>{FEATURES[3].description}</p>
             <div className={styles['feature-card__image-container']}>
-              <Image src={FEATURES[3].image!} alt={FEATURES[3].title} fill style={{ objectFit: "cover" }} />
+              <Image src={FEATURES[3].image!} alt={FEATURES[3].title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: "cover" }} />
             </div>
           </article>
 
@@ -181,7 +183,7 @@ export default function Features() {
               <h3 className={styles['feature-card__title']}>{FEATURES[4].title}</h3>
             </div>
             <div className={styles['feature-card__image-container']} style={{ marginBottom: "16px" }}>
-              <Image src={FEATURES[4].image!} alt={FEATURES[4].title} fill style={{ objectFit: "cover" }} />
+              <Image src={FEATURES[4].image!} alt={FEATURES[4].title} fill sizes="(max-width: 768px) 100vw, 20vw" style={{ objectFit: "cover" }} />
             </div>
             <p className={styles['feature-card__desc']}>{FEATURES[4].description}</p>
           </article>
