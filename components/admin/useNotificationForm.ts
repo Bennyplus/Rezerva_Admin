@@ -140,8 +140,8 @@ export function useNotificationForm({ onSave, initialData }: UseNotificationForm
       .then((users: { id: number; email: string }[]) => {
         const map: Record<string, number> = {};
         const reverseMap: Record<number, string> = {};
-        users.forEach((u) => { 
-          map[u.email] = u.id; 
+        users.forEach((u) => {
+          map[u.email] = u.id;
           reverseMap[u.id] = u.email;
         });
         userIdMapRef.current = map;
@@ -304,7 +304,7 @@ export function useNotificationForm({ onSave, initialData }: UseNotificationForm
     setIsSubmitting(true);
     try {
       const payload = new FormData();
-      
+
       const appendIfChanged = (key: string, newValue: any, oldValue: any) => {
         if (!initialData) {
           payload.append(key, newValue);
@@ -316,7 +316,7 @@ export function useNotificationForm({ onSave, initialData }: UseNotificationForm
       appendIfChanged("title", formData.title.trim(), initialData?.title);
       appendIfChanged("message", formData.message, initialData?.message);
       appendIfChanged("recipient_type", formData.recipients, initialData?.recipient_type);
-      
+
       const isScheduledValue = formData.schedule ? "True" : "False";
       const initialIsScheduledValue = initialData?.is_scheduled ? "True" : "False";
       appendIfChanged("is_scheduled", isScheduledValue, initialIsScheduledValue);
@@ -326,13 +326,13 @@ export function useNotificationForm({ onSave, initialData }: UseNotificationForm
         const initialIso = initialData?.scheduled_at ? new Date(initialData.scheduled_at).toISOString() : undefined;
         appendIfChanged("scheduled_at", currentIso, initialIso);
       }
-      
+
       const currentCta = formData.cta.trim();
       const initialCta = initialData?.call_to_action || "";
       if (!initialData || currentCta !== initialCta) {
         payload.append("call_to_action", currentCta);
       }
-      
+
       appendIfChanged("delivery_channel", formData.channel, initialData?.delivery_channel);
 
       // Each ID as a separate entry — backend expects integer PKs, not a comma string
@@ -340,13 +340,13 @@ export function useNotificationForm({ onSave, initialData }: UseNotificationForm
         const newEmails = formData.userEmails.split(",").map(v => v.trim()).filter(Boolean);
         const newIds = newEmails.map(email => userIdMapRef.current[email]).filter(id => id != null).sort();
         const oldIds = initialData?.specific_recipients ? [...initialData.specific_recipients].sort() : [];
-        
+
         if (!initialData || JSON.stringify(newIds) !== JSON.stringify(oldIds)) {
-           newIds.forEach(id => payload.append("specific_recipients", String(id)));
+          newIds.forEach(id => payload.append("specific_recipients", String(id)));
         }
       }
 
-      selectedFiles.forEach((file) => payload.append("media_attachments", file));
+      selectedFiles.forEach((file) => payload.append("media_attachment", file));
       onSave(payload);
     } finally {
       setIsSubmitting(false);

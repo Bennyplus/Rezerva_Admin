@@ -158,7 +158,7 @@ export const accountsService = {
    */
   suspendTeamMember: async (id: string, payload: { reason: string }): Promise<any> => {
     const response = await publicApi.post('', payload, {
-      params: { path: `api/v1/admin/members/suspend/`, member_id: id }
+      params: { path: `api/v1/admin/suspend-member/`, user_id: id }
     });
     return response.data;
   },
