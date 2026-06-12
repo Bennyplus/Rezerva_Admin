@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import styles from "./TicketModals.module.css";
 import CustomSelect from "./CustomSelect";
-import { notificationsService } from "@/services/notifications-services";
+import { ticketsService } from "@/services/tickets-service";
 
 interface AssignTicketModalProps {
   isOpen: boolean;
@@ -35,10 +35,10 @@ export default function AssignTicketModal({
     const fetchAdmins = async () => {
       setIsLoadingAdmins(true);
       try {
-        const users = await notificationsService.getUsersForNotifications();
+        const users = await ticketsService.getAdmins();
         const mapped = users.map((u: any) => ({
-          value: String(u?.id || u?.user_id || u?.admin_id || ""),
-          label: u?.name || u?.full_name || u?.username || u?.email || `Admin ${u?.id}`,
+          value: String(u?.id || ""),
+          label: u?.user_name || u?.user_email || `Admin ${u?.id}`,
         })).filter((o: any) => o.value !== "");
         setAdminOptions(mapped);
       } catch {

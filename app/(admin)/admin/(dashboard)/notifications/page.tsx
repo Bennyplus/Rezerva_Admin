@@ -133,9 +133,9 @@ export default function NotificationsPage() {
         )}
         <CreateNotificationForm
           initialData={editingNotification}
-          onCancel={() => { 
-            setCurrentView("list"); 
-            setSubmitError(null); 
+          onCancel={() => {
+            setCurrentView("list");
+            setSubmitError(null);
             setEditingNotification(null);
           }}
           onSave={async (data) => {
@@ -162,12 +162,12 @@ export default function NotificationsPage() {
   }
 
   if (isLoading) {
-      return (
-        <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
-          <Spinner size={40} />
-        </div>
-      );
-    }
+    return (
+      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner size={40} />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -288,13 +288,13 @@ export default function NotificationsPage() {
                           </button>
                           {activeDropdown === notif.id && (
                             <div className={styles.dropdown}>
-                              <button 
+                              <button
                                 className={styles.dropdownItem}
                                 onClick={() => handleEdit(notif.id)}
                               >
                                 Edit Notification
                               </button>
-                              <button 
+                              <button
                                 className={styles.dropdownItem}
                                 onClick={() => handleViewDetails(notif.id)}
                               >

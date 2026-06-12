@@ -18,6 +18,7 @@ export default function AnalyticsPage() {
   const [analyticsData, setAnalyticsData] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [showExportMenu, setShowExportMenu] = useState(false);
 
   useEffect(() => {
     console.log("Analytics page mounted, fetching data...");
@@ -42,13 +43,13 @@ export default function AnalyticsPage() {
     }
   };
 
-  const handleExportReport = async (reportType: string) => {
+  const handleExportReport = async (reportType: string, format: string = "pdf") => {
     try {
-      const blob = await analyticsService.exportReportanalytics() as Blob;
+      const blob = await analyticsService.exportReportanalytics(format) as Blob;
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.href = url;
-      link.download = `${reportType}-report-${new Date().toISOString().split("T")[0]}.xlsx`;
+      link.download = `${reportType}-report-${new Date().toISOString().split("T")[0]}.${format}`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -159,23 +160,53 @@ export default function AnalyticsPage() {
         <div className={styles.headerLeft}>
         </div>
         <div className={styles.headerRight}>
-          <button
+          {/* <button
             className={styles.toggleBtn}
             onClick={() => setShowEmptyState(!showEmptyState)}
           >
             Toggle Empty State
-          </button>
+          </button> */}
           {!showEmptyState && (
             <>
               <button className={styles.todaySelect}>
                 Today <ChevronDownIcon />
               </button>
-              <button
-                className={styles.exportBtn}
-                onClick={() => handleExportReport("analytics")}
-              >
-                Export
-              </button>
+              <div style={{ position: "relative" }}>
+                <button
+                  className={styles.exportBtn}
+                  onClick={() => setShowExportMenu(!showExportMenu)}
+                >
+                  Export <ChevronDownIcon />
+                </button>
+                {showExportMenu && (
+                  <div style={{ position: "absolute", top: "100%", right: 0, marginTop: "8px", backgroundColor: "#fff", border: "1px solid #e2e4e9", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 10, display: "flex", flexDirection: "column", padding: "4px", minWidth: "140px" }}>
+                    <button 
+                      onClick={() => { handleExportReport("analytics", "pdf"); setShowExportMenu(false); }}
+                      style={{ padding: "8px 12px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRadius: "4px", fontSize: "14px", color: "#1a1d1f", width: "100%" }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#f4f5f6"}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                      Export as PDF
+                    </button>
+                    <button 
+                      onClick={() => { handleExportReport("analytics", "csv"); setShowExportMenu(false); }}
+                      style={{ padding: "8px 12px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRadius: "4px", fontSize: "14px", color: "#1a1d1f", width: "100%" }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#f4f5f6"}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                      Export as CSV
+                    </button>
+                    <button 
+                      onClick={() => { handleExportReport("analytics", "xlsx"); setShowExportMenu(false); }}
+                      style={{ padding: "8px 12px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRadius: "4px", fontSize: "14px", color: "#1a1d1f", width: "100%" }}
+                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#f4f5f6"}
+                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
+                    >
+                      Export as XLSX
+                    </button>
+                  </div>
+                )}
+              </div>
             </>
           )}
         </div>

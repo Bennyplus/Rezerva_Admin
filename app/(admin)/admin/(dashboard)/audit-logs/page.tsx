@@ -44,9 +44,9 @@ export default function AuditLogsPage() {
   const statusClass = (status: string) => {
     switch (normalizeStatus(status)) {
       case "Success": return styles.statusSuccess;
-      case "Denied":  return styles.statusDenied;
+      case "Denied": return styles.statusDenied;
       case "Pending": return styles.statusPending;
-      default:        return "";
+      default: return "";
     }
   };
 
@@ -77,8 +77,8 @@ export default function AuditLogsPage() {
         normalizeStatus(log.status).toLowerCase().includes(q);
 
       const matchesCategory = !filterCategory || log.category === filterCategory;
-      const matchesAction   = !filterAction   || log.action === filterAction;
-      const matchesStatus   = !filterStatus   || normalizeStatus(log.status) === filterStatus;
+      const matchesAction = !filterAction || log.action === filterAction;
+      const matchesStatus = !filterStatus || normalizeStatus(log.status) === filterStatus;
 
       return matchesSearch && matchesCategory && matchesAction && matchesStatus;
     });
@@ -107,7 +107,7 @@ export default function AuditLogsPage() {
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "audit_logs.xlsx");
+      link.setAttribute("download", "audit_logs.csv");
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -242,13 +242,13 @@ export default function AuditLogsPage() {
                       <td>
                         {log.timestamp
                           ? new Date(log.timestamp).toLocaleString("en-US", {
-                              day: "numeric",
-                              month: "short",
-                              year: "numeric",
-                              hour: "numeric",
-                              minute: "numeric",
-                              hour12: true,
-                            })
+                            day: "numeric",
+                            month: "short",
+                            year: "numeric",
+                            hour: "numeric",
+                            minute: "numeric",
+                            hour12: true,
+                          })
                           : "N/A"}
                       </td>
                       <td>

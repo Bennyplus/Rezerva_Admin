@@ -51,6 +51,7 @@ export default function Footer() {
               <ul className={styles['footer__links']}>
                 <li><Link href="/privacy" className={styles['footer__link']}>Privacy Policy</Link></li>
                 <li><Link href="/terms" className={styles['footer__link']}>Terms & Conditions</Link></li>
+                <li><Link href="/cookie-policy" className={styles['footer__link']}>Cookie Policy</Link></li>
                 <li><Link href="/cancellation" className={styles['footer__link']}>Cancellation Policy</Link></li>
               </ul>
             </div>

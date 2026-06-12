@@ -24,6 +24,7 @@ export default function TicketsPage() {
   const [escalateModalTicketId, setEscalateModalTicketId] = useState<string | null>(null);
 
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [metrics, setMetrics] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   // Fetch tickets on mount
@@ -31,8 +32,12 @@ export default function TicketsPage() {
     const fetchTickets = async () => {
       setIsLoading(true);
       try {
-        const data = await ticketsService.getTickets();
+        const [data, metricsData] = await Promise.all([
+          ticketsService.getTickets(),
+          ticketsService.getMetrics().catch(() => null)
+        ]);
         setTickets(data || []);
+        if (metricsData) setMetrics(metricsData);
       } catch (error) {
         console.error("Failed to fetch tickets:", error);
         setTickets([]);
@@ -60,10 +65,10 @@ export default function TicketsPage() {
   });
 
   // Derived stat counts from live data
-  const totalTickets = tickets.length;
-  const pendingCount = tickets.filter(t => t.status === "Pending").length;
-  const resolvedCount = tickets.filter(t => t.status === "Resolved").length;
-  const escalatedCount = tickets.filter(t => t.status === "Escalated").length;
+  const totalTickets = metrics?.total_tickets ?? tickets.length;
+  const pendingCount = metrics?.total_pending ?? tickets.filter(t => t.status === "Pending").length;
+  const resolvedCount = metrics?.total_resolved ?? tickets.filter(t => t.status === "Resolved").length;
+  const escalatedCount = metrics?.total_escalated ?? tickets.filter(t => t.status === "Escalated").length;
 
   // Action handlers
   const handleAssign = async (ticketNumber: string, adminId: string) => {
@@ -98,6 +103,31 @@ export default function TicketsPage() {
       console.error("Failed to escalate ticket:", error);
     } finally {
       setEscalateModalTicketId(null);
+    }
+  };
+
+  const handleClose = async (ticketNumber: string) => {
+    try {
+      await ticketsService.closeTicket(ticketNumber);
+      setTickets(prev => prev.map(t => t.id === ticketNumber ? { ...t, status: "Closed" as TicketStatus } : t));
+    } catch (error) {
+      console.error("Failed to close ticket:", error);
+    }
+  };
+
+  const handleExportTickets = async () => {
+    try {
+      const blob = await ticketsService.exportTickets() as Blob;
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "tickets_export.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to export tickets:", err);
     }
   };
 
@@ -141,7 +171,7 @@ export default function TicketsPage() {
       {/* ─── Toolbar ─── */}
       <div className={styles.toolbar}>
         <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideSort />
-        <button className={styles.toolBtn} id="tickets-export" style={{ marginLeft: "auto" }}>Export</button>
+        <button className={styles.toolBtn} id="tickets-export" style={{ marginLeft: "auto" }} onClick={handleExportTickets}>Export</button>
       </div>
 
       {/* ─── Content ─── */}
@@ -254,7 +284,7 @@ export default function TicketsPage() {
                             </button>
                             <button
                               className={styles.menuItem}
-                              onClick={() => setOpenMenuId(null)}
+                              onClick={() => { handleClose(ticket.id); setOpenMenuId(null); }}
                             >
                               Close Ticket
                             </button>
