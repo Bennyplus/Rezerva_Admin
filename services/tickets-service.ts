@@ -99,6 +99,18 @@ export const ticketsService = {
     });
     return response.data || [];
   },
+
+  /**
+   * Exports tickets to XLSX
+   * GET admin/support-tickets/export/?export=xlsx
+   */
+  exportTickets: async (): Promise<any> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/admin/support-tickets/export/', export: 'xlsx' },
+      responseType: 'blob'
+    });
+    return response.data;
+  },
 };
 
 function mapTicket(item: any) {

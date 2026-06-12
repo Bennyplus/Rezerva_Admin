@@ -115,6 +115,22 @@ export default function TicketsPage() {
     }
   };
 
+  const handleExportTickets = async () => {
+    try {
+      const blob = await ticketsService.exportTickets() as Blob;
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "tickets_export.xlsx");
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error("Failed to export tickets:", err);
+    }
+  };
+
   const statusClass = (status: TicketStatus | string) => {
     switch (status) {
       case "Pending":     return styles.statusPending;
@@ -155,7 +171,7 @@ export default function TicketsPage() {
       {/* ─── Toolbar ─── */}
       <div className={styles.toolbar}>
         <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideSort />
-        <button className={styles.toolBtn} id="tickets-export" style={{ marginLeft: "auto" }}>Export</button>
+        <button className={styles.toolBtn} id="tickets-export" style={{ marginLeft: "auto" }} onClick={handleExportTickets}>Export</button>
       </div>
 
       {/* ─── Content ─── */}
