@@ -1,18 +1,52 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ADMIN_TRANSACTIONS, TransactionStatus } from "@/data/admin-payments";
+import { TransactionStatus } from "@/data/admin-payments";
 import styles from "./payment-details.module.css";
+import { paymentsService } from "@/services/payments-service";
+import Spinner from "@/components/admin/Spinner";
 
 export default function PaymentDetailsPage({ params }: { params: { id: string } }) {
   const router = useRouter();
+  const [tx, setTx] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
 
-  // Find transaction by customerId — fallback to first entry
-  const tx =
-    ADMIN_TRANSACTIONS.find((t) => t.customerId === params.id) ??
-    ADMIN_TRANSACTIONS[0];
+  useEffect(() => {
+    const fetchPayment = async () => {
+      try {
+        setLoading(true);
+        const data = await paymentsService.getPaymentDetails(params.id);
+        setTx(data);
+      } catch (error) {
+        console.error("Failed to fetch payment details:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPayment();
+  }, [params.id]);
 
-  const isPending = tx.status === "Pending" || tx.status === "Processing";
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner size={40} />
+      </div>
+    );
+  }
+
+  if (!tx) {
+    return <div style={{ padding: "24px" }}>Payment not found.</div>;
+  }
+
+  const statusStr = String(tx.status || tx.transaction_status || "Pending");
+  let mappedStatus = "Pending";
+  if (statusStr.toLowerCase().includes("success") || statusStr.toLowerCase() === "completed") mappedStatus = "Completed";
+  else if (statusStr.toLowerCase() === "failed") mappedStatus = "Failed";
+  else if (statusStr.toLowerCase() === "reversed") mappedStatus = "Reversed";
+  else if (statusStr.toLowerCase() === "processing") mappedStatus = "Processing";
+
+  const isPending = mappedStatus === "Pending" || mappedStatus === "Processing";
 
   return (
     <div className={styles.page}>
@@ -32,13 +66,13 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
       {/* ─── Header ─── */}
       <div className={styles.pageHeader}>
         <div className={styles.transactionIdRow}>
-          <h1 className={styles.transactionId}>{tx.id}</h1>
-          <button className={styles.copyBtn} aria-label="Copy transaction ID" onClick={() => navigator.clipboard.writeText(tx.id)}>
+          <h1 className={styles.transactionId}>{tx.id || tx.transaction_id || params.id}</h1>
+          <button className={styles.copyBtn} aria-label="Copy transaction ID" onClick={() => navigator.clipboard.writeText(tx.id || tx.transaction_id || params.id)}>
             <CopyIcon />
           </button>
-          <StatusBadge status={tx.status} />
+          <StatusBadge status={mappedStatus as TransactionStatus} />
         </div>
-        <p className={styles.headerDate}>{tx.paymentInitiated}</p>
+        <p className={styles.headerDate}>{tx.paymentInitiated || tx.created_at || tx.payment_initiated || "N/A"}</p>
       </div>
 
       {/* ─── Two-Column Layout ─── */}
@@ -51,24 +85,24 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
             <div className={styles.grid3}>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Name</span>
-                <span className={styles.fieldValue}>{tx.customerName}</span>
+                <span className={styles.fieldValue}>{tx.customerName || tx.customer_name || "N/A"}</span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Email</span>
-                <span className={styles.fieldValue}>{tx.customerEmail}</span>
+                <span className={styles.fieldValue}>{tx.customerEmail || tx.customer_email || "N/A"}</span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Phone</span>
-                <span className={styles.fieldValue}>{tx.customerPhone}</span>
+                <span className={styles.fieldValue}>{tx.customerPhone || tx.customer_phone || "N/A"}</span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Date Created</span>
-                <span className={styles.fieldValue}>{tx.dateCreated}</span>
+                <span className={styles.fieldValue}>{tx.dateCreated || tx.created_at || "N/A"}</span>
               </div>
             </div>
             <div className={styles.field} style={{ marginTop: "20px" }}>
               <span className={styles.fieldLabel}>Booking Type</span>
-              <span className={styles.fieldValue}>{tx.bookingType}</span>
+              <span className={styles.fieldValue}>{tx.bookingType || tx.booking_type || "N/A"}</span>
             </div>
           </div>
 
@@ -79,8 +113,8 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Transaction ID</span>
                 <span className={styles.fieldValue}>
-                  {tx.id}
-                  <button className={styles.inlineCopyBtn} onClick={() => navigator.clipboard.writeText(tx.id)} aria-label="Copy">
+                  {tx.id || tx.transaction_id || params.id}
+                  <button className={styles.inlineCopyBtn} onClick={() => navigator.clipboard.writeText(tx.id || tx.transaction_id || params.id)} aria-label="Copy">
                     <CopySmIcon />
                   </button>
                 </span>
@@ -88,23 +122,23 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Booking ID</span>
                 <span className={styles.fieldValue}>
-                  {tx.bookingId}
-                  <button className={styles.inlineCopyBtn} onClick={() => navigator.clipboard.writeText(tx.bookingId)} aria-label="Copy">
+                  {tx.bookingId || tx.booking_id || "N/A"}
+                  <button className={styles.inlineCopyBtn} onClick={() => navigator.clipboard.writeText(tx.bookingId || tx.booking_id || "")} aria-label="Copy">
                     <CopySmIcon />
                   </button>
                 </span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Amount</span>
-                <span className={styles.fieldValue}>{tx.amount}</span>
+                <span className={styles.fieldValue}>{tx.amount || "$0.00"}</span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Fees</span>
-                <span className={styles.fieldValue}>{tx.fees}</span>
+                <span className={styles.fieldValue}>{tx.fees || "$0.00"}</span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Taxes</span>
-                <span className={styles.fieldValue}>{tx.taxes}</span>
+                <span className={styles.fieldValue}>{tx.taxes || "$0.00"}</span>
               </div>
             </div>
           </div>
@@ -115,24 +149,24 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
             <div className={styles.grid2}>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Payment Method</span>
-                <span className={styles.fieldValue}>{tx.paymentMethod}</span>
+                <span className={styles.fieldValue}>{tx.paymentMethod || tx.payment_method || "N/A"}</span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Reference Number</span>
                 <span className={styles.fieldValue}>
-                  {tx.referenceNumber}
-                  <button className={styles.inlineCopyBtn} onClick={() => navigator.clipboard.writeText(tx.referenceNumber)} aria-label="Copy">
+                  {tx.referenceNumber || tx.reference_number || "N/A"}
+                  <button className={styles.inlineCopyBtn} onClick={() => navigator.clipboard.writeText(tx.referenceNumber || tx.reference_number || "")} aria-label="Copy">
                     <CopySmIcon />
                   </button>
                 </span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Payment Initiated</span>
-                <span className={styles.fieldValue}>{tx.paymentInitiated}</span>
+                <span className={styles.fieldValue}>{tx.paymentInitiated || tx.payment_initiated || "N/A"}</span>
               </div>
               <div className={styles.field}>
                 <span className={styles.fieldLabel}>Payment Received</span>
-                <span className={styles.fieldValue}>{tx.paymentReceived}</span>
+                <span className={styles.fieldValue}>{tx.paymentReceived || tx.payment_received || "N/A"}</span>
               </div>
             </div>
           </div>
@@ -149,19 +183,19 @@ export default function PaymentDetailsPage({ params }: { params: { id: string } 
               </div>
               <div className={styles.stepContent}>
                 <p className={styles.stepLabel}>Payment Initiated</p>
-                <p className={styles.stepDate}>{tx.paymentInitiatedAt}</p>
+                <p className={styles.stepDate}>{tx.paymentInitiatedAt || tx.payment_initiated_at || tx.created_at || "N/A"}</p>
               </div>
             </div>
 
             {/* Step 2: Payment Completed */}
             <div className={styles.timelineStep}>
-              <div className={`${styles.stepIndicator} ${tx.paymentCompletedAt ? styles.stepIndicatorDone : ""}`}>
-                {tx.paymentCompletedAt && <CheckIcon />}
+              <div className={`${styles.stepIndicator} ${(tx.paymentCompletedAt || tx.payment_completed_at || mappedStatus === "Completed") ? styles.stepIndicatorDone : ""}`}>
+                {(tx.paymentCompletedAt || tx.payment_completed_at || mappedStatus === "Completed") && <CheckIcon />}
               </div>
               <div className={styles.stepContent}>
                 <p className={styles.stepLabel}>Payment Completed</p>
-                {tx.paymentCompletedAt && (
-                  <p className={styles.stepDate}>{tx.paymentCompletedAt}</p>
+                {(tx.paymentCompletedAt || tx.payment_completed_at) && (
+                  <p className={styles.stepDate}>{tx.paymentCompletedAt || tx.payment_completed_at}</p>
                 )}
               </div>
             </div>

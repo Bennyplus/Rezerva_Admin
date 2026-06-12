@@ -66,5 +66,15 @@ export const paymentsService = {
     });
 
     return response.data;
+  },
+
+  /**
+   * Fetches payment details
+   */
+  getPaymentDetails: async (paymentId: string): Promise<any> => {
+    const response = await publicApi.get('', {
+      params: { path: `api/v1/admin/payments/info/`, payment_id: paymentId }
+    });
+    return response.data;
   }
 };

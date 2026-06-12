@@ -215,7 +215,7 @@ export default function PaymentsPage() {
                         rowId={`${t.id}-${i}`}
                         openKebab={openKebab}
                         setOpenKebab={setOpenKebab}
-                        onViewDetails={() => router.push(`/admin/payments/${t.customerId}`)}
+                        onViewDetails={() => router.push(`/admin/payments/${t.id}`)}
                         onMarkAsSuccessful={() => handleMarkAsSuccessful(t.id)}
                       />
                     </td>
