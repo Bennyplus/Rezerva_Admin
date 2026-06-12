@@ -23,10 +23,10 @@ export const analyticsService = {
       throw error;
     }
   },
-  exportReportanalytics: async () => {
+  exportReportanalytics: async (format: string = 'pdf') => {
     try {
       const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/analytics/overview/', export: 'xlsx' },
+        params: { path: 'api/v1/admin/analytics/overview/', export: format },
         responseType: 'blob',
       });
       return response.data as Blob;

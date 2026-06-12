@@ -35,14 +35,14 @@ export const auditLogsService = {
   exportAuditLogs: async () => {
     try {
       const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/audit-logs/', export: 'xlsx' },
+        params: { path: 'api/v1/admin/audit-logs/', export: 'csv' },
         responseType: 'arraybuffer',
       });
       return response;
     } catch (error) {
       try {
         const fallbackResponse = await publicApi.get('', {
-          params: { path: 'admin/audit-logs/', export: 'xlsx' },
+          params: { path: 'admin/audit-logs/', export: 'csv' },
           responseType: 'arraybuffer',
         });
         return fallbackResponse;

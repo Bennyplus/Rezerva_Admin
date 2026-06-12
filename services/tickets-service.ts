@@ -66,6 +66,39 @@ export const ticketsService = {
     });
     return response.data;
   },
+
+  /**
+   * Fetches ticket metrics
+   * GET admin/support-tickets/metrics/
+   */
+  getMetrics: async (): Promise<any> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/admin/support-tickets/metrics/' }
+    });
+    return response.data;
+  },
+
+  /**
+   * Closes a ticket
+   * POST admin/support-tickets/close/?ticket_number={ticketNumber}
+   */
+  closeTicket: async (ticketNumber: string): Promise<any> => {
+    const response = await publicApi.post('', {}, {
+      params: { path: 'api/v1/admin/support-tickets/close/', ticket_number: ticketNumber }
+    });
+    return response.data;
+  },
+
+  /**
+   * Fetches admin members for assignment
+   * GET admin/members/
+   */
+  getAdmins: async (): Promise<any[]> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/admin/members/' }
+    });
+    return response.data || [];
+  },
 };
 
 function mapTicket(item: any) {
