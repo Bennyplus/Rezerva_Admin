@@ -1,9 +1,19 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import Footer from '@/components/Footer';
 import CustomSelect from '@/components/admin/CustomSelect';
+import { accountsService } from '@/services/accounts-service';
+
+function getFlagEmoji(countryCode: string) {
+  if (!countryCode || countryCode.length !== 2) return "";
+  const codePoints = countryCode
+    .toUpperCase()
+    .split('')
+    .map(char => 127397 + char.charCodeAt(0));
+  return String.fromCodePoint(...codePoints);
+}
 
 const subjectOptions = [
   { value: "general_inquiry", label: "General Inquiry" },
@@ -13,15 +23,38 @@ const subjectOptions = [
   { value: "other", label: "Other" },
 ];
 
-const phonePrefixOptions = [
-  { value: "+1", label: "🇺🇸 +1" },
-  { value: "+44", label: "🇬🇧 +44" },
-  { value: "+234", label: "🇳🇬 +234" },
-];
-
 export default function ContactUsPage() {
   const [subject, setSubject] = useState("");
   const [phonePrefix, setPhonePrefix] = useState("+1");
+  const [phonePrefixOptions, setPhonePrefixOptions] = useState<{ value: string; label: string }[]>([
+    { value: "+1", label: "🇺🇸 +1" }
+  ]);
+
+  useEffect(() => {
+    async function loadCountries() {
+      try {
+        const countries = await accountsService.getCountries();
+        const options = countries.map(c => ({
+          value: c.dial_code,
+          label: `${getFlagEmoji(c.iso_code)} ${c.dial_code}`
+        }));
+
+        // Optional: filter out duplicate dial codes so the dropdown is cleaner
+        const uniqueOptions = Array.from(new Map(options.map(item => [item.value, item])).values());
+
+        if (uniqueOptions.length > 0) {
+          setPhonePrefixOptions(uniqueOptions);
+          // Set default to the first available if +1 isn't there
+          if (!uniqueOptions.find(o => o.value === "+1")) {
+            setPhonePrefix(uniqueOptions[0].value);
+          }
+        }
+      } catch (error) {
+        console.error("Failed to fetch countries for phone prefixes", error);
+      }
+    }
+    loadCountries();
+  }, []);
 
   const handleSelectChange = (name: string, value: string) => {
     if (name === "subject") {
@@ -39,10 +72,12 @@ export default function ContactUsPage() {
           <div className="contact-grid">
             {/* Left Column */}
             <div className="contact-left">
-              <h1 className="contact-title">We&rsquo;re here to help</h1>
-              <p className="contact-desc">
-                Questions, issues, or special requests? Reach out and we&rsquo;ll get back to you quickly.
-              </p>
+              <div>
+                <h1 className="contact-title">We&rsquo;re here to help</h1>
+                <p className="contact-desc">
+                  Questions, issues, or special requests? Reach out and we&rsquo;ll get back to you quickly.
+                </p>
+              </div>
 
               <div className="contact-info-card">
                 <div className="contact-info-title">Chat with us directly</div>
