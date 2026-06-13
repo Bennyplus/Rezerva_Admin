@@ -45,7 +45,67 @@ async function handleRequest(request: NextRequest, method: string) {
     // Do not attach tokens for authentication routes
     const isAuthRoute = path.includes('login') || path.includes('register') || path.includes('verify-otp');
     const cookieStore = await cookies();
-    const token = cookieStore.get('accessToken')?.value;
+    let token = cookieStore.get('accessToken')?.value;
+    const refreshToken = cookieStore.get('refreshToken')?.value;
+
+    // Preemptive refresh check
+    if (token && refreshToken && !isAuthRoute) {
+      try {
+        const payloadBase64 = token.split('.')[1];
+        if (payloadBase64) {
+          const payloadJson = Buffer.from(payloadBase64, 'base64').toString('utf8');
+          const payload = JSON.parse(payloadJson);
+          if (payload.exp) {
+            // Refresh if expiring in less than 2 minutes (120000 ms) or already expired
+            if ((payload.exp * 1000) - Date.now() < 120000) {
+              let newTokens: { access: string; refresh: string } | null = null;
+              
+              if (activeRefreshPromise) {
+                newTokens = await activeRefreshPromise;
+              } else if (
+                lastRefreshedTokens &&
+                Date.now() - lastRefreshedTokens.timestamp < 10000 &&
+                token !== lastRefreshedTokens.access
+              ) {
+                newTokens = { access: lastRefreshedTokens.access, refresh: lastRefreshedTokens.refresh };
+              } else {
+                activeRefreshPromise = axios.post(
+                  `${BACKEND_URL}/accounts/token/refresh/`,
+                  { refresh: refreshToken },
+                  {
+                    headers: {
+                      'X-API-KEY': API_KEY,
+                      'Accept': 'application/json',
+                    }
+                  }
+                ).then(res => {
+                  const refreshed = {
+                    access: res.data.access,
+                    refresh: res.data.refresh || refreshToken,
+                  };
+                  lastRefreshedTokens = { ...refreshed, timestamp: Date.now() };
+                  return refreshed;
+                }).finally(() => {
+                  activeRefreshPromise = null;
+                });
+                
+                newTokens = await activeRefreshPromise;
+              }
+
+              if (newTokens) {
+                token = newTokens.access;
+                // We will attach _newTokens to response later to set cookies
+              }
+            }
+          }
+        }
+      } catch (e) {
+        // ignore parsing errors
+      }
+    }
+
+    // Attach _newTokens to the current scope so we can pass it to response later
+    let preemptiveNewTokens = token !== cookieStore.get('accessToken')?.value ? { access: token, refresh: refreshToken } : null;
 
     if (token && !isAuthRoute) {
       headers['Authorization'] = `Bearer ${token}`;
@@ -229,8 +289,8 @@ async function handleRequest(request: NextRequest, method: string) {
       refreshToSet = jsonData?.refresh;
     }
 
-    accessToSet = accessToSet || (response as any)._newTokens?.access;
-    refreshToSet = refreshToSet || (response as any)._newTokens?.refresh;
+    accessToSet = accessToSet || (response as any)._newTokens?.access || preemptiveNewTokens?.access;
+    refreshToSet = refreshToSet || (response as any)._newTokens?.refresh || preemptiveNewTokens?.refresh;
 
     // Set secure cookies when receiving tokens
     if (accessToSet) {
@@ -239,7 +299,7 @@ async function handleRequest(request: NextRequest, method: string) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 60 * 15, // 15 mins for access token
+        maxAge: 60 * 60 * 24 * 7, // 7 days for access token cookie (so browser doesn't delete it before proxy can refresh)
       });
     }
     if (refreshToSet) {
