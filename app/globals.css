@@ -1930,7 +1930,7 @@ h6 {
 .contact-right {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-2);
   width: 100%;
   width: 608px;
   margin-left: 60px;
@@ -1983,20 +1983,23 @@ h6 {
 
 .contact-form-card {
   background-color: var(--color-surface);
-  padding: var(--space-8);
+  padding: var(--space-6);
   border-radius: var(--radius-xl);
   width: 100%;
+  /* display: flex;
+  flex-direction: column;
+  gap: 4px; */
 }
 
 .contact-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-4);
-  margin-bottom: var(--space-4);
+  /* margin-bottom: var(--space-4); */
 }
 
 .contact-form-group {
-  margin-bottom: var(--space-4);
+  /* margin-bottom: var(--space-4); */
   display: flex;
   flex-direction: column;
 }
@@ -2004,8 +2007,8 @@ h6 {
 .contact-form-label {
   display: inline-flex;
   font-family: var(--font-heading);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--color-primary);
   margin-bottom: var(--space-2);
 }
@@ -2089,9 +2092,9 @@ h6 {
 
 .contact-submit-btn {
   width: 100%;
-  background-color: var(--color-primary);
-  border: 1.5px solid var(--color-primary);
-  color: var(--color-white);
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  color: #868C98;
   padding: 14px;
   border-radius: var(--radius-md);
   font-family: var(--font-heading);
@@ -2105,6 +2108,9 @@ h6 {
 .contact-submit-btn:hover {
   opacity: 0.88;
   transform: translateY(-1px);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+  background-color: var(--color-primary);
 }
 
 @media (max-width: 1024px) {

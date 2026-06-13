@@ -89,7 +89,7 @@ export default function ContactUsPage() {
             {/* Right Column (Form) */}
             <div className="contact-right">
               <div className="contact-form-card">
-                <form>
+                <form className="contact-form" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div className="contact-form-row">
                     <div className="contact-form-group">
                       <label className="contact-form-label">Full Name</label>
