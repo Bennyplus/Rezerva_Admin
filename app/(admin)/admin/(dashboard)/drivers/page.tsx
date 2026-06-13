@@ -1,29 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import StatCard from "@/components/admin/StatCard";
 import Pagination from "@/components/admin/Pagination";
 import AddDriverModal from "@/components/admin/AddDriverModal";
 import SuspendDriverModal from "@/components/admin/SuspendDriverModal";
 import DriverDetailView from "@/components/admin/DriverDetailView";
 import FilterBar from "@/components/admin/FilterBar";
-import { ADMIN_DRIVERS, DRIVER_STATS, type Driver } from "@/data/admin-drivers";
+import Spinner from "@/components/admin/Spinner";
+import { type Driver } from "@/data/admin-drivers";
+import { driversService } from "@/services/drivers-service";
 import styles from "./drivers.module.css";
 
 type ViewMode = "list" | "grid";
 
 export default function DriversPage() {
-  const [drivers, setDrivers] = useState<Driver[]>(ADMIN_DRIVERS);
+  const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isEmpty, setIsEmpty] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>("list");
-  const [currentPage, setCurrentPage] = useState(2);
+  const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [suspendTarget, setSuspendTarget] = useState<Driver | null>(null);
   const [openKebab, setOpenKebab] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const fetchDrivers = async () => {
+    setIsLoading(true);
+    try {
+      const data = await driversService.getDrivers();
+      setDrivers(data);
+      if (data.length === 0) setIsEmpty(true);
+      else setIsEmpty(false);
+    } catch (error) {
+      console.error("Failed to fetch drivers:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchDrivers();
+  }, []);
 
   const totalPages = 16;
   const resultsPerPage = 9;
@@ -52,7 +72,7 @@ export default function DriversPage() {
   }
 
   /* ─── Add driver handler ─── */
-  const handleAddDriver = (data: {
+  const handleAddDriver = async (data: {
     name: string;
     email: string;
     phone: string;
@@ -62,32 +82,23 @@ export default function DriversPage() {
     driversLicense: File | null;
     nin: File | null;
   }) => {
-    const newDriver: Driver = {
-      id: `drv-${Date.now()}`,
-      name: data.name,
-      avatar: "/images/admin/profile-Avatar.svg",
-      rating: 0,
-      phone: data.phone,
-      email: data.email,
-      licenseNo: data.licenseNumber,
-      licenseStatus: "Valid",
-      status: "Active",
-      availability: "Available",
-      location: "Lagos",
-      totalTrips: 0,
-      reports: 0,
-      currentBooking: null,
-      assignedTrips: 0,
-      bookingHistory: [],
-      documents: {
-        driversLicense: { label: "Drivers License", filename: data.driversLicense?.name ?? "—", size: "—" },
-        nin: { label: "NIN", filename: data.nin?.name ?? "—", size: "—" },
-        proofOfAddress: { label: "Proof Of Address", filename: data.proofOfAddress?.name ?? "—", size: "—" },
-        nin2: { label: "NIN", filename: data.nin?.name ?? "—", size: "—" },
-      },
-    };
-    setDrivers((prev) => [newDriver, ...prev]);
-    showToast(`${data.name} has been successfully added as a driver.`);
+    try {
+      const formData = new FormData();
+      formData.append("full_name", data.name);
+      formData.append("email", data.email);
+      formData.append("phone_number", data.phone);
+      formData.append("license_number", data.licenseNumber);
+      if (data.driversLicense) formData.append("drivers_license", data.driversLicense);
+      if (data.nin) formData.append("nin_document", data.nin);
+      if (data.passportPhoto) formData.append("passport_photo", data.passportPhoto);
+
+      await driversService.addDriver(formData);
+      showToast(`${data.name} has been successfully added as a driver.`);
+      fetchDrivers(); // refresh list
+    } catch (error) {
+      console.error("Failed to add driver:", error);
+      showToast("Failed to add driver. Please try again.");
+    }
   };
 
   /* ─── Suspend handler ─── */
@@ -128,14 +139,11 @@ export default function DriversPage() {
         </div>
       )}
 
-      {/* Stat Cards */}
-      <div className={styles.statsGrid} id="drivers-stats">
-        {DRIVER_STATS.map((stat) => (
-          <StatCard key={stat.id} label={stat.label} value={stat.value} id={`stat-${stat.id}`} />
-        ))}
-      </div>
-
-      {isEmpty ? (
+      {isLoading ? (
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "300px" }}>
+          <Spinner />
+        </div>
+      ) : isEmpty ? (
         <div className={styles.emptyCard} id="drivers-empty-state">
           <div className={styles.illustration} aria-hidden="true">
             <Image
@@ -287,13 +295,15 @@ export default function DriversPage() {
                   </tbody>
                 </table>
               </div>
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                resultsPerPage={resultsPerPage}
-                onPageChange={setCurrentPage}
-                variant="table"
-              />
+              {filteredDrivers.length > 10 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  resultsPerPage={resultsPerPage}
+                  onPageChange={setCurrentPage}
+                  variant="table"
+                />
+              )}
             </div>
           ) : (
             /* ─── Grid View ─── */
@@ -336,20 +346,22 @@ export default function DriversPage() {
                   </div>
                 ))}
               </div>
-              <Pagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                resultsPerPage={6}
-                onPageChange={setCurrentPage}
-                variant="standalone"
-              />
+              {filteredDrivers.length > 10 && (
+                <Pagination
+                  currentPage={currentPage}
+                  totalPages={totalPages}
+                  resultsPerPage={6}
+                  onPageChange={setCurrentPage}
+                  variant="standalone"
+                />
+              )}
             </>
           )}
         </>
       )}
 
       {/* Dev toggle */}
-      <div className={styles.devToggleWrap}>
+      {/* <div className={styles.devToggleWrap}>
         <button
           className={styles.stateToggle}
           onClick={() => setIsEmpty((v) => !v)}
@@ -357,7 +369,7 @@ export default function DriversPage() {
         >
           {isEmpty ? "Show Populated State" : "Show Empty State"} →
         </button>
-      </div>
+      </div> */}
 
       {/* Modals */}
       <AddDriverModal
@@ -378,9 +390,9 @@ export default function DriversPage() {
 /* ─── Status Badge ─── */
 function DriverStatusBadge({ status }: { status: string }) {
   const cls =
-    status === "Active"    ? styles.badgeActive :
-    status === "Suspended" ? styles.badgeSuspended :
-    styles.badgeInactive;
+    status === "Active" ? styles.badgeActive :
+      status === "Suspended" ? styles.badgeSuspended :
+        styles.badgeInactive;
   return (
     <span className={`${styles.badge} ${cls}`}>
       <span className={styles.badgeDot} />
@@ -393,10 +405,10 @@ function DriverStatusBadge({ status }: { status: string }) {
 const s = 16;
 const ip = { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
 
-function PlusIcon()   { return <svg {...ip}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>; }
-function GridIcon()   { return <svg {...ip} strokeWidth={1.8}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>; }
-function ListIcon()   { return <svg {...ip} strokeWidth={1.8}><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>; }
-function MoreIcon()   { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }
+function PlusIcon() { return <svg {...ip}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>; }
+function GridIcon() { return <svg {...ip} strokeWidth={1.8}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>; }
+function ListIcon() { return <svg {...ip} strokeWidth={1.8}><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>; }
+function MoreIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }
 function LocationIcon() { return <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>; }
 function CheckCircleIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>; }
 function XSmall() { return <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>; }

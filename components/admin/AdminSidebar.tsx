@@ -152,9 +152,19 @@ export default function AdminSidebar() {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [usersExpanded, setUsersExpanded] = useState(true);
+  const [currentUser, setCurrentUser] = useState<any>(null);
   const pathname = usePathname();
 
-  const currentRole = ADMIN_USER.role as AdminRole;
+  useEffect(() => {
+    const userStr = localStorage.getItem("drifully_admin_user");
+    if (userStr) {
+      try {
+        setCurrentUser(JSON.parse(userStr));
+      } catch (e) {}
+    }
+  }, []);
+
+  const currentRole = (currentUser?.user_type || ADMIN_USER.role) as AdminRole;
 
   // Filter sections and remove empty categories
   const visibleSections = NAV_SECTIONS.map((section) => {
@@ -182,6 +192,18 @@ export default function AdminSidebar() {
     if (href === "/admin") return pathname === "/admin";
     return pathname.startsWith(href);
   };
+
+  const getInitials = (name: string) => {
+    if (!name) return "AD";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  const name = currentUser?.full_name || ADMIN_USER.name;
+  const email = currentUser?.email || ADMIN_USER.email;
+  const profilePic = currentUser?.profile?.profile_picture;
+  const hasProfilePic = profilePic && !profilePic.includes("default.jpg");
 
   return (
     <>
@@ -319,18 +341,25 @@ export default function AdminSidebar() {
         {/* User profile */}
         <div className={styles.profile}>
           <div className={styles.profileAvatar}>
-            <Image
-              src={ADMIN_USER.avatar}
-              alt={ADMIN_USER.name}
-              width={40}
-              height={40}
-              className={styles.avatarImg}
-            />
+            {hasProfilePic ? (
+              <Image
+                src={profilePic}
+                alt={name}
+                width={40}
+                height={40}
+                className={styles.avatarImg}
+                style={{ objectFit: 'cover', borderRadius: '50%' }}
+              />
+            ) : (
+              <div style={{ width: 40, height: 40, borderRadius: "50%", background: "#f1f5f9", color: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "600", fontSize: "14px", flexShrink: 0 }}>
+                {getInitials(name)}
+              </div>
+            )}
           </div>
           {!collapsed && (
             <div className={styles.profileInfo}>
               <div className={styles.profileName}>
-                {ADMIN_USER.name}
+                {name}
                 <Image
                   src="/images/admin/profile-checkmark.svg"
                   alt="Verified"
@@ -339,7 +368,7 @@ export default function AdminSidebar() {
                   className={styles.verifiedBadge}
                 />
               </div>
-              <span className={styles.profileEmail}>{ADMIN_USER.email}</span>
+              <span className={styles.profileEmail}>{email}</span>
             </div>
           )}
           {!collapsed && (

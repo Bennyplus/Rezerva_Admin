@@ -31,7 +31,8 @@ export default function AdminLoginPage() {
       const response = await accountsService.login({ email, password });
 
       // Allow user to assume Super Admin role for now while BE user roles are tweaked
-      localStorage.setItem("drifully_admin_role", "Super Admin");
+      localStorage.setItem("drifully_admin_role", response.user?.user_type || "Super Admin");
+      localStorage.setItem("drifully_admin_user", JSON.stringify(response.user));
 
       setSuccess("Logged in successfully! Redirecting...");
       setTimeout(() => {

@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { ADMIN_USER } from "@/data/admin-mock";
@@ -75,6 +76,23 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
 
 export default function AdminTopbar() {
   const pathname = usePathname();
+  const [currentUser, setCurrentUser] = useState<any>(null);
+
+  useEffect(() => {
+    const userStr = localStorage.getItem("drifully_admin_user");
+    if (userStr) {
+      try {
+        setCurrentUser(JSON.parse(userStr));
+      } catch (e) {}
+    }
+  }, []);
+
+  const getInitials = (name: string) => {
+    if (!name) return "AD";
+    const parts = name.trim().split(/\s+/);
+    if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  };
 
   // Resolve dynamic routes before exact lookup
   const resolvedPath = (() => {
@@ -83,6 +101,10 @@ export default function AdminTopbar() {
   })();
 
   const meta = PAGE_META[resolvedPath] || { title: "Dashboard", subtitle: "" };
+
+  const name = currentUser?.full_name || ADMIN_USER.name;
+  const profilePic = currentUser?.profile?.profile_picture;
+  const hasProfilePic = profilePic && !profilePic.includes("default.jpg");
 
   return (
     <header className={styles.topbar} id="admin-topbar">
@@ -113,13 +135,20 @@ export default function AdminTopbar() {
           aria-label="Admin menu"
           id="admin-avatar-btn"
         >
-          <Image
-            src={ADMIN_USER.avatar}
-            alt={ADMIN_USER.name}
-            width={36}
-            height={36}
-            className={styles.avatarImg}
-          />
+          {hasProfilePic ? (
+            <Image
+              src={profilePic}
+              alt={name}
+              width={36}
+              height={36}
+              className={styles.avatarImg}
+              style={{ objectFit: 'cover', borderRadius: '50%' }}
+            />
+          ) : (
+            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#f1f5f9", color: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "600", fontSize: "13px", flexShrink: 0 }}>
+              {getInitials(name)}
+            </div>
+          )}
         </button>
       </div>
     </header>
