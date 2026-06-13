@@ -32,17 +32,17 @@ export const auditLogsService = {
     }
   },
 
-  exportAuditLogs: async () => {
+  exportAuditLogs: async (format: string = 'csv') => {
     try {
       const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/audit-logs/', export: 'csv' },
+        params: { path: 'api/v1/admin/audit-logs/', export: format },
         responseType: 'arraybuffer',
       });
       return response;
     } catch (error) {
       try {
         const fallbackResponse = await publicApi.get('', {
-          params: { path: 'admin/audit-logs/', export: 'csv' },
+          params: { path: 'admin/audit-logs/', export: format },
           responseType: 'arraybuffer',
         });
         return fallbackResponse;

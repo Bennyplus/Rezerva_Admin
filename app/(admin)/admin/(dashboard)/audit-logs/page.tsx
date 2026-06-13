@@ -12,6 +12,8 @@ const PAGE_SIZE = 12;
 
 export default function AuditLogsPage() {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+  const [exportDropdownOpen, setExportDropdownOpen] = useState(false);
+  const [exportingFormat, setExportingFormat] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [allLogs, setAllLogs] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -101,18 +103,22 @@ export default function AuditLogsPage() {
     setOpenDropdownId(openDropdownId === id ? null : id);
   };
 
-  const handleExport = async () => {
+  const handleExport = async (format: "csv" | "pdf" | "xlsx") => {
     try {
-      const response = await auditLogsService.exportAuditLogs();
+      setExportingFormat(format);
+      const response = await auditLogsService.exportAuditLogs(format);
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
       link.href = url;
-      link.setAttribute("download", "audit_logs.csv");
+      link.setAttribute("download", `audit_logs.${format}`);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
     } catch (error) {
       console.error("Failed to export logs:", error);
+    } finally {
+      setExportingFormat(null);
+      setExportDropdownOpen(false);
     }
   };
 
@@ -189,12 +195,23 @@ export default function AuditLogsPage() {
         </div>
 
         <div className={styles.headerRight}>
-          <button
-            onClick={handleExport}
-            style={{ padding: "8px 16px", background: "#111", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px", fontWeight: 600 }}
-          >
-            Export Logs
-          </button>
+          <div style={{ position: "relative" }}>
+            <button
+              onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
+              style={{ padding: "8px 16px", background: "#111", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px", fontWeight: 600, display: "flex", alignItems: "center", gap: "8px" }}
+              disabled={!!exportingFormat}
+            >
+              {exportingFormat ? `Exporting ${exportingFormat.toUpperCase()}...` : "Export Logs"}
+              <ChevronDownIcon />
+            </button>
+            {exportDropdownOpen && (
+              <div style={{ position: "absolute", top: "100%", right: 0, marginTop: "8px", background: "#fff", border: "1px solid #eee", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 10, minWidth: "120px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
+                <button onClick={() => handleExport("csv")} style={{ padding: "10px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: "13px", color: "#333", borderBottom: "1px solid #eee" }}>Export as CSV</button>
+                <button onClick={() => handleExport("pdf")} style={{ padding: "10px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: "13px", color: "#333", borderBottom: "1px solid #eee" }}>Export as PDF</button>
+                <button onClick={() => handleExport("xlsx")} style={{ padding: "10px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: "13px", color: "#333" }}>Export as XLSX</button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -316,6 +333,14 @@ function MoreIcon() {
   return (
     <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
       <circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" />
+    </svg>
+  );
+}
+
+function ChevronDownIcon() {
+  return (
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="6 9 12 15 18 9" />
     </svg>
   );
 }
