@@ -131,6 +131,13 @@ export default function ContactUsPage() {
                     />
                   </div>
 
+                  {subject === "booking_issue" && (
+                    <div className="contact-form-group">
+                      <label className="contact-form-label">Booking ID</label>
+                      <input type="text" className="contact-form-input" placeholder="Enter booking ID" />
+                    </div>
+                  )}
+
                   <div className="contact-form-group">
                     <label className="contact-form-label">Message</label>
                     <textarea className="contact-form-textarea" placeholder="How can we help?"></textarea>

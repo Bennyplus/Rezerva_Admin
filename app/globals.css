@@ -1898,7 +1898,7 @@ h6 {
 
 .contact-section {
   position: relative;
-  /* min-height: calc(100vh - 80px); */
+  min-height: calc(100vh - 80px);
   /* Adjust based on navbar */
   padding-top: var(--space-20);
   padding-bottom: var(--space-20);
@@ -2030,6 +2030,7 @@ h6 {
   font-size: 14px;
   color: var(--color-primary);
   outline: none;
+  letter-spacing: -0.3px;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -2045,7 +2046,7 @@ h6 {
 }
 
 .contact-form-textarea {
-  resize: vertical;
+  resize: none;
   min-height: 120px;
 }
 
