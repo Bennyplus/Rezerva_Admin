@@ -28,25 +28,25 @@ const NAV_SECTIONS: NavSection[] = [
         label: "Dashboard",
         href: "/admin",
         icon: "dashboard",
-        allowedRoles: ["Super Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"]
+        allowedRoles: ["Super Admin", "Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"]
       },
       {
         label: "Analytics",
         href: "/admin/analytics",
         icon: "analytics",
-        allowedRoles: ["Super Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"]
+        allowedRoles: ["Super Admin", "Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"]
       },
       {
         label: "Audit Logs",
         href: "/admin/audit-logs",
         icon: "audit",
-        allowedRoles: ["Super Admin"]
+        allowedRoles: ["Super Admin", "Admin"]
       },
       {
         label: "Tickets",
         href: "/admin/tickets",
         icon: "ticket",
-        allowedRoles: ["Super Admin", "Customer Engagement"]
+        allowedRoles: ["Super Admin", "Admin", "Customer Engagement"]
       },
     ],
   },
@@ -57,19 +57,19 @@ const NAV_SECTIONS: NavSection[] = [
         label: "Vehicles",
         href: "/admin/vehicles",
         icon: "vehicles",
-        allowedRoles: ["Super Admin", "Fleet Manager"]
+        allowedRoles: ["Super Admin", "Admin", "Fleet Manager"]
       },
       {
         label: "Bookings",
         href: "/admin/bookings",
         icon: "bookings",
-        allowedRoles: ["Super Admin", "Operations Manager", "Fleet Manager"]
+        allowedRoles: ["Super Admin", "Admin", "Operations Manager", "Fleet Manager"]
       },
       {
         label: "Notifications",
         href: "/admin/notifications",
         icon: "notification",
-        allowedRoles: ["Super Admin", "Customer Engagement"]
+        allowedRoles: ["Super Admin", "Admin", "Customer Engagement"]
       },
     ],
   },
@@ -80,13 +80,13 @@ const NAV_SECTIONS: NavSection[] = [
         label: "Users",
         href: "/admin/users",
         icon: "users",
-        allowedRoles: ["Super Admin", "Customer Engagement"]
+        allowedRoles: ["Super Admin", "Admin", "Customer Engagement"]
       },
       {
         label: "Reviews",
         href: "/admin/reviews",
         icon: "reviews",
-        allowedRoles: ["Super Admin", "Customer Engagement"]
+        allowedRoles: ["Super Admin", "Admin", "Customer Engagement"]
       },
     ],
   },
@@ -98,13 +98,13 @@ const NAV_SECTIONS: NavSection[] = [
         label: "Payments",
         href: "/admin/payments",
         icon: "payments",
-        allowedRoles: ["Super Admin", "Finance Manager"]
+        allowedRoles: ["Super Admin", "Admin", "Finance Manager"]
       },
       {
         label: "Refunds",
         href: "/admin/refunds",
         icon: "refunds",
-        allowedRoles: ["Super Admin", "Finance Manager"]
+        allowedRoles: ["Super Admin", "Admin", "Finance Manager"]
       },
     ],
   },
@@ -160,7 +160,7 @@ export default function AdminSidebar() {
     if (userStr) {
       try {
         setCurrentUser(JSON.parse(userStr));
-      } catch (e) {}
+      } catch (e) { }
     }
   }, []);
 

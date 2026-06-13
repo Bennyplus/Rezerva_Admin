@@ -8,24 +8,24 @@ import styles from "./AdminGuard.module.css";
 
 // Pathname-to-allowed-roles mapping
 const ROUTE_PERMISSIONS: Record<string, AdminRole[]> = {
-  "/admin": ["Super Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"],
-  "/admin/analytics": ["Super Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"],
-  "/admin/audit-logs": ["Super Admin"],
-  "/admin/vehicles": ["Super Admin", "Fleet Manager"],
-  "/admin/bookings": ["Super Admin", "Operations Manager", "Fleet Manager"],
-  "/admin/notifications": ["Super Admin", "Customer Engagement"],
-  "/admin/users": ["Super Admin", "Customer Engagement"],
-  "/admin/teams": ["Super Admin"],
-  "/admin/drivers": ["Super Admin", "Customer Engagement"],
-  "/admin/customers": ["Super Admin", "Customer Engagement"],
-  "/admin/reviews": ["Super Admin", "Customer Engagement"],
-  "/admin/payments": ["Super Admin", "Finance Manager"],
+  "/admin": ["Super Admin", "Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"],
+  "/admin/analytics": ["Super Admin", "Admin", "Fleet Manager", "Operations Manager", "Customer Engagement", "Finance Manager"],
+  "/admin/audit-logs": ["Super Admin", "Admin"],
+  "/admin/vehicles": ["Super Admin", "Admin", "Fleet Manager"],
+  "/admin/bookings": ["Super Admin", "Admin", "Operations Manager", "Fleet Manager"],
+  "/admin/notifications": ["Super Admin", "Admin", "Customer Engagement"],
+  "/admin/users": ["Super Admin", "Admin", "Customer Engagement"],
+  "/admin/teams": ["Super Admin", "Admin"],
+  "/admin/drivers": ["Super Admin", "Admin", "Customer Engagement"],
+  "/admin/customers": ["Super Admin", "Admin", "Customer Engagement"],
+  "/admin/reviews": ["Super Admin", "Admin", "Customer Engagement"],
+  "/admin/payments": ["Super Admin", "Admin", "Finance Manager"],
 };
 
 export default function AdminGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  
+
   const [currentRole, setCurrentRole] = useState<AdminRole | null>(null);
 
   useEffect(() => {
