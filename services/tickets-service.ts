@@ -122,12 +122,11 @@ function mapTicket(item: any) {
     date: item?.date_created || 'N/A',
     status: mapStatus(item?.status),
     attachments: item?.attachments || [],
-    // Fields not in API — will show N/A until endpoint provides them
-    category: 'N/A',
-    priority: 'N/A',
-    assignedAdmin: 'N/A',
-    customerPhone: 'N/A',
-    customerEmail: 'N/A',
+    category: 'N/A', // Not in API data yet
+    priority: item?.priority || 'N/A',
+    assigned_admin: item?.assigned_admin || 'N/A',
+    customerPhone: item?.phone_number || 'N/A',
+    customerEmail: item?.customer_email || 'N/A',
   };
 }
 

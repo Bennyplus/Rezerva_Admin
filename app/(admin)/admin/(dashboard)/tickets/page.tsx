@@ -133,12 +133,12 @@ export default function TicketsPage() {
 
   const statusClass = (status: TicketStatus | string) => {
     switch (status) {
-      case "Pending":     return styles.statusPending;
+      case "Pending": return styles.statusPending;
       case "In Progress": return styles.statusInProgress;
-      case "Resolved":    return styles.statusResolved;
-      case "Escalated":   return styles.statusEscalated;
-      case "Closed":      return styles.statusClosed;
-      default:            return "";
+      case "Resolved": return styles.statusResolved;
+      case "Escalated": return styles.statusEscalated;
+      case "Closed": return styles.statusClosed;
+      default: return "";
     }
   };
 
@@ -146,10 +146,10 @@ export default function TicketsPage() {
     <div className={styles.page}>
       {/* ─── Stats ─── */}
       <div className={styles.statsGrid}>
-        <StatCard label="Total Tickets"    value={totalTickets}   id="stat-total" />
-        <StatCard label="Pending Tickets"  value={pendingCount}   id="stat-pending" />
-        <StatCard label="Resolved Tickets" value={resolvedCount}  id="stat-resolved" />
-        <StatCard label="Escalated"        value={escalatedCount} id="stat-escalated" />
+        <StatCard label="Total Tickets" value={totalTickets} id="stat-total" />
+        <StatCard label="Pending Tickets" value={pendingCount} id="stat-pending" />
+        <StatCard label="Resolved Tickets" value={resolvedCount} id="stat-resolved" />
+        <StatCard label="Escalated" value={escalatedCount} id="stat-escalated" />
       </div>
 
       {/* ─── Tabs ─── */}
@@ -246,7 +246,7 @@ export default function TicketsPage() {
                           : ticket.description}
                       </span>
                     </td>
-                    <td>{ticket.assignedAdmin}</td>
+                    <td>{ticket.assigned_admin}</td>
                     <td>
                       <span className={`${styles.badge} ${statusClass(ticket.status)}`}>
                         <span className={styles.badgeDot} />

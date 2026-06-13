@@ -22,7 +22,7 @@ export interface Ticket {
   // Fields NOT returned by API — will show "N/A" until endpoint provides them
   category: string;
   priority: TicketPriority | string;
-  assignedAdmin: string;
+  assigned_admin: string;
   customerPhone: string;
   customerEmail: string;
 }
