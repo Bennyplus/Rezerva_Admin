@@ -164,7 +164,7 @@ export default function AboutUsPage() {
             <div className={styles['about-arrival__grid']}>
               <div className={styles['about-arrival__img-composite']}>
                 <Image
-                  src="/images/handsome-man.jpg"
+                  src="/images/handsome-man-w.png"
                   alt="Man in suit opening car door"
                   width={300}
                   height={500}
@@ -172,14 +172,14 @@ export default function AboutUsPage() {
                 />
                 <div className={styles['about-arrival__img-stack']}>
                   <Image
-                    src="/images/couple.jpg"
+                    src="/images/couple-w.png"
                     alt="Couple enjoying a ride"
                     width={240}
                     height={245}
                     className={styles['about-arrival__img-small']}
                   />
                   <Image
-                    src="/images/last-car-img.jpg"
+                    src="/images/last-car-img-w.png"
                     alt="Premium car in garage"
                     width={240}
                     height={245}

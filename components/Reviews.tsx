@@ -181,6 +181,9 @@ export default function Reviews() {
             } else if (index === 2) {
               className = "review-card--tall";
             }
+            
+            // Card 2, 4, and 8 (0-indexed as 1, 3, and 7) have custom background
+            const isCustomBg = index === 1 || index === 3 || index === 7;
 
             if (isLoading) {
               return (
@@ -196,6 +199,7 @@ export default function Reviews() {
                 key={review.id}
                 review={review}
                 className={className}
+                hasCustomBg={isCustomBg}
               />
             );
           })}
@@ -269,13 +273,14 @@ function getAvatarColor(name: string): string {
 
 function ReviewCard({
   review,
-  className = ""
+  className = "",
+  hasCustomBg = false
 }: {
   review: ReviewType,
-  className?: string
+  className?: string,
+  hasCustomBg?: boolean
 }) {
   const [imgError, setImgError] = useState(false);
-  const hasCustomBg = ["r2", "r4", "r8", "r-2", "r-4", "r-8", "2", "4", "8"].includes(review.id);
 
   const initials = getInitials(review.author);
   const avatarBg = getAvatarColor(review.author);
