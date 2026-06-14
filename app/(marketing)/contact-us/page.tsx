@@ -89,7 +89,7 @@ export default function ContactUsPage() {
             {/* Right Column (Form) */}
             <div className="contact-right">
               <div className="contact-form-card">
-                <form>
+                <form className="contact-form" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   <div className="contact-form-row">
                     <div className="contact-form-group">
                       <label className="contact-form-label">Full Name</label>
@@ -130,6 +130,13 @@ export default function ContactUsPage() {
                       onChange={handleSelectChange}
                     />
                   </div>
+
+                  {subject === "booking_issue" && (
+                    <div className="contact-form-group">
+                      <label className="contact-form-label">Booking ID</label>
+                      <input type="text" className="contact-form-input" placeholder="Enter booking ID" />
+                    </div>
+                  )}
 
                   <div className="contact-form-group">
                     <label className="contact-form-label">Message</label>

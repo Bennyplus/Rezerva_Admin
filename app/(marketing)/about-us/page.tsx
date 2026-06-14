@@ -64,7 +64,7 @@ export default function AboutUsPage() {
                 >
                   Download The App
                 </Link>
-                <Link href="#story" className="btn btn-ghost-white">
+                <Link href="#story" className="btn btn-ghost-white" style={{ padding: '10px', fontWeight: '500' }}>
                   Learn About Drifully
                 </Link>
               </div>
@@ -80,7 +80,7 @@ export default function AboutUsPage() {
               {/* Left Column */}
               <div className={styles['about-story__left-col']}>
                 <h2 className={styles['about-story__title']}>Our Story</h2>
-                <p className="about-story__lead">
+                <p className="about-story__lead" style={{ fontSize: '20px', fontWeight: '600', letterSpacing: '-0.75px' }}>
                   Getting around shouldn't feel <span className={styles['about-story__muted-text']}>complicated</span>.<br />
                   It shouldn't involve <span className={styles['about-story__muted-text']}>stress, uncertainty, or wasted time.</span>
                 </p>
@@ -126,13 +126,15 @@ export default function AboutUsPage() {
                   </div>
                 </div>
 
-                <p className={`${styles['about-story__text']} ${styles['about-story__text--spaced-margin']}`}>
-                  With Drifully, <strong>you choose</strong>.
-                </p>
-                <ul className={styles['about-arrival__list']} style={{ marginTop: 0 }}>
-                  <li className={styles['about-arrival__list-item']}>Drive yourself when you want freedom and control</li>
-                  <li className={styles['about-arrival__list-item']}>Ride with a chauffeur when you want ease and peace of mind</li>
-                </ul>
+                <div className={styles['about-story__text-wrapper']}>
+                  <p className={`${styles['about-story__text']} ${styles['about-story__text--spaced-margin']}`}>
+                    With Drifully, <strong>you choose</strong>.
+                  </p>
+                  <ul className={styles['about-arrival__list']} style={{ marginTop: 0 }}>
+                    <li className={styles['about-arrival__list-item']}>Drive yourself when you want freedom and control</li>
+                    <li className={styles['about-arrival__list-item']}>Ride with a chauffeur when you want ease and peace of mind</li>
+                  </ul>
+                </div>
               </div>
             </div>
           </div>
@@ -164,7 +166,7 @@ export default function AboutUsPage() {
             <div className={styles['about-arrival__grid']}>
               <div className={styles['about-arrival__img-composite']}>
                 <Image
-                  src="/images/handsome-man.jpg"
+                  src="/images/handsome-man-w.png"
                   alt="Man in suit opening car door"
                   width={300}
                   height={500}
@@ -172,14 +174,14 @@ export default function AboutUsPage() {
                 />
                 <div className={styles['about-arrival__img-stack']}>
                   <Image
-                    src="/images/couple.jpg"
+                    src="/images/couple-w.png"
                     alt="Couple enjoying a ride"
                     width={240}
                     height={245}
                     className={styles['about-arrival__img-small']}
                   />
                   <Image
-                    src="/images/last-car-img.jpg"
+                    src="/images/last-car-img-w.png"
                     alt="Premium car in garage"
                     width={240}
                     height={245}

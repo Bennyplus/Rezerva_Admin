@@ -1224,6 +1224,8 @@ h6 {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--space-6);
+  max-width: 1241px;
+  margin: 0 auto;
 }
 
 /* Step card */
@@ -1472,6 +1474,8 @@ h6 {
 
 /* 7-Column Grid Layout */
 .reviews__grid {
+  max-width: 1027px;
+  margin: 0 auto;
   display: grid;
   grid-template-columns: repeat(1, 1fr);
   gap: var(--space-4);
@@ -1609,7 +1613,7 @@ h6 {
 .review-card__title {
   font-family: var(--font-heading);
   font-size: var(--text-base);
-  font-weight: 600;
+  font-weight: 500;
   color: var(--color-primary);
 }
 
@@ -1636,10 +1640,10 @@ h6 {
 
 .review-card__body {
   font-family: var(--font-body);
-  font-size: 14px;
-  color: var(--color-muted);
+  font-size: 12px;
+  color: var(--color-primary);
   line-height: 1.6;
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-1);
 }
 
 .review-card__author {
@@ -1683,7 +1687,7 @@ h6 {
 
 .review-card__name {
   font-family: var(--font-heading);
-  font-weight: 600;
+  font-weight: 500;
   font-size: 14px;
   color: var(--color-primary);
   line-height: 1.2;
@@ -1898,7 +1902,7 @@ h6 {
 
 .contact-section {
   position: relative;
-  /* min-height: calc(100vh - 80px); */
+  min-height: calc(100vh - 80px);
   /* Adjust based on navbar */
   padding-top: var(--space-20);
   padding-bottom: var(--space-20);
@@ -1930,7 +1934,7 @@ h6 {
 .contact-right {
   display: flex;
   flex-direction: column;
-  gap: var(--space-4);
+  gap: var(--space-2);
   width: 100%;
   width: 608px;
   margin-left: 60px;
@@ -1983,20 +1987,23 @@ h6 {
 
 .contact-form-card {
   background-color: var(--color-surface);
-  padding: var(--space-8);
+  padding: var(--space-6);
   border-radius: var(--radius-xl);
   width: 100%;
+  /* display: flex;
+  flex-direction: column;
+  gap: 4px; */
 }
 
 .contact-form-row {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-4);
-  margin-bottom: var(--space-4);
+  /* margin-bottom: var(--space-4); */
 }
 
 .contact-form-group {
-  margin-bottom: var(--space-4);
+  /* margin-bottom: var(--space-4); */
   display: flex;
   flex-direction: column;
 }
@@ -2004,8 +2011,8 @@ h6 {
 .contact-form-label {
   display: inline-flex;
   font-family: var(--font-heading);
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 14px;
+  font-weight: 500;
   color: var(--color-primary);
   margin-bottom: var(--space-2);
 }
@@ -2027,6 +2034,7 @@ h6 {
   font-size: 14px;
   color: var(--color-primary);
   outline: none;
+  letter-spacing: -0.3px;
   transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 
@@ -2042,7 +2050,7 @@ h6 {
 }
 
 .contact-form-textarea {
-  resize: vertical;
+  resize: none;
   min-height: 120px;
 }
 
@@ -2089,9 +2097,9 @@ h6 {
 
 .contact-submit-btn {
   width: 100%;
-  background-color: var(--color-primary);
-  border: 1.5px solid var(--color-primary);
-  color: var(--color-white);
+  background-color: var(--color-white);
+  border: 1.5px solid var(--color-border);
+  color: #868C98;
   padding: 14px;
   border-radius: var(--radius-md);
   font-family: var(--font-heading);
@@ -2105,6 +2113,9 @@ h6 {
 .contact-submit-btn:hover {
   opacity: 0.88;
   transform: translateY(-1px);
+  border-color: var(--color-primary);
+  color: var(--color-white);
+  background-color: var(--color-primary);
 }
 
 @media (max-width: 1024px) {
