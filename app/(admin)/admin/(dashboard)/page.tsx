@@ -1,115 +1,218 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
 import type { ApexOptions } from "apexcharts";
 import StatCard from "@/components/admin/StatCard";
-import {
-  DASHBOARD_STATS,
-  MONTHLY_REVENUE,
-  BOOKING_TRENDS,
-  RECENT_BOOKINGS,
-} from "@/data/admin-mock";
+import Spinner from "@/components/admin/Spinner";
+import { dashboardService } from "@/services/dashboard-service";
 import styles from "./page.module.css";
 
 // Dynamically import ApexCharts to avoid SSR issues
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-/* ─── Revenue bar chart options ─── */
-const revenueChartOptions: ApexOptions = {
-  chart: {
-    type: "bar",
-    toolbar: { show: false },
-    zoom: { enabled: false },
-    fontFamily: "inherit",
-  },
-  plotOptions: {
-    bar: {
-      columnWidth: "45%",
-      borderRadius: 3,
-    },
-  },
-  colors: ["#CCCED2"],
-  dataLabels: { enabled: false },
-  grid: {
-    borderColor: "#E2E4E9",
-    strokeDashArray: 4,
-    xaxis: { lines: { show: false } },
-    yaxis: { lines: { show: true } },
-  },
-  legend: { show: false },
-  xaxis: {
-    categories: MONTHLY_REVENUE.categories,
-    labels: { style: { colors: "#868C98", fontSize: "12px" } },
-    axisBorder: { show: false },
-    axisTicks: { show: false },
-  },
-  yaxis: {
-    min: 0,
-    tickAmount: 4,
-    labels: {
-      style: { colors: "#868C98", fontSize: "12px" },
-      formatter: (val: number) => `$${val}K`,
-    },
-  },
-};
+/* ─── API Types ─── */
+interface DashboardSummary {
+  total_bookings: { value: number; change_label?: string };
+  total_revenue: { value: number; change_label?: string };
+  total_payouts: { value: number; change_label?: string };
+  available_cars: { value: number; change_label?: string };
+}
 
-/* ─── Booking trends donut options ─── */
-const total = BOOKING_TRENDS.cancelled + BOOKING_TRENDS.ongoing + BOOKING_TRENDS.scheduled;
-const pct = (n: number) => `${Math.round((n / total) * 100)}%`;
+interface RevenueChartData {
+  month: string;
+  revenue: number;
+}
 
-const trendsChartOptions: ApexOptions = {
-  chart: {
-    type: "donut",
-    toolbar: { show: false },
-    fontFamily: "inherit",
-  },
-  colors: ["#BEBFC2", "#1a1d1f", "#D8D9DC"],
-  labels: ["Cancelled Bookings", "Ongoing Trips", "Scheduled Trips"],
-  dataLabels: {
-    enabled: true,
-    formatter: (_val: string | number | number[], opts?: { seriesIndex?: number }) => {
-      const counts = [BOOKING_TRENDS.cancelled, BOOKING_TRENDS.ongoing, BOOKING_TRENDS.scheduled];
-      const idx = opts?.seriesIndex ?? 0;
-      return pct(counts[idx]);
-    },
-    style: { fontSize: "12px", fontWeight: "500", colors: ["#fff"] },
-    dropShadow: { enabled: false },
-  },
-  plotOptions: {
-    pie: {
-      donut: {
-        size: "62%",
-      },
-    },
-  },
-  legend: { show: false },
-  stroke: { width: 0 },
-  tooltip: { enabled: false },
-};
+interface BookingTrend {
+  label: string;
+  count: number;
+  percentage: number;
+}
 
-const trendsSeries = [BOOKING_TRENDS.cancelled, BOOKING_TRENDS.ongoing, BOOKING_TRENDS.scheduled];
+interface RecentBooking {
+  booking_id: string;
+  customer_name: string;
+  customer_phone: string;
+  vehicle: string;
+  booking_type: string;
+  status: string;
+  status_code: string;
+}
+
+interface DashboardApiResponse {
+  summary: DashboardSummary;
+  revenue_chart: RevenueChartData[];
+  booking_trends: BookingTrend[];
+  recent_bookings: RecentBooking[];
+}
 
 /* ─── Status badge helper ─── */
-function statusClass(status: string): string {
-  switch (status) {
-    case "completed":  return styles.statusCompleted;
-    case "upcoming":   return styles.statusUpcoming;
-    case "ongoing":    return styles.statusOngoing;
-    case "cancelled":  return styles.statusCancelled;
-    default:           return "";
+function statusClass(status_code: string): string {
+  switch (status_code.toLowerCase()) {
+    case "completed": return styles.statusCompleted;
+    case "scheduled": return styles.statusUpcoming;
+    case "ongoing": return styles.statusOngoing;
+    case "pending": return styles.statusPending || "";
+    case "cancelled": return styles.statusCancelled;
+    default: return "";
   }
 }
 
 export default function AdminDashboard() {
   const [_openMenu, setOpenMenu] = useState<number | null>(null);
+  const [data, setData] = useState<DashboardApiResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch from your API endpoint here
+    const fetchData = async () => {
+      try {
+        const json = await dashboardService.fetchDashboardOverview();
+        setData(json);
+      } catch (error) {
+        console.error("API fetch failed, falling back to initial data:", error);
+        // Fallback or handle error
+        // For demonstration, you could also provide default static data here
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const revenueChartOptions: ApexOptions = useMemo(() => ({
+    chart: {
+      type: "bar",
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      fontFamily: "inherit",
+    },
+    plotOptions: {
+      bar: {
+        columnWidth: "45%",
+        borderRadius: 3,
+      },
+    },
+    colors: ["#CCCED2"],
+    dataLabels: { enabled: false },
+    grid: {
+      borderColor: "#E2E4E9",
+      strokeDashArray: 4,
+      xaxis: { lines: { show: false } },
+      yaxis: { lines: { show: true } },
+    },
+    legend: { show: false },
+    xaxis: {
+      categories: data?.revenue_chart.map(d => d.month) || [],
+      labels: { style: { colors: "#868C98", fontSize: "12px" } },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+    },
+    yaxis: {
+      min: 0,
+      tickAmount: 4,
+      labels: {
+        style: { colors: "#868C98", fontSize: "12px" },
+        formatter: (val: number) => `$${val >= 1000 ? (val / 1000).toFixed(0) + 'K' : val}`,
+      },
+    },
+  }), [data]);
+
+  const trendsChartOptions: ApexOptions = useMemo(() => {
+    if (!data) return {};
+    const total = data.booking_trends.reduce((sum, item) => sum + item.count, 0);
+    const pct = (n: number) => `${Math.round((n / total) * 100)}%`;
+
+    return {
+      chart: {
+        type: "donut",
+        toolbar: { show: false },
+        fontFamily: "inherit",
+      },
+      colors: ["#BEBFC2", "#1a1d1f", "#D8D9DC"],
+      labels: data.booking_trends.map(t => t.label),
+      dataLabels: {
+        enabled: true,
+        formatter: (_val: string | number | number[], opts?: { seriesIndex?: number }) => {
+          const idx = opts?.seriesIndex ?? 0;
+          return pct(data.booking_trends[idx].count);
+        },
+        style: { fontSize: "12px", fontWeight: "500", colors: ["#fff"] },
+        dropShadow: { enabled: false },
+      },
+      plotOptions: {
+        pie: {
+          donut: {
+            size: "62%",
+          },
+        },
+      },
+      legend: { show: false },
+      stroke: { width: 0 },
+      tooltip: { enabled: false },
+    };
+  }, [data]);
+
+  // Loading state
+  if (loading) {
+    return (
+      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+        <Spinner size={40} />
+      </div>
+    );
+  }
+
+  if (!data) {
+    return <div className={styles.page}>Failed to load dashboard data.</div>;
+  }
+
+  const revenueSeries = [{
+    name: "Revenue",
+    data: data.revenue_chart.map(d => d.revenue)
+  }];
+
+  const trendsSeries = data.booking_trends.map(t => t.count);
+
+  // Format stats for UI cards
+  const dashboardStats = [
+    {
+      id: "total_bookings",
+      label: "Total Bookings",
+      value: data.summary.total_bookings.value.toString(),
+      growth: data.summary.total_bookings.change_label,
+      isPositive: data.summary.total_bookings.change_label?.includes('+')
+    },
+    {
+      id: "total_revenue",
+      label: "Total Revenue",
+      value: `$${data.summary.total_revenue.value.toLocaleString()}`,
+      growth: data.summary.total_revenue.change_label,
+      isPositive: data.summary.total_revenue.change_label?.includes('+')
+    },
+    {
+      id: "total_payouts",
+      label: "Total Payouts",
+      value: `$${data.summary.total_payouts.value.toLocaleString()}`,
+      growth: data.summary.total_payouts.change_label,
+      isPositive: data.summary.total_payouts.change_label?.includes('+')
+    },
+    {
+      id: "available_cars",
+      label: "Available Cars",
+      value: data.summary.available_cars.value.toString(),
+      growth: data.summary.available_cars.change_label,
+      isPositive: data.summary.available_cars.change_label?.includes('+')
+    },
+  ];
 
   return (
     <div className={styles.page}>
 
       {/* ─── Stat Cards ─── */}
       <div className={styles.statsGrid} id="admin-stats">
-        {DASHBOARD_STATS.map((stat) => (
+        {dashboardStats.map((stat) => (
           <StatCard
             key={stat.id}
             label={stat.label}
@@ -132,7 +235,7 @@ export default function AdminDashboard() {
           <div className={styles.revenueChart}>
             <ReactApexChart
               options={revenueChartOptions}
-              series={MONTHLY_REVENUE.series}
+              series={revenueSeries}
               type="bar"
               height={260}
             />
@@ -155,27 +258,23 @@ export default function AdminDashboard() {
               />
             </div>
             <div className={styles.trendsLegend}>
-              <div className={styles.legendItem}>
-                <span className={styles.legendLabel}>
-                  <span className={`${styles.legendDot} ${styles.dotCancelled}`} />
-                  Cancelled Bookings
-                </span>
-                <span className={styles.legendCount}>{BOOKING_TRENDS.cancelled}</span>
-              </div>
-              <div className={styles.legendItem}>
-                <span className={styles.legendLabel}>
-                  <span className={`${styles.legendDot} ${styles.dotOngoing}`} />
-                  Ongoing Trips
-                </span>
-                <span className={styles.legendCount}>{BOOKING_TRENDS.ongoing}</span>
-              </div>
-              <div className={styles.legendItem}>
-                <span className={styles.legendLabel}>
-                  <span className={`${styles.legendDot} ${styles.dotScheduled}`} />
-                  Scheduled Trips
-                </span>
-                <span className={styles.legendCount}>{BOOKING_TRENDS.scheduled}</span>
-              </div>
+              {data.booking_trends.map((trend, idx) => {
+                let dotClass = '';
+                const labelLower = trend.label.toLowerCase();
+                if (labelLower.includes('cancel')) dotClass = styles.dotCancelled || '';
+                else if (labelLower.includes('ongoing')) dotClass = styles.dotOngoing || '';
+                else if (labelLower.includes('schedule')) dotClass = styles.dotScheduled || '';
+
+                return (
+                  <div key={idx} className={styles.legendItem}>
+                    <span className={styles.legendLabel}>
+                      <span className={`${styles.legendDot} ${dotClass}`} />
+                      {trend.label}
+                    </span>
+                    <span className={styles.legendCount}>{trend.count}</span>
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>
@@ -195,23 +294,28 @@ export default function AdminDashboard() {
                   <th>Vehicle</th>
                   <th>Booking Type</th>
                   <th>Booking Status</th>
-                  <th className={styles.actionsCol} />
+                  {/* <th className={styles.actionsCol} /> */}
                 </tr>
               </thead>
               <tbody>
-                {RECENT_BOOKINGS.map((booking, idx) => (
+                {data.recent_bookings.map((booking, idx) => (
                   <tr key={idx}>
-                    <td>{booking.id}</td>
-                    <td>{booking.customer}</td>
-                    <td>{booking.vehicle}</td>
-                    <td>{booking.bookingType}</td>
+                    <td>{booking.booking_id}</td>
                     <td>
-                      <span className={`${styles.badge} ${statusClass(booking.status)}`}>
+                      <div>{booking.customer_name}</div>
+                      <div style={{ fontSize: "12px", color: "#868C98", marginTop: "2px" }}>
+                        {booking.customer_phone}
+                      </div>
+                    </td>
+                    <td>{booking.vehicle}</td>
+                    <td>{booking.booking_type}</td>
+                    <td>
+                      <span className={`${styles.badge} ${statusClass(booking.status_code)}`}>
                         <span className={styles.badgeDot} />
-                        {booking.status.charAt(0).toUpperCase() + booking.status.slice(1)}
+                        {booking.status}
                       </span>
                     </td>
-                    <td className={styles.actionsCol}>
+                    {/* <td className={styles.actionsCol}>
                       <button
                         className={styles.moreBtn}
                         aria-label="More actions"
@@ -219,7 +323,7 @@ export default function AdminDashboard() {
                       >
                         <MoreIcon />
                       </button>
-                    </td>
+                    </td> */}
                   </tr>
                 ))}
               </tbody>
