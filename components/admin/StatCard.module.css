@@ -31,7 +31,7 @@
   background: var(--admin-card-bg, #ffffff);
   border-radius: 12px;
   margin: 0 8px 8px;
-  padding: 18px 18px 22px;
+  padding: 12px;
 }
 
 .value {
