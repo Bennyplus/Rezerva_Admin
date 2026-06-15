@@ -59,7 +59,7 @@ async function handleRequest(request: NextRequest, method: string) {
             // Refresh if expiring in less than 2 minutes (120000 ms) or already expired
             if ((payload.exp * 1000) - Date.now() < 120000) {
               let newTokens: { access: string; refresh: string } | null = null;
-              
+
               if (activeRefreshPromise) {
                 newTokens = await activeRefreshPromise;
               } else if (
@@ -88,7 +88,7 @@ async function handleRequest(request: NextRequest, method: string) {
                 }).finally(() => {
                   activeRefreshPromise = null;
                 });
-                
+
                 newTokens = await activeRefreshPromise;
               }
 
@@ -299,7 +299,7 @@ async function handleRequest(request: NextRequest, method: string) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 7 days for access token cookie (so browser doesn't delete it before proxy can refresh)
+        maxAge: 60 * 60 * 24, // 24 hours for access token cookie (so browser doesn't delete it before proxy can refresh)
       });
     }
     if (refreshToSet) {
@@ -308,7 +308,7 @@ async function handleRequest(request: NextRequest, method: string) {
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         path: '/',
-        maxAge: 60 * 60 * 24 * 7, // 7 days for refresh token
+        maxAge: 60 * 60 * 24, // 24 hours for refresh token
       });
     }
 
