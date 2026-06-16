@@ -304,9 +304,9 @@ export default function AdminSidebar() {
                         {usersExpanded && !collapsed && (
                           <ul className={styles.subNavList}>
                             {[
-                              { label: "Teams", href: "/admin/teams", icon: "teams", allowedRoles: ["Super Admin"] },
-                              { label: "Drivers", href: "/admin/drivers", icon: "drivers", allowedRoles: ["Super Admin", "Customer Engagement"] },
-                              { label: "Customers", href: "/admin/customers", icon: "customers", allowedRoles: ["Super Admin", "Customer Engagement"] },
+                              { label: "Teams", href: "/admin/teams", icon: "teams", allowedRoles: ["Super Admin", "Admin"] },
+                              { label: "Drivers", href: "/admin/drivers", icon: "drivers", allowedRoles: ["Super Admin", "Admin", "Customer Engagement"] },
+                              { label: "Customers", href: "/admin/customers", icon: "customers", allowedRoles: ["Super Admin", "Admin", "Customer Engagement"] },
                             ].filter((sub) => sub.allowedRoles.includes(currentRole)).map((sub) => (
                               <li key={sub.href}>
                                 <Link
