@@ -73,17 +73,19 @@
 
 :global(.footer__app-btn) {
   /* width: 185px; */
+
   /* height: 44px; */
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 10px 14px;
+  padding: 10px;
   border-radius: 10px;
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 400;
   transition: all var(--transition-fast);
   white-space: nowrap;
+  color: var(--color-muted);
 }
 
 :global(.footer__app-btn--dark) {
@@ -94,7 +96,7 @@
 
 :global(.footer__app-btn--outline) {
   background: transparent;
-  color: var(--color-primary);
+  color: #868C98;
   border: 1px solid var(--color-border);
 }
 
@@ -255,5 +257,10 @@
   .footer__tagline {
     width: 100%;
     max-width: 100%;
+    font-size: 14px;
+  }
+
+  :global(.footer__apps) {
+    width: 328px;
   }
 }
