@@ -80,7 +80,7 @@ export default function AboutUsPage() {
               {/* Left Column */}
               <div className={styles['about-story__left-col']}>
                 <h2 className={styles['about-story__title']}>Our Story</h2>
-                <p className="about-story__lead" style={{ fontSize: '20px', fontWeight: '600', letterSpacing: '-0.75px' }}>
+                <p className="about-story__lead">
                   Getting around shouldn't feel <span className={styles['about-story__muted-text']}>complicated</span>.<br />
                   It shouldn't involve <span className={styles['about-story__muted-text']}>stress, uncertainty, or wasted time.</span>
                 </p>

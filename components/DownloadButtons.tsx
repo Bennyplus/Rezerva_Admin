@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { color } from "jodit/esm/plugins/color/color";
 
 interface DownloadButtonsProps {
   variant?: "hero" | "cta" | "footer" | "default";
@@ -7,7 +8,7 @@ interface DownloadButtonsProps {
   appIconSrc?: string;
 }
 
-export default function DownloadButtons({ 
+export default function DownloadButtons({
   variant = "default",
   playIconSrc = "/icons/google-play.svg",
   appIconSrc = "/icons/apple.svg"
@@ -35,8 +36,11 @@ export default function DownloadButtons({
     playClass = "btn btn-primary";
     appClass = "btn";
     playStyle = { display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#111', color: '#fff', padding: '12px 24px', borderRadius: '12px' };
-    appStyle = { display: 'flex', alignItems: 'center', gap: '8px', border: '1px solid var(--color-border)', padding: '12px 24px', borderRadius: '12px' };
+    appStyle = { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px', color: '#868C98' };
   }
+
+  // mobileclass should exclude cta too
+  const mobileClass = variant === "footer" || variant === "cta" ? "" : "mobile-dl-btn";
 
   return (
     <div className={containerClass} style={variant === "default" ? { display: 'flex', gap: 'var(--space-4)', justifyContent: 'center' } : {}}>
@@ -45,7 +49,7 @@ export default function DownloadButtons({
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Get Drifully on Google Play"
-        className={playClass}
+        className={`${playClass} ${mobileClass}`.trim()}
         style={playStyle}
       >
         <span>Get it on Google Play</span>
@@ -57,7 +61,7 @@ export default function DownloadButtons({
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Download Drifully on the App Store"
-        className={appClass}
+        className={`${appClass} ${mobileClass}`.trim()}
         style={appStyle}
       >
         <span>Download on App Store</span>

@@ -78,12 +78,6 @@ export default function ContactUsPage() {
                   Questions, issues, or special requests? Reach out and we&rsquo;ll get back to you quickly.
                 </p>
               </div>
-
-              <div className="contact-info-card">
-                <div className="contact-info-title">Chat with us directly</div>
-                <div className="contact-info-item">Email: support@drifully.com</div>
-                <div className="contact-info-item">Phone: +234 255 473 4562</div>
-              </div>
             </div>
 
             {/* Right Column (Form) */}
@@ -147,7 +141,14 @@ export default function ContactUsPage() {
                     Send Message
                   </button>
                 </form>
-              </div>
+                </div>
+            </div>
+
+            {/* Info card – sits below the form on mobile */}
+            <div className="contact-info-card contact-info-card--bottom">
+              <div className="contact-info-title">Chat with us directly</div>
+              <div className="contact-info-item">Email: support@drifully.com</div>
+              <div className="contact-info-item">Phone: +234 255 473 4562</div>
             </div>
           </div>
         </div>

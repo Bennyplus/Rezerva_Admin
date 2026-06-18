@@ -1,9 +1,7 @@
 .heroContainer {
   width: 100%;
   position: relative;
-  /* Navbar offset handled by global padding or we can do it here */
-  margin-top: 80px;
-  /* Adjust if navbar is fixed */
+  margin-top: 68px;
 }
 
 .hero {
@@ -35,7 +33,7 @@
 }
 
 .heroContent {
-  margin-top: 230px;
+  margin-top: 210px;
   position: relative;
   z-index: 2;
   max-width: 600px;
@@ -70,8 +68,8 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  padding: 12px 20px;
-  border-radius: 8px;
+  padding: 10px;
+  border-radius: 10px;
   font-family: var(--font-body, "DM Sans", sans-serif);
   font-size: 13px;
   font-weight: 500;
@@ -93,7 +91,6 @@
 .appStoreBtn {
   background: transparent;
   color: white;
-  border: 1px solid rgba(255, 255, 255, 0.4);
 }
 
 .appStoreBtn:hover {
@@ -110,13 +107,20 @@
     padding-bottom: 50px;
   }
 
+  .heroOverlay {
+    background:
+      radial-gradient(circle at top left, rgba(0, 0, 0, 1) 0%, rgba(0, 0, 0, 0.9) 30%, rgba(0, 0, 0, 0.4) 70%, rgba(0, 0, 0, 0) 90%),
+      linear-gradient(to right, rgba(0, 0, 0, 0.5) 0%, rgba(0, 0, 0, 0) 60%);
+  }
+
   .heroContent {
     margin-top: 0;
   }
 
   .heroTitle {
-    font-size: 32px;
-    line-height: 1.2;
+    letter-spacing: -1px;
+    font-size: 28px;
+    line-height: 1.25;
     margin-bottom: var(--space-4);
   }
 
@@ -132,13 +136,14 @@
   }
 
   .googlePlayBtn {
-    background: #1c1c1e; /* dark background as in screenshot */
+    background: #1c1c1e;
+    /* dark background as in screenshot */
     color: white;
     border: none;
     border-radius: 12px;
     padding: 12px 20px;
   }
-  
+
   .googlePlayBtn:hover {
     background: #2a2a2d;
   }
@@ -148,7 +153,7 @@
     border: none;
     padding: 0;
   }
-  
+
   .appStoreBtn:hover {
     background: transparent;
     opacity: 0.8;
@@ -175,7 +180,7 @@
 .sectionTitle {
   font-family: var(--font-heading, "DM Sans", sans-serif);
   font-size: 36px;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 16px;
   color: var(--color-primary);
   letter-spacing: -1px;
@@ -184,8 +189,9 @@
 .sectionDesc {
   font-family: var(--font-body, "DM Sans", sans-serif);
   font-size: 16px;
-  color: var(--color-muted);
-  max-width: 700px;
+  color: var(--color-primary);
+  /* max-width: 700px; */
+  letter-spacing: -0.5px;
 }
 
 /* Top Blogs Grid */
@@ -232,7 +238,7 @@
   width: 100%;
   border-radius: 12px;
   overflow: hidden;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
   position: relative;
 }
 
@@ -250,18 +256,18 @@
 
 .cardTitle {
   font-family: var(--font-heading, "DM Sans", sans-serif);
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 24px;
+  font-weight: 600;
   margin-bottom: 12px;
   color: var(--color-primary);
   line-height: 1.3;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.8px;
 }
 
 .cardDesc {
   font-family: var(--font-body, "DM Sans", sans-serif);
   font-size: 15px;
-  color: var(--color-muted);
+  color: #868C98;
   margin-bottom: 20px;
   line-height: 1.6;
 }
@@ -274,7 +280,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-top: auto;
+  /* margin-top: auto; */
   align-self: flex-start;
   transition: gap 0.2s ease;
   text-decoration: none;

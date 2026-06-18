@@ -76,6 +76,14 @@
   margin-bottom: 15px;
 }
 
+:global(.about-story__lead) {
+  order: 2;
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: -0.75px;
+  margin-bottom: 0;
+}
+
 .about-story__grid {
   display: grid;
   grid-template-columns: 1fr 1.2fr;
@@ -328,31 +336,26 @@
   gap: var(--space-4);
 }
 
-.about-faq__item {
-  background: var(--color-white);
-  border-radius: var(--radius-md);
-  border: 1px solid rgba(0, 0, 0, 0.05);
-  overflow: hidden;
-}
-
-.about-faq__item:hover {
-  box-shadow: var(--shadow-md);
-}
-
 .about-faq__question {
   width: 100%;
   padding: 10px 10px 10px 12px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: none;
-  border: none;
+  background: var(--color-white);
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   text-align: left;
   font-family: var(--font-heading);
-  font-weight: 600;
+  font-weight: 400;
   font-size: var(--text-base);
   color: var(--color-primary);
   cursor: pointer;
+  transition: box-shadow var(--transition-normal);
+}
+
+.about-faq__question:hover {
+  box-shadow: var(--shadow-md);
 }
 
 .about-faq__icon {
@@ -369,13 +372,19 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height var(--transition-normal);
-  background: #fafafa;
 }
 
 .about-faq__item[data-open="true"] .about-faq__answer {
   max-height: 500px;
 }
 
+.about-faq__answer-inner {
+  margin-top: 8px;
+  background: #fafafa;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
 
 .about-faq__answer-text {
   padding: var(--space-4) var(--space-6) var(--space-6);
@@ -390,7 +399,7 @@
 }
 
 .about-faq__cta p {
-  color: #999999;
+  color: #868C98;
   margin-bottom: var(--space-4);
   font-size: 15px;
 }
@@ -398,8 +407,9 @@
 .about-faq__cta .contact-btn {
   background-color: #111;
   color: #fff;
-  border-radius: 12px;
-  padding: 12px 30px;
+  border-radius: 10px;
+  padding: 10px;
+  width: 181px;
 }
 
 /* Responsive */
@@ -484,7 +494,7 @@
   .about-story__grid {
     display: flex;
     flex-direction: column;
-    gap: var(--space-6);
+    gap: var(--space-2);
   }
 
   .about-story__left-col,
@@ -501,6 +511,8 @@
   :global(.about-story__lead) {
     order: 2;
     font-size: 14px;
+    font-weight: 500;
+    letter-spacing: -0.3px;
     margin-bottom: 0;
   }
 
@@ -538,14 +550,21 @@
     height: auto;
   }
 
-  .about-story__text--spaced-margin {
+  .about-story__text-wrapper {
     order: 6;
     margin-top: 0;
-    font-size: 14px;
+    display: flex;
+    flex-direction: column;
+    /* gap: var(--space-4); */
   }
 
-  .about-story__grid .about-arrival__list {
-    order: 7;
+  .about-story__text {
+    margin-bottom: 0;
+  }
+
+  .about-story__text--spaced-margin {
+    margin-top: 0;
+    font-size: 14px;
   }
 
   .about-story__bottom-text {
@@ -570,6 +589,10 @@
   }
 
   /* Arrival & Trust Section */
+  .about-arrival__content {
+    gap: 4px;
+  }
+
   .about-arrival {
     padding-block: var(--space-12);
   }
@@ -598,6 +621,7 @@
   .about-arrival__section-title {
     font-size: 24px;
     margin-bottom: var(--space-2);
+    margin-top: 0;
   }
 
   .about-story__text,
