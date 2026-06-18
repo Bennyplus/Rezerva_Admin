@@ -223,11 +223,28 @@
   /* margin-bottom: var(--space-4); */
 }
 
+.fleet-sitting {
+  display: flex;
+  justify-content: space-between;
+}
+
 .fleet-card__specs {
   display: flex;
   gap: 16px;
   font-size: 14px;
   color: var(--color-muted);
+  /* padding: 4px 12px; */
+  border-radius: 20px;
+  /* border: 1px solid #E2E4E9; */
+  width: fit-content;
+}
+
+.fleet-card__specs span {
+  padding: 4px 12px;
+  border-radius: 20px;
+  border: 1px solid #E2E4E9;
+  width: fit-content;
+  background-color: #F6F8FA;
 }
 
 .fleet-pagination {

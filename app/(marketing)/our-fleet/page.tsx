@@ -6,6 +6,7 @@ import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DownloadButtons from "@/components/DownloadButtons";
+import Spinner from "@/components/admin/Spinner";
 import { marketingService } from "@/services/marketing-service";
 import { Vehicle } from "@/types/vehicle";
 import styles from "./page.module.css";
@@ -143,7 +144,9 @@ export default function OurFleetPage() {
             {/* Vehicle Grid */}
             <div className={styles['fleet-grid']}>
               {loading ? (
-                <div className={styles.loading}>Loading vehicles...</div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '100%', gridColumn: '1 / -1', minHeight: '300px' }}>
+                  <Spinner />
+                </div>
               ) : error ? (
                 <div className={styles.error}>{error}</div>
               ) : vehicles.length === 0 ? (
@@ -174,19 +177,17 @@ export default function OurFleetPage() {
                             <span className={styles['fleet-card__price-unit']}>/day</span>
                           </span>
                         </div>
-                        <h3 className={styles['fleet-card__title']}>{vehicle.name}</h3>
-                        <div className={styles['fleet-card__specs']}>
-                          <span>{vehicle.type}</span>
-                          <span>•</span>
-                          <span>{vehicle.transmission}</span>
-                          <span>•</span>
-                          <span>
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: 'middle', marginRight: '4px' }}>
-                              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                              <circle cx="12" cy="7" r="4" />
-                            </svg>
+                        <div className={styles['fleet-sitting']}>
+                          <h3 className={styles['fleet-card__title']}>{vehicle.name}</h3>
+                          <span className='flex items-center gap-1' style={{ color: '#868C98' }}>
+                            <Image src="/images/our-fleet/profile.svg" alt="capacity" width={14} height={14} style={{ marginTop: '6px' }} />
                             {vehicle.capacity}
                           </span>
+                        </div>
+                        <div className={styles['fleet-card__specs']}>
+                          <span>{vehicle.type}</span>
+                          {/* <span>•</span> */}
+                          <span>{vehicle.transmission}</span>
                         </div>
                       </div>
                     </div>
