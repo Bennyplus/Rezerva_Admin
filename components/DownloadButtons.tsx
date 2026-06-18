@@ -1,5 +1,6 @@
 import Link from "next/link";
 import Image from "next/image";
+import { color } from "jodit/esm/plugins/color/color";
 
 interface DownloadButtonsProps {
   variant?: "hero" | "cta" | "footer" | "default";
@@ -35,7 +36,7 @@ export default function DownloadButtons({
     playClass = "btn btn-primary";
     appClass = "btn";
     playStyle = { display: 'flex', alignItems: 'center', gap: '8px', backgroundColor: '#111', color: '#fff', padding: '12px 24px', borderRadius: '12px' };
-    appStyle = { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px' };
+    appStyle = { display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '12px', color: '#868C98' };
   }
 
   // mobileclass should exclude cta too
