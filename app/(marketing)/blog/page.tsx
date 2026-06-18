@@ -61,7 +61,7 @@ export default function BlogPage() {
                 </div>
                 <h3 className={styles.cardTitle}>Getting started with Drifully</h3>
                 <p className={styles.cardDesc}>New to Drifully? Here's a quick guide to help you book your first ride with ease</p>
-                <div className={styles.readMore}>Read More &rarr;</div>
+                <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
               </Link>
 
               <div className={styles.sideBlogCards}>
@@ -75,9 +75,9 @@ export default function BlogPage() {
                     />
                   </div>
                   <div className={styles.horizontalCardContent}>
-                    <h3 className={styles.cardTitle} style={{ fontSize: '18px' }}>The easiest way to get from the airport without stress</h3>
+                    <h3 className={styles.cardTitle}>The easiest way to get from the airport without stress</h3>
                     <p className={styles.cardDesc}>Skip the confusion and long waits—here's how to arrive smoothly and comfortably.</p>
-                    <div className={styles.readMore}>Read More &rarr;</div>
+                    <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
                   </div>
                 </Link>
 
@@ -91,16 +91,16 @@ export default function BlogPage() {
                     />
                   </div>
                   <div className={styles.horizontalCardContent}>
-                    <h3 className={styles.cardTitle} style={{ fontSize: '18px' }}>Everything you need to know before your first self-drive</h3>
+                    <h3 className={styles.cardTitle}>Everything you need to know before your first self-drive</h3>
                     <p className={styles.cardDesc}>From picking the right car to hitting the road with confidence, here's how to make your first self-drive smooth and stress-free.</p>
-                    <div className={styles.readMore}>Read More &rarr;</div>
+                    <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
                   </div>
                 </Link>
               </div>
             </div>
           </section>
 
-          <section className={styles.section} style={{ paddingTop: '40px' }}>
+          <section className={styles.section} style={{ paddingTop: '240px' }}>
             <div className={styles.sectionHeader}>
               <h2 className={styles.sectionTitle}>Insights for every journey</h2>
               <p className={styles.sectionDesc}>Explore travel tips, driving guides, and smarter ways to move — designed to make every trip easier and more enjoyable</p>
@@ -113,7 +113,7 @@ export default function BlogPage() {
                 </div>
                 <h3 className={styles.cardTitle}>What to expect when booking a chauffeur</h3>
                 <p className={styles.cardDesc}>Enjoy a seamless, comfortable ride with a professional driver—here's how it works from start to finish.</p>
-                <div className={styles.readMore}>Read More &rarr;</div>
+                <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
               </Link>
 
               <Link href="#" className={`${styles.card} ${styles.insightCard}`}>
@@ -122,7 +122,7 @@ export default function BlogPage() {
                 </div>
                 <h3 className={styles.cardTitle}>Drive yourself vs chauffeur services on Drifully</h3>
                 <p className={styles.cardDesc}>Take control of the wheel or sit back and enjoy the ride—Drifully gives you both, effortlessly.</p>
-                <div className={styles.readMore}>Read More &rarr;</div>
+                <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
               </Link>
 
               <Link href="#" className={`${styles.card} ${styles.insightCard}`}>
@@ -131,7 +131,7 @@ export default function BlogPage() {
                 </div>
                 <h3 className={styles.cardTitle}>Top places to go in the UK</h3>
                 <p className={styles.cardDesc}>A curated guide to the UK's must-visit spots, where every stop is worth the journey.</p>
-                <div className={styles.readMore}>Read More &rarr;</div>
+                <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
               </Link>
 
               <Link href="#" className={`${styles.card} ${styles.insightCard}`}>
@@ -140,7 +140,7 @@ export default function BlogPage() {
                 </div>
                 <h3 className={styles.cardTitle}>How to plan a smooth and stress-free road trip</h3>
                 <p className={styles.cardDesc}>A few simple steps can turn your trip into a seamless and enjoyable experience from start to finish.</p>
-                <div className={styles.readMore}>Read More &rarr;</div>
+                <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
               </Link>
 
               <Link href="#" className={`${styles.card} ${styles.insightCard}`}>
@@ -149,7 +149,7 @@ export default function BlogPage() {
                 </div>
                 <h3 className={styles.cardTitle}>How to book a car in minutes with Drifully</h3>
                 <p className={styles.cardDesc}>No long processes—just a fast, simple way to get the ride you need, when you need it.</p>
-                <div className={styles.readMore}>Read More &rarr;</div>
+                <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
               </Link>
 
               <Link href="#" className={`${styles.card} ${styles.insightCard}`}>
@@ -158,7 +158,7 @@ export default function BlogPage() {
                 </div>
                 <h3 className={styles.cardTitle}>Why professionals choose chauffeur services</h3>
                 <p className={styles.cardDesc}>From convenience to presentation, here's why it's the smarter way to move for business.</p>
-                <div className={styles.readMore}>Read More &rarr;</div>
+                <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
               </Link>
             </div>
           </section>
