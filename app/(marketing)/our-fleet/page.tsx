@@ -36,7 +36,7 @@ export default function OurFleetPage() {
           };
           types = [typeMap[activeCategory] || activeCategory.toLowerCase()];
         }
-        
+
         const data = await marketingService.getVehicles(types);
         setVehicles(data);
       } catch (err: any) {
@@ -53,7 +53,7 @@ export default function OurFleetPage() {
   return (
     <>
       <Navbar />
-      
+
       <main className={styles.main}>
         {/* Hero Section */}
         <section className={styles['fleet-hero']}>
@@ -65,7 +65,7 @@ export default function OurFleetPage() {
             <p className={`${styles['body-lg']} body-lg`}>
               From self-drives to chauffeur-led comfort, explore vehicles designed to move you effortlessly.
             </p>
-            
+
             <DownloadButtons variant="default" />
 
             {/* Continuous Carousel */}
@@ -73,8 +73,8 @@ export default function OurFleetPage() {
               <div className={styles['hero-carousel__track']}>
                 {/* Set 1 */}
                 <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/1st-img.png" alt="VW Bus" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                  <Image src="/images/2nd-img.jpg" alt="Interior" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
+                  <Image src="/images/1st-img.png" alt="VW Bus" width={250} height={180} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--taller']}`} />
+                  <Image src="/images/2nd-img.jpg" alt="Interior" width={250} height={100} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--shorter']}`} />
                 </div>
                 <div className={styles['hero-carousel__col']}>
                   <Image src="/images/3rd-img.png" alt="Tesla" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
@@ -88,14 +88,14 @@ export default function OurFleetPage() {
                   <Image src="/images/7th-img.png" alt="Charging" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
                 </div>
                 <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/8th-img.png" alt="BMW X6" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                  <Image src="/images/9th-img.png" alt="Red Honda" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
+                  <Image src="/images/8th-img.png" alt="BMW X6" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--shorter']}`} />
+                  <Image src="/images/9th-img.png" alt="Red Honda" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--taller']}`} />
                 </div>
 
                 {/* Set 2 (Duplicate for seamless loop) */}
                 <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/1st-img.png" alt="VW Bus" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                  <Image src="/images/2nd-img.jpg" alt="Interior" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
+                  <Image src="/images/1st-img.png" alt="VW Bus" width={250} height={180} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--taller']}`} />
+                  <Image src="/images/2nd-img.jpg" alt="Interior" width={250} height={100} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--shorter']}`} />
                 </div>
                 <div className={styles['hero-carousel__col']}>
                   <Image src="/images/3rd-img.png" alt="Tesla" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
@@ -109,8 +109,8 @@ export default function OurFleetPage() {
                   <Image src="/images/7th-img.png" alt="Charging" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
                 </div>
                 <div className={styles['hero-carousel__col']}>
-                  <Image src="/images/8th-img.png" alt="BMW X6" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
-                  <Image src="/images/9th-img.png" alt="Red Honda" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--small']}`} />
+                  <Image src="/images/8th-img.png" alt="BMW X6" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--shorter']}`} />
+                  <Image src="/images/9th-img.png" alt="Red Honda" width={250} height={140} className={`${styles['hero-carousel__img']} ${styles['hero-carousel__img--taller']}`} />
                 </div>
               </div>
             </div>
@@ -152,44 +152,44 @@ export default function OurFleetPage() {
                 vehicles.map(vehicle => (
                   <Link href={`/our-fleet/${vehicle.id}`} key={vehicle.id} className={styles['fleet-card-link']}>
                     <div className={styles['fleet-card']}>
-                    <div className={styles['fleet-card__img-wrapper']}>
-                      <Image 
-                        src={vehicle.image || '/images/placeholder-car.png'} 
-                        alt={vehicle.name} 
-                        fill 
-                        style={{ objectFit: 'cover' }} 
-                      />
-                    </div>
-                    <div className={styles['fleet-card__content']}>
-                      <div className={styles['fleet-card__meta']}>
-                        <span className={styles['fleet-card__location']}>
-                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
-                            <circle cx="12" cy="10" r="3" />
-                          </svg>
-                          {vehicle.location}
-                        </span>
-                        <span className={styles['fleet-card__price']}>
-                          ${typeof vehicle.price === 'number' ? vehicle.price.toLocaleString() : parseFloat(vehicle.price).toLocaleString()}
-                          <span className={styles['fleet-card__price-unit']}>/day</span>
-                        </span>
+                      <div className={styles['fleet-card__img-wrapper']}>
+                        <Image
+                          src={vehicle.image || '/images/placeholder-car.png'}
+                          alt={vehicle.name}
+                          fill
+                          style={{ objectFit: 'cover' }}
+                        />
                       </div>
-                      <h3 className={styles['fleet-card__title']}>{vehicle.name}</h3>
-                      <div className={styles['fleet-card__specs']}>
-                        <span>{vehicle.type}</span>
-                        <span>•</span>
-                        <span>{vehicle.transmission}</span>
-                        <span>•</span>
-                        <span>
-                          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: 'middle', marginRight: '4px' }}>
-                            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
-                            <circle cx="12" cy="7" r="4" />
-                          </svg>
-                          {vehicle.capacity}
-                        </span>
+                      <div className={styles['fleet-card__content']}>
+                        <div className={styles['fleet-card__meta']}>
+                          <span className={styles['fleet-card__location']}>
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                              <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0118 0z" />
+                              <circle cx="12" cy="10" r="3" />
+                            </svg>
+                            {vehicle.location}
+                          </span>
+                          <span className={styles['fleet-card__price']}>
+                            ${typeof vehicle.price === 'number' ? vehicle.price.toLocaleString() : parseFloat(vehicle.price).toLocaleString()}
+                            <span className={styles['fleet-card__price-unit']}>/day</span>
+                          </span>
+                        </div>
+                        <h3 className={styles['fleet-card__title']}>{vehicle.name}</h3>
+                        <div className={styles['fleet-card__specs']}>
+                          <span>{vehicle.type}</span>
+                          <span>•</span>
+                          <span>{vehicle.transmission}</span>
+                          <span>•</span>
+                          <span>
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" style={{ verticalAlign: 'middle', marginRight: '4px' }}>
+                              <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
+                              <circle cx="12" cy="7" r="4" />
+                            </svg>
+                            {vehicle.capacity}
+                          </span>
+                        </div>
                       </div>
                     </div>
-                  </div>
                   </Link>
                 ))
               )}

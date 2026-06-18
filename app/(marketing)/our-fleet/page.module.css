@@ -12,20 +12,26 @@
 }
 
 .badge {
-  margin-bottom: var(--space-4);
+  margin-bottom: var(--space-10);
+  padding: 8px 12px;
+  border-radius: 200px;
+  background-color: #F6F8FA;
+  color: #868C98;
 }
 
 .heading-1 {
-  font-size: 48px;
-  margin-bottom: var(--space-4);
+  font-size: 45px;
+  margin: var(--space-8) 0 var(--space-4);
   font-weight: 700;
+  letter-spacing: -1.3px;
 }
 
 .body-lg {
-  max-width: 600px;
+  max-width: 488px;
   margin-inline: auto;
   margin-bottom: var(--space-8);
-  color: var(--color-muted);
+  color: var(--color-primary);
+  letter-spacing: -0.5px;
 }
 
 /* Continuous Carousel */
@@ -39,12 +45,14 @@
   margin-right: -50vw;
   padding-block: var(--space-4);
   margin-bottom: var(--space-12);
+  margin-top: var(--space-12);
 }
 
 @keyframes slide {
   0% {
     transform: translateX(0);
   }
+
   100% {
     transform: translateX(-50%);
   }
@@ -79,12 +87,25 @@
   height: 140px;
 }
 
+.hero-carousel__img--taller {
+  height: 180px;
+}
+
+.hero-carousel__img--shorter {
+  height: 100px;
+}
+
 .hero-carousel__img--large {
-  height: 296px; /* 140 + 140 + 16 (gap) */
+  height: 296px;
+  /* 140 + 140 + 16 (gap) */
 }
 
 .hero-carousel:hover .hero-carousel__track {
   animation-play-state: paused;
+}
+
+.body-md {
+  color: #868C98;
 }
 
 /* Fleet Grid & Filters */
@@ -114,11 +135,11 @@
 }
 
 .filter-tab {
-  padding: 8px 20px;
+  padding: 4px 12px;
   border-radius: 20px;
-  border: 1px solid var(--color-border);
-  background: transparent;
-  color: var(--color-primary);
+  border: 1px solid #E2E4E9;
+  background: #F6F8FA;
+  color: var(--color-muted);
   cursor: pointer;
   font-weight: 500;
   transition: all 0.2s;
@@ -148,7 +169,7 @@
   background: #fcfcfc;
   border-radius: 16px;
   overflow: hidden;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   height: 100%;
   transition: transform 0.2s, box-shadow 0.2s;
 }
