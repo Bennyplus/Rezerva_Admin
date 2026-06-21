@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { marketingService } from "@/services/marketing-service";
 
 interface Testimonial {
@@ -105,6 +105,7 @@ const STATIC_REVIEWS: ReviewType[] = [
 export default function Reviews() {
   const [reviews, setReviews] = useState<ReviewType[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function fetchTestimonials() {
@@ -153,6 +154,65 @@ export default function Reviews() {
     fetchTestimonials();
   }, []);
 
+  // Auto-scroll on mobile
+  useEffect(() => {
+    let interval: NodeJS.Timeout;
+    let isInteracting = false;
+    
+    const container = scrollRef.current;
+
+    const startCarousel = () => {
+      if (window.innerWidth <= 768 && container) {
+        interval = setInterval(() => {
+          if (container && !isInteracting) {
+            const scrollAmount = container.clientWidth;
+            const maxScroll = container.scrollWidth - container.clientWidth;
+            
+            if (container.scrollLeft >= maxScroll - 10) {
+              container.scrollTo({ left: 0, behavior: 'smooth' });
+            } else {
+              container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
+          }
+        }, 3000);
+      }
+    };
+
+    const handleInteractionStart = () => {
+      isInteracting = true;
+    };
+
+    const handleInteractionEnd = () => {
+      isInteracting = false;
+    };
+
+    if (container) {
+      container.addEventListener('touchstart', handleInteractionStart, { passive: true });
+      container.addEventListener('touchend', handleInteractionEnd, { passive: true });
+      container.addEventListener('mouseenter', handleInteractionStart);
+      container.addEventListener('mouseleave', handleInteractionEnd);
+    }
+
+    startCarousel();
+
+    const handleResize = () => {
+      clearInterval(interval);
+      startCarousel();
+    };
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener("resize", handleResize);
+      if (container) {
+        container.removeEventListener('touchstart', handleInteractionStart);
+        container.removeEventListener('touchend', handleInteractionEnd);
+        container.removeEventListener('mouseenter', handleInteractionStart);
+        container.removeEventListener('mouseleave', handleInteractionEnd);
+      }
+    };
+  }, [isLoading]);
+
   // Use either the mapped reviews or empty array while loading
   const displayReviews = isLoading ? Array(8).fill(null) : reviews;
 
@@ -173,7 +233,7 @@ export default function Reviews() {
           </p>
         </header>
 
-        <div className="reviews__grid" role="list">
+        <div className="reviews__grid" role="list" ref={scrollRef} style={{ scrollBehavior: 'smooth' }}>
           {displayReviews.map((review, index) => {
             let className = "";
             if (index === 0 || index === 4 || index === 7) {

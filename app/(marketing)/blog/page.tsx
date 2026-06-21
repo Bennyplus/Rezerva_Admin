@@ -1,25 +1,49 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useState, useEffect } from "react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import styles from "./blog.module.css";
 
-
+const heroImages = [
+  "/images/blog-hero-image.jpg",
+  "/images/blog-hero/Property 1=Frame 1984079717.png",
+  "/images/blog-hero/Property 1=Frame 1984079718.png",
+  "/images/blog-hero/Property 1=Frame 1984079719.png",
+];
 
 export default function BlogPage() {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroImages.length);
+    }, 3000);
+    return () => clearInterval(timer);
+  }, []);
+
   return (
     <>
       <Navbar />
       <main>
         <section className={styles.heroContainer}>
           <div className={styles.hero}>
-            <Image
-              src="/images/blog-hero-image.jpg"
-              alt="Drifully blog hero"
-              fill
-              className={styles.heroImage}
-              priority
-            />
+            {heroImages.map((img, index) => (
+              <Image
+                key={img}
+                src={img}
+                alt="Drifully blog hero"
+                fill
+                className={styles.heroImage}
+                style={{
+                  opacity: currentSlide === index ? 1 : 0,
+                  transition: "opacity 1s ease-in-out",
+                }}
+                priority={index === 0}
+              />
+            ))}
             <div className={styles.heroOverlay} />
 
             <div className="container" style={{ position: 'relative', width: '100%' }}>
