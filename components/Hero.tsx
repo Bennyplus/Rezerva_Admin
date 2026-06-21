@@ -43,6 +43,7 @@ export default function Hero() {
                 width={580}
                 height={600}
                 priority
+                fetchPriority="high"
                 className="hero__img"
               />
 
