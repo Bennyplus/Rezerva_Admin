@@ -1,8 +1,8 @@
 import { Metadata } from 'next';
 
 export const metadata: Metadata = {
-  title: 'Contact Us | Drifully',
-  description: 'Questions, issues, or special requests? Reach out and we\'ll get back to you quickly.',
+  title: 'Contact Drifully | 24/7 Customer Support',
+  description: 'Need help with your car rental or chauffeur service? Reach out to the Drifully support team for quick assistance, booking inquiries, or special requests.',
 };
 
 export default function ContactLayout({
