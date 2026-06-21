@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link
+    href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,400;0,500;0,700;1,400;1,500;1,700&display=swap"
+    rel="stylesheet">
+  <title>Welcome to Drifully</title>
+  <style>
+    /* Reset & Base Styles */
+    body {
+      margin: 0;
+      padding: 0;
+      -webkit-text-size-adjust: 100%;
+      background-color: #FFFFFF;
+    }
+
+    table {
+      border-spacing: 0;
+      border-collapse: collapse;
+    }
+
+    td {
+      padding: 0;
+    }
+
+    img {
+      border: 0;
+      line-height: 100%;
+      outline: none;
+      text-decoration: none;
+      display: block;
+    }
+
+    /* Responsive overrides */
+    @media screen and (max-width: 600px) {
+      .footer-col {
+        display: block !important;
+        width: 100% !important;
+        margin-bottom: 20px !important;
+      }
+
+      .content-area {
+        padding: 30px 20px !important;
+      }
+    }
+  </style>
+</head>
+
+<body
+  style="margin: 0; padding: 0; font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #F8F9FA; -webkit-font-smoothing: antialiased;">
+  <center style="width: 100%; background-color: #F8F9FA; padding: 40px 0;">
+    <div style="max-width: 834px; margin: 0 auto;">
+      <!-- Main Email Container -->
+      <table width="100%" align="center"
+        style="max-width: 834px; background-color: #FFFFFF; border: 1px solid #EAEAEA; border-radius: 8px; overflow: hidden; margin: 0 auto; text-align: left;">
+
+        <!-- Header Section -->
+        <tr>
+          <td align="center" style="padding: 40px 20px 0px;">
+            <!-- Logo Fallback / Image -->
+            <table style="margin: 0 auto;">
+              <tr>
+                <td style="text-align: center;">
+                  <a href="https://drifully.com" style="text-decoration: none; display: inline-block;">
+                    <img src="{{ logo_url }}" alt="DRIFULLY" width="160"
+                      style="display: block; margin: 0 auto; outline: none; border: none;" />
+                  </a>
+                </td>
+              </tr>
+            </table>
+
+            <h1
+              style="margin: 30px 0 10px; font-size: 36px; font-weight: 600; color: #0A0D14; line-height: 125%; letter-spacing: -1px;">
+              Welcome to Drifully</h1>
+            <p style="margin: 0; font-size: 14px; color: #888888;">Thank you for signing up with Drifully</p>
+          </td>
+        </tr>
+
+        <!-- Content Section -->
+        <tr>
+          <td class="content-area" style="padding: 40px 40px 20px; font-size: 14px; color: #0A0D14; line-height: 1.6;">
+            <p style="margin: 0 0 15px;">Hello <strong>{{ name }}</strong>,</p>
+            <p style="margin: 0 0 15px;">Welcome to Drifully.</p>
+            <p style="margin: 0 0 15px;">Your next journey just got easier. Whether you're booking a self-drive ride,
+              choosing a professional chauffeur, or arranging an airport pickup, Drifully is designed to get you where
+              you need to be&mdash;comfortably, conveniently, and on your terms.</p>
+            <p style="margin: 0 0 10px;">With Drifully, you can:</p>
+
+            <ul style="margin: 0 0 20px; padding-left: 20px;">
+              <li style="margin-bottom: 8px;">Rent premium vehicles in minutes</li>
+              <li style="margin-bottom: 8px;">Choose between self-drive and chauffeur services</li>
+              <li style="margin-bottom: 8px;">Schedule reliable airport pickups and drop-offs</li>
+              <li style="margin-bottom: 8px;">Enjoy clean, fully fueled, and professionally maintained cars</li>
+            </ul>
+
+            <p style="margin: 0 0 15px;">Your perfect ride is only a few taps away.</p>
+            <p style="margin: 0 0 15px;">Download the app, complete your profile, and start exploring a better way to
+              move.</p>
+            <p style="margin: 0 0 25px;">We look forward to being part of your journey.</p>
+
+            <p style="margin: 0 0 5px;">Warm regards,</p>
+            <p style="margin: 0;">The Drifully Team</p>
+          </td>
+        </tr>
+
+        <!-- Footer Section -->
+        <tr>
+          <td
+            style="padding: 0; background-color: #FFFFFF; border-top: 1px  solid #EAEAEA; position: relative; overflow: hidden; z-index: 1;">
+            <!-- Text Watermark Background -->
+            <div
+              style="position: absolute; bottom: 30px; left: 0; right: 0; text-align: center; font-size: 167.11px; font-weight: 900; color: #F6F8FA; z-index: -1; pointer-events: none; letter-spacing: 0.45px; font-style: italic; line-height: 1;">
+              DRIFULLY
+            </div>
+
+            <div style="position: relative; z-index: 2;">
+              <!-- Main Footer Grid -->
+              <table width="100%" cellpadding="0" cellspacing="0"
+                style="padding: 60px 40px; margin: 40px 40px 50px 40px;">
+                <tr>
+                  <!-- Left: Brand & Tagline -->
+                  <td class="footer-col" width="50%" valign="top" style="padding-right: 30px;">
+                    <div
+                      style="font-size: 24px; font-weight: 800; font-style: italic; color: #111111; margin-bottom: 20px;">
+                      DRIFULLY</div>
+                    <p
+                      style="margin: 0 0 24px; font-size: 14px; font-style: italic; color: #0A0D14; line-height: 1.25; letter-spacing: -0.8px;">
+                      Wherever you're going, start with Drifully.<br />
+                      Download the app and take control of your next journey.
+                    </p>
+                    <!-- App Buttons -->
+                    <table border="0" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="padding-right: 12px;">
+                          <a href="https://play.google.com/store/apps/details?id=com.drifully"
+                            style="display: inline-block; background-color: #111111; color: #ffffff; text-decoration: none; border-radius: 6px; padding: 6px 12px; font-family: 'DM Sans', sans-serif;">
+                            <table border="0" cellpadding="0" cellspacing="0" style="margin: 0;">
+                              <tr>
+                                <td valign="middle" style="padding-right: 8px;">
+                                  <img src="{{ play_store_icon_url }}" alt="Play Store" width="16" height="16"
+                                    style="display: block;" />
+                                </td>
+                                <td valign="middle">
+                                  <div style="font-size: 9px; line-height: 1; color: #EAEAEA;">Get it on</div>
+                                  <div style="font-size: 13px; font-weight: 500; line-height: 1.2;">Google Play</div>
+                                </td>
+                              </tr>
+                            </table>
+                          </a>
+                        </td>
+                        <td>
+                          <a href="https://apps.apple.com/app/drifully"
+                            style="display: inline-block; background-color: #ffffff; color: #111111; text-decoration: none; border-radius: 6px; border: 1px solid #EAEAEA; padding: 5px 11px; font-family: 'DM Sans', sans-serif;">
+                            <table border="0" cellpadding="0" cellspacing="0" style="margin: 0;">
+                              <tr>
+                                <td valign="middle" style="padding-right: 8px;">
+                                  <img src="{{ app_store_icon_url }}" alt="Apple" width="16" height="16"
+                                    style="display: block;" />
+                                </td>
+                                <td valign="middle">
+                                  <div style="font-size: 9px; line-height: 1; color: #555555;">Download on the</div>
+                                  <div style="font-size: 13px; font-weight: 500; line-height: 1.2;">App Store</div>
+                                </td>
+                              </tr>
+                            </table>
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+
+                  <!-- Right: Need Help -->
+                  <td class="footer-col" width="50%" valign="top" style="padding-left: 20px;">
+                    <h3 style="font-size: 16px; font-weight: 700; color: #111111; margin: 0 0 20px;">Need Help?</h3>
+                    <p style="margin: 0 0 16px; font-size: 14px; color: #555555; line-height: 1.4;">Our Customer support
+                      is always ready to help</p>
+                    <p style="margin: 0 0 16px; font-size: 14px; color: #555555;">Email: <a
+                        href="mailto:support@drifully.com"
+                        style="color: #555555; text-decoration: none;">support@drifully.com</a></p>
+                    <p style="margin: 0 0 0; font-size: 14px; color: #555555;">Phone: <a href="tel:+2342554734562"
+                        style="color: #555555; text-decoration: none;">+234 255 473 4562</a></p>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Bottom Bar (Full width within the container) -->
+              <table width="100%" height="91" cellpadding="0" cellspacing="0"
+                style="height: 91px; background-color: #F6F8FA;">
+                <tr>
+                  <td align="left" valign="middle" style="font-size: 14px; color: #111111; padding-left: 40px;">
+                    &copy; 2026 Drifully. All rights reserved.
+                  </td>
+                  <td align="right" valign="middle" style="padding-right: 40px;">
+                    <a href="#"
+                      style="text-decoration: none; color: #111111; font-size: 28px; margin-left: 15px; font-weight: bold;"><svg
+                        width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <mask id="mask0_2220_46168" style="mask-type:luminance" maskUnits="userSpaceOnUse" x="0" y="0"
+                          width="20" height="20">
+                          <path d="M0 0H20V20H0V0Z" fill="white" />
+                        </mask>
+                        <g mask="url(#mask0_2220_46168)">
+                          <path
+                            d="M15.75 0.937256H18.8171L12.1171 8.6144L20 19.063H13.8286L8.99143 12.7273L3.46286 19.063H0.392857L7.55857 10.8487L0 0.938684H6.32857L10.6943 6.72868L15.75 0.937256ZM14.6714 17.223H16.3714L5.4 2.68154H3.57714L14.6714 17.223Z"
+                            fill="#0A0D14" />
+                        </g>
+                      </svg>
+                    </a>
+                    <a href="#"
+                      style="text-decoration: none; color: #111111; font-size: 18px; margin-left: 15px; font-weight: bold;">
+                      <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M20 10C20 4.48 15.52 0 10 0C4.48 0 0 4.48 0 10C0 14.84 3.44 18.87 8 19.8V13H6V10H8V7.5C8 5.57 9.57 4 11.5 4H14V7H12C11.45 7 11 7.45 11 8V10H14V13H11V19.95C16.05 19.45 20 15.19 20 10Z"
+                          fill="#0A0D14" />
+                      </svg>
+                    </a>
+                    <a href="#"
+                      style="text-decoration: none; color: #111111; font-size: 18px; margin-left: 15px; font-weight: bold;"><svg
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                          d="M7.8 2H16.2C19.4 2 22 4.6 22 7.8V16.2C22 17.7383 21.3889 19.2135 20.3012 20.3012C19.2135 21.3889 17.7383 22 16.2 22H7.8C4.6 22 2 19.4 2 16.2V7.8C2 6.26174 2.61107 4.78649 3.69878 3.69878C4.78649 2.61107 6.26174 2 7.8 2ZM7.6 4C6.64522 4 5.72955 4.37928 5.05442 5.05442C4.37928 5.72955 4 6.64522 4 7.6V16.4C4 18.39 5.61 20 7.6 20H16.4C17.3548 20 18.2705 19.6207 18.9456 18.9456C19.6207 18.2705 20 17.3548 20 16.4V7.6C20 5.61 18.39 4 16.4 4H7.6ZM17.25 5.5C17.5815 5.5 17.8995 5.6317 18.1339 5.86612C18.3683 6.10054 18.5 6.41848 18.5 6.75C18.5 7.08152 18.3683 7.39946 18.1339 7.63388C17.8995 7.8683 17.5815 8 17.25 8C16.9185 8 16.6005 7.8683 16.3661 7.63388C16.1317 7.39946 16 7.08152 16 6.75C16 6.41848 16.1317 6.10054 16.3661 5.86612C16.6005 5.6317 16.9185 5.5 17.25 5.5ZM12 7C13.3261 7 14.5979 7.52678 15.5355 8.46447C16.4732 9.40215 17 10.6739 17 12C17 13.3261 16.4732 14.5979 15.5355 15.5355C14.5979 16.4732 13.3261 17 12 17C10.6739 17 9.40215 16.4732 8.46447 15.5355C7.52678 14.5979 7 13.3261 7 12C7 10.6739 7.52678 9.40215 8.46447 8.46447C9.40215 7.52678 10.6739 7 12 7ZM12 9C11.2044 9 10.4413 9.31607 9.87868 9.87868C9.31607 10.4413 9 11.2044 9 12C9 12.7956 9.31607 13.5587 9.87868 14.1213C10.4413 14.6839 11.2044 15 12 15C12.7956 15 13.5587 14.6839 14.1213 14.1213C14.6839 13.5587 15 12.7956 15 12C15 11.2044 14.6839 10.4413 14.1213 9.87868C13.5587 9.31607 12.7956 9 12 9Z"
+                          fill="#0A0D14" />
+                      </svg>
+                    </a>
+                  </td>
+                </tr>
+              </table>
+            </div>
+          </td>
+        </tr>
+
+      </table>
+    </div>
+  </center>
+</body>
+
+</html>
