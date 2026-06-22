@@ -188,7 +188,7 @@
 }
 
 .fleet-card__content {
-  padding: var(--space-5);
+  padding: var(--space-5) 0;
 }
 
 .fleet-card__meta {

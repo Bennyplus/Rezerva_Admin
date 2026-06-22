@@ -11,7 +11,7 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://drifully.com"),
+  metadataBase: new URL("https://drifullyrentals.com"),
   title: {
     default: "Drifully – Rent a Car, Your Way. Anytime, Anywhere.",
     template: "%s | Drifully",
