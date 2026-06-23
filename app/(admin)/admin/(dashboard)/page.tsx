@@ -131,7 +131,7 @@ export default function AdminDashboard() {
         toolbar: { show: false },
         fontFamily: "inherit",
       },
-      colors: ["#BEBFC2", "#1a1d1f", "#D8D9DC"],
+      colors: ["#BEBFC2", "#FFD6A8", "#1447E6"],
       labels: data.booking_trends.map(t => t.label),
       dataLabels: {
         enabled: true,
@@ -139,13 +139,22 @@ export default function AdminDashboard() {
           const idx = opts?.seriesIndex ?? 0;
           return pct(data.booking_trends[idx].count);
         },
-        style: { fontSize: "12px", fontWeight: "500", colors: ["#fff"] },
+        style: { fontSize: "10px", fontWeight: "500", colors: ["#F6F8FA"] },
+        background: {
+          enabled: true,
+          foreColor: "#0A0D14",
+          borderRadius: 4,
+          padding: 4,
+          borderWidth: 1,
+          borderColor: "#E2E4E9",
+          dropShadow: { enabled: false },
+        },
         dropShadow: { enabled: false },
       },
       plotOptions: {
         pie: {
           donut: {
-            size: "62%",
+            size: "58%",
           },
         },
       },
