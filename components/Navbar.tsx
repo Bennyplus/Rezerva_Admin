@@ -37,9 +37,9 @@ export default function Navbar() {
     <nav className="navbar" aria-label="Main navigation">
       <div className="navbar__inner">
         {/* Logo */}
-        <Link 
-          href="/" 
-          className={`navbar__logo-link ${isOpen ? "navbar__logo-link--hidden" : ""}`} 
+        <Link
+          href="/"
+          className={`navbar__logo-link ${isOpen ? "navbar__logo-link--hidden" : ""}`}
           aria-label="Drifully home"
         >
           <Image
@@ -105,13 +105,13 @@ export default function Navbar() {
           </ul>
 
           {/* Mobile CTA */}
-          <Link href="/download" className="btn btn-primary navbar__cta-mobile" onClick={() => setIsOpen(false)}>
+          <Link href="https://play.google.com/store/apps/details?id=com.drifully.app" className="btn btn-primary navbar__cta-mobile" onClick={() => setIsOpen(false)}>
             Download App
           </Link>
         </div>
 
         {/* Desktop CTA */}
-        <Link href="/download" className="btn btn-primary btn-sm navbar__cta-desktop">
+        <Link href="https://play.google.com/store/apps/details?id=com.drifully.app" className="btn btn-primary btn-sm navbar__cta-desktop">
           Download App
         </Link>
       </div>

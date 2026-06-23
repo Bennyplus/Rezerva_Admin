@@ -50,6 +50,9 @@ const transformVehicle = (apiVehicle: any): Vehicle => {
     gallery: apiVehicle.images?.map((img: any) => img.image) || [],
     features: apiVehicle.features || [],
     rules: [],
+    brand_id: apiVehicle.brand,
+    category_id: apiVehicle.category,
+    model: apiVehicle.model,
   };
 };
 
@@ -76,7 +79,7 @@ export const marketingService = {
 
   getVehicleById: async (id: string | number): Promise<Vehicle> => {
     const response = await publicApi.get('', {
-      params: { path: `api/v1/vehicles/fleet/${id}/` }
+      params: { path: `api/v1/vehicles/fleet/?vehicle_id=${id}` }
     });
     return transformVehicle(response.data);
   },
@@ -93,6 +96,26 @@ export const marketingService = {
       params: { path: 'api/v1/accounts/testimonials/' }
     });
     return response.data;
+  },
+
+  getBlogs: async (): Promise<any[]> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/blogs/all/' }
+    });
+    return response.data;
+  },
+
+  getBlogById: async (id: number | string): Promise<any> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/blogs/all/', blog_id: id }
+    });
+    const blogs = response.data;
+    if (Array.isArray(blogs)) {
+      return blogs.find((b: any) => String(b.id) === String(id)) || null;
+    } else if (blogs && typeof blogs === 'object') {
+      return blogs; // Single object returned by API
+    }
+    return null;
   },
   // getFleetVehicles: async (): Promise<any[]> => {
   //   const res = await publicApi.get('', {

@@ -63,6 +63,7 @@ export default function AdminDashboard() {
   const [_openMenu, setOpenMenu] = useState<number | null>(null);
   const [data, setData] = useState<DashboardApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [bookingPage, setBookingPage] = useState(0);
 
   useEffect(() => {
     // Fetch from your API endpoint here
@@ -131,7 +132,7 @@ export default function AdminDashboard() {
         toolbar: { show: false },
         fontFamily: "inherit",
       },
-      colors: ["#BEBFC2", "#1a1d1f", "#D8D9DC"],
+      colors: ["#BEBFC2", "#FFD6A8", "#1447E6"],
       labels: data.booking_trends.map(t => t.label),
       dataLabels: {
         enabled: true,
@@ -139,13 +140,22 @@ export default function AdminDashboard() {
           const idx = opts?.seriesIndex ?? 0;
           return pct(data.booking_trends[idx].count);
         },
-        style: { fontSize: "12px", fontWeight: "500", colors: ["#fff"] },
+        style: { fontSize: "10px", fontWeight: "500", colors: ["#F6F8FA"] },
+        background: {
+          enabled: true,
+          foreColor: "#0A0D14",
+          borderRadius: 4,
+          padding: 4,
+          borderWidth: 1,
+          borderColor: "#E2E4E9",
+          dropShadow: { enabled: false },
+        },
         dropShadow: { enabled: false },
       },
       plotOptions: {
         pie: {
           donut: {
-            size: "62%",
+            size: "58%",
           },
         },
       },
@@ -294,11 +304,10 @@ export default function AdminDashboard() {
                   <th>Vehicle</th>
                   <th>Booking Type</th>
                   <th>Booking Status</th>
-                  {/* <th className={styles.actionsCol} /> */}
                 </tr>
               </thead>
               <tbody>
-                {data.recent_bookings.map((booking, idx) => (
+                {data.recent_bookings.slice(bookingPage * 5, bookingPage * 5 + 5).map((booking, idx) => (
                   <tr key={idx}>
                     <td>{booking.booking_id}</td>
                     <td>
@@ -315,20 +324,25 @@ export default function AdminDashboard() {
                         {booking.status}
                       </span>
                     </td>
-                    {/* <td className={styles.actionsCol}>
-                      <button
-                        className={styles.moreBtn}
-                        aria-label="More actions"
-                        onClick={() => setOpenMenu(idx)}
-                      >
-                        <MoreIcon />
-                      </button>
-                    </td> */}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {data.recent_bookings.length > 5 && (
+            <div className={styles.bookingPagination}>
+              {Array.from({ length: Math.ceil(data.recent_bookings.length / 5) }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setBookingPage(i)}
+                  className={`${styles.pageIndicator} ${i === bookingPage ? styles.pageIndicatorActive : ""}`}
+                  aria-label={`Page ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 

@@ -5,7 +5,9 @@ import Image from "next/image";
 import Link from "next/link";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
+import Spinner from "@/components/admin/Spinner";
 import { marketingService } from "@/services/marketing-service";
+import { vehiclesService } from "@/services/vehicles-service";
 import { Vehicle } from "@/types/vehicle";
 import styles from "./page.module.css";
 
@@ -68,35 +70,58 @@ function FeatureIcon({ name }: { name: string }) {
 export default function VehicleDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const unwrappedParams = use(params);
   const [vehicle, setVehicle] = useState<Vehicle | null>(null);
+  const [brands, setBrands] = useState<any[]>([]);
+  const [categories, setCategories] = useState<any[]>([]);
+  const [featuresList, setFeaturesList] = useState<any[]>([]);
+  const [currency, setCurrency] = useState<string>("USD");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Read cached currency (set by fleet page via ipapi.co)
   useEffect(() => {
-    const fetchVehicle = async () => {
+    const cached = localStorage.getItem('drifully_currency');
+    if (cached) setCurrency(cached);
+  }, []);
+
+  useEffect(() => {
+    const fetchData = async () => {
       setLoading(true);
       setError(null);
       try {
-        const data = await marketingService.getVehicleById(unwrappedParams.id);
-        setVehicle(data);
+        const [vehicleData, optionsData] = await Promise.all([
+          marketingService.getVehicleById(unwrappedParams.id),
+          vehiclesService.getVehicleOptions()
+        ]);
+        setVehicle(vehicleData);
+        setBrands(optionsData.brands);
+        setCategories(optionsData.categories);
+        setFeaturesList(optionsData.features);
       } catch (err: any) {
         setError("Failed to load vehicle details.");
-        console.error("Error fetching vehicle:", err);
+        console.error("Error fetching data:", err);
       } finally {
         setLoading(false);
       }
     };
 
     if (unwrappedParams.id) {
-      fetchVehicle();
+      fetchData();
     }
   }, [unwrappedParams.id]);
+
+  const brandData = vehicle ? brands.find(b => b.id === vehicle.brand_id) : null;
+  const categoryData = vehicle ? categories.find(c => c.id === vehicle.category_id) : null;
+  const displayBrand = brandData ? brandData.name : vehicle?.name?.split(' ')[0];
+  const displayCategory = categoryData ? categoryData.name : vehicle?.category;
+  const displayName = vehicle ? (brandData ? `${displayBrand} ${vehicle.model}` : vehicle.name) : "";
+
 
   if (loading) {
     return (
       <>
         <Navbar />
         <main className="container" style={{ paddingTop: '120px', minHeight: '60vh', textAlign: 'center' }}>
-          <div className={styles.loading}>Loading vehicle details...</div>
+          <Spinner />
         </main>
         <Footer />
       </>
@@ -160,7 +185,7 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
             {/* Left Column (Info) */}
             <div>
               <div className={styles.header}>
-                <h1 className={`heading-1 ${styles.title}`}>{vehicle.name}</h1>
+                <h1 className={`heading-1 ${styles.title}`}>{displayName}</h1>
               </div>
 
               {/* Badges */}
@@ -170,8 +195,12 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
                   {vehicle.capacity} Seats
                 </span>
                 <span className={styles.badge}>
-                  <Image src="/images/our-fleet/jeep.svg" alt="Category" width={24} height={24} aria-hidden="true" />
-                  {vehicle.category}
+                  {categoryData?.icon ? (
+                    <Image src={categoryData.icon} alt={displayCategory} width={24} height={24} aria-hidden="true" />
+                  ) : (
+                    <Image src="/images/our-fleet/jeep.svg" alt="Category" width={24} height={24} aria-hidden="true" />
+                  )}
+                  {displayCategory}
                 </span>
                 <span className={styles.badge}>
                   {vehicle.transmission}
@@ -186,7 +215,9 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
               <div className={styles.mobilePriceRating}>
                 <div>
                   <span className={styles.mobilePriceAmount}>
-                    ${typeof vehicle.price === 'number' ? vehicle.price.toLocaleString() : vehicle.price}
+                    {new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(
+                      typeof vehicle.price === 'number' ? vehicle.price : parseFloat(vehicle.price)
+                    )}
                   </span>
                   <span className={styles.mobilePriceUnit}>/day</span>
                   <span className={styles.mobilePriceTaxes}>Before taxes</span>
@@ -202,34 +233,40 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
               <div className={styles.featuresSection}>
                 <h2 className={styles.featuresTitle}>Features</h2>
                 <div className={styles.featuresGrid}>
-                  {vehicle.features?.map(feature => (
-                    <div key={feature} className={styles.featureItem}>
-                      <div className={styles.featureIcon}>
-                        <FeatureIcon name={feature} />
-                      </div>
-                      <span>{feature}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Rules of the Road */}
-              <div className={styles.rulesSection}>
-                <h2 className={styles.rulesTitle}>Rules of the road</h2>
-                <div className={styles.rulesList}>
-                  {vehicle.rules?.map((rule, index) => {
-                    const parts = rule.split('.');
-                    const title = parts[0];
-                    const desc = parts.slice(1).join('.');
+                  {vehicle.features?.map(featureId => {
+                    const featureData = featuresList.find(f => f.id === featureId);
+                    const featureName = featureData ? featureData.name : `Feature ${featureId}`;
                     return (
-                      <div key={index}>
-                        <h3 className={styles.ruleItemTitle}>{index + 1}. {title}</h3>
-                        {desc && <p className={styles.ruleItemDesc}>{desc.trim()}</p>}
+                      <div key={featureId} className={styles.featureItem}>
+                        <div className={styles.featureIcon}>
+                          <FeatureIcon name={featureName} />
+                        </div>
+                        <span>{featureName}</span>
                       </div>
                     );
                   })}
                 </div>
               </div>
+
+              {/* Rules of the Road */}
+              {vehicle.rules && vehicle.rules.length > 0 && (
+                <div className={styles.rulesSection}>
+                  <h2 className={styles.rulesTitle}>Rules of the road</h2>
+                  <div className={styles.rulesList}>
+                    {vehicle.rules.map((rule, index) => {
+                      const parts = rule.split('.');
+                      const title = parts[0];
+                      const desc = parts.slice(1).join('.');
+                      return (
+                        <div key={index}>
+                          <h3 className={styles.ruleItemTitle}>{index + 1}. {title}</h3>
+                          {desc && <p className={styles.ruleItemDesc}>{desc.trim()}</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Right Column (Sticky Card - Hidden on Mobile) */}
@@ -242,7 +279,9 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
               <div className={styles.stickyCard}>
                 <div className={styles.priceRow}>
                   <span className={styles.priceAmount}>
-                    ${typeof vehicle.price === 'number' ? vehicle.price.toLocaleString() : vehicle.price}
+                    {new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(
+                      typeof vehicle.price === 'number' ? vehicle.price : parseFloat(vehicle.price)
+                    )}
                     <span className={styles.priceUnit}>/day</span>
                   </span>
                   <span className={styles.priceTaxes}>Before taxes</span>
