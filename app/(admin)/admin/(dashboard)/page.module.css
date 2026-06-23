@@ -225,6 +225,32 @@
   background: #64748B;
 }
 
+/* ─── Booking Pagination ─── */
+.bookingPagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 16px 20px;
+  border-top: 1px solid var(--admin-card-border, #E2E4E9);
+}
+
+.pageIndicator {
+  height: 10px;
+  width: 10px;
+  border-radius: 999px;
+  border: none;
+  background: #D8D9DC;
+  cursor: pointer;
+  padding: 0;
+  transition: width 0.25s ease, background 0.2s ease;
+}
+
+.pageIndicatorActive {
+  width: 32px;
+  background: var(--color-primary, #FF3192);
+}
+
 /* ─── Kebab button ─── */
 .actionsCol {
   width: 40px;

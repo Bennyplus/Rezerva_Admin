@@ -63,6 +63,7 @@ export default function AdminDashboard() {
   const [_openMenu, setOpenMenu] = useState<number | null>(null);
   const [data, setData] = useState<DashboardApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [bookingPage, setBookingPage] = useState(0);
 
   useEffect(() => {
     // Fetch from your API endpoint here
@@ -303,11 +304,10 @@ export default function AdminDashboard() {
                   <th>Vehicle</th>
                   <th>Booking Type</th>
                   <th>Booking Status</th>
-                  {/* <th className={styles.actionsCol} /> */}
                 </tr>
               </thead>
               <tbody>
-                {data.recent_bookings.map((booking, idx) => (
+                {data.recent_bookings.slice(bookingPage * 5, bookingPage * 5 + 5).map((booking, idx) => (
                   <tr key={idx}>
                     <td>{booking.booking_id}</td>
                     <td>
@@ -324,20 +324,25 @@ export default function AdminDashboard() {
                         {booking.status}
                       </span>
                     </td>
-                    {/* <td className={styles.actionsCol}>
-                      <button
-                        className={styles.moreBtn}
-                        aria-label="More actions"
-                        onClick={() => setOpenMenu(idx)}
-                      >
-                        <MoreIcon />
-                      </button>
-                    </td> */}
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+
+          {/* Pagination */}
+          {data.recent_bookings.length > 5 && (
+            <div className={styles.bookingPagination}>
+              {Array.from({ length: Math.ceil(data.recent_bookings.length / 5) }).map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setBookingPage(i)}
+                  className={`${styles.pageIndicator} ${i === bookingPage ? styles.pageIndicatorActive : ""}`}
+                  aria-label={`Page ${i + 1}`}
+                />
+              ))}
+            </div>
+          )}
         </div>
       </div>
 
