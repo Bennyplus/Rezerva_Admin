@@ -73,8 +73,15 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
   const [brands, setBrands] = useState<any[]>([]);
   const [categories, setCategories] = useState<any[]>([]);
   const [featuresList, setFeaturesList] = useState<any[]>([]);
+  const [currency, setCurrency] = useState<string>("USD");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Read cached currency (set by fleet page via ipapi.co)
+  useEffect(() => {
+    const cached = localStorage.getItem('drifully_currency');
+    if (cached) setCurrency(cached);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -208,7 +215,9 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
               <div className={styles.mobilePriceRating}>
                 <div>
                   <span className={styles.mobilePriceAmount}>
-                    ${typeof vehicle.price === 'number' ? vehicle.price.toLocaleString() : vehicle.price}
+                    {new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(
+                      typeof vehicle.price === 'number' ? vehicle.price : parseFloat(vehicle.price)
+                    )}
                   </span>
                   <span className={styles.mobilePriceUnit}>/day</span>
                   <span className={styles.mobilePriceTaxes}>Before taxes</span>
@@ -270,7 +279,9 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
               <div className={styles.stickyCard}>
                 <div className={styles.priceRow}>
                   <span className={styles.priceAmount}>
-                    ${typeof vehicle.price === 'number' ? vehicle.price.toLocaleString() : vehicle.price}
+                    {new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(
+                      typeof vehicle.price === 'number' ? vehicle.price : parseFloat(vehicle.price)
+                    )}
                     <span className={styles.priceUnit}>/day</span>
                   </span>
                   <span className={styles.priceTaxes}>Before taxes</span>

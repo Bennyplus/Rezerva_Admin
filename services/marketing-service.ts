@@ -97,6 +97,26 @@ export const marketingService = {
     });
     return response.data;
   },
+
+  getBlogs: async (): Promise<any[]> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/blogs/all/' }
+    });
+    return response.data;
+  },
+
+  getBlogById: async (id: number | string): Promise<any> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/blogs/all/', blog_id: id }
+    });
+    const blogs = response.data;
+    if (Array.isArray(blogs)) {
+      return blogs.find((b: any) => String(b.id) === String(id)) || null;
+    } else if (blogs && typeof blogs === 'object') {
+      return blogs; // Single object returned by API
+    }
+    return null;
+  },
   // getFleetVehicles: async (): Promise<any[]> => {
   //   const res = await publicApi.get('', {
   //     params: { path: 'api/v1/vehicles/fleet/' }

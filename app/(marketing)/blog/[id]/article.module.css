@@ -253,3 +253,48 @@
     margin-bottom: 6px;
   }
 }
+
+.blogBody {
+  font-family: var(--font-body, "DM Sans", sans-serif);
+  font-size: 16px;
+  line-height: 1.8;
+  color: var(--color-primary);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+.blogBody h2 {
+  font-family: var(--font-heading, "DM Sans", sans-serif);
+  font-size: 32px;
+  margin-top: 48px;
+  margin-bottom: 24px;
+  letter-spacing: -0.5px;
+}
+
+.blogBody h3 {
+  font-family: var(--font-heading, "DM Sans", sans-serif);
+  font-size: 24px;
+  margin-top: 40px;
+  margin-bottom: 16px;
+  letter-spacing: -0.5px;
+}
+
+.blogBody p {
+  margin-bottom: 24px;
+  color: var(--color-muted);
+}
+
+.blogBody ul, .blogBody ol {
+  margin-bottom: 24px;
+  padding-left: 24px;
+  color: var(--color-muted);
+}
+
+.blogBody li {
+  margin-bottom: 8px;
+}
+
+.blogBody em {
+  font-style: italic;
+  color: #868C98;
+}

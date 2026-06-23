@@ -8,6 +8,7 @@ import Footer from "@/components/Footer";
 import DownloadButtons from "@/components/DownloadButtons";
 import Spinner from "@/components/admin/Spinner";
 import { marketingService } from "@/services/marketing-service";
+import { vehiclesService } from "@/services/vehicles-service";
 import { Vehicle } from "@/types/vehicle";
 import styles from "./page.module.css";
 
@@ -16,8 +17,25 @@ const CATEGORIES = ["All", "Jeep", "Hatchback", "Luxury", "SUVs", "Sedan", "Van"
 export default function OurFleetPage() {
   const [activeCategory, setActiveCategory] = useState("All");
   const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [brands, setBrands] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currency, setCurrency] = useState<string>("USD");
+
+  // Detect user's local currency via IP — cached in localStorage to avoid repeat calls
+  useEffect(() => {
+    const cached = localStorage.getItem('drifully_currency');
+    if (cached) { setCurrency(cached); return; }
+    fetch("https://ipapi.co/json/")
+      .then(r => r.json())
+      .then(d => {
+        if (d?.currency) {
+          setCurrency(d.currency);
+          localStorage.setItem('drifully_currency', d.currency);
+        }
+      })
+      .catch(() => {}); // silently fall back to USD
+  }, []);
 
   useEffect(() => {
     const fetchVehicles = async () => {
@@ -38,8 +56,12 @@ export default function OurFleetPage() {
           types = [typeMap[activeCategory] || activeCategory.toLowerCase()];
         }
 
-        const data = await marketingService.getVehicles(types);
+        const [data, optionsData] = await Promise.all([
+          marketingService.getVehicles(types),
+          vehiclesService.getBrandsAndCategories()
+        ]);
         setVehicles(data);
+        setBrands(optionsData.brands);
       } catch (err: any) {
         setError("Failed to load vehicles. Please try again later.");
         console.error("Error fetching vehicles:", err);
@@ -174,12 +196,19 @@ export default function OurFleetPage() {
                             {vehicle.location}
                           </span>
                           <span className={styles['fleet-card__price']}>
-                            ${typeof vehicle.price === 'number' ? vehicle.price.toLocaleString() : parseFloat(vehicle.price).toLocaleString()}
+                            {new Intl.NumberFormat(undefined, { style: 'currency', currency, maximumFractionDigits: 0 }).format(
+                              typeof vehicle.price === 'number' ? vehicle.price : parseFloat(vehicle.price)
+                            )}
                             <span className={styles['fleet-card__price-unit']}>/day</span>
                           </span>
                         </div>
                         <div className={styles['fleet-sitting']}>
-                          <h3 className={styles['fleet-card__title']}>{vehicle.name}</h3>
+                          <h3 className={styles['fleet-card__title']}>
+                            {(() => {
+                              const brand = brands.find(b => b.id === vehicle.brand_id);
+                              return brand ? `${brand.name} ${vehicle.model}` : vehicle.name;
+                            })()}
+                          </h3>
                           <span className='flex items-center gap-1' style={{ color: '#868C98' }}>
                             <Image src="/images/our-fleet/profile.svg" alt="capacity" width={14} height={14} style={{ marginTop: '6px' }} />
                             {vehicle.capacity}
