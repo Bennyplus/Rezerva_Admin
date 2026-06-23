@@ -1,6 +1,8 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
-import { color } from "jodit/esm/plugins/color/color";
+import { useEffect, useState } from "react";
 
 interface DownloadButtonsProps {
   variant?: "hero" | "cta" | "footer" | "default";
@@ -13,6 +15,34 @@ export default function DownloadButtons({
   playIconSrc = "/icons/google-play.svg",
   appIconSrc = "/icons/apple.svg"
 }: DownloadButtonsProps) {
+  const [os, setOs] = useState<"ios" | "android" | "desktop">("desktop");
+
+  const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.drifully.app";
+  const APP_STORE_URL = "https://apps.apple.com/app/idYOUR_APP_ID"; // Placeholder
+
+  useEffect(() => {
+    const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+    if (/android/i.test(userAgent)) {
+      setOs("android");
+    } else if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+      setOs("ios");
+    } else {
+      setOs("desktop");
+    }
+  }, []);
+
+  const handleStoreClick = (e: React.MouseEvent<HTMLAnchorElement>, targetStore: "play" | "app") => {
+    // If on mobile, route to the correct store regardless of which button was clicked
+    if (os === "android") {
+      e.preventDefault();
+      window.open(GOOGLE_PLAY_URL, "_blank");
+    } else if (os === "ios") {
+      e.preventDefault();
+      window.open(APP_STORE_URL, "_blank");
+    }
+    // If on desktop, let the default href behavior proceed (goes to targetStore)
+  };
+
   let containerClass = "download-buttons";
   let playClass = "btn btn-primary";
   let appClass = "btn";
@@ -45,24 +75,26 @@ export default function DownloadButtons({
   return (
     <div className={containerClass} style={variant === "default" ? { display: 'flex', gap: 'var(--space-4)', justifyContent: 'center' } : {}}>
       <Link
-        href="https://play.google.com/store"
+        href={GOOGLE_PLAY_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Get Drifully on Google Play"
         className={`${playClass} ${mobileClass}`.trim()}
         style={playStyle}
+        onClick={(e) => handleStoreClick(e, "play")}
       >
         <span>Get it on Google Play</span>
         <Image src={playIconSrc} alt="" width={18} height={18} />
       </Link>
 
       <Link
-        href="https://apps.apple.com"
+        href={APP_STORE_URL}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Download Drifully on the App Store"
         className={`${appClass} ${mobileClass}`.trim()}
         style={appStyle}
+        onClick={(e) => handleStoreClick(e, "app")}
       >
         <span>Download on App Store</span>
         <Image src={appIconSrc} alt="" width={18} height={18} />

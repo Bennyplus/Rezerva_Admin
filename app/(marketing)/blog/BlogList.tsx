@@ -26,11 +26,15 @@ export default function BlogList() {
     );
   }
 
-  const featuredBlogs = blogs.filter(b => b.is_featured);
-  const nonFeaturedBlogs = blogs.filter(b => !b.is_featured);
+  const gettingStartedBlog = blogs.find(b => String(b.id) === "1");
+  const otherBlogs = blogs.filter(b => String(b.id) !== "1");
 
-  const mainBlog = featuredBlogs[0];
-  const sideBlogs = featuredBlogs.slice(1, 3);
+  const featuredBlogs = otherBlogs.filter(b => b.is_featured);
+  const nonFeaturedBlogs = otherBlogs.filter(b => !b.is_featured);
+
+  // Force Getting Started blog to be the main hero blog, otherwise fallback to the first featured
+  const mainBlog = gettingStartedBlog || featuredBlogs[0];
+  const sideBlogs = gettingStartedBlog ? featuredBlogs.slice(0, 2) : featuredBlogs.slice(1, 3);
 
   return (
     <div className="container">
