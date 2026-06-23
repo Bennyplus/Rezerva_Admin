@@ -50,6 +50,9 @@ const transformVehicle = (apiVehicle: any): Vehicle => {
     gallery: apiVehicle.images?.map((img: any) => img.image) || [],
     features: apiVehicle.features || [],
     rules: [],
+    brand_id: apiVehicle.brand,
+    category_id: apiVehicle.category,
+    model: apiVehicle.model,
   };
 };
 
@@ -76,7 +79,7 @@ export const marketingService = {
 
   getVehicleById: async (id: string | number): Promise<Vehicle> => {
     const response = await publicApi.get('', {
-      params: { path: `api/v1/vehicles/fleet/${id}/` }
+      params: { path: `api/v1/vehicles/fleet/?vehicle_id=${id}` }
     });
     return transformVehicle(response.data);
   },

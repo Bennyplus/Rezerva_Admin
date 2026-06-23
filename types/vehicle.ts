@@ -12,8 +12,11 @@ export interface Vehicle {
   reviews: number;
   fuel: string;
   gallery: string[];
-  features: string[];
+  features: any[];
   rules: string[];
+  brand_id?: number | string;
+  category_id?: number | string;
+  model?: string;
 }
 
 export interface VehicleResponse {
