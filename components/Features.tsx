@@ -1,5 +1,6 @@
 import Image from "next/image";
 import styles from "./Features.module.css";
+import FeatureImageSlider from "./FeatureImageSlider";
 
 const FEATURES = [
   {
@@ -167,7 +168,7 @@ export default function Features() {
             </div>
             <p className={styles['feature-card__desc']}>{FEATURES[3].description}</p>
             <div className={styles['feature-card__image-container']}>
-              <Image src={FEATURES[3].image!} alt={FEATURES[3].title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: "cover" }} />
+              <FeatureImageSlider images={["/images/hourly-lot.jpg.jpeg", "/images/hourly-lot-2.jpg.jpeg"]} alt={FEATURES[3].title} fill sizes="(max-width: 768px) 100vw, 33vw" style={{ objectFit: "cover" }} />
             </div>
           </article>
 

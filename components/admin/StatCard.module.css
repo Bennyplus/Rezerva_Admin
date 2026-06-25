@@ -5,7 +5,7 @@
 .card {
   background: var(--admin-content-bg, #F6F8FA);
   border: 1px solid var(--admin-card-border, #E2E4E9);
-  border-radius: 14px;
+  border-radius: 10px;
   display: flex;
   flex-direction: column;
   gap: 0;
@@ -20,23 +20,24 @@
 
 .label {
   font-family: var(--font-body);
-  font-size: 13.5px;
+  font-size: 12px;
   font-weight: 400;
   color: var(--admin-section-label, #868C98);
-  padding: 14px 18px 10px;
+  padding: 4px 8px;
   letter-spacing: 0.01em;
 }
 
 .valueArea {
   background: var(--admin-card-bg, #ffffff);
   border-radius: 12px;
-  margin: 0 8px 8px;
+  margin: 0 4px 4px;
   padding: 12px;
+  position: relative;
 }
 
 .value {
   font-family: var(--font-heading);
-  font-size: 32px;
+  font-size: 24px;
   font-weight: 600;
   color: var(--color-text, #111111);
   letter-spacing: -0.02em;
@@ -48,14 +49,17 @@
   align-items: flex-end;
   justify-content: space-between;
   width: 100%;
+  padding: 10px 0;
 }
 
 .growth {
   font-size: 12px;
   letter-spacing: -0.3px;
   font-weight: 400;
-  margin-bottom: 4px;
   text-align: right;
+  position: absolute;
+  top: 6px;
+  right: 9px;
 }
 
 .positive {

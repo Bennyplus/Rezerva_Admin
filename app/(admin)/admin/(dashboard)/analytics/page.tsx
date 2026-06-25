@@ -7,12 +7,14 @@ import { REPORTS_DATA } from "@/data/admin-analytics";
 import Spinner from "@/components/admin/Spinner";
 import { analyticsService } from "@/services/analytics-services";
 import StatCard from "@/components/admin/StatCard";
+import { useCurrencyFormatter } from "@/hooks/useCurrencyFormatter";
 import styles from "./analytics.module.css";
 
 // Dynamically import ApexCharts to avoid SSR issues
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
 export default function AnalyticsPage() {
+  const formatCurrency = useCurrencyFormatter();
   const [showEmptyState, setShowEmptyState] = useState(false);
   const [bookingsTimeframe, setBookingsTimeframe] = useState<"Weekly" | "Monthly">("Weekly");
   const [analyticsData, setAnalyticsData] = useState<any>(null);
@@ -124,7 +126,7 @@ export default function AnalyticsPage() {
       tickAmount: 5,
       labels: {
         style: { colors: "#6f767e", fontSize: "12px" },
-        formatter: (val: number) => val >= 1000 ? `$${(val / 1000).toFixed(0)}k` : `$${val}`,
+        formatter: (val: number) => formatCurrency(val, { compact: true }),
       },
     },
   };
@@ -254,7 +256,7 @@ export default function AnalyticsPage() {
                 />
                 <StatCard
                   label="Revenue"
-                  value={`$${Number(analyticsData.revenue || 0).toLocaleString("en-US", { maximumFractionDigits: 0 })}`}
+                  value={formatCurrency(Number(analyticsData.revenue || 0))}
                   id="stat-revenue"
                   isPositive={true}
                 />

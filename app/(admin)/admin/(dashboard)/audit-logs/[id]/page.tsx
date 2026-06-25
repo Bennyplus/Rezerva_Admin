@@ -92,7 +92,7 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
           </button>
           <div className={styles.headerInfo}>
             <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span className={styles.actionTitle}>Action: {log.action}</span>
+              <span className={styles.actionTitle}>Action: {log.action.replace('_', ' ')}</span>
               <span className={`${styles.badge} ${statusClass(log.status)}`}>
                 <span className={styles.badgeDot}></span>
                 {displayStatus}
@@ -101,20 +101,20 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
             <div className={styles.timestamp}>Timestamp: On {log.timestamp || log.created_at || 'N/A'}</div>
           </div>
         </div>
-        <button 
+        <button
           className={styles.exportBtn}
           onClick={async () => {
             try {
-               const response = await auditLogsService.exportAuditLogs();
-               const url = window.URL.createObjectURL(new Blob([response.data]));
-               const link = document.createElement('a');
-               link.href = url;
-               link.setAttribute('download', `audit_log_${log.id}.xlsx`);
-               document.body.appendChild(link);
-               link.click();
-               document.body.removeChild(link);
-            } catch(e) {
-               console.error(e);
+              const response = await auditLogsService.exportAuditLogs();
+              const url = window.URL.createObjectURL(new Blob([response.data]));
+              const link = document.createElement('a');
+              link.href = url;
+              link.setAttribute('download', `audit_log_${log.id}.xlsx`);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            } catch (e) {
+              console.error(e);
             }
           }}
         >Export Log</button>
@@ -123,18 +123,18 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
       <div className={styles.contentGrid}>
         {/* Left Column */}
         <div className={styles.leftCol}>
-          
+
           {/* Action Performed By */}
           <div className={styles.section}>
             <h2 className={styles.sectionTitle}>Action Performed By</h2>
             <div className={styles.performerGrid}>
               {log.profile_picture ? (
-                <Image 
-                  src={log.profile_picture} 
-                  alt={log.user || 'User'} 
-                  width={64} 
-                  height={64} 
-                  className={styles.avatar} 
+                <Image
+                  src={log.profile_picture}
+                  alt={log.user || 'User'}
+                  width={64}
+                  height={64}
+                  className={styles.avatar}
                 />
               ) : (
                 <div style={{ width: 64, height: 64, borderRadius: '50%', background: '#ccc' }} className={styles.avatar} />
@@ -170,8 +170,8 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
                     <span className={styles.infoLabel}>Object ID</span>
                     <div className={styles.copyable}>
                       <span className={styles.infoValue}>{log.object_id}</span>
-                      <button 
-                        className={styles.copyBtn} 
+                      <button
+                        className={styles.copyBtn}
                         aria-label="Copy object ID"
                         onClick={() => navigator.clipboard.writeText(log.object_id)}
                       >
@@ -257,8 +257,8 @@ export default function AuditLogDetails({ params }: AuditLogDetailsProps) {
             <div className={styles.networkCard}>
               <div className={styles.networkLabel}>Metadata</div>
               <div className={styles.networkValue} style={{ fontSize: 12, wordBreak: 'break-all' }}>
-                {typeof log.metadata === 'string' 
-                  ? log.metadata 
+                {typeof log.metadata === 'string'
+                  ? log.metadata
                   : JSON.stringify(log.metadata, null, 2)}
               </div>
             </div>

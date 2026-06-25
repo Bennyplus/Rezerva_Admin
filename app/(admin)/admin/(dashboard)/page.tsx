@@ -6,6 +6,7 @@ import type { ApexOptions } from "apexcharts";
 import StatCard from "@/components/admin/StatCard";
 import Spinner from "@/components/admin/Spinner";
 import { dashboardService } from "@/services/dashboard-service";
+import { useCurrencyFormatter } from "@/hooks/useCurrencyFormatter";
 import styles from "./page.module.css";
 
 // Dynamically import ApexCharts to avoid SSR issues
@@ -60,6 +61,7 @@ function statusClass(status_code: string): string {
 }
 
 export default function AdminDashboard() {
+  const formatCurrency = useCurrencyFormatter();
   const [_openMenu, setOpenMenu] = useState<number | null>(null);
   const [data, setData] = useState<DashboardApiResponse | null>(null);
   const [loading, setLoading] = useState(true);
@@ -113,13 +115,12 @@ export default function AdminDashboard() {
     },
     yaxis: {
       min: 0,
-      tickAmount: 4,
       labels: {
         style: { colors: "#868C98", fontSize: "12px" },
-        formatter: (val: number) => `$${val >= 1000 ? (val / 1000).toFixed(0) + 'K' : val}`,
+        formatter: (val: number) => formatCurrency(val, { compact: true }),
       },
     },
-  }), [data]);
+  }), [data, formatCurrency]);
 
   const trendsChartOptions: ApexOptions = useMemo(() => {
     if (!data) return {};
@@ -197,14 +198,14 @@ export default function AdminDashboard() {
     {
       id: "total_revenue",
       label: "Total Revenue",
-      value: `$${data.summary.total_revenue.value.toLocaleString()}`,
+      value: formatCurrency(data.summary.total_revenue.value),
       growth: data.summary.total_revenue.change_label,
       isPositive: data.summary.total_revenue.change_label?.includes('+')
     },
     {
       id: "total_payouts",
       label: "Total Payouts",
-      value: `$${data.summary.total_payouts.value.toLocaleString()}`,
+      value: formatCurrency(data.summary.total_payouts.value),
       growth: data.summary.total_payouts.change_label,
       isPositive: data.summary.total_payouts.change_label?.includes('+')
     },

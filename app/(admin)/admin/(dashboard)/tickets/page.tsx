@@ -11,12 +11,14 @@ import AssignTicketModal from "@/components/admin/AssignTicketModal";
 import ResolveTicketModal from "@/components/admin/ResolveTicketModal";
 import EscalateTicketModal from "@/components/admin/EscalateTicketModal";
 import { ticketsService } from "@/services/tickets-service";
+import TicketsFilterDropdown from "@/components/admin/tickets/TicketsFilterDropdown";
 import styles from "./tickets.module.css";
 
 export default function TicketsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"All" | "Critical">("All");
+  const [activeFilters, setActiveFilters] = useState<{ status: string[] }>({ status: [] });
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [assignModalTicketId, setAssignModalTicketId] = useState<string | null>(null);
@@ -61,7 +63,10 @@ export default function TicketsPage() {
       t.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTab = activeTab === "Critical" ? t.priority === "High" : true;
-    return matchesSearch && matchesTab;
+    const matchesStatus = activeFilters.status && activeFilters.status.length > 0 
+      ? activeFilters.status.includes(t.status) 
+      : true;
+    return matchesSearch && matchesTab && matchesStatus;
   });
 
   // Derived stat counts from live data
@@ -170,7 +175,12 @@ export default function TicketsPage() {
 
       {/* ─── Toolbar ─── */}
       <div className={styles.toolbar}>
-        <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideSort />
+        <FilterBar 
+          searchValue={searchQuery} 
+          onSearchChange={setSearchQuery} 
+          hideSort 
+          filterDropdown={<TicketsFilterDropdown onApply={setActiveFilters} />}
+        />
         <button className={styles.toolBtn} id="tickets-export" style={{ marginLeft: "auto" }} onClick={handleExportTickets}>Export</button>
       </div>
 
