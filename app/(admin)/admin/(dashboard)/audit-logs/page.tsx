@@ -5,6 +5,8 @@ import Link from "next/link";
 import Image from "next/image";
 import Pagination from "@/components/admin/Pagination";
 import Spinner from "@/components/admin/Spinner";
+import FilterBar from "@/components/admin/FilterBar";
+import AuditLogsFilterDropdown from "@/components/admin/audit-logs/AuditLogsFilterDropdown";
 import { auditLogsService } from "@/services/audit-logs-service";
 import styles from "./audit-logs.module.css";
 
@@ -20,9 +22,9 @@ export default function AuditLogsPage() {
 
   // Search / filter state
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterCategory, setFilterCategory] = useState("");
-  const [filterAction, setFilterAction] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
+  const [filterCategories, setFilterCategories] = useState<string[]>([]);
+  const [filterActions, setFilterActions] = useState<string[]>([]);
+  const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -78,19 +80,23 @@ export default function AuditLogsPage() {
         (log.action || "").toLowerCase().includes(q) ||
         normalizeStatus(log.status).toLowerCase().includes(q);
 
-      const matchesCategory = !filterCategory || log.category === filterCategory;
-      const matchesAction = !filterAction || log.action === filterAction;
-      const matchesStatus = !filterStatus || normalizeStatus(log.status) === filterStatus;
+      const matchesCategory = filterCategories.length === 0 || filterCategories.includes(log.category);
+      const matchesAction = filterActions.length === 0 || filterActions.includes(log.action);
+      const matchesStatus = filterStatuses.length === 0 || filterStatuses.includes(normalizeStatus(log.status));
 
       return matchesSearch && matchesCategory && matchesAction && matchesStatus;
     });
-  }, [allLogs, searchQuery, filterCategory, filterAction, filterStatus]);
+  }, [allLogs, searchQuery, filterCategories, filterActions, filterStatuses]);
 
   // Reset to page 1 whenever filters change
   const handleSearch = (v: string) => { setSearchQuery(v); setCurrentPage(1); };
-  const handleCategory = (v: string) => { setFilterCategory(v); setCurrentPage(1); };
-  const handleAction = (v: string) => { setFilterAction(v); setCurrentPage(1); };
-  const handleStatus = (v: string) => { setFilterStatus(v); setCurrentPage(1); };
+
+  const handleApplyFilters = (filters: { categories: string[], actions: string[], statuses: string[] }) => {
+    setFilterCategories(filters.categories);
+    setFilterActions(filters.actions);
+    setFilterStatuses(filters.statuses);
+    setCurrentPage(1);
+  };
 
   // Client-side pagination
   const totalPages = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE));
@@ -137,61 +143,19 @@ export default function AuditLogsPage() {
       {/* Header row: search/filters left, export right */}
       <div className={styles.header}>
         <div className={styles.headerLeft}>
-          {/* Search input */}
-          <div className={styles.searchWrap}>
-            <span className={styles.searchIcon}>
-              <SearchIcon />
-            </span>
-            <input
-              id="audit-search"
-              type="text"
-              className={styles.searchInput}
-              placeholder="Search user, action, category…"
-              value={searchQuery}
-              onChange={(e) => handleSearch(e.target.value)}
-            />
-          </div>
-
-          {/* Category filter */}
-          <select
-            id="audit-filter-category"
-            className={styles.filterSelect}
-            value={filterCategory}
-            onChange={(e) => handleCategory(e.target.value)}
-          >
-            <option value="">All Categories</option>
-            {categories.map((c) => (
-              <option key={c} value={c}>{c}</option>
-            ))}
-          </select>
-
-          {/* Action filter */}
-          <select
-            id="audit-filter-action"
-            className={styles.filterSelect}
-            value={filterAction}
-            onChange={(e) => handleAction(e.target.value)}
-          >
-            <option value="">All Actions</option>
-            {actions.map((a) => (
-              <option key={a} value={a}>
-                {a.split("_").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}
-              </option>
-            ))}
-          </select>
-
-          {/* Status filter */}
-          <select
-            id="audit-filter-status"
-            className={styles.filterSelect}
-            value={filterStatus}
-            onChange={(e) => handleStatus(e.target.value)}
-          >
-            <option value="">All Statuses</option>
-            {statuses.map((s) => (
-              <option key={s} value={s}>{s}</option>
-            ))}
-          </select>
+          <FilterBar
+            searchValue={searchQuery}
+            onSearchChange={handleSearch}
+            hideSort={true}
+            filterDropdown={
+              <AuditLogsFilterDropdown
+                categories={categories}
+                actions={actions}
+                statuses={statuses}
+                onApply={handleApplyFilters}
+              />
+            }
+          />
         </div>
 
         <div className={styles.headerRight}>
