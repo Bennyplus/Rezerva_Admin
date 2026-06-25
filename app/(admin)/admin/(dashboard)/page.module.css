@@ -5,7 +5,7 @@
 .page {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 15px;
 }
 
 /* ─── Stats Grid (4 cards) ─── */
@@ -20,7 +20,8 @@
   display: grid;
   grid-template-columns: 1fr 420px;
   gap: 16px;
-  align-items: start;
+  height: 315px;
+  align-items: stretch;
 }
 
 /* ─── Generic card shell ─── */
@@ -29,6 +30,8 @@
   border: 1px solid var(--admin-card-border, #E2E4E9);
   border-radius: var(--radius-md, 10px);
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .cardHeader {
@@ -50,6 +53,7 @@
 /* ─── Revenue Bar Chart card ─── */
 .revenueChart {
   padding: 0 8px 12px;
+  flex: 1;
 }
 
 /* ─── Booking Trends (Donut) card ─── */
@@ -58,6 +62,7 @@
   align-items: center;
   gap: 24px;
   padding: 0 20px 20px;
+  flex: 1;
 }
 
 .trendsChart {
@@ -119,7 +124,7 @@
   font-size: 16px;
   font-weight: 600;
   color: var(--color-text, #111111);
-  margin: 4px 0 12px;
+  margin: 0 0 10px;
   letter-spacing: -0.01em;
 }
 
