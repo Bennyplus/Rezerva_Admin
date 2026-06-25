@@ -11,20 +11,61 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://drifullyrentals.com"),
+  metadataBase: new URL("https://www.drifullyrentals.com"),
   title: {
     default: "Drifully – Rent a Car, Your Way. Anytime, Anywhere.",
     template: "%s | Drifully",
   },
   description:
     "Drive yourself or get a chauffeur. Book in seconds with Drifully — fast, flexible, and hassle-free car rentals for trips, events, and business.",
-  keywords: ["car rental", "chauffeur", "ride booking", "self-drive", "Drifully"],
+  keywords: [
+    // Core Nigeria keywords
+    "car rental in Nigeria",
+    "rent a car in Nigeria",
+    "rent car in Nigeria",
+    "car rental services in Nigeria",
+    "self drive rental in Nigeria",
+    "self drive car Nigeria",
+    "car hire Nigeria",
+    "vehicle rental Nigeria",
+    "affordable car rental Nigeria",
+    // Airport & travel
+    "airport car rental Nigeria",
+    "airport pickup car hire Nigeria",
+    "car rental for business travel Nigeria",
+    // Duration-based
+    "monthly car rental Nigeria",
+    "weekly car rental Nigeria",
+    "daily car rental Nigeria",
+    "long-term car rental Nigeria",
+    // Business & corporate
+    "corporate car hire Nigeria",
+    "car rental for road trips Nigeria",
+    "car rental without driver Nigeria",
+    "self-drive car hire Lagos",
+    // Diaspora & tourists (high priority)
+    "car rental Nigeria for tourists",
+    "rent a car in Nigeria from USA",
+    "Nigeria car rental for diaspora",
+    "car hire for visitors in Nigeria",
+    "international car rental Nigeria",
+    // Online booking intent (high priority)
+    "Nigeria car rental booking online",
+    "book car rental Nigeria online",
+    "car rental app Nigeria",
+    "best car rental app Nigeria",
+    // Brand
+    "Drifully",
+    "chauffeur",
+    "ride booking",
+    "self-drive",
+  ],
   authors: [{ name: "Drifully" }],
   creator: "Drifully",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://drifully.com",
+    url: "https://www.drifullyrentals.com",
     siteName: "Drifully",
     title: "Drifully – Rent a Car, Your Way. Anytime, Anywhere.",
     description:
@@ -45,7 +86,7 @@ export const metadata: Metadata = {
     images: ["/og-cover.png"],
   },
   alternates: {
-    canonical: "https://drifully.com",
+    canonical: "https://www.drifullyrentals.com",
   },
   robots: {
     index: true,
@@ -69,13 +110,18 @@ const jsonLd = {
   name: "Drifully",
   description:
     "Drive yourself or get a chauffeur. Book in seconds with Drifully — fast, flexible, and hassle-free car rentals.",
-  url: "https://drifully.com",
-  logo: "https://drifully.com/logo.svg",
-  sameAs: [],
+  url: "https://www.drifullyrentals.com",
+  logo: "https://www.drifullyrentals.com/logo.svg",
+  sameAs: [
+    "https://www.facebook.com/share/1YiruGKukG/?mibextid=wwXIfr",
+    "https://www.instagram.com/drifullycarrentals?utm_source=qr",
+    "https://x.com/drifullyrentals?s=11",
+    "https://www.linkedin.com/company/drifully-car-rentals"
+  ],
   offers: {
     "@type": "Offer",
     description: "Car rentals and chauffeur services",
-    priceCurrency: "USD",
+    priceCurrency: "NGN",
     availability: "https://schema.org/InStock",
   },
 };

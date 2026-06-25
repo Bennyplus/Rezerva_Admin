@@ -7,6 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       allow: "/",
       disallow: ["/api/", "/admin/"],
     },
-    sitemap: "https://drifully.com/sitemap.xml",
+    sitemap: "https://www.drifullyrentals.com/sitemap.xml",
   };
 }

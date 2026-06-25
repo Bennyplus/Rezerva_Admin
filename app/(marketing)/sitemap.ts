@@ -1,7 +1,7 @@
 import type { MetadataRoute } from "next";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = "https://drifully.com";
+  const baseUrl = "https://www.drifullyrentals.com";
 
   const routes = [
     { url: "/", priority: 1.0, changeFrequency: "weekly" as const },
