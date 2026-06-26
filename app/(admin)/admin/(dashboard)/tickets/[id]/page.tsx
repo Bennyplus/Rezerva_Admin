@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, use } from "react";
 import { useRouter } from "next/navigation";
 import { TicketStatus } from "@/data/admin-tickets";
 import AssignTicketModal from "@/components/admin/AssignTicketModal";
@@ -10,9 +10,10 @@ import Spinner from "@/components/admin/Spinner";
 import { ticketsService } from "@/services/tickets-service";
 import styles from "./ticket-detail.module.css";
 
-export default function TicketDetailPage({ params }: { params: { id: string } }) {
+export default function TicketDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const ticketId = params.id;
+  const unwrappedParams = use(params);
+  const ticketId = unwrappedParams.id;
 
   const [ticket, setTicket] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -25,7 +26,7 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
     const fetchTicket = async () => {
       setIsLoading(true);
       try {
-        const data = await ticketsService.getTicket(ticketId);
+        const data = await ticketsService.getTicketDetails(ticketId);
         setTicket(data);
       } catch (error) {
         console.error("Failed to fetch ticket:", error);
@@ -72,12 +73,12 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
 
   const statusBadgeClass = (status: string) => {
     switch (status) {
-      case "Pending":     return styles.badgeTodo;
+      case "Pending": return styles.badgeTodo;
       case "In Progress": return styles.badgeInProgress;
-      case "Resolved":    return styles.badgeResolved;
-      case "Escalated":   return styles.badgeEscalated;
-      case "Closed":      return styles.badgeClosed;
-      default:            return styles.badgeTodo;
+      case "Resolved": return styles.badgeResolved;
+      case "Escalated": return styles.badgeEscalated;
+      case "Closed": return styles.badgeClosed;
+      default: return styles.badgeTodo;
     }
   };
 
@@ -131,7 +132,7 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
         <div className={styles.ticketInfo}>
           <span className={styles.ticketIdLabel}>Ticket ID</span>
           <div className={styles.ticketIdRow}>
-            <h1 className={styles.ticketId}>{ticket.id}</h1>
+            <h1 className={styles.ticketId}>{ticket.ticketNumber}</h1>
             <button className={styles.copyBtn} aria-label="Copy ticket ID">
               <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
                 <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
@@ -142,13 +143,12 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
               <span className={styles.badgeDot} />
               {ticket.status}
             </span>
-            {/* Priority not available from API */}
-            <span className={styles.naLabel}>Priority: N/A</span>
+            <span className={styles.naLabel}>Priority: {ticket.priority}</span>
           </div>
           <span className={styles.ticketDate}>Created: {ticket.date}</span>
         </div>
         <div className={styles.assignedRow} style={{ marginTop: "auto" }}>
-          Assigned Admin:&nbsp;<span className={styles.assignedName}>{ticket.assignedAdmin}</span>
+          Assigned Admin:&nbsp;<span className={styles.assignedName}>{ticket.assigned_admin}</span>
         </div>
       </div>
 
@@ -240,10 +240,10 @@ export default function TicketDetailPage({ params }: { params: { id: string } })
           {/* Action Buttons */}
           <div className={styles.actionsGroup}>
             {[
-              { label: "Assign Ticket",   onClick: () => setIsAssignOpen(true) },
-              { label: "Resolve Ticket",  onClick: () => setIsResolveOpen(true) },
-              { label: "Close Ticket",    onClick: () => {} },
-              { label: "Escalate",        onClick: () => setIsEscalateOpen(true) },
+              { label: "Assign Ticket", onClick: () => setIsAssignOpen(true) },
+              { label: "Resolve Ticket", onClick: () => setIsResolveOpen(true) },
+              { label: "Close Ticket", onClick: () => { } },
+              { label: "Escalate", onClick: () => setIsEscalateOpen(true) },
             ].map((action) => (
               <button key={action.label} className={styles.actionBtn} onClick={action.onClick}>
                 {action.label}
