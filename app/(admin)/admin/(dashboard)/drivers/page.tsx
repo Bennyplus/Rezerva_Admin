@@ -25,7 +25,6 @@ export default function DriversPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [suspendTarget, setSuspendTarget] = useState<Driver | null>(null);
   const [openKebab, setOpenKebab] = useState<string | null>(null);
-  const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const fetchDrivers = async () => {
     setIsLoading(true);
@@ -93,51 +92,36 @@ export default function DriversPage() {
       if (data.passportPhoto) formData.append("passport_photo", data.passportPhoto);
 
       await driversService.addDriver(formData);
-      showToast(`${data.name} has been successfully added as a driver.`);
       fetchDrivers(); // refresh list
     } catch (error) {
       console.error("Failed to add driver:", error);
-      showToast("Failed to add driver. Please try again.");
+      // Re-throw so the modal's loading state resolves and it stays open on failure
+      throw error;
     }
   };
 
   /* ─── Suspend handler ─── */
-  const handleSuspendConfirm = () => {
+  const handleSuspendConfirm = async () => {
     if (!suspendTarget) return;
-    setDrivers((prev) =>
-      prev.map((d) =>
-        d.id === suspendTarget.id ? { ...d, status: "Suspended", availability: "Offline" } : d
-      )
-    );
-    showToast(`${suspendTarget.name} has been suspended.`);
-    setSuspendTarget(null);
-    // Also exit detail view if we're in one
-    setSelectedDriverId(null);
-  };
-
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 4000);
+    try {
+      await driversService.suspendDriver(suspendTarget.id);
+      // Optimistically update local state
+      setDrivers((prev) =>
+        prev.map((d) =>
+          d.id === suspendTarget.id ? { ...d, status: "Suspended", availability: "Offline" } : d
+        )
+      );
+      setSuspendTarget(null);
+      setSelectedDriverId(null);
+    } catch (error) {
+      console.error("Failed to suspend driver:", error);
+      // Re-throw so the modal stays open and loading state resets
+      throw error;
+    }
   };
 
   return (
     <div className={styles.page} onClick={() => setOpenKebab(null)}>
-      {/* Toast */}
-      {toastMessage && (
-        <div className={styles.toastWrapper}>
-          <div className={styles.toast}>
-            <CheckCircleIcon />
-            {toastMessage}
-            <button
-              className={styles.toastClose}
-              onClick={() => setToastMessage(null)}
-              aria-label="Close notification"
-            >
-              <XSmall />
-            </button>
-          </div>
-        </div>
-      )}
 
       {isLoading ? (
         <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "300px" }}>
@@ -166,7 +150,7 @@ export default function DriversPage() {
           {/* Toolbar */}
           <div className={styles.toolbar} id="drivers-toolbar">
             <div className={styles.toolbarLeft}>
-              <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} />
+              <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideFilter hideSort />
               {/* View toggles */}
               <div className={styles.viewToggle}>
                 <button
@@ -213,7 +197,7 @@ export default function DriversPage() {
                       <th>Email</th>
                       <th>Drivers License</th>
                       <th>Status</th>
-                      <th>Location</th>
+                      {/* <th>Location</th> */}
                       <th className={styles.actionsCol} />
                     </tr>
                   </thead>
@@ -250,7 +234,7 @@ export default function DriversPage() {
                         <td>
                           <DriverStatusBadge status={driver.status} />
                         </td>
-                        <td>{driver.location}</td>
+                        {/* <td>{driver.location}</td> */}
                         <td
                           className={styles.actionsCol}
                           onClick={(e) => e.stopPropagation()}
@@ -410,5 +394,3 @@ function GridIcon() { return <svg {...ip} strokeWidth={1.8}><rect x="3" y="3" wi
 function ListIcon() { return <svg {...ip} strokeWidth={1.8}><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>; }
 function MoreIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }
 function LocationIcon() { return <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>; }
-function CheckCircleIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>; }
-function XSmall() { return <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>; }

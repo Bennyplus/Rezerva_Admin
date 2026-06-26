@@ -1,11 +1,13 @@
 import { publicApi } from '@/lib/api-client';
 
 export const auditLogsService = {
-  getAuditLogs: async () => {
+  getAuditLogs: async (queryParams?: Record<string, any>) => {
     try {
       const response = await publicApi.get('', {
-        // Fallback to path without api/v1 if needed, but start with standard structure
-        params: { path: 'api/v1/admin/audit-logs/', }
+        params: { 
+          path: 'api/v1/admin/audit-logs/',
+          ...queryParams,
+        }
       });
       return response.data;
     } catch (error) {

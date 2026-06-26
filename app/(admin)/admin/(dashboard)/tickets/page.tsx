@@ -7,6 +7,7 @@ import { Ticket, TicketStatus } from "@/data/admin-tickets";
 import FilterBar from "@/components/admin/FilterBar";
 import StatCard from "@/components/admin/StatCard";
 import Spinner from "@/components/admin/Spinner";
+import Pagination from "@/components/admin/Pagination";
 import AssignTicketModal from "@/components/admin/AssignTicketModal";
 import ResolveTicketModal from "@/components/admin/ResolveTicketModal";
 import EscalateTicketModal from "@/components/admin/EscalateTicketModal";
@@ -29,26 +30,31 @@ export default function TicketsPage() {
   const [metrics, setMetrics] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch tickets on mount
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+
+  // Fetch tickets on mount or page change
   useEffect(() => {
     const fetchTickets = async () => {
       setIsLoading(true);
       try {
         const [data, metricsData] = await Promise.all([
-          ticketsService.getTickets(),
+          ticketsService.getTickets({ page: currentPage }),
           ticketsService.getMetrics().catch(() => null)
         ]);
-        setTickets(data || []);
+        setTickets(data?.results || []);
+        setTotalCount(data?.count || 0);
         if (metricsData) setMetrics(metricsData);
       } catch (error) {
         console.error("Failed to fetch tickets:", error);
         setTickets([]);
+        setTotalCount(0);
       } finally {
         setIsLoading(false);
       }
     };
     fetchTickets();
-  }, []);
+  }, [currentPage]);
 
   // Close menu on click outside
   useEffect(() => {
@@ -60,17 +66,17 @@ export default function TicketsPage() {
   const filtered = tickets.filter((t) => {
     const matchesSearch =
       t.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      t.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
       t.description.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesTab = activeTab === "Critical" ? t.priority === "High" : true;
-    const matchesStatus = activeFilters.status && activeFilters.status.length > 0 
-      ? activeFilters.status.includes(t.status) 
+    const matchesStatus = activeFilters.status && activeFilters.status.length > 0
+      ? activeFilters.status.includes(t.status)
       : true;
     return matchesSearch && matchesTab && matchesStatus;
   });
 
-  // Derived stat counts from live data
-  const totalTickets = metrics?.total_tickets ?? tickets.length;
+  // Derived stat counts from live data (fallback to metrics)
+  const totalTickets = metrics?.total_tickets ?? totalCount;
   const pendingCount = metrics?.total_pending ?? tickets.filter(t => t.status === "Pending").length;
   const resolvedCount = metrics?.total_resolved ?? tickets.filter(t => t.status === "Resolved").length;
   const escalatedCount = metrics?.total_escalated ?? tickets.filter(t => t.status === "Escalated").length;
@@ -79,7 +85,7 @@ export default function TicketsPage() {
   const handleAssign = async (ticketNumber: string, adminId: string) => {
     try {
       await ticketsService.assignTicket(ticketNumber, adminId);
-      setTickets(prev => prev.map(t => t.id === ticketNumber ? { ...t, status: "In Progress" as TicketStatus } : t));
+      setTickets(prev => prev.map(t => t.ticketNumber === ticketNumber ? { ...t, status: "In Progress" as TicketStatus } : t));
     } catch (error) {
       console.error("Failed to assign ticket:", error);
     } finally {
@@ -90,7 +96,7 @@ export default function TicketsPage() {
   const handleResolve = async (ticketNumber: string, notes: string) => {
     try {
       await ticketsService.resolveTicket(ticketNumber, notes);
-      setTickets(prev => prev.map(t => t.id === ticketNumber ? { ...t, status: "Resolved" as TicketStatus } : t));
+      setTickets(prev => prev.map(t => t.ticketNumber === ticketNumber ? { ...t, status: "Resolved" as TicketStatus } : t));
     } catch (error) {
       console.error("Failed to resolve ticket:", error);
     } finally {
@@ -98,11 +104,11 @@ export default function TicketsPage() {
     }
   };
 
-  const handleEscalate = async (ticketId: string, reason: string) => {
+  const handleEscalate = async (ticketNumber: string, reason: string) => {
     try {
-      await ticketsService.escalateTicket(ticketId, reason);
+      await ticketsService.escalateTicket(ticketNumber, reason);
       setTickets(prev => prev.map(t =>
-        t.id === ticketId ? { ...t, status: "Escalated" as any, priority: "High" } : t
+        t.ticketNumber === ticketNumber ? { ...t, status: "Escalated" as any, priority: "High" } : t
       ));
     } catch (error) {
       console.error("Failed to escalate ticket:", error);
@@ -114,7 +120,7 @@ export default function TicketsPage() {
   const handleClose = async (ticketNumber: string) => {
     try {
       await ticketsService.closeTicket(ticketNumber);
-      setTickets(prev => prev.map(t => t.id === ticketNumber ? { ...t, status: "Closed" as TicketStatus } : t));
+      setTickets(prev => prev.map(t => t.ticketNumber === ticketNumber ? { ...t, status: "Closed" as TicketStatus } : t));
     } catch (error) {
       console.error("Failed to close ticket:", error);
     }
@@ -175,10 +181,10 @@ export default function TicketsPage() {
 
       {/* ─── Toolbar ─── */}
       <div className={styles.toolbar}>
-        <FilterBar 
-          searchValue={searchQuery} 
-          onSearchChange={setSearchQuery} 
-          hideSort 
+        <FilterBar
+          searchValue={searchQuery}
+          onSearchChange={setSearchQuery}
+          hideSort
           filterDropdown={<TicketsFilterDropdown onApply={setActiveFilters} />}
         />
         <button className={styles.toolBtn} id="tickets-export" style={{ marginLeft: "auto" }} onClick={handleExportTickets}>Export</button>
@@ -247,7 +253,7 @@ export default function TicketsPage() {
                         }}
                       />
                     </td>
-                    <td>{ticket.id}</td>
+                    <td>{ticket.ticketNumber}</td>
                     <td>{ticket.customerName}</td>
                     <td style={{ maxWidth: 260 }}>
                       <span title={ticket.description}>
@@ -276,31 +282,31 @@ export default function TicketsPage() {
                           <div className={styles.dropdownMenu}>
                             <button
                               className={styles.menuItem}
-                              onClick={() => { router.push(`/admin/tickets/${ticket.id}`); setOpenMenuId(null); }}
+                              onClick={() => { router.push(`/admin/tickets/${ticket.ticketNumber}`); setOpenMenuId(null); }}
                             >
                               View Details
                             </button>
                             <button
                               className={styles.menuItem}
-                              onClick={() => { setAssignModalTicketId(ticket.id); setOpenMenuId(null); }}
+                              onClick={() => { setAssignModalTicketId(ticket.ticketNumber); setOpenMenuId(null); }}
                             >
                               Assign Ticket
                             </button>
                             <button
                               className={styles.menuItem}
-                              onClick={() => { setResolveModalTicketId(ticket.id); setOpenMenuId(null); }}
+                              onClick={() => { setResolveModalTicketId(ticket.ticketNumber); setOpenMenuId(null); }}
                             >
                               Resolve Ticket
                             </button>
                             <button
                               className={styles.menuItem}
-                              onClick={() => { handleClose(ticket.id); setOpenMenuId(null); }}
+                              onClick={() => { handleClose(ticket.ticketNumber); setOpenMenuId(null); }}
                             >
                               Close Ticket
                             </button>
                             <button
                               className={styles.menuItem}
-                              onClick={() => { setEscalateModalTicketId(ticket.id); setOpenMenuId(null); }}
+                              onClick={() => { setEscalateModalTicketId(ticket.ticketNumber); setOpenMenuId(null); }}
                             >
                               Escalate
                             </button>
@@ -313,6 +319,12 @@ export default function TicketsPage() {
               </tbody>
             </table>
           </div>
+          <Pagination
+            currentPage={currentPage}
+            totalPages={Math.max(1, Math.ceil(totalCount / 10))}
+            resultsPerPage={10}
+            onPageChange={setCurrentPage}
+          />
         </div>
       )}
 

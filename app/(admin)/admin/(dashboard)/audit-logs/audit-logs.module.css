@@ -1,8 +1,8 @@
-/* .page {
-  padding: 32px;
-  max-width: 1200px;
-  margin: 0 auto;
-} */
+.page {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
 
 .header {
   display: flex;
@@ -161,14 +161,17 @@
 /* Table Card */
 .tableCard {
   background: white;
-  /* border: 1px solid #e2e4e9; */
   border-radius: 12px;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
 }
 
 .tableWrap {
   width: 100%;
   overflow-x: auto;
+  flex: 1;
 }
 
 .table {

@@ -2,12 +2,12 @@
    ADMIN PAYMENTS — Scoped styles (CSS Module)
    ============================================================ */
 
-/* .page {
+.page {
   display: flex;
   flex-direction: column;
   gap: 20px;
   flex: 1;
-} */
+}
 
 /* ─── Stats Grid ─── */
 .statsGrid {

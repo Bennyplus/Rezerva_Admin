@@ -4,12 +4,16 @@ export const notificationsService = {
   /**
    * Fetches notifications for the admin dashboard.
    */
-  getNotifications: async (page = 1, search = "") => {
+  getNotifications: async (page = 1) => {
     try {
       const response = await publicApi.get("", {
-        params: { path: "api/v1/admin/notifications/", page, search },
+        params: { path: "api/v1/admin/notifications/", page },
       });
-      return Array.isArray(response.data) ? response.data : response.data?.results || [];
+      const data = response.data;
+      if (data && data.results !== undefined) {
+        return data;
+      }
+      return { results: Array.isArray(data) ? data : [], count: Array.isArray(data) ? data.length : 0 };
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
       throw error;

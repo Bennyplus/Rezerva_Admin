@@ -10,7 +10,7 @@ import AuditLogsFilterDropdown from "@/components/admin/audit-logs/AuditLogsFilt
 import { auditLogsService } from "@/services/audit-logs-service";
 import styles from "./audit-logs.module.css";
 
-const PAGE_SIZE = 12;
+const PAGE_SIZE = 10;
 
 export default function AuditLogsPage() {
   const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
@@ -18,6 +18,7 @@ export default function AuditLogsPage() {
   const [exportingFormat, setExportingFormat] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [allLogs, setAllLogs] = useState<any[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
 
   // Search / filter state
@@ -30,8 +31,13 @@ export default function AuditLogsPage() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const data = await auditLogsService.getAuditLogs();
+        const data = await auditLogsService.getAuditLogs({ page: currentPage });
         setAllLogs(Array.isArray(data) ? data : data.results || data.data || []);
+        if (data && data.count !== undefined) {
+          setTotalCount(data.count);
+        } else {
+          setTotalCount(Array.isArray(data) ? data.length : (data.results?.length || 0));
+        }
       } catch (error) {
         console.error("Failed to load audit logs:", error);
       } finally {
@@ -39,7 +45,7 @@ export default function AuditLogsPage() {
       }
     };
     fetchData();
-  }, []);
+  }, [currentPage]);
 
   // Normalize status capitalisation (API returns lowercase "success")
   const normalizeStatus = (s: string) =>
@@ -98,12 +104,9 @@ export default function AuditLogsPage() {
     setCurrentPage(1);
   };
 
-  // Client-side pagination
-  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / PAGE_SIZE));
-  const paginatedLogs = filteredLogs.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE
-  );
+  // Client-side pagination logic updated for server-side count
+  const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+  const paginatedLogs = filteredLogs;
 
   const handleDropdownToggle = (id: string) => {
     setOpenDropdownId(openDropdownId === id ? null : id);

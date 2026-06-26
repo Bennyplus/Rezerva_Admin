@@ -4,12 +4,22 @@ export const ticketsService = {
   /**
    * Fetches all support tickets
    */
-  getTickets: async (): Promise<any[]> => {
+  getTickets: async (queryParams?: { page?: number }): Promise<{ count: number; results: any[] }> => {
     const response = await publicApi.get('', {
-      params: { path: 'api/v1/admin/support-tickets/' }
+      params: { path: 'api/v1/admin/support-tickets/', ...queryParams }
     });
-    const raw = response?.data?.results || response?.data?.data || (Array.isArray(response?.data) ? response.data : []);
-    return raw.map((item: any) => mapTicket(item));
+    const data = response?.data;
+    if (data && data.count !== undefined) {
+      return {
+        count: data.count,
+        results: (data.results || []).map((item: any) => mapTicket(item))
+      };
+    }
+    const raw = data?.results || data?.data || (Array.isArray(data) ? data : []);
+    return {
+      count: raw.length,
+      results: raw.map((item: any) => mapTicket(item))
+    };
   },
 
   /**
@@ -99,6 +109,19 @@ export const ticketsService = {
     });
     return response.data || [];
   },
+  /**
+   * Retrieves a ticket's detailed information including all messages and attachments
+   * @param ticketNumber The ticket number to retrieve details for
+   * @returns A promise that resolves to the ticket details object
+   * admin/support-tickets/?ticket_number=TIC-AC-228
+   */
+  getTicketDetails: async (ticketNumber: string): Promise<any> => {
+    const response = await publicApi.get('', {
+      params: { path: 'api/v1/admin/support-tickets/', ticket_number: ticketNumber }
+    });
+    const item = Array.isArray(response?.data) ? response.data[0] : (response?.data?.results?.[0] ?? response?.data);
+    return item ? mapTicket(item) : null;
+  },
 
   /**
    * Exports tickets to XLSX
@@ -115,7 +138,7 @@ export const ticketsService = {
 
 function mapTicket(item: any) {
   return {
-    id: item?.ticket_number || String(item?.id) || 'N/A',
+    id: item?.id || 'N/A',
     ticketNumber: item?.ticket_number || 'N/A',
     customerName: item?.customer_name || 'N/A',
     description: item?.description || 'N/A',

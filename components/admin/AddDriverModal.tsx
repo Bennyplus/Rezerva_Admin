@@ -21,7 +21,7 @@ interface AddDriverModalProps {
     proofOfAddress: File | null;
     driversLicense: File | null;
     nin: File | null;
-  }) => void;
+  }) => Promise<void>;
 }
 
 const COUNTRY_CODES = [
@@ -110,6 +110,7 @@ function UploadZone({ label, id, file, onFile, accept = ".pdf,.jpg,.jpeg,.png,.w
           className={styles.hiddenInput}
           ref={ref}
           onChange={handleChange}
+          required
         />
       </div>
     </div>
@@ -127,6 +128,7 @@ export default function AddDriverModal({ isOpen, onClose, onSubmit }: AddDriverM
   const [driversLicense, setDriversLicense] = useState<UploadedFile | null>(null);
   const [nin, setNin] = useState<UploadedFile | null>(null);
   const [showCountryDropdown, setShowCountryDropdown] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   if (!isOpen) return null;
 
@@ -134,21 +136,30 @@ export default function AddDriverModal({ isOpen, onClose, onSubmit }: AddDriverM
     name.trim().length > 0 &&
     email.trim().length > 0 &&
     phone.trim().length > 0 &&
-    licenseNumber.trim().length > 0;
+    licenseNumber.trim().length > 0 &&
+    passportPhoto !== null &&
+    proofOfAddress !== null &&
+    driversLicense !== null &&
+    nin !== null;
 
-  const handleSubmit = () => {
-    if (!isValid) return;
-    onSubmit({
-      name,
-      email,
-      phone: `${countryCode} ${phone}`,
-      licenseNumber,
-      passportPhoto: passportPhoto?.file ?? null,
-      proofOfAddress: proofOfAddress?.file ?? null,
-      driversLicense: driversLicense?.file ?? null,
-      nin: nin?.file ?? null,
-    });
-    handleClose();
+  const handleSubmit = async () => {
+    if (!isValid || isSubmitting) return;
+    setIsSubmitting(true);
+    try {
+      await onSubmit({
+        name,
+        email,
+        phone: `${countryCode} ${phone}`,
+        licenseNumber,
+        passportPhoto: passportPhoto?.file ?? null,
+        proofOfAddress: proofOfAddress?.file ?? null,
+        driversLicense: driversLicense?.file ?? null,
+        nin: nin?.file ?? null,
+      });
+      handleClose();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleClose = () => {
@@ -245,6 +256,7 @@ export default function AddDriverModal({ isOpen, onClose, onSubmit }: AddDriverM
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 id="driver-phone-input"
+                required
               />
             </div>
           </div>
@@ -259,6 +271,7 @@ export default function AddDriverModal({ isOpen, onClose, onSubmit }: AddDriverM
               value={licenseNumber}
               onChange={(e) => setLicenseNumber(e.target.value)}
               id="driver-license-input"
+              required
             />
           </div>
 
@@ -269,25 +282,28 @@ export default function AddDriverModal({ isOpen, onClose, onSubmit }: AddDriverM
               id="upload-passport"
               file={passportPhoto}
               onFile={setPassportPhoto}
-              accept=".jpg,.jpeg,.png,.webp"
+              accept="image/*"
             />
             <UploadZone
               label="Upload Proof Of Address"
               id="upload-proof-address"
               file={proofOfAddress}
               onFile={setProofOfAddress}
+              accept="image/*"
             />
             <UploadZone
               label="Upload Drivers License"
               id="upload-drivers-license"
               file={driversLicense}
               onFile={setDriversLicense}
+              accept="image/*"
             />
             <UploadZone
               label="Upload NIN"
               id="upload-nin"
               file={nin}
               onFile={setNin}
+              accept="image/*"
             />
           </div>
         </div>
@@ -299,11 +315,19 @@ export default function AddDriverModal({ isOpen, onClose, onSubmit }: AddDriverM
           </button>
           <button
             className={styles.submitBtn}
-            disabled={!isValid}
+            disabled={!isValid || isSubmitting}
             onClick={handleSubmit}
             id="add-driver-submit"
+            aria-busy={isSubmitting}
           >
-            Add Driver
+            {isSubmitting ? (
+              <>
+                <ButtonSpinner />
+                Adding...
+              </>
+            ) : (
+              "Add Driver"
+            )}
           </button>
         </div>
       </div>
@@ -343,6 +367,24 @@ function XSmall() {
   return (
     <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round">
       <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
+
+function ButtonSpinner() {
+  return (
+    <svg
+      width={15}
+      height={15}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      style={{ animation: "spin 0.7s linear infinite", display: "inline-block", verticalAlign: "middle", marginRight: 6 }}
+    >
+      <style>{"@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }"}</style>
+      <path d="M12 2a10 10 0 0 1 10 10" />
     </svg>
   );
 }
