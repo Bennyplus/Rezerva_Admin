@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import Image from "next/image";
 import StatCard from "@/components/admin/StatCard";
 import Pagination from "@/components/admin/Pagination";
@@ -10,6 +10,8 @@ import Spinner from "@/components/admin/Spinner";
 import { notificationsService } from "@/services/notifications-services";
 import { NOTIFICATION_STATS, ADMIN_NOTIFICATIONS } from "@/data/admin-notifications";
 import FilterBar from "@/components/admin/FilterBar";
+import NotificationsFilterDropdown from "@/components/admin/notifications/NotificationsFilterDropdown";
+import NotificationsSortDropdown from "@/components/admin/notifications/NotificationsSortDropdown";
 import styles from "./notifications.module.css";
 
 export default function NotificationsPage() {
@@ -17,7 +19,8 @@ export default function NotificationsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [currentView, setCurrentView] = useState<"list" | "create">("list");
-  const [currentPage, setCurrentPage] = useState(2);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
   const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
   const [editingNotification, setEditingNotification] = useState<any>(null);
@@ -25,6 +28,11 @@ export default function NotificationsPage() {
 
   // data states
   const [notificationlist, setNotificationList] = useState<any[]>([]);
+
+  // filter/sort states
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeFilters, setActiveFilters] = useState<{ statuses: string[], channels: string[], recipients: string[] }>({ statuses: [], channels: [], recipients: [] });
+  const [sortOption, setSortOption] = useState<string>("date_desc");
 
   const toggleDropdown = (id: string) => {
     setActiveDropdown(activeDropdown === id ? null : id);
@@ -36,8 +44,9 @@ export default function NotificationsPage() {
 
     try {
       const data = await notificationsService.getNotifications(currentPage);
-      setNotificationList(data);
-      setIsEmpty(!Array.isArray(data) || data.length === 0);
+      setNotificationList(data.results || []);
+      setTotalCount(data.count || 0);
+      setIsEmpty(!data.results || data.results.length === 0);
     } catch (error) {
       console.error("Error fetching notifications:", error);
       setFetchError(error instanceof Error ? error.message : "Unable to load notifications.");
@@ -97,8 +106,44 @@ export default function NotificationsPage() {
   };
 
   useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery]);
+
+  useEffect(() => {
     fetchNotifications();
   }, [currentPage]);
+
+  // Client-side filtering & sorting for properties not supported by backend yet
+  const filteredAndSortedList = useMemo(() => {
+    let result = [...notificationlist];
+
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(notif => 
+        notif?.title?.toLowerCase().includes(q) ||
+        notif?.delivery_channel?.toLowerCase().includes(q)
+      );
+    }
+
+    if (activeFilters.statuses.length > 0) {
+      result = result.filter(notif => activeFilters.statuses.includes(notif?.status));
+    }
+
+    if (activeFilters.channels.length > 0) {
+      const channelsLower = activeFilters.channels.map(c => c.toLowerCase());
+      result = result.filter(notif => channelsLower.includes(notif?.delivery_channel?.toLowerCase()));
+    }
+
+    result.sort((a, b) => {
+      if (sortOption === "title_asc") return (a?.title || "").localeCompare(b?.title || "");
+      if (sortOption === "title_desc") return (b?.title || "").localeCompare(a?.title || "");
+      if (sortOption === "date_asc") return new Date(a?.created_at || 0).getTime() - new Date(b?.created_at || 0).getTime();
+      if (sortOption === "date_desc") return new Date(b?.created_at || 0).getTime() - new Date(a?.created_at || 0).getTime();
+      return 0;
+    });
+
+    return result;
+  }, [notificationlist, searchQuery, activeFilters, sortOption]);
 
   // Close dropdown on click outside
   useEffect(() => {
@@ -230,7 +275,12 @@ export default function NotificationsPage() {
         <>
           <div className={styles.toolbar}>
             <div className={styles.toolbarLeft}>
-              <FilterBar />
+              <FilterBar 
+                searchValue={searchQuery}
+                onSearchChange={setSearchQuery}
+                filterDropdown={<NotificationsFilterDropdown onApply={setActiveFilters} />}
+                sortDropdown={<NotificationsSortDropdown onSortSelect={setSortOption} />}
+              />
             </div>
             <div className={styles.toolbarRight}>
               <button
@@ -260,7 +310,7 @@ export default function NotificationsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {notificationlist.map((notif) => (
+                  {filteredAndSortedList.map((notif) => (
                     <tr key={notif?.id}>
                       <td className={styles.checkCol}>
                         <input type="checkbox" className={styles.checkbox} aria-label={`Select notification ${notif?.title}`} />
@@ -315,8 +365,8 @@ export default function NotificationsPage() {
 
             <Pagination
               currentPage={currentPage}
-              totalPages={16}
-              resultsPerPage={9}
+              totalPages={Math.ceil(totalCount / 10) || 1}
+              resultsPerPage={10}
               onPageChange={setCurrentPage}
               variant="table"
             />
