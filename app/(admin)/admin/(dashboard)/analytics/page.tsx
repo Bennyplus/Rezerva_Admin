@@ -182,7 +182,7 @@ export default function AnalyticsPage() {
                 </button>
                 {showExportMenu && (
                   <div style={{ position: "absolute", top: "100%", right: 0, marginTop: "8px", backgroundColor: "#fff", border: "1px solid #e2e4e9", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 10, display: "flex", flexDirection: "column", padding: "4px", minWidth: "140px" }}>
-                    <button 
+                    <button
                       onClick={() => { handleExportReport("analytics", "pdf"); setShowExportMenu(false); }}
                       style={{ padding: "8px 12px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRadius: "4px", fontSize: "14px", color: "#1a1d1f", width: "100%" }}
                       onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#f4f5f6"}
@@ -190,7 +190,7 @@ export default function AnalyticsPage() {
                     >
                       Export as PDF
                     </button>
-                    <button 
+                    <button
                       onClick={() => { handleExportReport("analytics", "csv"); setShowExportMenu(false); }}
                       style={{ padding: "8px 12px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRadius: "4px", fontSize: "14px", color: "#1a1d1f", width: "100%" }}
                       onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#f4f5f6"}
@@ -198,7 +198,7 @@ export default function AnalyticsPage() {
                     >
                       Export as CSV
                     </button>
-                    <button 
+                    <button
                       onClick={() => { handleExportReport("analytics", "xlsx"); setShowExportMenu(false); }}
                       style={{ padding: "8px 12px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRadius: "4px", fontSize: "14px", color: "#1a1d1f", width: "100%" }}
                       onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#f4f5f6"}
@@ -400,7 +400,7 @@ export default function AnalyticsPage() {
           </div>
 
           {/* Reports Section */}
-          <div className={styles.reportsSection}>
+          {/* <div className={styles.reportsSection}>
             <div className={styles.reportsHeader}>
               <h2 className={styles.reportsTitle}>Reports</h2>
               <p className={styles.reportsSubtitle}>Generate detailed reports and export data</p>
@@ -424,7 +424,7 @@ export default function AnalyticsPage() {
                 </div>
               ))}
             </div>
-          </div>
+          </div> */}
         </>
       )}
     </div>
