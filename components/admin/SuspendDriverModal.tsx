@@ -1,13 +1,13 @@
-/* ─── SuspendDriverModal ─── */
 "use client";
 
+import { useState } from "react";
 import styles from "./SuspendDriverModal.module.css";
 
 interface SuspendDriverModalProps {
   isOpen: boolean;
   driverName: string;
   onDismiss: () => void;
-  onConfirm: () => void;
+  onConfirm: () => Promise<void>;
 }
 
 export default function SuspendDriverModal({
@@ -16,7 +16,18 @@ export default function SuspendDriverModal({
   onDismiss,
   onConfirm,
 }: SuspendDriverModalProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   if (!isOpen) return null;
+
+  const handleConfirm = async () => {
+    setIsSubmitting(true);
+    try {
+      await onConfirm();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className={styles.overlay} onClick={onDismiss}>
@@ -47,10 +58,12 @@ export default function SuspendDriverModal({
           </button>
           <button
             className={styles.confirmBtn}
-            onClick={onConfirm}
+            onClick={handleConfirm}
+            disabled={isSubmitting}
+            aria-busy={isSubmitting}
             id="suspend-driver-confirm"
           >
-            Suspend Driver
+            {isSubmitting ? "Suspending..." : "Suspend Driver"}
           </button>
         </div>
       </div>

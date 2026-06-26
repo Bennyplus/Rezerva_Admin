@@ -13,7 +13,7 @@ export const driversService = {
       throw error;
     }
   },
-  
+
   addDriver: async (formData: FormData): Promise<any> => {
     try {
       const response = await publicApi.post('', formData, {
@@ -27,7 +27,20 @@ export const driversService = {
       console.error('Failed to add driver:', error);
       throw error;
     }
-  }
+  },
+
+  suspendDriver: async (id: string): Promise<any> => {
+    try {
+      const response = await publicApi.post('', {}, {
+        params: { path: `api/v1/admin/drivers/management/suspend/?driver_id=${id}/` },
+        successMessage: 'Driver has been suspended.',
+      } as any);
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to suspend driver ${id}:`, error);
+      throw error;
+    }
+  },
 };
 
 function mapDriver(item: any) {
