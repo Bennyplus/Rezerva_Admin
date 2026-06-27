@@ -2,8 +2,10 @@
 
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ADMIN_USER } from "@/data/admin-mock";
+import ConfirmActionModal from "./ConfirmActionModal";
+import { accountsService } from "@/services/accounts-service";
 import styles from "./AdminTopbar.module.css";
 
 /* ─── Map routes to page titles & subtitles ─── */
@@ -76,14 +78,16 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
 
 export default function AdminTopbar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   useEffect(() => {
     const userStr = localStorage.getItem("drifully_admin_user");
     if (userStr) {
       try {
         setCurrentUser(JSON.parse(userStr));
-      } catch (e) {}
+      } catch (e) { }
     }
   }, []);
 
@@ -105,6 +109,17 @@ export default function AdminTopbar() {
   const name = currentUser?.full_name || ADMIN_USER.name;
   const profilePic = currentUser?.profile?.profile_picture;
   const hasProfilePic = profilePic && !profilePic.includes("default.jpg");
+
+  const handleLogout = async () => {
+    try {
+      await accountsService.logout();
+    } catch (e) {
+      console.error("Logout API failed:", e);
+    } finally {
+      localStorage.removeItem("drifully_admin_user");
+      router.push("/admin/login");
+    }
+  };
 
   return (
     <header className={styles.topbar} id="admin-topbar">
@@ -129,28 +144,55 @@ export default function AdminTopbar() {
           <span className={styles.notifDot} aria-hidden="true" />
         </button>
 
-        {/* Admin avatar */}
-        <button
-          className={styles.avatar}
-          aria-label="Admin menu"
-          id="admin-avatar-btn"
-        >
-          {hasProfilePic ? (
-            <Image
-              src={profilePic}
-              alt={name}
-              width={36}
-              height={36}
-              className={styles.avatarImg}
-              style={{ objectFit: 'cover', borderRadius: '50%' }}
-            />
-          ) : (
-            <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#f1f5f9", color: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "600", fontSize: "13px", flexShrink: 0 }}>
-              {getInitials(name)}
-            </div>
-          )}
-        </button>
+        <div className={styles.userPill}>
+          {/* Admin avatar */}
+          <button
+            className={styles.avatar}
+            aria-label="Admin menu"
+            id="admin-avatar-btn"
+          >
+            {hasProfilePic ? (
+              <Image
+                src={profilePic}
+                alt={name}
+                width={36}
+                height={36}
+                className={styles.avatarImg}
+                style={{ objectFit: 'cover', borderRadius: '50%' }}
+              />
+            ) : (
+              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#f1f5f9", color: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "600", fontSize: "13px", flexShrink: 0 }}>
+                {getInitials(name)}
+              </div>
+            )}
+          </button>
+
+          {/* Logout button */}
+          <button
+            className={styles.iconBtn}
+            aria-label="Logout"
+            onClick={() => setIsLogoutModalOpen(true)}
+            style={{ width: '32px', height: '32px' }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+          </button>
+        </div>
       </div>
+
+      <ConfirmActionModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
+        title="Logout"
+        message="Are you sure you want to log out of your session?"
+        confirmText="Logout"
+        cancelText="Cancel"
+        isDanger={true}
+      />
     </header>
   );
 }

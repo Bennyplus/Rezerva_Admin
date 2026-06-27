@@ -22,6 +22,15 @@ export interface LoginPayload {
   password: string;
 }
 
+export interface ContactUsPayload {
+  full_name: string;
+  email: string;
+  phone_number?: string;
+  country?: string | number;
+  subject: string;
+  message: string;
+}
+
 export const accountsService = {
   /**
    * Fetches the list of countries from accounts/countries/
@@ -71,6 +80,18 @@ export const accountsService = {
     });
     return response.data;
   },
+
+  /**
+   * Submits the contact us form
+   * @param payload - ContactUsPayload object
+   */
+  contactUs: async (payload: ContactUsPayload): Promise<any> => {
+    const response = await publicApi.post('', payload, {
+      params: { path: 'api/v1/accounts/contact-us/' }
+    });
+    return response.data;
+  },
+
   /**
    * Creates a new role in the admin account at admin/roles/
    * @param payload - RolePayload object
@@ -173,6 +194,7 @@ export const accountsService = {
       });
     } catch (e) {
       console.error('Logout failed:', e);
+      throw e;
     }
   }
 };
