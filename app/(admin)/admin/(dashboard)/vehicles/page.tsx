@@ -14,7 +14,7 @@ import { vehiclesService } from "@/services/vehicles-service";
 import FilterBar from "@/components/admin/FilterBar";
 import VehicleDetailsModal from "@/components/admin/VehicleDetailsModal";
 import VehiclesFilterModal from "@/components/admin/VehiclesFilterModal";
-import VehiclesSortDropdown from "@/components/admin/VehiclesSortDropdown";
+import SortDropdown from "@/components/admin/SortDropdown";
 import styles from "./vehicles.module.css";
 
 type ViewMode = "list" | "grid";
@@ -309,7 +309,15 @@ function VehiclesPageContent() {
                   />
                 }
                 sortDropdown={
-                  <VehiclesSortDropdown onSortSelect={handleSortSelect} />
+                  <SortDropdown 
+                    options={[
+                      { label: "Model A to Z", value: "model_asc" },
+                      { label: "Model Z to A", value: "model_desc" },
+                      { label: "Price Low to High", value: "price_asc" },
+                      { label: "Price High to Low", value: "price_desc" }
+                    ]}
+                    onSortSelect={handleSortSelect} 
+                  />
                 }
               />
               {/* View toggles */}

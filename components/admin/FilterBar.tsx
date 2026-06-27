@@ -70,7 +70,7 @@ export default function FilterBar({
           onChange={handleSearchChange}
         />
       </div>
-      {!hideFilter && (
+      {!hideFilter && filterDropdown && (
         <div className={styles.popoverWrapper} ref={filterRef}>
           <button 
             className={styles.toolBtn} 
@@ -97,7 +97,7 @@ export default function FilterBar({
           )}
         </div>
       )}
-      {!hideSort && (
+      {!hideSort && sortDropdown && (
         <div className={styles.popoverWrapper} ref={sortRef}>
           <button 
             className={styles.toolBtn} 

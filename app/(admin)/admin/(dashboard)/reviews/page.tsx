@@ -4,10 +4,11 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Review } from "@/data/admin-reviews";
 import Pagination from "@/components/admin/Pagination";
-import ReviewDetailsModal from "../../../../../components/admin/ReviewDetailsModal";
-import RemoveReviewModal from "../../../../../components/admin/RemoveReviewModal";
+import ReviewDetailsModal from "@/components/admin/ReviewDetailsModal";
+import RemoveReviewModal from "@/components/admin/RemoveReviewModal";
 import FilterBar from "@/components/admin/FilterBar";
 import Spinner from "@/components/admin/Spinner";
+import MoreIcon from "@/components/admin/icons/MoreIcon";
 import { customersService } from "@/services/customers-service";
 import styles from "./reviews.module.css";
 
@@ -121,7 +122,10 @@ export default function ReviewsPage() {
           {/* Toolbar */}
           <div className={styles.toolbar}>
             <div className={styles.toolbarLeft}>
-              <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} />
+              <FilterBar 
+                searchValue={searchQuery} 
+                onSearchChange={(v) => { setSearchQuery(v); setCurrentPage(1); }} 
+              />
             </div>
           </div>
 
@@ -220,7 +224,7 @@ export default function ReviewsPage() {
             </table>
           </div>
 
-          {!isLoading && filteredReviews.length > 10 && (
+          {!isLoading && (
             <Pagination
               currentPage={currentPage}
               totalPages={Math.max(1, Math.ceil(filteredReviews.length / resultsPerPage))}
@@ -285,8 +289,6 @@ export default function ReviewsPage() {
   );
 }
 
-/* ─── Inline Icons ─── */
-function MoreIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }
 
 function CheckCircleIcon() {
   return (

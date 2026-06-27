@@ -10,6 +10,9 @@ import FilterBar from "@/components/admin/FilterBar";
 import Spinner from "@/components/admin/Spinner";
 import { type Driver } from "@/data/admin-drivers";
 import { driversService } from "@/services/drivers-service";
+import FilterDropdown from "@/components/admin/FilterDropdown";
+import SortDropdown from "@/components/admin/SortDropdown";
+import MoreIcon from "@/components/admin/icons/MoreIcon";
 import styles from "./drivers.module.css";
 
 type ViewMode = "list" | "grid";
@@ -25,6 +28,8 @@ export default function DriversPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [suspendTarget, setSuspendTarget] = useState<Driver | null>(null);
   const [openKebab, setOpenKebab] = useState<string | null>(null);
+  const [sortOption, setSortOption] = useState<string>("Name A to Z");
+  const [activeDriverFilters, setActiveDriverFilters] = useState<{ status: string[] }>({ status: [] });
 
   const fetchDrivers = async () => {
     setIsLoading(true);
@@ -47,13 +52,27 @@ export default function DriversPage() {
   const totalPages = 16;
   const resultsPerPage = 9;
 
-  /* Filter */
-  const filteredDrivers = drivers.filter((d) =>
-    d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.licenseNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    d.location.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  /* Filter + Sort */
+  const filteredDrivers = (() => {
+    let result = drivers.filter((d) =>
+      d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.licenseNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.location.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
+    if (activeDriverFilters.status && activeDriverFilters.status.length > 0) {
+      result = result.filter(d => activeDriverFilters.status.includes(d.status));
+    }
+
+    if (sortOption === "Name A to Z") {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortOption === "Name Z to A") {
+      result.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
+    return result;
+  })();
 
   /* ─── Detail view ─── */
   const selectedDriver = drivers.find((d) => d.id === selectedDriverId);
@@ -150,7 +169,27 @@ export default function DriversPage() {
           {/* Toolbar */}
           <div className={styles.toolbar} id="drivers-toolbar">
             <div className={styles.toolbarLeft}>
-              <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} hideFilter hideSort />
+              <FilterBar 
+                searchValue={searchQuery} 
+                onSearchChange={(v) => { setSearchQuery(v); setCurrentPage(1); }}
+                filterDropdown={
+                  <FilterDropdown
+                    tabs={[
+                      { id: 'status', label: 'Status', options: ['Active', 'Suspended', 'Inactive'] }
+                    ]}
+                    onApply={(filters) => setActiveDriverFilters({ status: filters.status || [] })}
+                  />
+                }
+                sortDropdown={
+                  <SortDropdown
+                    options={[
+                      { label: "Name A to Z", value: "Name A to Z" },
+                      { label: "Name Z to A", value: "Name Z to A" }
+                    ]}
+                    onSortSelect={setSortOption}
+                  />
+                }
+              />
               {/* View toggles */}
               <div className={styles.viewToggle}>
                 <button
@@ -279,15 +318,13 @@ export default function DriversPage() {
                   </tbody>
                 </table>
               </div>
-              {filteredDrivers.length > 10 && (
-                <Pagination
+              <Pagination
                   currentPage={currentPage}
-                  totalPages={totalPages}
+                  totalPages={Math.max(1, Math.ceil(filteredDrivers.length / resultsPerPage))}
                   resultsPerPage={resultsPerPage}
                   onPageChange={setCurrentPage}
                   variant="table"
                 />
-              )}
             </div>
           ) : (
             /* ─── Grid View ─── */
@@ -330,15 +367,13 @@ export default function DriversPage() {
                   </div>
                 ))}
               </div>
-              {filteredDrivers.length > 10 && (
-                <Pagination
+              <Pagination
                   currentPage={currentPage}
-                  totalPages={totalPages}
+                  totalPages={Math.max(1, Math.ceil(filteredDrivers.length / 6))}
                   resultsPerPage={6}
                   onPageChange={setCurrentPage}
                   variant="standalone"
                 />
-              )}
             </>
           )}
         </>
@@ -385,12 +420,33 @@ function DriverStatusBadge({ status }: { status: string }) {
   );
 }
 
-/* ─── Inline Icons ─── */
-const s = 16;
-const ip = { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-
-function PlusIcon() { return <svg {...ip}><line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" /></svg>; }
-function GridIcon() { return <svg {...ip} strokeWidth={1.8}><rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" /><rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" /></svg>; }
-function ListIcon() { return <svg {...ip} strokeWidth={1.8}><line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" /><line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" /></svg>; }
-function MoreIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }
-function LocationIcon() { return <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" /></svg>; }
+function PlusIcon() {
+  return (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+    </svg>
+  );
+}
+function GridIcon() {
+  return (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+    </svg>
+  );
+}
+function ListIcon() {
+  return (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
+      <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+    </svg>
+  );
+}
+function LocationIcon() {
+  return (
+    <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+    </svg>
+  );
+}

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { ADMIN_REFUNDS, Refund, RefundStatus } from "@/data/admin-refunds";
 import Pagination from "@/components/admin/Pagination";
 import FilterBar from "@/components/admin/FilterBar";
+import MoreIcon from "@/components/admin/icons/MoreIcon";
 import styles from "./refunds.module.css";
 import RefundDetailsModal from "@/components/admin/RefundDetailsModal";
 import ProcessRefundModal from "@/components/admin/ProcessRefundModal";
@@ -15,7 +16,6 @@ export default function RefundsPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [openKebab, setOpenKebab] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = 16;
 
   // Modals state
   const [selectedRefund, setSelectedRefund] = useState<Refund | null>(null);
@@ -149,7 +149,7 @@ export default function RefundsPage() {
 
           <Pagination
             currentPage={currentPage}
-            totalPages={totalPages}
+            totalPages={Math.max(1, Math.ceil(filteredRefunds.length / 9))}
             resultsPerPage={9}
             onPageChange={setCurrentPage}
             variant="table"
@@ -235,6 +235,3 @@ function RefundKebab({
   );
 }
 
-/* ─── Inline Icons ─── */
-const ip = { width: 16, height: 16, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-function MoreIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }

@@ -67,7 +67,7 @@
 .dropdownContainer {
   position: absolute;
   top: calc(100% + 8px);
-  left: -247px;
+  left: 0;
   background: var(--admin-card-bg, #ffffff);
   border: 1px solid var(--admin-card-border, #E2E4E9);
   border-radius: 12px;
