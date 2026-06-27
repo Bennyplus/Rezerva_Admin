@@ -30,7 +30,7 @@ export default function CreatePasswordPage() {
     // Simulate API call
     await new Promise((resolve) => setTimeout(resolve, 1500));
     setSubmitting(false);
-    
+
     // Redirect after successful creation
     router.push("/admin");
   };
@@ -102,9 +102,9 @@ export default function CreatePasswordPage() {
                         {req.label}
                         {valid ? (
                           <span className={styles.chipIcon}>
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                              <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                              <path d="M6 11C8.75 11 11 8.75 11 6C11 3.25 8.75 1 6 1C3.25 1 1 3.25 1 6C1 8.75 3.25 11 6 11Z" stroke="#008236" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round" />
+                              <path d="M3.875 5.99996L5.29 7.41496L8.125 4.58496" stroke="#008236" stroke-width="0.75" stroke-linecap="round" stroke-linejoin="round" />
                             </svg>
                           </span>
                         ) : (
