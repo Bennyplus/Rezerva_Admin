@@ -30,7 +30,7 @@ export default function CustomersPage() {
   const [isExporting, setIsExporting] = useState(false);
 
   // Filter & sort state
-  const [activeFilters, setActiveFilters] = useState<{ verificationStatus: string[] }>({ verificationStatus: [] });
+  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({ verificationStatus: [] });
   const [sortOption, setSortOption] = useState<string>("Name A to Z");
 
   // Modal & action states

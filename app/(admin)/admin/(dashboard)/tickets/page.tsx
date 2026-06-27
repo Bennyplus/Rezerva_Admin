@@ -21,7 +21,7 @@ export default function TicketsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"All" | "Critical">("All");
-  const [activeFilters, setActiveFilters] = useState<{ status: string[] }>({ status: [] });
+  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({ status: [] });
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [assignModalTicketId, setAssignModalTicketId] = useState<string | null>(null);
