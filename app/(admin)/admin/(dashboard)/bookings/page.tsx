@@ -12,8 +12,9 @@ import { BOOKING_STATS_EMPTY, Booking } from "@/data/admin-bookings";
 import FilterBar from "@/components/admin/FilterBar";
 import Spinner from "@/components/admin/Spinner";
 import { bookingsService } from "@/services/bookings-service";
-import BookingsFilterDropdown from "@/components/admin/bookings/BookingsFilterDropdown";
-import BookingsSortDropdown from "@/components/admin/bookings/BookingsSortDropdown";
+import FilterDropdown from "@/components/admin/FilterDropdown";
+import SortDropdown from "@/components/admin/SortDropdown";
+import MoreIcon from "@/components/admin/icons/MoreIcon";
 import styles from "./bookings.module.css";
 
 export default function BookingsPage() {
@@ -43,8 +44,7 @@ export default function BookingsPage() {
 
   const [sortOption, setSortOption] = useState<string>("Newest to Oldest");
   const [activeFilters, setActiveFilters] = useState<any>({});
-
-
+  const [searchQuery, setSearchQuery] = useState("");
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
@@ -202,9 +202,26 @@ export default function BookingsPage() {
   const applyFiltersAndSort = (data: any[]) => {
     let result = [...data];
 
+    // Apply search
+    if (searchQuery) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter(b =>
+        (b.booking_reference || "").toLowerCase().includes(q) ||
+        (b.customer_name || "").toLowerCase().includes(q) ||
+        (b.vehicle || "").toLowerCase().includes(q) ||
+        (b.booking_status || "").toLowerCase().includes(q)
+      );
+    }
+
     // Apply filters
     if (activeFilters.status && activeFilters.status.length > 0) {
       result = result.filter(b => activeFilters.status.includes(b.booking_status));
+    }
+    if (activeFilters.bookingType && activeFilters.bookingType.length > 0) {
+      result = result.filter(b => activeFilters.bookingType.includes(b.booking_type));
+    }
+    if (activeFilters.vehicle && activeFilters.vehicle.length > 0) {
+      result = result.filter(b => activeFilters.vehicle.some((v: string) => (b.vehicle || "").toLowerCase().includes(v.toLowerCase())));
     }
 
     // Apply sort
@@ -221,7 +238,7 @@ export default function BookingsPage() {
     return result;
   };
 
-  const processedBookings = useMemo(() => applyFiltersAndSort(bookings), [bookings, activeFilters, sortOption]);
+  const processedBookings = useMemo(() => applyFiltersAndSort(bookings), [bookings, activeFilters, sortOption, searchQuery]);
   const totalPages = Math.max(1, Math.ceil(processedBookings.length / resultsPerPage));
   const displayedBookings = useMemo(() => {
     const start = (currentPage - 1) * resultsPerPage;
@@ -282,8 +299,30 @@ export default function BookingsPage() {
               <div className={styles.toolbar}>
                 <div className={styles.toolbarLeft}>
                   <FilterBar
-                    filterDropdown={<BookingsFilterDropdown onClose={() => { }} onApply={setActiveFilters} />}
-                    sortDropdown={<BookingsSortDropdown onClose={() => { }} onSortSelect={setSortOption} />}
+                    searchValue={searchQuery}
+                    onSearchChange={(v) => { setSearchQuery(v); setCurrentPage(1); }}
+                    filterDropdown={
+                      <FilterDropdown 
+                        tabs={[
+                          { id: 'status', label: 'Status', options: ['Completed', 'Scheduled', 'Ongoing', 'Cancelled'] },
+                          { id: 'bookingType', label: 'Booking Type', options: ['Daily', 'Weekly', 'Monthly'] },
+                          { id: 'vehicle', label: 'Vehicle', options: ['SUV', 'Sedan', 'Luxury'] },
+                          { id: 'customer', label: 'Customer', options: ['New', 'Returning'] }
+                        ]}
+                        onApply={setActiveFilters} 
+                      />
+                    }
+                    sortDropdown={
+                      <SortDropdown 
+                        options={[
+                          { label: "Newest to Oldest", value: "Newest to Oldest" },
+                          { label: "Oldest to Newest", value: "Oldest to Newest" },
+                          { label: "Amount Highest to Lowest", value: "Amount Highest to Lowest" },
+                          { label: "Amount Lowest to Highest", value: "Amount Lowest to Highest" }
+                        ]}
+                        onSortSelect={setSortOption} 
+                      />
+                    }
                   />
                 </div>
 
@@ -416,10 +455,4 @@ export default function BookingsPage() {
     </div>
   );
 }
-
-/* ─── Inline Icons ─── */
-const s = 16;
-const iconProps = { width: s, height: s, viewBox: "0 0 24 24", fill: "none", stroke: "currentColor", strokeWidth: 2, strokeLinecap: "round" as const, strokeLinejoin: "round" as const };
-
-function MoreIcon() { return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" /></svg>; }
 

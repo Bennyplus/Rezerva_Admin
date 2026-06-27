@@ -10,8 +10,9 @@ import Spinner from "@/components/admin/Spinner";
 import { notificationsService } from "@/services/notifications-services";
 import { NOTIFICATION_STATS, ADMIN_NOTIFICATIONS } from "@/data/admin-notifications";
 import FilterBar from "@/components/admin/FilterBar";
-import NotificationsFilterDropdown from "@/components/admin/notifications/NotificationsFilterDropdown";
-import NotificationsSortDropdown from "@/components/admin/notifications/NotificationsSortDropdown";
+import FilterDropdown from "@/components/admin/FilterDropdown";
+import SortDropdown from "@/components/admin/SortDropdown";
+import MoreIcon from "@/components/admin/icons/MoreIcon";
 import styles from "./notifications.module.css";
 
 export default function NotificationsPage() {
@@ -119,7 +120,7 @@ export default function NotificationsPage() {
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(notif => 
+      result = result.filter(notif =>
         notif?.title?.toLowerCase().includes(q) ||
         notif?.delivery_channel?.toLowerCase().includes(q)
       );
@@ -275,11 +276,34 @@ export default function NotificationsPage() {
         <>
           <div className={styles.toolbar}>
             <div className={styles.toolbarLeft}>
-              <FilterBar 
+              <FilterBar
                 searchValue={searchQuery}
                 onSearchChange={setSearchQuery}
-                filterDropdown={<NotificationsFilterDropdown onApply={setActiveFilters} />}
-                sortDropdown={<NotificationsSortDropdown onSortSelect={setSortOption} />}
+                filterDropdown={
+                  <FilterDropdown
+                    tabs={[
+                      { id: 'statuses', label: 'Status', options: ['Active', 'Inactive'] },
+                      { id: 'channels', label: 'Channel', options: ['Push', 'Email', 'In-App'] },
+                      { id: 'recipients', label: 'Recipients', options: ['All', 'Drivers', 'Customers'] }
+                    ]}
+                    onApply={(filters) => setActiveFilters({
+                      statuses: filters.statuses || [],
+                      channels: filters.channels || [],
+                      recipients: filters.recipients || []
+                    })}
+                  />
+                }
+                sortDropdown={
+                  <SortDropdown
+                    options={[
+                      { label: "Newest to Oldest", value: "date_desc" },
+                      { label: "Oldest to Newest", value: "date_asc" },
+                      { label: "Title A to Z", value: "title_asc" },
+                      { label: "Title Z to A", value: "title_desc" }
+                    ]}
+                    onSortSelect={setSortOption}
+                  />
+                }
               />
             </div>
             <div className={styles.toolbarRight}>
@@ -389,14 +413,6 @@ function PlusIcon() {
   return (
     <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
-    </svg>
-  );
-}
-
-function MoreIcon() {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" />
     </svg>
   );
 }

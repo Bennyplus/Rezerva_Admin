@@ -1,21 +1,20 @@
 "use client";
 
 import React from 'react';
-import styles from './VehiclesSortDropdown.module.css';
+import styles from './SortDropdown.module.css';
 
-interface VehiclesSortDropdownProps {
+export interface SortOption {
+  label: string;
+  value: string;
+}
+
+interface SortDropdownProps {
+  options: SortOption[];
   onClose?: () => void;
   onSortSelect: (sort: string) => void;
 }
 
-export default function VehiclesSortDropdown({ onClose, onSortSelect }: VehiclesSortDropdownProps) {
-  const options = [
-    { label: "Model A to Z", value: "model_asc" },
-    { label: "Model Z to A", value: "model_desc" },
-    { label: "Price Low to High", value: "price_asc" },
-    { label: "Price High to Low", value: "price_desc" }
-  ];
-
+export default function SortDropdown({ options, onClose, onSortSelect }: SortDropdownProps) {
   return (
     <div className={styles.container}>
       {options.map((option, idx) => (

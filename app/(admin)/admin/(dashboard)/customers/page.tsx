@@ -10,6 +10,9 @@ import { customersService } from "@/services/customers-service";
 import ConfirmActionModal from "@/components/admin/ConfirmActionModal";
 import SuspendUserModal from "@/components/admin/SuspendUserModal";
 import Spinner from "@/components/admin/Spinner";
+import FilterDropdown from "@/components/admin/FilterDropdown";
+import SortDropdown from "@/components/admin/SortDropdown";
+import MoreIcon from "@/components/admin/icons/MoreIcon";
 import styles from "./customers.module.css";
 
 export default function CustomersPage() {
@@ -25,6 +28,10 @@ export default function CustomersPage() {
   
   // Export state
   const [isExporting, setIsExporting] = useState(false);
+
+  // Filter & sort state
+  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({ verificationStatus: [] });
+  const [sortOption, setSortOption] = useState<string>("Name A to Z");
 
   // Modal & action states
   const [suspendUser, setSuspendUser] = useState<Customer | null>(null);
@@ -177,13 +184,31 @@ export default function CustomersPage() {
     }
   }, [toastMessage]);
 
-  /* ─── Filter ─── */
-  const filtered = customers.filter(
-    (c) =>
-      c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      c.phone.includes(searchQuery)
-  );
+  /* ─── Filter + Sort ─── */
+  const filtered = (() => {
+    let result = customers.filter(
+      (c) =>
+        c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        c.phone.includes(searchQuery)
+    );
+
+    if (activeFilters.verificationStatus && activeFilters.verificationStatus.length > 0) {
+      result = result.filter(c => activeFilters.verificationStatus.includes(c.verificationStatus));
+    }
+
+    if (sortOption === "Name A to Z") {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortOption === "Name Z to A") {
+      result.sort((a, b) => b.name.localeCompare(a.name));
+    } else if (sortOption === "Most Bookings") {
+      result.sort((a, b) => b.totalBookings - a.totalBookings);
+    } else if (sortOption === "Fewest Bookings") {
+      result.sort((a, b) => a.totalBookings - b.totalBookings);
+    }
+
+    return result;
+  })();
 
   /* ─── Detail view ─── */
   const selectedCustomer = customers.find((c) => c.id === selectedCustomerId);
@@ -258,7 +283,29 @@ export default function CustomersPage() {
           {/* Toolbar */}
           <div className={styles.toolbar} id="customers-toolbar">
             <div className={styles.toolbarLeft}>
-              <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} />
+              <FilterBar 
+                searchValue={searchQuery} 
+                onSearchChange={(v) => { setSearchQuery(v); setCurrentPage(1); }}
+                filterDropdown={
+                  <FilterDropdown
+                    tabs={[
+                      { id: 'verificationStatus', label: 'Status', options: ['Verified', 'Pending Verification', 'Suspended'] }
+                    ]}
+                    onApply={setActiveFilters}
+                  />
+                }
+                sortDropdown={
+                  <SortDropdown
+                    options={[
+                      { label: "Name A to Z", value: "Name A to Z" },
+                      { label: "Name Z to A", value: "Name Z to A" },
+                      { label: "Most Bookings", value: "Most Bookings" },
+                      { label: "Fewest Bookings", value: "Fewest Bookings" }
+                    ]}
+                    onSortSelect={setSortOption}
+                  />
+                }
+              />
             </div>
             <div className={styles.toolbarRight}>
               <button 
@@ -533,22 +580,4 @@ function CloseIcon() {
   );
 }
 
-function MoreIcon() {
-  return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-      <circle cx="12" cy="5" r="1" />
-      <circle cx="12" cy="12" r="1" />
-      <circle cx="12" cy="19" r="1" />
-    </svg>
-  );
-}
 
-function EmptyIcon() {
-  return (
-    <svg width={80} height={80} viewBox="0 0 80 80" fill="none">
-      <circle cx="40" cy="40" r="38" stroke="#E2E4E9" strokeWidth="2" strokeDasharray="6 4" />
-      <circle cx="40" cy="32" r="12" stroke="#D1D5DB" strokeWidth="2" />
-      <path d="M18 62c0-12.15 9.85-22 22-22s22 9.85 22 22" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" />
-    </svg>
-  );
-}

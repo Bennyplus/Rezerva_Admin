@@ -12,19 +12,22 @@ import AssignTicketModal from "@/components/admin/AssignTicketModal";
 import ResolveTicketModal from "@/components/admin/ResolveTicketModal";
 import EscalateTicketModal from "@/components/admin/EscalateTicketModal";
 import { ticketsService } from "@/services/tickets-service";
-import TicketsFilterDropdown from "@/components/admin/tickets/TicketsFilterDropdown";
+import FilterDropdown from "@/components/admin/FilterDropdown";
+import SortDropdown from "@/components/admin/SortDropdown";
+import MoreIcon from "@/components/admin/icons/MoreIcon";
 import styles from "./tickets.module.css";
 
 export default function TicketsPage() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [activeTab, setActiveTab] = useState<"All" | "Critical">("All");
-  const [activeFilters, setActiveFilters] = useState<{ status: string[] }>({ status: [] });
+  const [activeFilters, setActiveFilters] = useState<Record<string, string[]>>({ status: [] });
   const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
   const [openMenuId, setOpenMenuId] = useState<string | null>(null);
   const [assignModalTicketId, setAssignModalTicketId] = useState<string | null>(null);
   const [resolveModalTicketId, setResolveModalTicketId] = useState<string | null>(null);
   const [escalateModalTicketId, setEscalateModalTicketId] = useState<string | null>(null);
+  const [sortOption, setSortOption] = useState<string>("Newest to Oldest");
 
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [metrics, setMetrics] = useState<any>(null);
@@ -63,17 +66,27 @@ export default function TicketsPage() {
     return () => window.removeEventListener("click", handleWindowClick);
   }, [openMenuId]);
 
-  const filtered = tickets.filter((t) => {
-    const matchesSearch =
-      t.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.description.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesTab = activeTab === "Critical" ? t.priority === "High" : true;
-    const matchesStatus = activeFilters.status && activeFilters.status.length > 0
-      ? activeFilters.status.includes(t.status)
-      : true;
-    return matchesSearch && matchesTab && matchesStatus;
-  });
+  const filtered = (() => {
+    let result = tickets.filter((t) => {
+      const matchesSearch =
+        t.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.ticketNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        t.description.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesTab = activeTab === "Critical" ? t.priority === "High" : true;
+      const matchesStatus = activeFilters.status && activeFilters.status.length > 0
+        ? activeFilters.status.includes(t.status)
+        : true;
+      return matchesSearch && matchesTab && matchesStatus;
+    });
+
+    if (sortOption === "Newest to Oldest") {
+      result.sort((a, b) => new Date(b.date || 0).getTime() - new Date(a.date || 0).getTime());
+    } else if (sortOption === "Oldest to Newest") {
+      result.sort((a, b) => new Date(a.date || 0).getTime() - new Date(b.date || 0).getTime());
+    }
+
+    return result;
+  })();
 
   // Derived stat counts from live data (fallback to metrics)
   const totalTickets = metrics?.total_tickets ?? totalCount;
@@ -183,9 +196,24 @@ export default function TicketsPage() {
       <div className={styles.toolbar}>
         <FilterBar
           searchValue={searchQuery}
-          onSearchChange={setSearchQuery}
-          hideSort
-          filterDropdown={<TicketsFilterDropdown onApply={setActiveFilters} />}
+          onSearchChange={(v) => { setSearchQuery(v); setCurrentPage(1); }}
+          filterDropdown={
+            <FilterDropdown 
+              tabs={[
+                { id: 'status', label: 'Status', options: ['Pending', 'In Progress', 'Resolved', 'Escalated', 'Closed'] }
+              ]}
+              onApply={setActiveFilters} 
+            />
+          }
+          sortDropdown={
+            <SortDropdown 
+              options={[
+                { label: "Newest to Oldest", value: "Newest to Oldest" },
+                { label: "Oldest to Newest", value: "Oldest to Newest" }
+              ]}
+              onSortSelect={setSortOption}
+            />
+          }
         />
         <button className={styles.toolBtn} id="tickets-export" style={{ marginLeft: "auto" }} onClick={handleExportTickets}>Export</button>
       </div>
@@ -356,13 +384,3 @@ export default function TicketsPage() {
   );
 }
 
-/* ─── Inline Icons ─── */
-function MoreIcon() {
-  return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-      <circle cx="12" cy="5" r="1" />
-      <circle cx="12" cy="12" r="1" />
-      <circle cx="12" cy="19" r="1" />
-    </svg>
-  );
-}

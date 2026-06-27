@@ -6,7 +6,9 @@ import Image from "next/image";
 import Pagination from "@/components/admin/Pagination";
 import Spinner from "@/components/admin/Spinner";
 import FilterBar from "@/components/admin/FilterBar";
-import AuditLogsFilterDropdown from "@/components/admin/audit-logs/AuditLogsFilterDropdown";
+import FilterDropdown from "@/components/admin/FilterDropdown";
+import SortDropdown from "@/components/admin/SortDropdown";
+import MoreIcon from "@/components/admin/icons/MoreIcon";
 import { auditLogsService } from "@/services/audit-logs-service";
 import styles from "./audit-logs.module.css";
 
@@ -26,6 +28,7 @@ export default function AuditLogsPage() {
   const [filterCategories, setFilterCategories] = useState<string[]>([]);
   const [filterActions, setFilterActions] = useState<string[]>([]);
   const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
+  const [sortOption, setSortOption] = useState<string>("Newest to Oldest");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -77,7 +80,7 @@ export default function AuditLogsPage() {
   // Client-side filtering
   const filteredLogs = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
-    return allLogs.filter((log) => {
+    let result = allLogs.filter((log) => {
       const userName = (log.user || "").toLowerCase();
       const matchesSearch =
         !q ||
@@ -92,15 +95,23 @@ export default function AuditLogsPage() {
 
       return matchesSearch && matchesCategory && matchesAction && matchesStatus;
     });
-  }, [allLogs, searchQuery, filterCategories, filterActions, filterStatuses]);
+
+    if (sortOption === "Newest to Oldest") {
+      result.sort((a, b) => new Date(b.timestamp || 0).getTime() - new Date(a.timestamp || 0).getTime());
+    } else if (sortOption === "Oldest to Newest") {
+      result.sort((a, b) => new Date(a.timestamp || 0).getTime() - new Date(b.timestamp || 0).getTime());
+    }
+
+    return result;
+  }, [allLogs, searchQuery, filterCategories, filterActions, filterStatuses, sortOption]);
 
   // Reset to page 1 whenever filters change
   const handleSearch = (v: string) => { setSearchQuery(v); setCurrentPage(1); };
 
-  const handleApplyFilters = (filters: { categories: string[], actions: string[], statuses: string[] }) => {
-    setFilterCategories(filters.categories);
-    setFilterActions(filters.actions);
-    setFilterStatuses(filters.statuses);
+  const handleApplyFilters = (filters: Record<string, string[]>) => {
+    setFilterCategories(filters.categories || []);
+    setFilterActions(filters.actions || []);
+    setFilterStatuses(filters.statuses || []);
     setCurrentPage(1);
   };
 
@@ -151,11 +162,22 @@ export default function AuditLogsPage() {
             onSearchChange={handleSearch}
             hideSort={true}
             filterDropdown={
-              <AuditLogsFilterDropdown
-                categories={categories}
-                actions={actions}
-                statuses={statuses}
+              <FilterDropdown
+                tabs={[
+                  { id: 'categories', label: 'Categories', options: categories },
+                  { id: 'actions', label: 'Actions', options: actions },
+                  { id: 'statuses', label: 'Statuses', options: statuses }
+                ]}
                 onApply={handleApplyFilters}
+              />
+            }
+            sortDropdown={
+              <SortDropdown
+                options={[
+                  { label: "Newest to Oldest", value: "Newest to Oldest" },
+                  { label: "Oldest to Newest", value: "Oldest to Newest" }
+                ]}
+                onSortSelect={setSortOption}
               />
             }
           />
@@ -292,14 +314,6 @@ function SearchIcon() {
     <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
       <circle cx="11" cy="11" r="8" />
       <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
-  );
-}
-
-function MoreIcon() {
-  return (
-    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-      <circle cx="12" cy="5" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="12" cy="19" r="1" />
     </svg>
   );
 }
