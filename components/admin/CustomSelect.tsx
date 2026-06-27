@@ -6,6 +6,7 @@ import styles from "./CustomSelect.module.css";
 interface Option {
   value: string;
   label: string;
+  icon?: string | React.ReactNode;
 }
 
 interface CustomSelectProps {
@@ -62,7 +63,12 @@ export default function CustomSelect({
         <span className={(multiple ? selectedOptions.length > 0 : selectedOption) ? styles.value : styles.placeholder}>
           {multiple
             ? (selectedOptions.length > 0 ? selectedOptions.map(o => o.label).join(', ') : placeholder)
-            : (selectedOption ? selectedOption.label : placeholder)}
+            : (selectedOption ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                {selectedOption.icon && (typeof selectedOption.icon === 'string' ? <img src={selectedOption.icon as string} alt="" style={{ width: 20, height: 20, objectFit: 'cover', borderRadius: '50%' }} /> : selectedOption.icon)}
+                {selectedOption.label}
+              </div>
+            ) : placeholder)}
         </span>
         <ChevronDownIcon isOpen={isOpen} />
       </div>
@@ -107,7 +113,10 @@ export default function CustomSelect({
                       }
                     }}
                   >
-                    {option.label}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                      {option.icon && (typeof option.icon === 'string' ? <img src={option.icon as string} alt="" style={{ width: 20, height: 20, objectFit: 'cover', borderRadius: '50%' }} /> : option.icon)}
+                      {option.label}
+                    </div>
                     {isSelected && <CheckIcon />}
                   </li>
                 );

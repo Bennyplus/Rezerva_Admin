@@ -14,6 +14,24 @@ async function handleRequest(request: NextRequest, method: string) {
 
   // Custom logout handler
   if (path === 'auth/logout') {
+    const cookieStore = await cookies();
+    const refreshToken = cookieStore.get('refreshToken')?.value;
+
+    if (refreshToken) {
+      try {
+        const formData = new FormData();
+        formData.append('refresh', refreshToken);
+        await axios.post(`${BACKEND_URL}/accounts/logout/`, formData, {
+          headers: {
+            'X-API-KEY': API_KEY,
+            'Content-Type': 'multipart/form-data',
+          }
+        });
+      } catch (e) {
+        console.error('Failed to invalidate token on backend during logout:', e);
+      }
+    }
+
     const response = NextResponse.json({ message: 'Logged out successfully' });
     response.cookies.delete('accessToken');
     response.cookies.delete('refreshToken');

@@ -3,8 +3,10 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ADMIN_USER, AdminRole } from "@/data/admin-mock";
+import ConfirmActionModal from "./ConfirmActionModal";
+import { accountsService } from "@/services/accounts-service";
 import styles from "./AdminSidebar.module.css";
 
 /* ─── Navigation structure matching the design ─── */
@@ -159,7 +161,9 @@ export default function AdminSidebar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [usersExpanded, setUsersExpanded] = useState(true);
   const [currentUser, setCurrentUser] = useState<any>(null);
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const pathname = usePathname();
+  const router = useRouter();
 
   useEffect(() => {
     const userStr = localStorage.getItem("drifully_admin_user");
@@ -210,6 +214,17 @@ export default function AdminSidebar() {
   const email = currentUser?.email || ADMIN_USER.email;
   const profilePic = currentUser?.profile?.profile_picture;
   const hasProfilePic = profilePic && !profilePic.includes("default.jpg");
+
+  const handleLogout = async () => {
+    try {
+      await accountsService.logout();
+    } catch (e) {
+      console.error("Logout API failed:", e);
+    } finally {
+      localStorage.removeItem("drifully_admin_user");
+      router.push("/admin/login");
+    }
+  };
 
   return (
     <>
@@ -378,12 +393,32 @@ export default function AdminSidebar() {
             </div>
           )}
           {!collapsed && (
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" className={styles.profileChevron}>
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
+            <button
+              onClick={() => setIsLogoutModalOpen(true)}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', marginLeft: 'auto' }}
+              title="Logout"
+              aria-label="Logout"
+            >
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+            </button>
           )}
         </div>
       </aside>
+
+      <ConfirmActionModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
+        title="Logout"
+        message="Are you sure you want to log out of your session?"
+        confirmText="Logout"
+        cancelText="Cancel"
+        isDanger={true}
+      />
     </>
   );
 }
