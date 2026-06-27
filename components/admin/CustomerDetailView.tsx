@@ -83,7 +83,8 @@ export default function CustomerDetailView({
     setBookingsLoading(true);
     try {
       const data = await customersService.getCustomerBookings(userId);
-      const mappedBookings: CustomerBooking[] = (data || []).map((b: any) => ({
+      const bookingsList = Array.isArray(data) ? data : (data?.results || data?.data || []);
+      const mappedBookings: CustomerBooking[] = bookingsList.map((b: any) => ({
         id: b.booking_id,
         vehicle: b.vehicle,
         startDate: b.start_date || "",
@@ -112,7 +113,8 @@ export default function CustomerDetailView({
     setReviewsLoading(true);
     try {
       const data = await customersService.getCustomerReviews(userId);
-      setReviewsData(data || []);
+      const reviewsList = Array.isArray(data) ? data : (data?.results || data?.data || []);
+      setReviewsData(reviewsList);
       setReviewsFetched(true);
     } catch (error) {
       console.error("Failed to fetch customer reviews:", error);

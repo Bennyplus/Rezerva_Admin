@@ -25,7 +25,7 @@ export default function CustomersPage() {
   const [totalPages, setTotalPages] = useState(1);
   const [selectedRows, setSelectedRows] = useState<Set<string>>(new Set());
   const [openKebab, setOpenKebab] = useState<string | null>(null);
-  
+
   // Export state
   const [isExporting, setIsExporting] = useState(false);
 
@@ -54,10 +54,11 @@ export default function CustomersPage() {
     try {
       const data = await customersService.getCustomers({ page: currentPage, page_size: resultsPerPage });
       // Map API data to Customer type
-      const mappedCustomers: Customer[] = (data || []).map((item: any, idx: number) => {
+      const customersList = Array.isArray(data) ? data : (data?.results || data?.data || []);
+      const mappedCustomers: Customer[] = customersList.map((item: any, idx: number) => {
         // Fallbacks since list API might not include user_id explicitly
         const userIdFallback = item.user_id || item.id || item.pk || (idx + 1);
-        
+
         return {
           id: `cust-${item.email || idx}`,
           userId: userIdFallback,
@@ -283,8 +284,8 @@ export default function CustomersPage() {
           {/* Toolbar */}
           <div className={styles.toolbar} id="customers-toolbar">
             <div className={styles.toolbarLeft}>
-              <FilterBar 
-                searchValue={searchQuery} 
+              <FilterBar
+                searchValue={searchQuery}
                 onSearchChange={(v) => { setSearchQuery(v); setCurrentPage(1); }}
                 filterDropdown={
                   <FilterDropdown
@@ -308,8 +309,8 @@ export default function CustomersPage() {
               />
             </div>
             <div className={styles.toolbarRight}>
-              <button 
-                className={styles.exportBtn} 
+              <button
+                className={styles.exportBtn}
                 onClick={handleExport}
                 disabled={isExporting}
                 id="customers-export-btn"
@@ -550,8 +551,8 @@ function VerificationBadge({ status }: { status: string }) {
     status === "Verified"
       ? styles.badgeVerified
       : status === "Suspended"
-      ? styles.badgeSuspended
-      : styles.badgePending;
+        ? styles.badgeSuspended
+        : styles.badgePending;
 
   return (
     <span className={`${styles.badge} ${cls}`}>
