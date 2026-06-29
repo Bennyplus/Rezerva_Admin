@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { ADMIN_REFUNDS, Refund, RefundStatus } from "@/data/admin-refunds";
+import { Refund, formatAmount, formatDate, getStatusDisplay } from "@/data/admin-refunds";
+import { refundsService } from "@/services/refunds-service";
 import Pagination from "@/components/admin/Pagination";
 import FilterBar from "@/components/admin/FilterBar";
 import MoreIcon from "@/components/admin/icons/MoreIcon";
@@ -11,41 +12,88 @@ import RefundDetailsModal from "@/components/admin/RefundDetailsModal";
 import ProcessRefundModal from "@/components/admin/ProcessRefundModal";
 import RejectRefundModal from "@/components/admin/RejectRefundModal";
 
+const PAGE_SIZE = 9;
+
 export default function RefundsPage() {
-  const [isEmpty, setIsEmpty] = useState(false);
+  // ── Data state ──────────────────────────────────────────────────────────────
+  const [refunds, setRefunds] = useState<Refund[]>([]);
+  const [totalCount, setTotalCount] = useState(0);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // ── UI state ─────────────────────────────────────────────────────────────────
   const [searchQuery, setSearchQuery] = useState("");
   const [openKebab, setOpenKebab] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
 
-  // Modals state
+  // ── Modal state ───────────────────────────────────────────────────────────────
   const [selectedRefund, setSelectedRefund] = useState<Refund | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
   const [isProcessOpen, setIsProcessOpen] = useState(false);
   const [isRejectOpen, setIsRejectOpen] = useState(false);
 
-  // Toast state
+  // ── Toast state ───────────────────────────────────────────────────────────────
   const [showToast, setShowToast] = useState(false);
 
-  const filteredRefunds = ADMIN_REFUNDS.filter(
-    (r) =>
-      r.customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      r.bookingId.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  // ── Fetch ─────────────────────────────────────────────────────────────────────
+  const fetchRefunds = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const res = await refundsService.getRefunds();
+      setRefunds(res.results);
+      setTotalCount(res.count);
+    } catch {
+      setError("Failed to load refunds. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
 
+  useEffect(() => {
+    fetchRefunds();
+  }, [fetchRefunds]);
+
+  // ── Handlers ──────────────────────────────────────────────────────────────────
   const handleProcessRefund = () => {
     setIsProcessOpen(false);
     if (isDetailsOpen) setIsDetailsOpen(false);
     setShowToast(true);
     setTimeout(() => setShowToast(false), 3000);
+    fetchRefunds();
   };
 
   const handleRejectRefund = () => {
     setIsRejectOpen(false);
     if (isDetailsOpen) setIsDetailsOpen(false);
+    fetchRefunds();
   };
+
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    setCurrentPage(1);
+  };
+
+  // ── Derived ───────────────────────────────────────────────────────────────────
+  const searchLower = searchQuery.toLowerCase();
+  const filteredRefunds = refunds.filter((refund) => {
+    if (!searchQuery) return true;
+    return (
+      refund.reference.toLowerCase().includes(searchLower) ||
+      (refund.initiated_by?.full_name || "").toLowerCase().includes(searchLower) ||
+      (refund.initiated_by?.email || "").toLowerCase().includes(searchLower) ||
+      refund.amount.includes(searchLower)
+    );
+  });
+
+  const isEmpty = !isLoading && !error && refunds.length === 0;
+  const totalPages = Math.max(1, Math.ceil(filteredRefunds.length / PAGE_SIZE));
+  const paginatedRefunds = filteredRefunds.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
 
   return (
     <div className={styles.page} onClick={() => setOpenKebab(null)}>
+      {/* Toast */}
       {showToast && (
         <>
           <div className={styles.toastOverlay} />
@@ -65,8 +113,33 @@ export default function RefundsPage() {
         </>
       )}
 
-      {isEmpty ? (
-        /* ─── Empty State ─── */
+      {/* Loading skeleton */}
+      {isLoading && (
+        <div className={styles.tableCard}>
+          <div style={{ padding: "48px", textAlign: "center", color: "#868C98" }}>
+            Loading refunds…
+          </div>
+        </div>
+      )}
+
+      {/* Error */}
+      {!isLoading && error && (
+        <div className={styles.tableCard}>
+          <div style={{ padding: "48px", textAlign: "center", color: "#E53E3E" }}>
+            {error}
+            <br />
+            <button
+              style={{ marginTop: 12, cursor: "pointer", color: "#2563EB", background: "none", border: "none" }}
+              onClick={fetchRefunds}
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!isLoading && !error && isEmpty && (
         <div className={styles.emptyCard} id="refunds-empty-state">
           <div className={styles.illustration} aria-hidden="true">
             <Image
@@ -82,10 +155,12 @@ export default function RefundsPage() {
             Customer refund requests will appear here
           </p>
         </div>
-      ) : (
-        /* ─── Refunds Table ─── */
+      )}
+
+      {/* Populated table */}
+      {!isLoading && !error && !isEmpty && (
         <div className={styles.tableCard} id="refunds-table">
-          <FilterBar searchValue={searchQuery} onSearchChange={setSearchQuery} />
+          <FilterBar searchValue={searchQuery} onSearchChange={handleSearch} />
 
           <div className={styles.tableWrap}>
             <table className={styles.table}>
@@ -94,8 +169,8 @@ export default function RefundsPage() {
                   <th className={styles.checkCol}>
                     <input type="checkbox" className={styles.checkbox} aria-label="Select all" />
                   </th>
-                  <th>Booking ID</th>
-                  <th>Customer</th>
+                  <th>Reference</th>
+                  <th>Initiated By</th>
                   <th>Amount</th>
                   <th>Date Requested</th>
                   <th>Status</th>
@@ -103,23 +178,30 @@ export default function RefundsPage() {
                 </tr>
               </thead>
               <tbody>
-                {filteredRefunds.map((r, i) => (
-                  <tr key={`${r.bookingId}-${i}`}>
+                {paginatedRefunds.map((r) => (
+                  <tr key={r.id}>
                     <td className={styles.checkCol}>
-                      <input type="checkbox" className={styles.checkbox} aria-label={`Select ${r.customerName}`} />
+                      <input
+                        type="checkbox"
+                        className={styles.checkbox}
+                        aria-label={`Select ${r.reference}`}
+                      />
                     </td>
-                    <td>{r.bookingId}</td>
-                    <td>{r.customerName}</td>
-                    <td>{r.amount}</td>
-                    <td>{r.dateRequested}</td>
+                    <td>{r.reference}</td>
+                    <td>
+                      {r.initiated_by?.full_name || r.initiated_by?.email || "—"}
+                    </td>
+                    <td>{formatAmount(r.amount)}</td>
+                    <td>{formatDate(r.created_at)}</td>
                     <td>
                       <RefundBadge status={r.status} />
                     </td>
                     <td className={styles.actionsCol}>
                       <RefundKebab
-                        rowId={`${r.bookingId}-${i}`}
+                        rowId={r.id}
                         openKebab={openKebab}
                         setOpenKebab={setOpenKebab}
+                        status={r.status}
                         onViewDetails={() => {
                           setSelectedRefund(r);
                           setIsDetailsOpen(true);
@@ -136,7 +218,7 @@ export default function RefundsPage() {
                     </td>
                   </tr>
                 ))}
-                {filteredRefunds.length === 0 && (
+                {paginatedRefunds.length === 0 && (
                   <tr>
                     <td colSpan={7} style={{ textAlign: "center", padding: "32px", color: "#868C98" }}>
                       No refunds found matching your search.
@@ -149,20 +231,13 @@ export default function RefundsPage() {
 
           <Pagination
             currentPage={currentPage}
-            totalPages={Math.max(1, Math.ceil(filteredRefunds.length / 9))}
-            resultsPerPage={9}
+            totalPages={totalPages}
+            resultsPerPage={PAGE_SIZE}
             onPageChange={setCurrentPage}
             variant="table"
           />
         </div>
       )}
-
-      {/* Dev toggle */}
-      <div className={styles.devToggleWrap}>
-        <button className={styles.stateToggle} onClick={() => setIsEmpty((v) => !v)} id="toggle-refunds-state">
-          {isEmpty ? "Show Populated State" : "Show Empty State"} →
-        </button>
-      </div>
 
       {/* Modals */}
       <RefundDetailsModal
@@ -177,61 +252,107 @@ export default function RefundsPage() {
         isOpen={isProcessOpen}
         onClose={() => setIsProcessOpen(false)}
         onProcess={handleProcessRefund}
+        refundId={selectedRefund?.id}
       />
 
       <RejectRefundModal
         isOpen={isRejectOpen}
         onClose={() => setIsRejectOpen(false)}
         onReject={handleRejectRefund}
+        refundId={selectedRefund?.id}
       />
     </div>
   );
 }
 
-/* ─── Badge Components ─── */
-function RefundBadge({ status }: { status: RefundStatus }) {
-  const map: Record<RefundStatus, string> = {
-    Pending: styles.badgePending,
-    Completed: styles.badgeCompleted,
-    Rejected: styles.badgeRejected,
-    Processing: styles.badgeProcessing,
+/* ─── Badge ─── */
+function RefundBadge({ status }: { status: string }) {
+  const map: Record<string, string> = {
+    pending: styles.badgePending,
+    processing: styles.badgeProcessing,
+    success: styles.badgeCompleted,
+    rejected: styles.badgeRejected,
+    failed: styles.badgeRejected,
   };
+  const cls = map[status?.toLowerCase()] ?? styles.badgePending;
+  const label = getStatusDisplay(status);
   return (
-    <span className={`${styles.badge} ${map[status]}`}>
+    <span className={`${styles.badge} ${cls}`}>
       <span className={styles.badgeDot} />
-      {status}
+      {label}
     </span>
   );
 }
 
 /* ─── Kebab menu ─── */
 function RefundKebab({
-  rowId, openKebab, setOpenKebab, onViewDetails, onProcess, onReject
+  rowId,
+  openKebab,
+  setOpenKebab,
+  status,
+  onViewDetails,
+  onProcess,
+  onReject,
 }: {
   rowId: string;
   openKebab: string | null;
   setOpenKebab: (v: string | null) => void;
+  status: string;
   onViewDetails: () => void;
   onProcess: () => void;
   onReject: () => void;
 }) {
+  const isPending = status === "pending";
   return (
     <div className={styles.kebabWrap}>
       <button
         className={styles.moreBtn}
         aria-label="More actions"
-        onClick={(e) => { e.stopPropagation(); setOpenKebab(openKebab === rowId ? null : rowId); }}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpenKebab(openKebab === rowId ? null : rowId);
+        }}
       >
         <MoreIcon />
       </button>
       {openKebab === rowId && (
         <div className={styles.kebabMenu}>
-          <button className={styles.kebabItem} onClick={(e) => { e.stopPropagation(); setOpenKebab(null); onViewDetails(); }}>View Details</button>
-          <button className={styles.kebabItem} onClick={(e) => { e.stopPropagation(); setOpenKebab(null); onProcess(); }}>Process Refund</button>
-          <button className={styles.kebabItem} onClick={(e) => { e.stopPropagation(); setOpenKebab(null); onReject(); }}>Reject Refund</button>
+          <button
+            className={styles.kebabItem}
+            onClick={(e) => {
+              e.stopPropagation();
+              setOpenKebab(null);
+              onViewDetails();
+            }}
+          >
+            View Details
+          </button>
+          {isPending && (
+            <>
+              <button
+                className={styles.kebabItem}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenKebab(null);
+                  onProcess();
+                }}
+              >
+                Process Refund
+              </button>
+              <button
+                className={styles.kebabItem}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setOpenKebab(null);
+                  onReject();
+                }}
+              >
+                Reject Refund
+              </button>
+            </>
+          )}
         </div>
       )}
     </div>
   );
 }
-
