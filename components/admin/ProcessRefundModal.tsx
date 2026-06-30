@@ -3,19 +3,23 @@
 import { useEffect, useState } from "react";
 import styles from "./ProcessRefundModal.module.css";
 import CustomSelect from "./CustomSelect";
+import { refundsService } from "@/services/refunds-service";
 
 interface ProcessRefundModalProps {
   isOpen: boolean;
   onClose: () => void;
   onProcess: () => void;
+  refundId?: string;
 }
 
 export default function ProcessRefundModal({
   isOpen,
   onClose,
   onProcess,
+  refundId,
 }: ProcessRefundModalProps) {
   const [showConfirm, setShowConfirm] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     refundType: "",
     amount: "20.00",
@@ -163,7 +167,28 @@ export default function ProcessRefundModal({
               <button className={styles.secondaryBtn} onClick={() => setShowConfirm(false)}>
                 Cancel
               </button>
-              <button className={styles.primaryBtn} onClick={() => { setShowConfirm(false); onProcess(); }}>
+              <button
+                className={styles.primaryBtn}
+                disabled={isSubmitting}
+                onClick={async () => {
+                  if (refundId) {
+                    setIsSubmitting(true);
+                    try {
+                      await refundsService.processRefund(refundId);
+                      setShowConfirm(false);
+                      onProcess();
+                    } catch {
+                      // toast handled by API client interceptor — keep modal open
+                    } finally {
+                      setIsSubmitting(false);
+                    }
+                  } else {
+                    // No refundId (shouldn't happen), close and notify anyway
+                    setShowConfirm(false);
+                    onProcess();
+                  }
+                }}
+              >
                 Process Refund
               </button>
             </div>

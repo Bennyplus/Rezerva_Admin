@@ -2,19 +2,23 @@
 
 import { useEffect, useState } from "react";
 import styles from "./RejectRefundModal.module.css";
+import { refundsService } from "@/services/refunds-service";
 
 interface RejectRefundModalProps {
   isOpen: boolean;
   onClose: () => void;
   onReject: () => void;
+  refundId?: string;
 }
 
 export default function RejectRefundModal({
   isOpen,
   onClose,
   onReject,
+  refundId,
 }: RejectRefundModalProps) {
   const [reason, setReason] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
@@ -74,12 +78,23 @@ export default function RejectRefundModal({
           </button>
           <button
             className={styles.rejectBtn}
-            onClick={() => {
-              if (reason.trim()) {
+            onClick={async () => {
+              if (!reason.trim()) return;
+              if (refundId) {
+                setIsSubmitting(true);
+                try {
+                  await refundsService.rejectRefund(refundId, reason.trim());
+                  onReject();
+                } catch {
+                  // toast handled by interceptor — keep modal open
+                } finally {
+                  setIsSubmitting(false);
+                }
+              } else {
                 onReject();
               }
             }}
-            disabled={!reason.trim()}
+            disabled={!reason.trim() || isSubmitting}
           >
             Reject Refund
           </button>

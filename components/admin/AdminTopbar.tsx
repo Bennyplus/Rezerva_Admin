@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { ADMIN_USER } from "@/data/admin-mock";
 import ConfirmActionModal from "./ConfirmActionModal";
 import { accountsService } from "@/services/accounts-service";
+import { useNotifications, Notification } from "@/hooks/useNotifications";
 import styles from "./AdminTopbar.module.css";
 
 /* ─── Map routes to page titles & subtitles ─── */
@@ -81,6 +82,19 @@ export default function AdminTopbar() {
   const router = useRouter();
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const notifRef = useRef<HTMLDivElement>(null);
+  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+        setIsNotifOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const userStr = localStorage.getItem("drifully_admin_user");
@@ -132,17 +146,59 @@ export default function AdminTopbar() {
       {/* Right actions */}
       <div className={styles.actions}>
         {/* Notification bell */}
-        <button
-          className={styles.iconBtn}
-          aria-label="Notifications"
-          id="admin-notification-btn"
-        >
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
-            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
-          </svg>
-          <span className={styles.notifDot} aria-hidden="true" />
-        </button>
+        <div className={styles.notificationWrapper} ref={notifRef}>
+          <button
+            className={styles.iconBtn}
+            aria-label="Notifications"
+            id="admin-notification-btn"
+            onClick={() => setIsNotifOpen(!isNotifOpen)}
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+              <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+            </svg>
+            {unreadCount > 0 && (
+              <span className={styles.notifBadge} aria-hidden="true">{unreadCount > 99 ? '99+' : unreadCount}</span>
+            )}
+          </button>
+
+          {isNotifOpen && (
+            <div className={styles.notificationsDropdown}>
+              <div className={styles.dropdownHeader}>
+                <h3 className={styles.dropdownTitle}>Notifications</h3>
+                {unreadCount > 0 && (
+                  <button className={styles.markAllReadBtn} onClick={markAllAsRead}>
+                    Mark all as read
+                  </button>
+                )}
+              </div>
+              
+              {notifications.length > 0 ? (
+                <ul className={styles.notificationList}>
+                  {notifications.map((notif: Notification) => (
+                    <li 
+                      key={notif.id} 
+                      className={`${styles.notificationItem} ${!notif.is_read ? styles.unread : ''}`}
+                      onClick={() => markAsRead(notif.id)}
+                    >
+                      <h4 className={styles.notificationTitle}>{notif.title}</h4>
+                      <p className={styles.notificationMessage}>{notif.message}</p>
+                      {notif.created_at && (
+                        <span className={styles.notificationTime}>
+                          {new Date(notif.created_at).toLocaleDateString()}
+                        </span>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className={styles.emptyState}>
+                  No new notifications
+                </div>
+              )}
+            </div>
+          )}
+        </div>
 
         <div className={styles.userPill}>
           {/* Admin avatar */}

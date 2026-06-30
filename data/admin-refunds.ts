@@ -1,106 +1,63 @@
-export type RefundStatus = "Pending" | "Processing" | "Completed" | "Rejected";
+// ─── API shape ────────────────────────────────────────────────────────────────
 
-export interface Refund {
-  bookingId: string;
-  customerName: string;
-  amount: string;
-  dateRequested: string;
-  status: RefundStatus;
-
-  // Additional detail fields
-  transactionId: string;
-  vehicle: string;
-  refundType: string;
-  refundReason: string;
+export interface RefundPayment {
+  id: string;
+  reference: string;
+  amount_received: string;
+  status: string;
 }
 
-export const ADMIN_REFUNDS: Refund[] = [
-  {
-    bookingId: "DRI-12XDJF-123",
-    customerName: "Prosper Edward",
-    amount: "$120.00",
-    dateRequested: "30 Feb 2026",
-    status: "Pending",
-    transactionId: "123SFRRF123GVB",
-    vehicle: "Toyota Highlander",
-    refundType: "Partial Refund",
-    refundReason: "Broken Child Seat",
-  },
-  {
-    bookingId: "DRI-12XDJF-124",
-    customerName: "Prosper Edward",
-    amount: "$120.00",
-    dateRequested: "30 Feb 2026",
-    status: "Processing",
-    transactionId: "123SFRRF123GVC",
-    vehicle: "Toyota Highlander",
-    refundType: "Full Refund",
-    refundReason: "Vehicle not available",
-  },
-  {
-    bookingId: "DRI-12XDJF-125",
-    customerName: "Prosper Edward",
-    amount: "$120.00",
-    dateRequested: "30 Feb 2026",
-    status: "Completed",
-    transactionId: "123SFRRF123GVD",
-    vehicle: "Toyota Highlander",
-    refundType: "Partial Refund",
-    refundReason: "Dirty exterior",
-  },
-  {
-    bookingId: "DRI-12XDJF-126",
-    customerName: "Prosper Edward",
-    amount: "$120.00",
-    dateRequested: "30 Feb 2026",
-    status: "Rejected",
-    transactionId: "123SFRRF123GVE",
-    vehicle: "Toyota Highlander",
-    refundType: "Full Refund",
-    refundReason: "Late return",
-  },
-  {
-    bookingId: "DRI-12XDJF-127",
-    customerName: "Prosper Edward",
-    amount: "$120.00",
-    dateRequested: "30 Feb 2026",
-    status: "Pending",
-    transactionId: "123SFRRF123GVF",
-    vehicle: "Toyota Highlander",
-    refundType: "Partial Refund",
-    refundReason: "Missing accessory",
-  },
-  {
-    bookingId: "DRI-12XDJF-128",
-    customerName: "Prosper Edward",
-    amount: "$120.00",
-    dateRequested: "30 Feb 2026",
-    status: "Processing",
-    transactionId: "123SFRRF123GVG",
-    vehicle: "Toyota Highlander",
-    refundType: "Full Refund",
-    refundReason: "Booking error",
-  },
-  {
-    bookingId: "DRI-12XDJF-129",
-    customerName: "Prosper Edward",
-    amount: "$120.00",
-    dateRequested: "30 Feb 2026",
-    status: "Completed",
-    transactionId: "123SFRRF123GVH",
-    vehicle: "Toyota Highlander",
-    refundType: "Full Refund",
-    refundReason: "Customer cancelled",
-  },
-  {
-    bookingId: "DRI-12XDJF-130",
-    customerName: "Prosper Edward",
-    amount: "$120.00",
-    dateRequested: "30 Feb 2026",
-    status: "Rejected",
-    transactionId: "123SFRRF123GVI",
-    vehicle: "Toyota Highlander",
-    refundType: "Partial Refund",
-    refundReason: "Damage during trip",
-  },
-];
+export interface RefundActor {
+  id: string;
+  full_name: string;
+  email: string;
+}
+
+export interface Refund {
+  id: string;
+  reference: string;
+  payment: RefundPayment;
+  gateway_reference: string;
+  amount: string;
+  reason: string;
+  reason_display: string;
+  reason_note: string;
+  status: string;
+  status_display: string;
+  initiated_by: RefundActor | null;
+  reviewed_by: RefundActor | null;
+  rejected_at: string | null;
+  refunded_at: string | null;
+  created_at: string;
+}
+
+// ─── Derived helpers ───────────────────────────────────────────────────────────
+
+export type RefundStatus = "pending" | "processing" | "success" | "rejected" | "failed";
+
+/** Map API `status` string → display label */
+export function getStatusDisplay(status: string): string {
+  const map: Record<string, string> = {
+    pending: "Pending",
+    processing: "Processing",
+    success: "Completed",
+    rejected: "Rejected",
+    failed: "Failed",
+  };
+  return map[status?.toLowerCase()] ?? status;
+}
+
+/** Format a raw amount string ("79875.00") → "₦79,875.00" */
+export function formatAmount(raw: string | number): string {
+  const num = parseFloat(String(raw));
+  if (isNaN(num)) return String(raw);
+  return `₦${num.toLocaleString("en-NG", { minimumFractionDigits: 2 })}`;
+}
+
+/** Format an ISO date string → "20 Jun 2026" */
+export function formatDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+}
