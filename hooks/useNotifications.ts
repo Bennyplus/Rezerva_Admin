@@ -28,33 +28,42 @@ export function useNotifications() {
           console.error('Failed to fetch auth token for WebSocket');
           return;
         }
-        
+
         const { token } = await response.json();
-        
+
         // Connect to WebSocket
         const wsUrl = `wss://drifully-backend-1qa6.onrender.com/ws/notification/?token=${token}`;
         ws = new WebSocket(wsUrl);
 
         ws.onopen = () => {
-          console.log('WebSocket connected');
+          // console.log('WebSocket connected');
           setIsConnected(true);
         };
 
         ws.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            console.log('WebSocket message received:', data);
-            
-            // Assuming the backend sends a notification object
-            if (data && data.type === 'notification') {
-              const newNotification = data.payload as Notification;
-              setNotifications(prev => [newNotification, ...prev]);
+            // console.log('WebSocket message received:', data);
+
+            // Handle plain message format { message: "..." }
+            if (data && typeof data.message === 'string') {
+              // console.log('Processing flat message into notification:', data.message);
+              const newNotification: Notification = {
+                id: Math.random().toString(36).substring(2, 11),
+                title: 'System Notification',
+                message: data.message,
+                type: 'info',
+                is_read: false,
+                created_at: new Date().toISOString(),
+              };
+              setNotifications(prev => [newNotification, ...prev].slice(0, 30));
               setUnreadCount(prev => prev + 1);
-              
-              // Show a toast if you have a global toast function
-              if (typeof (window as any).__showAdminToast === 'function') {
-                (window as any).__showAdminToast('info', newNotification.title || 'New Notification');
-              }
+            }
+            // Assuming the backend sends a notification object
+            else if (data && data.type === 'notification') {
+              const newNotification = data.payload as Notification;
+              setNotifications(prev => [newNotification, ...prev].slice(0, 30));
+              setUnreadCount(prev => prev + 1);
             } else if (data && data.type === 'unread_count') {
               setUnreadCount(data.payload.count);
             }
@@ -68,7 +77,7 @@ export function useNotifications() {
         };
 
         ws.onclose = () => {
-          console.log('WebSocket disconnected');
+          // console.log('WebSocket disconnected');
           setIsConnected(false);
           // Attempt to reconnect after 5 seconds
           reconnectTimeout = setTimeout(connectWebSocket, 5000);
@@ -105,11 +114,17 @@ export function useNotifications() {
     setUnreadCount(0);
   }, []);
 
+  const clearNotifications = useCallback(() => {
+    setNotifications([]);
+    setUnreadCount(0);
+  }, []);
+
   return {
     notifications,
     unreadCount,
     isConnected,
     markAsRead,
     markAllAsRead,
+    clearNotifications,
   };
 }
