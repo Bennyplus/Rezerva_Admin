@@ -6,11 +6,20 @@ import CustomSelect from '@/components/admin/CustomSelect';
 import { accountsService } from '@/services/accounts-service';
 
 export default function DriverApplicationPage() {
-  const [step, setStep] = useState<1 | 2>(1);
+  const [step, setStep] = useState<1 | 2>(2);
   const [referralCode, setReferralCode] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+
+  const [driverLicense, setDriverLicense] = useState<File | null>(null);
+  const [proofOfIdentity, setProofOfIdentity] = useState<File | null>(null);
+
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const [phonePrefix, setPhonePrefix] = useState("");
+  const [phonePrefixOptions, setPhonePrefixOptions] = useState<any[]>([]);
+
 
   // Step 2 Form Data
   const [formData, setFormData] = useState({
@@ -22,13 +31,11 @@ export default function DriverApplicationPage() {
     proof_of_identity_type: '',
   });
 
-  const [driverLicense, setDriverLicense] = useState<File | null>(null);
-  const [proofOfIdentity, setProofOfIdentity] = useState<File | null>(null);
-
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [phonePrefix, setPhonePrefix] = useState("");
-  const [phonePrefixOptions, setPhonePrefixOptions] = useState<any[]>([]);
+  const proofOfIdentityOptions = [
+    { value: "electricity_bill", label: "Utility Bill" },
+    { value: "lawma_bill", label: "Lawma bill" },
+    { value: "bank_statement", label: "Bank Statement" },
+  ]
 
   useEffect(() => {
     async function loadCountries() {
@@ -42,8 +49,8 @@ export default function DriverApplicationPage() {
 
         setPhonePrefixOptions(options);
 
-        // Set US as default, or fallback to first
-        const defaultCountry = countriesData.find((c: any) => c.iso_code === "US") || countriesData[0];
+        // Set Nigeria as default
+        const defaultCountry = countriesData.find((c: any) => c.iso_code === "234") || countriesData[1];
         if (defaultCountry) {
           setPhonePrefix(String(defaultCountry.id));
           setFormData(prev => ({ ...prev, country: String(defaultCountry.id) }));
@@ -287,15 +294,13 @@ export default function DriverApplicationPage() {
               <div className={styles.form_group}>
                 <label htmlFor="proof_of_identity_type" className={styles.label}>Proof of Identity Type</label>
                 <div className={styles.input_wrapper}>
-                  <input
-                    id="proof_of_identity_type"
+                  <CustomSelect
                     name="proof_of_identity_type"
-                    type="text"
-                    required
-                    className={styles.input}
-                    placeholder="e.g. lawma_bill, passport"
                     value={formData.proof_of_identity_type}
-                    onChange={handleInputChange}
+                    placeholder="Select proof of identity type"
+                    options={proofOfIdentityOptions}
+                    onChange={handleSelectChange}
+                    variant="minimal"
                   />
                 </div>
               </div>
