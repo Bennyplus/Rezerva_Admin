@@ -6,7 +6,7 @@ import CustomSelect from '@/components/admin/CustomSelect';
 import { accountsService } from '@/services/accounts-service';
 
 export default function DriverApplicationPage() {
-  const [step, setStep] = useState<1 | 2>(2);
+  const [step, setStep] = useState<1 | 2>(1);
   const [referralCode, setReferralCode] = useState('');
   const [isValidating, setIsValidating] = useState(false);
   const [errorMsg, setErrorMsg] = useState('');
@@ -66,6 +66,8 @@ export default function DriverApplicationPage() {
     if (name === "phonePrefix") {
       setPhonePrefix(value);
       setFormData(prev => ({ ...prev, country: value }));
+    } else {
+      setFormData(prev => ({ ...prev, [name]: value }));
     }
   };
 
