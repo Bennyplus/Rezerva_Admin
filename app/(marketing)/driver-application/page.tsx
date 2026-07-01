@@ -41,19 +41,19 @@ export default function DriverApplicationPage() {
     async function loadCountries() {
       try {
         const countriesData = await accountsService.getCountries();
-        const options = countriesData.map((c: any) => ({
-          value: String(c.id),
-          label: c.dial_code,
-          icon: c.flag
-        }));
-
-        setPhonePrefixOptions(options);
-
-        // Set Nigeria as default
-        const defaultCountry = countriesData.find((c: any) => c.iso_code === "234") || countriesData[1];
-        if (defaultCountry) {
-          setPhonePrefix(String(defaultCountry.id));
-          setFormData(prev => ({ ...prev, country: String(defaultCountry.id) }));
+        
+        // Find Nigeria and set as the only option
+        const nigeria = countriesData.find((c: any) => c.iso_code === "234" || c.dial_code === "+234") || countriesData[0];
+        
+        if (nigeria) {
+          const options = [{
+            value: String(nigeria.id),
+            label: nigeria.dial_code,
+            icon: nigeria.flag
+          }];
+          setPhonePrefixOptions(options);
+          setPhonePrefix(String(nigeria.id));
+          setFormData(prev => ({ ...prev, country: String(nigeria.id) }));
         }
       } catch (error) {
         console.error("Failed to fetch countries for phone prefixes", error);
