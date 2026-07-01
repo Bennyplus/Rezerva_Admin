@@ -196,5 +196,33 @@ export const accountsService = {
       console.error('Logout failed:', e);
       throw e;
     }
+  },
+
+  /**
+   * Verifies the referral code for driver online registration
+   * @param data - FormData containing referral_code
+   */
+  verifyDriverReferral: async (data: FormData): Promise<any> => {
+    const response = await publicApi.post('', data, {
+      params: { path: 'api/v1/drivers/verify-referral/' },
+      skipToast: true
+    } as any);
+    return response.data;
+  },
+
+  /**
+   * Registers a new driver online
+   * @param referralCode - Validated referral code
+   * @param data - FormData containing driver metadata and files
+   */
+  registerDriverOnline: async (referralCode: string, data: FormData): Promise<any> => {
+    const response = await publicApi.post('', data, {
+      params: {
+        path: 'api/v1/drivers/online/register/',
+        referral_code: referralCode
+      },
+      skipToast: true
+    } as any);
+    return response.data;
   }
 };
