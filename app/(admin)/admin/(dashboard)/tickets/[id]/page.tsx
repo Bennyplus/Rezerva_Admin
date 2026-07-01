@@ -21,6 +21,9 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
   const [isAssignOpen, setIsAssignOpen] = useState(false);
   const [isResolveOpen, setIsResolveOpen] = useState(false);
   const [isEscalateOpen, setIsEscalateOpen] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [isResolving, setIsResolving] = useState(false);
+  const [isEscalating, setIsEscalating] = useState(false);
 
   useEffect(() => {
     const fetchTicket = async () => {
@@ -39,6 +42,7 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
   }, [ticketId]);
 
   const handleAssign = async (adminId: string) => {
+    setIsAssigning(true);
     try {
       await ticketsService.assignTicket(ticketId, adminId);
       setTicket((prev: any) => prev ? { ...prev, status: "In Progress" as TicketStatus } : prev);
@@ -46,10 +50,12 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
       console.error("Failed to assign ticket:", error);
     } finally {
       setIsAssignOpen(false);
+      setIsAssigning(false);
     }
   };
 
   const handleEscalate = async (reason: string) => {
+    setIsEscalating(true);
     try {
       await ticketsService.escalateTicket(ticketId, reason);
       setTicket((prev: any) => prev ? { ...prev, status: "Escalated", priority: "High" } : prev);
@@ -57,10 +63,12 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
       console.error("Failed to escalate ticket:", error);
     } finally {
       setIsEscalateOpen(false);
+      setIsEscalating(false);
     }
   };
 
   const handleResolve = async (notes: string) => {
+    setIsResolving(true);
     try {
       await ticketsService.resolveTicket(ticketId, notes);
       setTicket((prev: any) => prev ? { ...prev, status: "Resolved" as TicketStatus } : prev);
@@ -68,6 +76,7 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
       console.error("Failed to resolve ticket:", error);
     } finally {
       setIsResolveOpen(false);
+      setIsResolving(false);
     }
   };
 
@@ -259,16 +268,19 @@ export default function TicketDetailPage({ params }: { params: Promise<{ id: str
         isOpen={isAssignOpen}
         onClose={() => setIsAssignOpen(false)}
         onAssign={(adminId, _notes) => handleAssign(adminId)}
+        isLoading={isAssigning}
       />
       <ResolveTicketModal
         isOpen={isResolveOpen}
         onClose={() => setIsResolveOpen(false)}
         onResolve={(notes, _email) => handleResolve(notes)}
+        isLoading={isResolving}
       />
       <EscalateTicketModal
         isOpen={isEscalateOpen}
         onClose={() => setIsEscalateOpen(false)}
         onEscalate={handleEscalate}
+        isLoading={isEscalating}
       />
     </div>
   );

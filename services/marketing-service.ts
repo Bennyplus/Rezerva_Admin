@@ -93,8 +93,10 @@ export const marketingService = {
 
   getTestimonials: async (): Promise<any[]> => {
     const response = await publicApi.get('', {
-      params: { path: 'api/v1/accounts/testimonials/' }
-    });
+      params: { path: 'api/v1/accounts/testimonials/' },
+      timeout: 3000,
+      skipToast: true
+    } as any);
     return response.data;
   },
 

@@ -28,6 +28,10 @@ export default function TicketsPage() {
   const [resolveModalTicketId, setResolveModalTicketId] = useState<string | null>(null);
   const [escalateModalTicketId, setEscalateModalTicketId] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<string>("Newest to Oldest");
+  const [isEscalating, setIsEscalating] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+  const [isResolving, setIsResolving] = useState(false);
+  const [isClosing, setIsClosing] = useState(false);
 
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [metrics, setMetrics] = useState<any>(null);
@@ -96,6 +100,7 @@ export default function TicketsPage() {
 
   // Action handlers
   const handleAssign = async (ticketNumber: string, adminId: string) => {
+    setIsAssigning(true);
     try {
       await ticketsService.assignTicket(ticketNumber, adminId);
       setTickets(prev => prev.map(t => t.ticketNumber === ticketNumber ? { ...t, status: "In Progress" as TicketStatus } : t));
@@ -103,10 +108,12 @@ export default function TicketsPage() {
       console.error("Failed to assign ticket:", error);
     } finally {
       setAssignModalTicketId(null);
+      setIsAssigning(false);
     }
   };
 
   const handleResolve = async (ticketNumber: string, notes: string) => {
+    setIsResolving(true);
     try {
       await ticketsService.resolveTicket(ticketNumber, notes);
       setTickets(prev => prev.map(t => t.ticketNumber === ticketNumber ? { ...t, status: "Resolved" as TicketStatus } : t));
@@ -114,10 +121,12 @@ export default function TicketsPage() {
       console.error("Failed to resolve ticket:", error);
     } finally {
       setResolveModalTicketId(null);
+      setIsResolving(false);
     }
   };
 
   const handleEscalate = async (ticketNumber: string, reason: string) => {
+    setIsEscalating(true);
     try {
       await ticketsService.escalateTicket(ticketNumber, reason);
       setTickets(prev => prev.map(t =>
@@ -126,16 +135,20 @@ export default function TicketsPage() {
     } catch (error) {
       console.error("Failed to escalate ticket:", error);
     } finally {
+      setIsEscalating(false);
       setEscalateModalTicketId(null);
     }
   };
 
   const handleClose = async (ticketNumber: string) => {
+    setIsClosing(true);
     try {
       await ticketsService.closeTicket(ticketNumber);
       setTickets(prev => prev.map(t => t.ticketNumber === ticketNumber ? { ...t, status: "Closed" as TicketStatus } : t));
     } catch (error) {
       console.error("Failed to close ticket:", error);
+    } finally {
+      setIsClosing(false);
     }
   };
 
@@ -198,15 +211,15 @@ export default function TicketsPage() {
           searchValue={searchQuery}
           onSearchChange={(v) => { setSearchQuery(v); setCurrentPage(1); }}
           filterDropdown={
-            <FilterDropdown 
+            <FilterDropdown
               tabs={[
                 { id: 'status', label: 'Status', options: ['Pending', 'In Progress', 'Resolved', 'Escalated', 'Closed'] }
               ]}
-              onApply={setActiveFilters} 
+              onApply={setActiveFilters}
             />
           }
           sortDropdown={
-            <SortDropdown 
+            <SortDropdown
               options={[
                 { label: "Newest to Oldest", value: "Newest to Oldest" },
                 { label: "Oldest to Newest", value: "Oldest to Newest" }
@@ -350,7 +363,7 @@ export default function TicketsPage() {
           <Pagination
             currentPage={currentPage}
             totalPages={Math.max(1, Math.ceil(totalCount / 10))}
-            resultsPerPage={10}
+            resultsPerPage={filtered.length}
             onPageChange={setCurrentPage}
           />
         </div>
@@ -363,6 +376,7 @@ export default function TicketsPage() {
         onAssign={(adminId, _notes) => {
           if (assignModalTicketId) handleAssign(assignModalTicketId, adminId);
         }}
+        isLoading={isAssigning}
       />
 
       <ResolveTicketModal
@@ -371,6 +385,7 @@ export default function TicketsPage() {
         onResolve={(notes, _email) => {
           if (resolveModalTicketId) handleResolve(resolveModalTicketId, notes);
         }}
+        isLoading={isResolving}
       />
 
       <EscalateTicketModal
@@ -379,6 +394,7 @@ export default function TicketsPage() {
         onEscalate={(reason) => {
           if (escalateModalTicketId) handleEscalate(escalateModalTicketId, reason);
         }}
+        isLoading={isEscalating}
       />
     </div>
   );

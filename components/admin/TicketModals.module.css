@@ -213,6 +213,9 @@
   font-weight: 500;
   cursor: not-allowed;
   transition: all 0.2s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
 }
 
 .submitBtn:not(:disabled) {
@@ -224,3 +227,22 @@
 .submitBtn:not(:disabled):hover {
   background: #000000;
 }
+
+.submitBtn:not(:disabled) {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* ─── Inline button spinner ─── */
+@keyframes btnSpin {
+  to { transform: rotate(360deg); }
+}
+
+.btnSpinner {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  animation: btnSpin 0.7s linear infinite;
+}
+

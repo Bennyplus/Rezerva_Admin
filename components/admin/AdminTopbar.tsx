@@ -84,7 +84,7 @@ export default function AdminTopbar() {
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
-  const { notifications, unreadCount, markAsRead, markAllAsRead } = useNotifications();
+  const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } = useNotifications();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -194,6 +194,13 @@ export default function AdminTopbar() {
               ) : (
                 <div className={styles.emptyState}>
                   No new notifications
+                </div>
+              )}
+              {notifications.length > 0 && (
+                <div className={styles.dropdownFooter}>
+                  <button className={styles.clearAllBtn} onClick={clearNotifications}>
+                    Clear all
+                  </button>
                 </div>
               )}
             </div>

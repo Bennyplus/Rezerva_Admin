@@ -265,3 +265,26 @@
   color: var(--admin-section-label, #868C98);
   font-size: 13px;
 }
+
+.dropdownFooter {
+  padding: 8px 16px;
+  border-top: 1px solid var(--admin-card-border, #E2E4E9);
+  display: flex;
+  justify-content: center;
+}
+
+.clearAllBtn {
+  background: none;
+  border: none;
+  color: #EF4444;
+  font-size: 12px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: background 0.15s ease;
+}
+
+.clearAllBtn:hover {
+  background: #FEF2F2;
+  text-decoration: underline;
+}
