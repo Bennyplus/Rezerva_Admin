@@ -126,8 +126,10 @@ export default function CookiePolicyPage() {
           <h2 className={styles.sectionTitle}>8. CONTACT US</h2>
           <div className={styles.contactInfo}>
             <p className={styles.text}>
-              <strong>Company Name:</strong> Drifully Global Technologies<br />
-              <strong>Email:</strong> Drifully@gmail.com
+              <strong>Company Name:</strong> Drifully Customer Support<br />
+              <strong>Email:</strong> drifully@gmail.com<br />
+              <strong>Phone:</strong> +234 7039344411<br />
+              <strong>Website:</strong> www.drifullyrentals.com
             </p>
           </div>
         </section>
