@@ -10,10 +10,10 @@ const FEATURES = [
     image: "/images/rentalsimage.png",
     description: (
       <>
-        Whether you prefer the <span style={{ color: "#000" }}>freedom</span> of being{" "}
-        <span style={{ color: "#000" }}>behind the wheel</span> or the comfort of a{" "}
-        <span style={{ color: "#000" }}>professional driver</span>, Drifully adapts to your needs.
-        Choose what fits <span style={{ color: "#000" }}>your schedule, your mood, and your journey</span>,{" "}
+        Whether you prefer the <span style={{ color: "var(--color-primary)" }}>freedom</span> of being{" "}
+        <span style={{ color: "var(--color-primary)" }}>behind the wheel</span> or the comfort of a{" "}
+        <span style={{ color: "var(--color-primary)" }}>professional driver</span>, Drifully adapts to your needs.
+        Choose what fits <span style={{ color: "var(--color-primary)" }}>your schedule, your mood, and your journey</span>,{" "}
         every time.
       </>
     ),
@@ -25,10 +25,10 @@ const FEATURES = [
     image: "/images/reliableandsecure-female.png",
     description: (
       <>
-        Every vehicle is <span style={{ color: "#000" }}>carefully maintained</span> and every driver{" "}
-        <span style={{ color: "#000" }}>professionally vetted</span> to ensure a safe, dependable
-        experience. With clear pricing and <span style={{ color: "#000" }}>no hidden fees</span>, you
-        can book with complete <span style={{ color: "#000" }}>confidence</span> from start to finish.
+        Every vehicle is <span style={{ color: "var(--color-primary)" }}>carefully maintained</span> and every driver{" "}
+        <span style={{ color: "var(--color-primary)" }}>professionally vetted</span> to ensure a safe, dependable
+        experience. With clear pricing and <span style={{ color: "var(--color-primary)" }}>no hidden fees</span>, you
+        can book with complete <span style={{ color: "var(--color-primary)" }}>confidence</span> from start to finish.
       </>
     ),
   },
@@ -40,7 +40,7 @@ const FEATURES = [
     description: (
       <>
         From selecting your ride to confirming your trip, everything is designed
-        to be <span style={{ color: "#000" }}>quick and effortless.</span>
+        to be <span style={{ color: "var(--color-primary)" }}>quick and effortless.</span>
       </>
     ),
   },
@@ -52,7 +52,7 @@ const FEATURES = [
     description: (
       <>
         Whether it's a quick trip, a family outing, or a special occasion,{" "}
-        <span style={{ color: "#000" }}>find the perfect car for every kind of journey</span>
+        <span style={{ color: "var(--color-primary)" }}>find the perfect car for every kind of journey</span>
       </>
     ),
   },
@@ -63,7 +63,7 @@ const FEATURES = [
     image: "/images/24-7support.png",
     description: (
       <>
-        Our team is <span style={{ color: "#000" }}>available around the clock</span> via chat, phone,
+        Our team is <span style={{ color: "var(--color-primary)" }}>available around the clock</span> via chat, phone,
         or email.
       </>
     ),
