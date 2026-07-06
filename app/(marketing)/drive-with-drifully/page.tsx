@@ -300,47 +300,88 @@ export default function DriveWithDrifullyPage() {
           </div>
           <div className={styles.faqGrid}>
             <div className={styles.faqCard}>
-              <div className={styles.faqQ}><span>01</span> Can I rent a vehicle?</div>
-              <p className={styles.faqA}>
-                Yes, if you don&apos;t have your own car, we have partnerships that allow you to rent vehicles to drive on our platform.
-              </p>
+              <div className={styles.faqNumber}>01</div>
+              <div className={styles.faqContent}>
+                <h3 className={styles.faqQ}>Can I cancel anytime?</h3>
+                <p className={styles.faqA}>
+                  Yes — you can cancel your subscription at any time. Your access will remain active until the billing cycle ends, and no additional charges will be applied.
+                </p>
+              </div>
             </div>
             <div className={styles.faqCard}>
-              <div className={styles.faqQ}><span>02</span> Do you offer insurance?</div>
-              <p className={styles.faqA}>
-                Yes, all active rides come with standard liability and collision insurance coverage to protect you while driving.
-              </p>
+              <div className={styles.faqNumber}>02</div>
+              <div className={styles.faqContent}>
+                <h3 className={styles.faqQ}>Do you offer discounts?</h3>
+                <p className={styles.faqA}>
+                  Yes — drivers receive a 30% discount on all plans. Verification is required with a valid enrollment document, and the discount is applied immediately.
+                </p>
+              </div>
             </div>
             <div className={styles.faqCard}>
-              <div className={styles.faqQ}><span>03</span> How do I get paid?</div>
-              <p className={styles.faqA}>
-                You will get paid directly to your bank account securely, with fast weekly payouts for all completed rides.
-              </p>
+              <div className={styles.faqNumber}>03</div>
+              <div className={styles.faqContent}>
+                <h3 className={styles.faqQ}>Is my data kept secure?</h3>
+                <p className={styles.faqA}>
+                  Yes — all customer data is encrypted and stored safely. We follow strict compliance standards, with regular audits to keep your information protected.
+                </p>
+              </div>
             </div>
             <div className={styles.faqCard}>
-              <div className={styles.faqQ}><span>04</span> Is my personal data secure?</div>
-              <p className={styles.faqA}>
-                Yes, we use secure, industry-standard encryption to ensure your personal information and documents are fully protected.
-              </p>
+              <div className={styles.faqNumber}>04</div>
+              <div className={styles.faqContent}>
+                <h3 className={styles.faqQ}>Can I change my plan anytime?</h3>
+                <p className={styles.faqA}>
+                  Yes — you can upgrade or downgrade your plan anytime. The changes take effect immediately, and billing adjustments happen automatically.
+                </p>
+              </div>
             </div>
+            <div className={styles.faqCard}>
+              <div className={styles.faqNumber}>05</div>
+              <div className={styles.faqContent}>
+                <h3 className={styles.faqQ}>Do you provide onboarding guidance?</h3>
+                <p className={styles.faqA}>
+                  Yes — every customer receives onboarding guidance. Interactive demos and instructions are included to make setup smooth and easy.
+                </p>
+              </div>
+            </div>
+            <div className={styles.faqCard}>
+              <div className={styles.faqNumber}>06</div>
+              <div className={styles.faqContent}>
+                <h3 className={styles.faqQ}>Is customer support available 24/7?</h3>
+                <p className={styles.faqA}>
+                  Yes — our support team is available around the clock. You can reach us by live chat or email anytime, with fast response times every single day.
+                </p>
+              </div>
+            </div>
+          </div>
+          <div className={styles.faqFooter}>
+            <p className={styles.faqFooterText}>Still have questions? Our support team is ready to help</p>
+            <Link href="/contact-us" className={styles.faqContactButton}>
+              Contact Us
+            </Link>
           </div>
         </div>
       </section>
 
       {/* CTA Section */}
       <section className={styles.ctaSection}>
+        <div className={styles.ctaBackground}>
+          <div className={styles.ctaReady2}>
+            <Image src="/images/ready-1.png" alt="Background Layer 1" fill style={{ objectFit: 'cover' }} />
+          </div>
+          {/* <div className={styles.ctaReadyBlur}></div> */}
+          <div className={styles.ctaReady1}>
+            <Image src="/images/ready-2.png" alt="Background Layer 2" fill style={{ objectFit: 'cover' }} />
+          </div>
+        </div>
         <div className={styles.container}>
           <div className={styles.ctaContent}>
             <h2 className={styles.ctaTitle}>Ready to Start Your Journey?</h2>
             <p className={styles.ctaDesc}>
-              Apply today and start earning with Drifully.
+              Take the first step toward becoming a trusted Drifully driver today.
             </p>
-            <div className={styles.ctaImages}>
-              <Image src="/images/ready-1.png" alt="Ready 1" width={150} height={50} className={styles.ctaImage} />
-              <Image src="/images/ready-2.png" alt="Ready 2" width={150} height={50} className={styles.ctaImage} />
-            </div>
-            <Link href="/driver-application" className={styles.heroButton}>
-              Apply To Drive
+            <Link href="/driver-application" className={styles.ctaButton}>
+              Become A Driver
             </Link>
           </div>
         </div>

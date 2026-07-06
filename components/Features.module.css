@@ -16,7 +16,7 @@
 
 .features__overline {
   margin-bottom: 16px;
-  color: #868C98;
+  color: var(--color-primary);
 }
 
 .features__heading {
@@ -34,7 +34,7 @@
   font-size: 14px;
   line-height: 170%;
   letter-spacing: -0.5px;
-  color: rgba(134, 140, 152, 1);
+  color: var(--color-primary);
 }
 
 .features__tag {
@@ -118,7 +118,7 @@
 .feature-card__desc {
   font-family: var(--font-body);
   font-size: var(--text-sm);
-  color: var(--color-muted);
+  color: var(--color-primary);
   line-height: var(--leading-relaxed);
 }
 
