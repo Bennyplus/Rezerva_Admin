@@ -301,9 +301,9 @@
 }
 
 .earnGrid {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 32px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
   text-align: left;
 }
 
@@ -325,31 +325,32 @@
 }
 
 .earnCard:nth-child(1) {
-  grid-column: span 2;
+  flex: 1;
 }
 
 .earnCard:nth-child(2) {
-  grid-column: span 3;
+  flex: 0 0 738px;
 }
 
 .earnCard:nth-child(3) {
-  grid-column: span 3;
+  flex: 0 0 683px;
 }
 
 .earnCard:nth-child(4) {
-  grid-column: span 2;
+  flex: 1;
 }
 
 @media (max-width: 900px) {
   .earnGrid {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .earnCard:nth-child(1),
   .earnCard:nth-child(2),
   .earnCard:nth-child(3),
   .earnCard:nth-child(4) {
-    grid-column: span 1;
+    flex: 1 1 auto;
+    width: 100%;
   }
 }
 
@@ -366,42 +367,52 @@
   flex: 1 1 auto;
   order: 0;
   align-self: stretch;
-  margin-bottom: 24px;
+  margin-bottom: 12px;
   position: relative;
   min-height: 0;
 }
 
+.earnImagePlaceholderFill {
+  padding: 0;
+  overflow: hidden;
+}
+
 .earnStep {
   color: #3b82f6;
+  font-family: "DM Sans", sans-serif;
   font-weight: 600;
-  font-size: 0.9rem;
-  margin-bottom: 8px;
+  font-size: 20px;
+  line-height: 125%;
+  letter-spacing: -0.75px;
+  text-align: center;
+  vertical-align: middle;
 }
 
 .earnCardTitle {
   font-size: 20px;
   font-weight: 500;
-  margin-bottom: 12px;
+  /* margin-bottom: 12px; */
   color: #111;
-  line-height: 1.4;
+  line-height: 1.25;
+  letter-spacing: -0.75px;
 }
 
 .earnCardDesc {
   font-size: 1rem;
   color: #555;
-  line-height: 1.5;
+  line-height: 1.25;
 }
 
 .earnList {
   list-style: none;
   padding: 0;
-  margin-top: 12px;
+  /* margin-top: 12px; */
 }
 
 .earnList li {
   position: relative;
   padding-left: 16px;
-  margin-bottom: 6px;
+  /* margin-bottom: 6px; */
   font-size: 0.95rem;
   color: #555;
 }
@@ -420,15 +431,21 @@
 }
 
 .faqHeader {
-  max-width: 600px;
   margin-bottom: 48px;
 }
 
 .faqTitle {
-  font-size: 2.2rem;
-  font-weight: 700;
-  color: #111;
-  margin-bottom: 12px;
+  width: 100%;
+  max-width: 727px;
+  min-height: 100px;
+  font-family: "DM Sans", sans-serif;
+  font-weight: 600;
+  font-size: 40px;
+  line-height: 125%;
+  display: flex;
+  align-items: center;
+  letter-spacing: -1.3px;
+  color: #171717;
 }
 
 .faqGrid {
@@ -438,32 +455,41 @@
 }
 
 .faqCard {
-  background: #f9fafb;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
   padding: 24px;
-  border-radius: 12px;
+  gap: 24px;
+  background: #F7F7F7;
+  border-radius: 10px;
 }
 
-.faqQ {
-  font-size: 1.1rem;
+.faqNumber {
+  font-family: "DM Sans", sans-serif;
   font-weight: 600;
-  margin-bottom: 8px;
-  color: #111;
+  font-size: 16px;
+  color: #171717;
+  flex-shrink: 0;
+}
+
+.faqContent {
   display: flex;
-  align-items: flex-start;
+  flex-direction: column;
   gap: 12px;
 }
 
-.faqQ span {
-  color: #666;
-  font-size: 0.9rem;
-  margin-top: 3px;
+.faqQ {
+  font-family: "DM Sans", sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #111;
 }
 
 .faqA {
+  font-family: "DM Sans", sans-serif;
   font-size: 1rem;
-  color: #555;
+  color: #868C98;
   line-height: 1.5;
-  padding-left: 32px;
 }
 
 /* CTA Section */
