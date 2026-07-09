@@ -51,7 +51,7 @@ export default function Footer() {
               <h3 className={styles['footer__col-title']}>Legal</h3>
               <ul className={styles['footer__links']}>
                 <li><Link href="/privacy" className={styles['footer__link']}>Privacy Policy</Link></li>
-                {/* <li><Link href="/terms" className={styles['footer__link']}>Terms & Conditions</Link></li> */}
+                <li><Link href="/terms" className={styles['footer__link']}>Terms & Conditions</Link></li>
                 <li><Link href="/cookie-policy" className={styles['footer__link']}>Cookie Policy</Link></li>
                 <li><Link href="/cancellation" className={styles['footer__link']}>Cancellation Policy</Link></li>
               </ul>

@@ -17,6 +17,7 @@
 .features__overline {
   margin-bottom: 16px;
   color: var(--color-primary);
+  font-weight: 600;
 }
 
 .features__heading {
@@ -30,7 +31,7 @@
   gap: 12px;
   flex-wrap: wrap;
   /* font-family: "DM Sans", sans-serif; */
-  font-weight: 400;
+  font-weight: 600;
   font-size: 14px;
   line-height: 170%;
   letter-spacing: -0.5px;
@@ -44,8 +45,8 @@
 }
 
 .features__tag-dot {
-  width: 6px;
-  height: 6px;
+  width: 8px;
+  height: 8px;
   background-color: rgba(134, 140, 152, 1);
   border-radius: 50%;
   display: inline-block;
@@ -106,7 +107,7 @@
 
 .feature-card__title {
   font-family: "DM Sans", sans-serif;
-  font-weight: 500;
+  font-weight: 700;
   font-style: normal;
   font-size: 14px;
   line-height: 170%;
@@ -120,6 +121,7 @@
   font-size: var(--text-sm);
   color: var(--color-primary);
   line-height: var(--leading-relaxed);
+  font-weight: 600;
 }
 
 .feature-card__placeholder {

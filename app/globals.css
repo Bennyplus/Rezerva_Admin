@@ -708,7 +708,7 @@ h6 {
 
 .hero__description {
   font-family: "DM Sans", sans-serif;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 16px;
   line-height: 170%;
   letter-spacing: -0.5px;
@@ -759,7 +759,7 @@ h6 {
 
 .hero__meta {
   font-family: "DM Sans", sans-serif;
-  font-weight: 400;
+  font-weight: 500;
   font-size: 16px;
   line-height: 170%;
   letter-spacing: -0.3px;
@@ -874,7 +874,7 @@ h6 {
 
 .hero__badge-text {
   font-family: var(--font-heading);
-  font-weight: 300;
+  font-weight: 500;
   font-size: var(--text-sm);
   color: var(--color-primary);
   white-space: nowrap;
@@ -1059,6 +1059,7 @@ h6 {
   gap: 16px;
   color: var(--color-primary);
   font-size: 14px;
+  font-weight: 500;
 }
 
 .features__tag {
@@ -1068,8 +1069,8 @@ h6 {
 }
 
 .features__tag-dot {
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: 50%;
   background: var(--color-primary);
   flex-shrink: 0;
@@ -1122,6 +1123,7 @@ h6 {
   flex-shrink: 0;
   margin-bottom: var(--space-4);
   border: 1px solid var(--color-border);
+  font-weight: 500;
 }
 
 .feature-card__title {
@@ -1363,7 +1365,7 @@ h6 {
 
 .step-card__confirm-title {
   font-family: var(--font-heading);
-  font-weight: 600;
+  font-weight: 700;
   font-size: var(--text-sm);
   color: var(--color-primary);
 }
@@ -1384,7 +1386,7 @@ h6 {
 
 .step-card__title {
   font-family: "DM Sans", sans-serif;
-  font-weight: 600;
+  font-weight: 700;
   font-style: normal;
   font-size: 14px;
   line-height: 170%;
@@ -1401,6 +1403,7 @@ h6 {
   color: var(--color-primary);
   line-height: 170%;
   letter-spacing: -0.3px;
+  font-weight: 600;
 }
 
 /* Date picker mockup for step 2 */
@@ -1468,12 +1471,14 @@ h6 {
 
 .reviews__heading {
   margin-bottom: var(--space-3);
+  font-weight: 700;
 }
 
 .reviews__subtext {
   font-family: var(--font-body);
   font-size: var(--text-md);
   color: var(--color-primary);
+  font-weight: 600;
 }
 
 /* 7-Column Grid Layout */
@@ -1617,7 +1622,7 @@ h6 {
 .review-card__title {
   font-family: var(--font-heading);
   font-size: var(--text-base);
-  font-weight: 500;
+  font-weight: 700;
   color: var(--color-primary);
 }
 
@@ -1648,6 +1653,7 @@ h6 {
   color: var(--color-primary);
   line-height: 1.6;
   margin-bottom: var(--space-1);
+  font-weight: 600;
 }
 
 .review-card__author {

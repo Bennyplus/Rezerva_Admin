@@ -15,12 +15,13 @@ export default function CancellationPolicyPage() {
 
       <div className={styles.container}>
         <h1 className={styles.title}>DRIFULLY RESERVATION CANCELLATION, MODIFICATION &amp; REFUND POLICY</h1>
-        <p className={styles.effectiveDate}>Effective Date: 06/28/2026</p>
+        <p className={styles.effectiveDate}>Effective Date: 04--072026</p>
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>1. PURPOSE</h2>
           <p className={styles.text}>
-            This Reservation Cancellation, Modification &amp; Refund Policy (&quot;Policy&quot;) governs all vehicle reservations made with Drifully (&quot;Company,&quot; &quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). It explains how reservations may be canceled, modified, refunded, or forfeited. By booking a vehicle through Drifully&apos;s website, mobile application, customer support, or any authorized booking channel, you agree to this Policy.
+            This Reservation Cancellation, Modification &amp; Refund Policy (&quot;Policy&quot;) governs all vehicle reservations made with Drifully (&quot;Company,&quot; &quot;we,&quot; &quot;our,&quot; or &quot;us&quot;). It explains how reservations may be canceled, modified, refunded, or forfeited.
+            By booking a vehicle through Drifully&apos;s website, mobile application, customer support, or any authorized booking channel, you agree to this Policy.
           </p>
         </section>
 
@@ -38,23 +39,26 @@ export default function CancellationPolicyPage() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>3. STANDARD CANCELLATION</h2>
           <p className={styles.text}>After the grace period:</p>
-          
+
           <h3 className={styles.subSectionTitle}>More than 48 Hours Before Pickup</h3>
+          <p className={styles.text}>Cancellation Fee:</p>
           <ul className={styles.list}>
-            <li className={styles.listItem}>Cancellation Fee: 10% of the total reservation amount</li>
+            <li className={styles.listItem}>10% of the total reservation amount</li>
             <li className={styles.listItem}>Remaining balance refunded.</li>
           </ul>
 
           <h3 className={styles.subSectionTitle}>Within 48 Hours Before Pickup</h3>
+          <p className={styles.text}>Cancellation Fee:</p>
           <ul className={styles.list}>
-            <li className={styles.listItem}>Cancellation Fee: 25% of the total reservation amount OR one rental day, whichever is greater.</li>
+            <li className={styles.listItem}>25% of the total reservation amount OR one rental day, whichever is greater.</li>
             <li className={styles.listItem}>Remaining balance refunded.</li>
           </ul>
 
           <h3 className={styles.subSectionTitle}>Same-Day Cancellation</h3>
           <p className={styles.text}>If cancelled before the pickup time:</p>
+          <p className={styles.text}>Customer forfeits</p>
           <ul className={styles.list}>
-            <li className={styles.listItem}>Customer forfeits 50% of the total reservation cost.</li>
+            <li className={styles.listItem}>50% of the total reservation cost.</li>
           </ul>
 
           <h3 className={styles.subSectionTitle}>After Pickup Time</h3>
@@ -64,9 +68,10 @@ export default function CancellationPolicyPage() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>4. RESERVATION HOLD POLICY</h2>
           <p className={styles.text}>Drifully understands that travel delays can occur.</p>
-          
+
           <h3 className={styles.subSectionTitle}>Self-Drive Rentals</h3>
-          <p className={styles.text}>Your reservation will be held for: Up to 2 hours after your scheduled pickup time.</p>
+          <p className={styles.text}>Your reservation will be held for:</p>
+          <p className={styles.text}>Up to 2 hours after your scheduled pickup time.</p>
           <p className={styles.text}>After two hours:</p>
           <ul className={styles.list}>
             <li className={styles.listItem}>reservation may be cancelled;</li>
@@ -86,10 +91,11 @@ export default function CancellationPolicyPage() {
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>5. RESCHEDULING POLICY</h2>
           <p className={styles.text}>Instead of cancelling, customers may request to reschedule.</p>
-          
+
           <h3 className={styles.subSectionTitle}>One Complimentary Change</h3>
-          <p className={styles.text}>Each reservation qualifies for: One free date or time change provided the request is received at least 48 hours before pickup.</p>
-          
+          <p className={styles.text}>Each reservation qualifies for:</p>
+          <p className={styles.text}>One free date or time change provided the request is received at least: 48 hours before pickup.</p>
+
           <p className={styles.text}>Additional changes may incur:</p>
           <ul className={styles.list}>
             <li className={styles.listItem}>administrative fee;</li>
@@ -255,11 +261,21 @@ export default function CancellationPolicyPage() {
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>16. CHAUFFEUR RESERVATIONS</h2>
+          <p className={styles.text}>More than 24 hours before pickup:</p>
           <ul className={styles.list}>
-            <li className={styles.listItem}>More than 24 hours before pickup: Full refund.</li>
-            <li className={styles.listItem}>Less than 24 hours: 30% cancellation fee.</li>
-            <li className={styles.listItem}>Within 6 hours: 50% cancellation fee.</li>
-            <li className={styles.listItem}>After chauffeur dispatch: Dispatch costs are non-refundable.</li>
+            <li className={styles.listItem}>Full refund.</li>
+          </ul>
+          <p className={styles.text}>Less than 24 hours:</p>
+          <ul className={styles.list}>
+            <li className={styles.listItem}>30% cancellation fee.</li>
+          </ul>
+          <p className={styles.text}>Within 6 hours:</p>
+          <ul className={styles.list}>
+            <li className={styles.listItem}>50% cancellation fee.</li>
+          </ul>
+          <p className={styles.text}>After chauffeur dispatch:</p>
+          <ul className={styles.list}>
+            <li className={styles.listItem}>Dispatch costs are non-refundable.</li>
           </ul>
         </section>
 
@@ -361,3 +377,4 @@ export default function CancellationPolicyPage() {
     </main>
   );
 }
+
