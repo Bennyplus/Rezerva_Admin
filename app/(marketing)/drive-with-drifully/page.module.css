@@ -1,12 +1,12 @@
 .hero {
   position: relative;
   width: 100%;
-  min-height: 80vh;
+  min-height: 100vh;
   display: flex;
   align-items: center;
   background-color: #0A0D14;
   color: white;
-  padding: 120px 5% 60px;
+  /* padding: 120px 5% 60px; */
   overflow: hidden;
 }
 
@@ -14,9 +14,10 @@
   position: absolute;
   top: 0;
   right: 0;
-  width: 60%;
+  width: 100%;
   height: 100%;
   z-index: 1;
+  margin-top: 68px;
 }
 
 .heroBackground img {
@@ -24,28 +25,63 @@
   height: 100%;
   object-fit: cover;
   object-position: center;
-  mask-image: linear-gradient(to right, transparent, black 40%);
-  -webkit-mask-image: linear-gradient(to right, transparent, black 40%);
+}
+
+.heroBackground2 {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  background: rgba(19, 21, 27, 0.85);
+  mix-blend-mode: multiply;
+}
+
+.heroBackground3 {
+  position: absolute;
+  top: 100px;
+  right: 50px;
+  width: 479px;
+  height: 639px;
+  z-index: 2;
+  border-radius: 12px;
+}
+
+.heroBackground3 img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  object-position: center;
 }
 
 .heroContent {
   position: relative;
   z-index: 2;
-  max-width: 600px;
+  max-width: 501px;
+  margin-left: 100px;
+  margin-top: 100px;
 }
 
 .heroTitle {
-  font-size: 3.5rem;
-  font-weight: 700;
-  margin-bottom: 24px;
-  line-height: 1.1;
+  font-family: 'DM Sans', sans-serif;
+  font-style: normal;
+  font-weight: 600;
+  font-size: 64px;
+  line-height: 125%;
+  letter-spacing: -1.3px;
+  color: #FFFFFF;
 }
 
 .heroSubtitle {
-  font-size: 1.1rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 170%;
+  letter-spacing: -0.5px;
   color: #ccc;
-  margin-bottom: 24px;
-  line-height: 1.5;
+  margin-bottom: 12px;
 }
 
 .heroList {
@@ -58,7 +94,12 @@
   position: relative;
   padding-left: 28px;
   margin-bottom: 12px;
-  font-size: 1.05rem;
+  font-family: 'DM Sans', sans-serif;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 16px;
+  line-height: 120%;
+  letter-spacing: -0.5px;
   color: #eee;
 }
 
@@ -67,21 +108,43 @@
   position: absolute;
   left: 0;
   top: 2px;
-  color: #FACC15;
+  color: #fefdf8;
   /* yellow/gold tick */
   font-weight: bold;
 }
 
+.heroTrusted {
+  margin-top: 50px;
+}
+
+.heroTrustedText {
+  font-weight: 400;
+  font-style: Regular;
+  font-size: 16px;
+  line-height: 190%;
+  letter-spacing: -0.5px;
+  text-align: start;
+
+}
+
 .heroButton {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   background: white;
   color: black;
-  padding: 16px 32px;
-  border-radius: 4px;
+  width: 187px;
+  height: 44px;
+  gap: 4px;
+  border-radius: 10px;
+  border: 1px solid white;
+  padding: 10px;
+  font-family: 'DM Sans', sans-serif;
   font-weight: 600;
   text-decoration: none;
   font-size: 1rem;
   transition: opacity 0.2s;
+  box-sizing: border-box;
 }
 
 .heroButton:hover {
@@ -566,41 +629,23 @@
   top: 0;
   left: 50%;
   transform: translateX(-50%);
-  width: 1469px;
+  width: 100%;
   height: 462px;
   z-index: 1;
   pointer-events: none;
 }
 
-.ctaReady1 {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 1469px;
-  height: 100%;
-  /* transform: rotate(-180deg); */
-  opacity: 0.2;
-  z-index: 1;
-}
-
 .ctaReadyBlur {
   position: absolute;
-  top: 64px;
-  left: 0;
-  width: 1469px;
-  height: 100%;
-  backdrop-filter: blur(56.3px);
-  -webkit-backdrop-filter: blur(56.3px);
-  z-index: 3;
-}
-
-.ctaReady2 {
-  position: absolute;
   top: 0;
   left: 0;
-  width: 1469;
+  width: 100%;
   height: 100%;
-  z-index: 2;
+  background: rgba(24, 25, 32, 0.7);
+  backdrop-filter: blur(80px);
+  -webkit-backdrop-filter: blur(80px);
+  z-index: 3;
+  pointer-events: none;
 }
 
 .ctaContent {
@@ -612,16 +657,24 @@
 
 .ctaTitle {
   font-family: "DM Sans", sans-serif;
-  font-size: 3rem;
-  font-weight: 700;
-  margin-bottom: 24px;
-  letter-spacing: -1px;
+  font-size: 45px;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 125%;
+  letter-spacing: -1.3px;
+  text-align: center;
   color: #FFFFFF;
+  margin-bottom: 24px;
 }
 
 .ctaDesc {
   font-family: "DM Sans", sans-serif;
-  font-size: 1.1rem;
+  font-size: 16px;
+  font-weight: 400;
+  font-style: normal;
+  line-height: 170%;
+  letter-spacing: -0.5px;
+  text-align: center;
   color: #FFFFFF;
   margin-bottom: 40px;
   max-width: 600px;
@@ -635,13 +688,18 @@
   justify-content: center;
   background: white;
   color: #171717;
-  padding: 14px 28px;
-  border-radius: 8px;
+  width: 181px;
+  height: 44px;
+  gap: 4px;
+  border-radius: 10px;
+  border: 1px solid white;
+  padding: 10px;
   font-family: "DM Sans", sans-serif;
   font-weight: 600;
   font-size: 1rem;
   text-decoration: none;
   transition: opacity 0.2s ease, transform 0.1s ease;
+  box-sizing: border-box;
 }
 
 .ctaButton:hover {
