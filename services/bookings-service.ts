@@ -62,10 +62,14 @@ export const bookingsService = {
     }
   },
 
-  confirmPickup: async (bookingRef: string, data?: { otp: string }) => {
+  confirmPickup: async (bookingRef: string, data?: { otp_code: string }) => {
     try {
-      const response = await publicApi.post('', data || null, {
-        params: { path: `api/v1/admin/bookings/pickup/confirm/`, booking_ref: bookingRef },
+      const formData = new FormData();
+      if (data?.otp_code) {
+        formData.append('otp_code', data.otp_code);
+      }
+      const response = await publicApi.post('', formData, {
+        params: { path: `api/v1/admin/bookings/confirm-pickup/`, booking_ref: bookingRef },
       });
       return response.data;
     } catch (error) {

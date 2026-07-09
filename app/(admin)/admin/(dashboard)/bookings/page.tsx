@@ -147,10 +147,11 @@ export default function BookingsPage() {
 
   const submitOTPVerification = async (bookingId: string, otp: string) => {
     try {
-      await bookingsService.confirmPickup(bookingId, { otp });
+      const result = await bookingsService.confirmPickup(bookingId, { otp_code: otp });
+      const newStatus = result?.booking_status || result?.status || "Ongoing";
       setBookings((prev) =>
         prev.map((b) =>
-          b.booking_reference === bookingId ? { ...b, booking_status: "Confirmed" } : b
+          b.booking_reference === bookingId ? { ...b, booking_status: newStatus } : b
         )
       );
     } catch (error) {
