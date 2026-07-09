@@ -12,11 +12,11 @@ export default function CookiePolicyPage() {
   return (
     <main>
       <Navbar />
-      
+
       <div className={styles.container}>
         <h1 className={styles.title}>COOKIE POLICY</h1>
-        <p className={styles.effectiveDate}>Effective Date: June 11, 2026</p>
-        
+        <p className={styles.effectiveDate}>Effective Date: 04-07-2026</p>
+
         <div className={styles.intro}>
           <p className={styles.text}>
             <strong>Company Name:</strong> Drifully Global Technologies<br />
@@ -33,7 +33,7 @@ export default function CookiePolicyPage() {
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>2. TYPES OF COOKIES WE USE</h2>
-          
+
           <h3 className={styles.subSectionTitle}>2.1 Essential Cookies</h3>
           <ul className={styles.list}>
             <li className={styles.listItem}>Required for platform functionality</li>
@@ -85,7 +85,7 @@ export default function CookiePolicyPage() {
 
         <section className={styles.section}>
           <h2 className={styles.sectionTitle}>5. YOUR COOKIE CHOICES</h2>
-          
+
           <h3 className={styles.subSectionTitle}>5.1 Browser Settings</h3>
           <p className={styles.text}>You can:</p>
           <ul className={styles.list}>
@@ -134,7 +134,7 @@ export default function CookiePolicyPage() {
           </div>
         </section>
       </div>
-      
+
       <Footer />
     </main>
   );

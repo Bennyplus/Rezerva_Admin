@@ -49,7 +49,7 @@ export default function HowItWorks() {
               aria-hidden="true"
             />
           </h2>
-          <p>
+          <p style={{ fontWeight: '500' }}>
             Get from booking to driving in just a few simple steps—quick,
             seamless, and designed for your convenience
           </p>

@@ -15,7 +15,7 @@ export default function PrivacyPolicyPage() {
 
       <div className={styles.container}>
         <h1 className={styles.title}>PRIVACY POLICY</h1>
-        <p className={styles.effectiveDate}>Effective Date: June 11, 2026</p>
+        <p className={styles.effectiveDate}>Effective Date: 04-07-2026</p>
 
         <div className={styles.intro}>
           <p className={styles.text}>
