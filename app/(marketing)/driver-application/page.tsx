@@ -122,6 +122,19 @@ export default function DriverApplicationPage() {
   const handleSubmitRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg('');
+
+    const cleanPhone = formData.phone_number.replace(/\D/g, '');
+    if (cleanPhone.length !== 11) {
+      setErrorMsg('Phone number must be exactly 11 digits.');
+      return;
+    }
+
+    const cleanNIN = formData.nin_number.replace(/\D/g, '');
+    if (cleanNIN.length !== 10) {
+      setErrorMsg('NIN number must be exactly 10 digits.');
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -170,11 +183,13 @@ export default function DriverApplicationPage() {
           <h1 className={styles.heading}>
             {step === 1 ? 'Driver Application' : 'Driver Details'}
           </h1>
-          <p className={styles.subheading}>
-            {step === 1
-              ? 'Please enter your referral code to proceed.'
-              : 'Complete your registration by providing your details.'}
-          </p>
+          {!successMsg && !errorMsg && (
+            <p className={styles.subheading}>
+              {step === 1
+                ? 'Please enter your referral code to proceed.'
+                : 'Complete your registration by providing your details.'}
+            </p>
+          )}
 
           {errorMsg && (
             <div style={{ background: '#FEF2F2', borderLeft: '4px solid #EF4444', padding: '12px', marginBottom: '16px', textAlign: 'left', borderRadius: '4px' }}>
@@ -271,7 +286,10 @@ export default function DriverApplicationPage() {
                     required
                     className={styles.input}
                     style={{ border: 'none', flex: 1, borderTopRightRadius: '8px', borderBottomRightRadius: '8px' }}
-                    placeholder="(555) 000-0000"
+                    placeholder="08012345678"
+                    pattern="[0-9]{11}"
+                    title="Phone number must be exactly 11 digits"
+                    maxLength={11}
                     value={formData.phone_number}
                     onChange={handleInputChange}
                   />
@@ -287,6 +305,10 @@ export default function DriverApplicationPage() {
                     type="text"
                     required
                     className={styles.input}
+                    placeholder="Enter 10-digit NIN"
+                    pattern="[0-9]{10}"
+                    title="NIN number must be exactly 10 digits"
+                    maxLength={10}
                     value={formData.nin_number}
                     onChange={handleInputChange}
                   />
@@ -364,17 +386,17 @@ export default function DriverApplicationPage() {
       <footer className={styles.footer}>
         <p className={styles.copyright}>© 2026 Drifully. All rights reserved.</p>
         <div className={styles.socials}>
-          <a href="#" className={styles.social_link} aria-label="X (Twitter)">
+          <a href="https://x.com/drifullyrentals?s=11" className={styles.social_link} aria-label="X (Twitter)">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
             </svg>
           </a>
-          <a href="#" className={styles.social_link} aria-label="Facebook">
+          <a href="https://www.facebook.com/share/1YiruGKukG/?mibextid=wwXIfr" className={styles.social_link} aria-label="Facebook">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
               <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
             </svg>
           </a>
-          <a href="#" className={styles.social_link} aria-label="Instagram">
+          <a href="https://www.instagram.com/drifullycarrentals?utm_source=qr" className={styles.social_link} aria-label="Instagram">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>
               <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path>
