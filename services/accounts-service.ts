@@ -224,5 +224,15 @@ export const accountsService = {
       skipToast: true
     } as any);
     return response.data;
+  },
+
+  /**
+   * Updates user profile details at accounts/profile/
+   */
+  updateProfile: async (payload: any): Promise<any> => {
+    const response = await publicApi.put('', payload, {
+      params: { path: 'api/v1/accounts/profile/' }
+    });
+    return response.data;
   }
 };

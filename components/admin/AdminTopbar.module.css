@@ -288,3 +288,187 @@
   background: #FEF2F2;
   text-decoration: underline;
 }
+
+/* ─── Profile Dropdown ─── */
+.profileWrapper {
+  position: relative;
+}
+
+.profileDropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 12px;
+  width: 290px;
+  background: var(--admin-sidebar-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 12px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  z-index: 100;
+  overflow: hidden;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.profileHeader {
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+}
+
+.profileName {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0;
+}
+
+.profileEmail {
+  font-size: 12px;
+  color: var(--admin-section-label, #868C98);
+  margin: 2px 0 0 0;
+  word-break: break-all;
+}
+
+.profileInfoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profileDetailRow {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.profileDetailLabel {
+  font-size: 11px;
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--admin-section-label, #868C98);
+}
+
+.profileDetailValue {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.mfaBadge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+.mfaEnabled {
+  background: #DEF7EC;
+  color: #03543F;
+}
+
+.mfaDisabled {
+  background: #FDE8E8;
+  color: #9B1C1C;
+}
+
+/* ─── Username Edit UI ─── */
+.profileNameRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.editBtn {
+  background: none;
+  border: none;
+  color: var(--admin-section-label, #868C98);
+  cursor: pointer;
+  padding: 2px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.editBtn:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+  color: var(--color-text, #111111);
+}
+
+.nameEditWrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+}
+
+.nameInput {
+  flex: 1;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 4px 8px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 6px;
+  background: #ffffff;
+  color: var(--color-text, #111111);
+  outline: none;
+}
+
+.nameInput:focus {
+  border-color: #2563EB;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.15);
+}
+
+.saveBtn, .cancelBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease;
+}
+
+.saveBtn {
+  color: #10B981;
+}
+
+.saveBtn:hover:not(:disabled) {
+  background: #ECFDF5;
+}
+
+.cancelBtn {
+  color: #EF4444;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  background: #FEF2F2;
+}
+
+.saveBtn:disabled, .cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.spinner {
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(16, 185, 129, 0.2);
+  border-top-color: #10B981;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

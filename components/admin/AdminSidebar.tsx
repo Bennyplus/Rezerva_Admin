@@ -150,6 +150,14 @@ function NavIcon({ icon }: { icon: string }) {
       return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>;
     case "settings":
       return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z" /></svg>;
+    case "logout":
+      return (
+        <svg {...props}>
+          <path d="M6.75 15.75H3.75C2.51 15.75 1.5 14.74 1.5 13.5V4.5C1.5 3.26 2.51 2.25 3.75 2.25H6.75" />
+          <polyline points="12 12.75 15.75 9 12 5.25" />
+          <line x1="15.75" y1="9" x2="6.75" y2="9" />
+        </svg>
+      );
     default:
       return <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /></svg>;
   }
@@ -166,12 +174,17 @@ export default function AdminSidebar() {
   const router = useRouter();
 
   useEffect(() => {
-    const userStr = localStorage.getItem("drifully_admin_user");
-    if (userStr) {
-      try {
-        setCurrentUser(JSON.parse(userStr));
-      } catch (e) { }
-    }
+    const loadUser = () => {
+      const userStr = localStorage.getItem("drifully_admin_user");
+      if (userStr) {
+        try {
+          setCurrentUser(JSON.parse(userStr));
+        } catch (e) { }
+      }
+    };
+    loadUser();
+    window.addEventListener("admin-user-updated", loadUser);
+    return () => window.removeEventListener("admin-user-updated", loadUser);
   }, []);
 
   const currentRole = (currentUser?.user_type || ADMIN_USER.role) as AdminRole;
@@ -212,7 +225,7 @@ export default function AdminSidebar() {
 
   const name = currentUser?.full_name || ADMIN_USER.name;
   const email = currentUser?.email || ADMIN_USER.email;
-  const profilePic = currentUser?.profile?.profile_picture;
+  const profilePic = currentUser?.profile?.profile_picture || currentUser?.profile_picture;
   const hasProfilePic = profilePic && !profilePic.includes("default.jpg");
 
   const handleLogout = async () => {
@@ -364,6 +377,23 @@ export default function AdminSidebar() {
               </ul>
             </div>
           ))}
+
+          {/* Dedicated Logout option at the bottom of the navigation list */}
+          <div className={styles.section} style={{ borderTop: '1px solid var(--admin-sidebar-border, #E2E4E9)', marginTop: '8px', paddingTop: '8px' }}>
+            <ul className={styles.navList}>
+              <li>
+                <button
+                  onClick={() => setIsLogoutModalOpen(true)}
+                  className={styles.navItem}
+                  style={{ width: "100%", textAlign: "left", background: "none", border: "none", cursor: "pointer" }}
+                  id="admin-nav-logout"
+                >
+                  <NavIcon icon="logout" />
+                  {!collapsed && <span>Logout</span>}
+                </button>
+              </li>
+            </ul>
+          </div>
         </nav>
 
         {/* User profile */}
@@ -398,20 +428,6 @@ export default function AdminSidebar() {
               </div>
               <span className={styles.profileEmail}>{email}</span>
             </div>
-          )}
-          {!collapsed && (
-            <button
-              onClick={() => setIsLogoutModalOpen(true)}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '4px', display: 'flex', alignItems: 'center', marginLeft: 'auto' }}
-              title="Logout"
-              aria-label="Logout"
-            >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                <polyline points="16 17 21 12 16 7"></polyline>
-                <line x1="21" y1="12" x2="9" y2="12"></line>
-              </svg>
-            </button>
           )}
         </div>
       </aside>

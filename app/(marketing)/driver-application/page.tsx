@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import styles from '../login/Login.module.css';
+import styles from './page.module.css';
 import CustomSelect from '@/components/admin/CustomSelect';
 import { accountsService } from '@/services/accounts-service';
 
@@ -41,10 +41,10 @@ export default function DriverApplicationPage() {
     async function loadCountries() {
       try {
         const countriesData = await accountsService.getCountries();
-        
+
         // Find Nigeria and set as the only option
         const nigeria = countriesData.find((c: any) => c.iso_code === "234" || c.dial_code === "+234") || countriesData[0];
-        
+
         if (nigeria) {
           const options = [{
             value: String(nigeria.id),
