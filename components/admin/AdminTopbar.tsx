@@ -5,7 +5,8 @@ import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { ADMIN_USER } from "@/data/admin-mock";
 import ConfirmActionModal from "./ConfirmActionModal";
-import { accountsService } from "@/services/accounts-service";
+import EditProfileModal from "./EditProfileModal";
+import { accountsService, Country } from "@/services/accounts-service";
 import { useNotifications, Notification } from "@/hooks/useNotifications";
 import styles from "./AdminTopbar.module.css";
 
@@ -83,7 +84,9 @@ export default function AdminTopbar() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
+  const profileRef = useRef<HTMLDivElement>(null);
   const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } = useNotifications();
 
   useEffect(() => {
@@ -91,25 +94,59 @@ export default function AdminTopbar() {
       if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
         setIsNotifOpen(false);
       }
+      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+        setIsProfileOpen(false);
+      }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [countries, setCountries] = useState<Country[]>([]);
+
   useEffect(() => {
-    const userStr = localStorage.getItem("drifully_admin_user");
-    if (userStr) {
+    const fetchCountries = async () => {
       try {
-        setCurrentUser(JSON.parse(userStr));
-      } catch (e) { }
-    }
+        const list = await accountsService.getCountries();
+        setCountries(list);
+      } catch (e) {
+        console.error("Failed to load countries in Topbar:", e);
+      }
+    };
+    fetchCountries();
   }, []);
+
+  useEffect(() => {
+    const loadUser = () => {
+      const userStr = localStorage.getItem("drifully_admin_user");
+      if (userStr) {
+        try {
+          setCurrentUser(JSON.parse(userStr));
+        } catch (e) { }
+      }
+    };
+    loadUser();
+    window.addEventListener("admin-user-updated", loadUser);
+    return () => window.removeEventListener("admin-user-updated", loadUser);
+  }, []);
+
+  const handleProfileUpdate = (updatedUser: any) => {
+    localStorage.setItem("drifully_admin_user", JSON.stringify(updatedUser));
+    setCurrentUser(updatedUser);
+    window.dispatchEvent(new Event("admin-user-updated"));
+  };
 
   const getInitials = (name: string) => {
     if (!name) return "AD";
     const parts = name.trim().split(/\s+/);
     if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
     return name.substring(0, 2).toUpperCase();
+  };
+
+  const getCountryName = (id: string | number) => {
+    const match = countries.find((c) => String(c.id) === String(id));
+    return match ? match.name : `Country ID: ${id}`;
   };
 
   // Resolve dynamic routes before exact lookup
@@ -121,7 +158,7 @@ export default function AdminTopbar() {
   const meta = PAGE_META[resolvedPath] || { title: "Dashboard", subtitle: "" };
 
   const name = currentUser?.full_name || ADMIN_USER.name;
-  const profilePic = currentUser?.profile?.profile_picture;
+  const profilePic = currentUser?.profile?.profile_picture || currentUser?.profile_picture;
   const hasProfilePic = profilePic && !profilePic.includes("default.jpg");
 
   const handleLogout = async () => {
@@ -208,27 +245,76 @@ export default function AdminTopbar() {
         </div>
 
         <div className={styles.userPill}>
-          {/* Admin avatar */}
-          <button
-            className={styles.avatar}
-            aria-label="Admin menu"
-            id="admin-avatar-btn"
-          >
-            {hasProfilePic ? (
-              <Image
-                src={profilePic}
-                alt={name}
-                width={36}
-                height={36}
-                className={styles.avatarImg}
-                style={{ objectFit: 'cover', borderRadius: '50%' }}
-              />
-            ) : (
-              <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#f1f5f9", color: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "600", fontSize: "13px", flexShrink: 0 }}>
-                {getInitials(name)}
+          {/* Admin avatar with profile details dropdown */}
+          <div className={styles.profileWrapper} ref={profileRef}>
+            <button
+              className={styles.avatar}
+              aria-label="Admin menu"
+              id="admin-avatar-btn"
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+            >
+              {hasProfilePic ? (
+                <Image
+                  src={profilePic}
+                  alt={name}
+                  width={36}
+                  height={36}
+                  className={styles.avatarImg}
+                  style={{ objectFit: 'cover', borderRadius: '50%' }}
+                />
+              ) : (
+                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#f1f5f9", color: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "600", fontSize: "13px", flexShrink: 0 }}>
+                  {getInitials(name)}
+                </div>
+              )}
+            </button>
+
+            {isProfileOpen && (
+              <div className={styles.profileDropdown}>
+                <div className={styles.profileHeader}>
+                  <div className={styles.profileNameRow}>
+                    <h4 className={styles.profileName}>{name}</h4>
+                    <button 
+                      onClick={() => setIsEditModalOpen(true)} 
+                      className={styles.editBtn}
+                      title="Edit Profile"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                    </button>
+                  </div>
+                  <p className={styles.profileEmail}>{currentUser?.email || ADMIN_USER.email}</p>
+                </div>
+                <div className={styles.profileInfoSection}>
+                  <div className={styles.profileDetailRow}>
+                    <span className={styles.profileDetailLabel}>Phone Number</span>
+                    <span className={styles.profileDetailValue}>{currentUser?.phone_number || "Not Provided"}</span>
+                  </div>
+                  <div className={styles.profileDetailRow}>
+                    <span className={styles.profileDetailLabel}>Referral Code</span>
+                    <span className={styles.profileDetailValue}>{currentUser?.referral_code || "N/A"}</span>
+                  </div>
+                  <div className={styles.profileDetailRow}>
+                    <span className={styles.profileDetailLabel}>MFA Status</span>
+                    <span className={styles.profileDetailValue}>
+                      <span className={`${styles.mfaBadge} ${currentUser?.mfa_enabled ? styles.mfaEnabled : styles.mfaDisabled}`}>
+                        {currentUser?.mfa_enabled ? "Enabled" : "Disabled"}
+                      </span>
+                    </span>
+                  </div>
+                  <div className={styles.profileDetailRow}>
+                    <span className={styles.profileDetailLabel}>Address</span>
+                    <span className={styles.profileDetailValue}>{currentUser?.address_line_1 || "Not Provided"}</span>
+                  </div>
+                  {currentUser?.country && (
+                    <div className={styles.profileDetailRow}>
+                      <span className={styles.profileDetailLabel}>Country</span>
+                      <span className={styles.profileDetailValue}>{getCountryName(currentUser.country)}</span>
+                    </div>
+                  )}
+                </div>
               </div>
             )}
-          </button>
+          </div>
 
           {/* Logout button */}
           <button
@@ -255,6 +341,13 @@ export default function AdminTopbar() {
         confirmText="Logout"
         cancelText="Cancel"
         isDanger={true}
+      />
+
+      <EditProfileModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        currentUser={currentUser}
+        onUpdate={handleProfileUpdate}
       />
     </header>
   );

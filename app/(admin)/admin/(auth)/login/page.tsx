@@ -36,7 +36,7 @@ export default function AdminLoginPage() {
 
       setSuccess("Logged in successfully! Redirecting...");
       setTimeout(() => {
-        router.push("/admin");
+        window.location.href = "/admin";
       }, 1500);
     } catch (err: any) {
       const serverMessage = err.response?.data?.message || err.response?.data?.error || err.message;
