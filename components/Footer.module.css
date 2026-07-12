@@ -124,7 +124,7 @@
   font-family: var(--font-body);
   font-size: 14px;
   font-weight: 500;
-  color: var(--color-subtle);
+  color: var(--color-primary);
   transition: color var(--transition-fast);
 }
 
