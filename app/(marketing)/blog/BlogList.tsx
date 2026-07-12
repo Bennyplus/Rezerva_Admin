@@ -59,7 +59,7 @@ export default function BlogList() {
                 </div>
                 <h3 className={styles.cardTitle}>{mainBlog.title}</h3>
                 <p className={styles.cardDesc}>{mainBlog.excerpt}</p>
-                <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
+                <div className={styles.readMore}>Read More <span style={{ color: '#000' }}> &rarr;</span> </div>
               </Link>
             )}
 
@@ -79,7 +79,7 @@ export default function BlogList() {
                     <div className={styles.horizontalCardContent}>
                       <h3 className={styles.cardTitle}>{blog.title}</h3>
                       <p className={styles.cardDesc}>{blog.excerpt}</p>
-                      <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
+                      <div className={styles.readMore}>Read More <span style={{ color: '#000' }}> &rarr;</span> </div>
                     </div>
                   </Link>
                 ))}
@@ -104,7 +104,7 @@ export default function BlogList() {
                 </div>
                 <h3 className={styles.cardTitle}>{blog.title}</h3>
                 <p className={styles.cardDesc}>{blog.excerpt}</p>
-                <div className={styles.readMore}>Read More <span style={{ color: '#868C98' }}> &rarr;</span> </div>
+                <div className={styles.readMore}>Read More <span style={{ color: '#000' }}> &rarr;</span> </div>
               </Link>
             ))}
           </div>

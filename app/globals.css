@@ -52,10 +52,10 @@
   --color-white: #ffffff;
   --color-black: #0a0a0a;
   --color-primary: #111111;
-  --color-primary-light: #868C98;
+  --color-primary-light: #111111;
   /* near-black – headlines, dark elements */
   --color-text: #111111;
-  --color-muted: #868C98;
+  --color-muted: #111111;
   /* secondary text */
   --color-subtle: #999999;
   --color-surface: #F6F8FA;

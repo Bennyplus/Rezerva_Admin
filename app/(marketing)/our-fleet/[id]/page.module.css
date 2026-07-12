@@ -77,7 +77,7 @@
   padding: 8px 16px;
   border-radius: 20px;
   font-size: 14px;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   display: flex;
   align-items: center;
   gap: 6px;
@@ -115,7 +115,7 @@
 .rulesSection {
   padding: 32px;
   border-radius: 16px;
-  border: 2px solid rgba(0,0,0,0.05);
+  border: 2px solid rgba(0, 0, 0, 0.05);
 }
 
 .rulesTitle {
@@ -169,7 +169,7 @@
   background: #fff;
   padding: 32px;
   border-radius: 16px;
-  border: 1px solid rgba(0,0,0,0.05);
+  border: 1px solid rgba(0, 0, 0, 0.05);
   box-shadow: var(--shadow-sm);
   position: sticky;
   top: 120px;
@@ -196,6 +196,7 @@
 .priceTaxes {
   font-size: 12px;
   color: var(--color-muted);
+  text-align: end;
 }
 
 .bookBtn {
@@ -226,6 +227,7 @@
   .detailsGrid {
     grid-template-columns: 1fr;
   }
+
   .rightSidebar {
     margin-left: 0;
   }
@@ -234,7 +236,8 @@
 @media (max-width: 768px) {
   .main {
     padding-top: 140px;
-    padding-bottom: 140px; /* space for fixed button */
+    padding-bottom: 140px;
+    /* space for fixed button */
   }
 
   .backBtn {
@@ -305,6 +308,7 @@
     font-size: 12px;
     color: var(--color-muted);
     margin-left: 12px;
+    /* text-align: end; */
   }
 
   .mobileRatingRow {
@@ -347,8 +351,8 @@
     width: 100%;
     padding: 16px 20px 24px;
     background: #fff;
-    border-top: 1px solid rgba(0,0,0,0.05);
-    box-shadow: 0 -4px 12px rgba(0,0,0,0.05);
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
     z-index: 100;
   }
 }
