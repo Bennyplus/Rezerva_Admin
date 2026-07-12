@@ -115,6 +115,18 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
   const displayCategory = categoryData ? categoryData.name : vehicle?.category;
   const displayName = vehicle ? (brandData ? `${displayBrand} ${vehicle.model}` : vehicle.name) : "";
 
+  const handleBookNow = () => {
+    if (typeof window !== "undefined") {
+      const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
+      if (/iPad|iPhone|iPod/.test(userAgent) && !(window as any).MSStream) {
+        window.open("https://apps.apple.com/app/drifully", "_blank");
+      } else {
+        window.open("https://play.google.com/store/apps/details?id=com.drifully.app", "_blank");
+      }
+    }
+  };
+
+
 
   if (loading) {
     return (
@@ -220,6 +232,7 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
                     )}
                   </span>
                   <span className={styles.mobilePriceUnit}>/day</span>
+                  <br />
                   <span className={styles.mobilePriceTaxes}>Before taxes</span>
                 </div>
                 <div className={styles.mobileRatingRow}>
@@ -286,7 +299,7 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
                   </span>
                   <span className={styles.priceTaxes}>Before taxes</span>
                 </div>
-                <button className={`btn btn-primary ${styles.bookBtn}`}>
+                <button className={`btn btn-primary ${styles.bookBtn}`} onClick={handleBookNow}>
                   Book Now
                 </button>
               </div>
@@ -296,7 +309,7 @@ export default function VehicleDetailsPage({ params }: { params: Promise<{ id: s
 
         {/* Mobile Sticky Book Button (Hidden on Desktop) */}
         <div className={styles.mobileStickyBookBtn}>
-          <button className={`btn btn-primary ${styles.bookBtn}`}>
+          <button className={`btn btn-primary ${styles.bookBtn}`} onClick={handleBookNow}>
             Book Now
           </button>
         </div>
