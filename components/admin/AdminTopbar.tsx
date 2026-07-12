@@ -209,12 +209,12 @@ export default function AdminTopbar() {
                   </button>
                 )}
               </div>
-              
+
               {notifications.length > 0 ? (
                 <ul className={styles.notificationList}>
                   {notifications.map((notif: Notification) => (
-                    <li 
-                      key={notif.id} 
+                    <li
+                      key={notif.id}
                       className={`${styles.notificationItem} ${!notif.is_read ? styles.unread : ''}`}
                       onClick={() => markAsRead(notif.id)}
                     >
@@ -243,6 +243,19 @@ export default function AdminTopbar() {
             </div>
           )}
         </div>
+
+        {/* Logout button */}
+        <button
+          className={styles.iconBtn}
+          aria-label="Logout"
+          onClick={() => setIsLogoutModalOpen(true)}
+        >
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+            <polyline points="16 17 21 12 16 7"></polyline>
+            <line x1="21" y1="12" x2="9" y2="12"></line>
+          </svg>
+        </button>
 
         <div className={styles.userPill}>
           {/* Admin avatar with profile details dropdown */}
@@ -274,12 +287,12 @@ export default function AdminTopbar() {
                 <div className={styles.profileHeader}>
                   <div className={styles.profileNameRow}>
                     <h4 className={styles.profileName}>{name}</h4>
-                    <button 
-                      onClick={() => setIsEditModalOpen(true)} 
+                    <button
+                      onClick={() => setIsEditModalOpen(true)}
                       className={styles.editBtn}
                       title="Edit Profile"
                     >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                     </button>
                   </div>
                   <p className={styles.profileEmail}>{currentUser?.email || ADMIN_USER.email}</p>
@@ -315,20 +328,6 @@ export default function AdminTopbar() {
               </div>
             )}
           </div>
-
-          {/* Logout button */}
-          <button
-            className={styles.iconBtn}
-            aria-label="Logout"
-            onClick={() => setIsLogoutModalOpen(true)}
-            style={{ width: '32px', height: '32px' }}
-          >
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-              <polyline points="16 17 21 12 16 7"></polyline>
-              <line x1="21" y1="12" x2="9" y2="12"></line>
-            </svg>
-          </button>
         </div>
       </div>
 
