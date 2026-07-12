@@ -1,10 +1,13 @@
 .articleContainer {
-  padding-top: 120px;
   padding-bottom: 80px;
   margin-inline: auto;
+  position: relative;
+  padding-top: 100px;
 }
 
 .backButton {
+  position: absolute;
+  top: 100px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -43,6 +46,7 @@
   line-height: 1.6;
   color: var(--color-muted);
   max-width: 800px;
+  font-weight: 500;
 }
 
 .imageSection {
@@ -228,7 +232,7 @@
     letter-spacing: -1px;
     margin-bottom: 12px;
   }
-  
+
   .subtitle {
     font-size: 14px;
   }
@@ -257,6 +261,7 @@
 .blogBody {
   font-family: var(--font-body, "DM Sans", sans-serif);
   font-size: 16px;
+  font-weight: 500;
   line-height: 1.8;
   color: var(--color-primary);
   max-width: 800px;
@@ -266,6 +271,7 @@
 .blogBody h2 {
   font-family: var(--font-heading, "DM Sans", sans-serif);
   font-size: 32px;
+  font-weight: 600;
   margin-top: 48px;
   margin-bottom: 24px;
   letter-spacing: -0.5px;
@@ -284,7 +290,8 @@
   color: var(--color-muted);
 }
 
-.blogBody ul, .blogBody ol {
+.blogBody ul,
+.blogBody ol {
   margin-bottom: 24px;
   padding-left: 24px;
   color: var(--color-muted);
