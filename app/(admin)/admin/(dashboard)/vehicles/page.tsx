@@ -541,6 +541,7 @@ function VehiclesPageContent() {
       <BulkUploadModal
         isOpen={showBulkUploadModal}
         onClose={() => setShowBulkUploadModal(false)}
+        onSuccess={() => window.location.reload()}
       />
 
       {showDetailModal && selectedVehicle && (

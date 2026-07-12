@@ -7,11 +7,12 @@ import Pagination from "@/components/admin/Pagination";
 import BookingDetailView from "@/components/admin/BookingDetailView";
 import CancelBookingModal from "@/components/admin/CancelBookingModal";
 import SendReminderModal from "@/components/admin/SendReminderModal";
+import { bookingsService } from "@/services/bookings-service";
 import OTPVerificationModal from "@/components/admin/OTPVerificationModal";
+import VehicleInspectionModal from "@/components/admin/VehicleInspectionModal";
 import { BOOKING_STATS_EMPTY, Booking } from "@/data/admin-bookings";
 import FilterBar from "@/components/admin/FilterBar";
 import Spinner from "@/components/admin/Spinner";
-import { bookingsService } from "@/services/bookings-service";
 import FilterDropdown from "@/components/admin/FilterDropdown";
 import SortDropdown from "@/components/admin/SortDropdown";
 import MoreIcon from "@/components/admin/icons/MoreIcon";
@@ -30,12 +31,15 @@ export default function BookingsPage() {
   const [openMenuIdx, setOpenMenuIdx] = useState<number | null>(null);
   const [showCancelModal, setShowCancelModal] = useState(false);
   const [bookingToCancel, setBookingToCancel] = useState<string | null>(null);
-  
+
   const [showSendReminderModal, setShowSendReminderModal] = useState(false);
   const [bookingToSendReminder, setBookingToSendReminder] = useState<string | null>(null);
 
   const [showOTPModal, setShowOTPModal] = useState(false);
   const [bookingForOTP, setBookingForOTP] = useState<string | null>(null);
+
+  const [showInspectionModal, setShowInspectionModal] = useState(false);
+  const [bookingForInspection, setBookingForInspection] = useState<string | null>(null);
 
   const [isExporting, setIsExporting] = useState(false);
 
@@ -154,8 +158,36 @@ export default function BookingsPage() {
           b.booking_reference === bookingId ? { ...b, booking_status: newStatus } : b
         )
       );
+      // Wait for user to read/see success briefly or proceed to inspection modal directly
+      setShowOTPModal(false);
+      setBookingForInspection(bookingId);
+      setShowInspectionModal(true);
     } catch (error) {
       console.error(`Failed to confirm booking ${bookingId} with OTP:`, error);
+      throw error;
+    }
+  };
+
+  const submitVehicleInspection = async (
+    bookingId: string,
+    data: { images: Record<string, File>; mileage: string }
+  ) => {
+    try {
+      const rawMileage = data.mileage.replace(/,/g, "");
+      await bookingsService.uploadVehicleImages(bookingId, {
+        images: data.images,
+        mileage: rawMileage,
+      });
+
+      // Refresh data
+      const bookingsData = await bookingsService.getBookings();
+      if (Array.isArray(bookingsData)) {
+        setBookings(bookingsData);
+      } else if (bookingsData?.results) {
+        setBookings(bookingsData.results);
+      }
+    } catch (error) {
+      console.error(`Failed to upload images for booking ${bookingId}:`, error);
       throw error;
     }
   };
@@ -303,25 +335,25 @@ export default function BookingsPage() {
                     searchValue={searchQuery}
                     onSearchChange={(v) => { setSearchQuery(v); setCurrentPage(1); }}
                     filterDropdown={
-                      <FilterDropdown 
+                      <FilterDropdown
                         tabs={[
                           { id: 'status', label: 'Status', options: ['Completed', 'Scheduled', 'Ongoing', 'Cancelled'] },
                           { id: 'bookingType', label: 'Booking Type', options: ['Daily', 'Weekly', 'Monthly'] },
                           { id: 'vehicle', label: 'Vehicle', options: ['SUV', 'Sedan', 'Luxury'] },
                           { id: 'customer', label: 'Customer', options: ['New', 'Returning'] }
                         ]}
-                        onApply={setActiveFilters} 
+                        onApply={setActiveFilters}
                       />
                     }
                     sortDropdown={
-                      <SortDropdown 
+                      <SortDropdown
                         options={[
                           { label: "Newest to Oldest", value: "Newest to Oldest" },
                           { label: "Oldest to Newest", value: "Oldest to Newest" },
                           { label: "Amount Highest to Lowest", value: "Amount Highest to Lowest" },
                           { label: "Amount Lowest to Highest", value: "Amount Lowest to Highest" }
                         ]}
-                        onSortSelect={setSortOption} 
+                        onSortSelect={setSortOption}
                       />
                     }
                   />
@@ -450,6 +482,17 @@ export default function BookingsPage() {
         onVerify={async (otp) => {
           if (bookingForOTP) {
             await submitOTPVerification(bookingForOTP, otp);
+          }
+        }}
+      />
+
+      {/* Vehicle Inspection Modal */}
+      <VehicleInspectionModal
+        isOpen={showInspectionModal}
+        onClose={() => setShowInspectionModal(false)}
+        onConfirm={async (data) => {
+          if (bookingForInspection) {
+            await submitVehicleInspection(bookingForInspection, data);
           }
         }}
       />

@@ -77,6 +77,30 @@ export const bookingsService = {
       throw error;
     }
   },
+
+  uploadVehicleImages: async (
+    bookingRef: string,
+    data: { images: { [key: string]: File }; mileage: string }
+  ) => {
+    try {
+      const formData = new FormData();
+      Object.entries(data.images).forEach(([key, file]) => {
+        if (file) {
+          formData.append(key, file);
+        }
+      });
+      formData.append("current_mileage", data.mileage);
+
+      const response = await publicApi.post("", formData, {
+        params: { path: `api/v1/bookings/upload-images/`, booking_ref: bookingRef },
+      });
+      return response.data;
+    } catch (error) {
+      console.error(`Failed to upload vehicle images for booking ${bookingRef}:`, error);
+      throw error;
+    }
+  },
+
   modifyBooking: async (bookingRef: string, data: {}) => {
     try {
       const response = await publicApi.put('', data, {
