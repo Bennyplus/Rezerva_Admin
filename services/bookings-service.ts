@@ -86,13 +86,13 @@ export const bookingsService = {
       const formData = new FormData();
       Object.entries(data.images).forEach(([key, file]) => {
         if (file) {
-          formData.append(key, file);
+          formData.append("images", file);
         }
       });
-      formData.append("current_mileage", data.mileage);
+      formData.append("mileage_at_pickup", data.mileage);
 
       const response = await publicApi.post("", formData, {
-        params: { path: `api/v1/bookings/upload-images/`, booking_ref: bookingRef },
+        params: { path: `api/v1/admin/bookings/upload-pickup-data/`, booking_ref: bookingRef },
       });
       return response.data;
     } catch (error) {
