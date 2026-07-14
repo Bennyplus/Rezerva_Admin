@@ -105,5 +105,20 @@ export const vehiclesService = {
       console.error("Failed to fetch brands and categories:", e);
       return { brands: [], categories: [] };
     }
+  },
+
+  bulkUploadVehicles: async (file: File) => {
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await publicApi.post("", formData, {
+        params: { path: "api/v1/vehicles/bulk-upload/" },
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Failed to bulk upload vehicles:", error);
+      throw error;
+    }
   }
 };

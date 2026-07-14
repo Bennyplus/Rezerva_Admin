@@ -58,6 +58,19 @@ export default function BookingDetailView({ bookingId, onBack, onCancelBooking }
 
   const { booking_info, car_info, extras_info, booking_timeline } = detailData;
 
+  //  "extras_info": {
+  //       "extras": [
+  //           {
+  //               "extra": "Dashcam",
+  //               "price": 6500
+  //           },
+  //           {
+  //               "extra": "Airport Meet & Greet",
+  //               "price": 20000
+  //           }
+  //       ],
+  //       "extras_total": "26500.00"
+  //   },
   const extras = extras_info?.extras || [];
   const extrasTotal = extras_info?.extras_total || 0;
 
@@ -184,10 +197,10 @@ export default function BookingDetailView({ bookingId, onBack, onCancelBooking }
                     </tr>
                   </thead>
                   <tbody>
-                    {extras.map((extra: any, i: number) => (
+                    {extras?.map((extra: any, i: number) => (
                       <tr key={i}>
-                        <td>{extra.name}</td>
-                        <td className={styles.amount}>N{parseFloat(extra.amount || '0').toLocaleString()}</td>
+                        <td>{extra.extra}</td>
+                        <td className={styles.amount}>N{parseFloat(extra.price || '0').toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>

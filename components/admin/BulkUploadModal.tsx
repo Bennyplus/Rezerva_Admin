@@ -5,21 +5,38 @@ import Image from "next/image";
 import styles from "./BulkUploadModal.module.css";
 import VehicleDetailsModal from "./VehicleDetailsModal";
 import { ADMIN_VEHICLES, AdminVehicle } from "@/data/admin-vehicles";
+import { vehiclesService } from "@/services/vehicles-service";
 
 interface BulkUploadModalProps {
   isOpen: boolean;
   onClose: () => void;
+  onSuccess?: () => void;
 }
 
 type Step = "upload" | "selected" | "preview";
 
-export default function BulkUploadModal({ isOpen, onClose }: BulkUploadModalProps) {
+export default function BulkUploadModal({ isOpen, onClose, onSuccess }: BulkUploadModalProps) {
   const [step, setStep] = useState<Step>("upload");
   const [file, setFile] = useState<File | null>(null);
   const [selectedVehicle, setSelectedVehicle] = useState<AdminVehicle | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   if (!isOpen) return null;
+
+  const handleUpload = async () => {
+    if (!file || isUploading) return;
+    setIsUploading(true);
+    try {
+      await vehiclesService.bulkUploadVehicles(file);
+      onSuccess?.();
+      onClose();
+    } catch (error) {
+      console.error("Bulk upload failed:", error);
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files.length > 0) {
@@ -214,28 +231,21 @@ export default function BulkUploadModal({ isOpen, onClose }: BulkUploadModalProp
           {/* Footer */}
           <div className={styles.footer}>
             <div className={styles.footerLeft}>
-              <button className={styles.btnCancel} onClick={onClose}>Cancel</button>
+              <button className={styles.btnCancel} onClick={onClose} disabled={isUploading}>Cancel</button>
             </div>
             <div className={styles.footerRight}>
               {step === "preview" && (
-                <button className={styles.btnBack} onClick={() => setStep("selected")}>Back</button>
+                <button className={styles.btnBack} onClick={() => setStep("selected")} disabled={isUploading}>Back</button>
               )}
               {step === "selected" && (
-                <button className={styles.btnPreview} onClick={() => setStep("preview")}>Preview</button>
+                <button className={styles.btnPreview} onClick={() => setStep("preview")} disabled={isUploading}>Preview</button>
               )}
               <button 
-                className={step === "upload" ? styles.btnPrimaryDisabled : styles.btnPrimary}
-                disabled={step === "upload"}
-                onClick={() => {
-                  if (step === "preview") {
-                    onClose();
-                    // Handle actual upload logic here
-                  } else if (step === "selected") {
-                    // Optional: maybe clicking upload vehicles here bypasses preview?
-                  }
-                }}
+                className={step === "upload" || isUploading ? styles.btnPrimaryDisabled : styles.btnPrimary}
+                disabled={step === "upload" || isUploading}
+                onClick={handleUpload}
               >
-                Upload Vehicles
+                {isUploading ? "Uploading..." : "Upload Vehicles"}
               </button>
             </div>
           </div>
