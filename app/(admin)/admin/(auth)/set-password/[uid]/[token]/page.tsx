@@ -3,11 +3,16 @@
 import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import styles from "./create-password.module.css";
+import { useRouter, useParams } from "next/navigation";
+import { accountsService } from "@/services/accounts-service";
+import styles from "../../set-password.module.css";
 
-export default function CreatePasswordPage() {
+export default function SetPasswordPage() {
   const router = useRouter();
+  const params = useParams();
+  const uid = params?.uid as string;
+  const token = params?.token as string;
+
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
@@ -24,15 +29,23 @@ export default function CreatePasswordPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isValid) return;
+    if (!isValid || !uid || !token) return;
 
     setSubmitting(true);
-    // Simulate API call
-    await new Promise((resolve) => setTimeout(resolve, 1500));
-    setSubmitting(false);
-
-    // Redirect after successful creation
-    router.push("/admin");
+    try {
+      await accountsService.setPassword(uid, token, {
+        uid,
+        token,
+        password,
+        confirm_password: password,
+      });
+      // Redirect after successful creation to the admin login page
+      router.push("/admin/login");
+    } catch (error) {
+      console.error("Failed to set password:", error);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -48,7 +61,7 @@ export default function CreatePasswordPage() {
             </Link>
           </div>
 
-          <h1 className={styles.title}>Hello { } ,</h1>
+          <h1 className={styles.title}>Hello</h1>
           <p className={styles.subtitle}>
             Please create a strong password to access the admin dashboard
           </p>

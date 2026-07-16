@@ -60,8 +60,9 @@ async function handleRequest(request: NextRequest, method: string) {
       'Accept': 'application/json',
     };
 
+
     // Do not attach tokens for authentication routes
-    const isAuthRoute = path.includes('login') || path.includes('register') || path.includes('verify-otp');
+    const isAuthRoute = path.includes('login') || path.includes('register') || path.includes('verify-otp') || path.includes('set-password');
     const cookieStore = await cookies();
     let token = cookieStore.get('accessToken')?.value;
     const refreshToken = cookieStore.get('refreshToken')?.value;
