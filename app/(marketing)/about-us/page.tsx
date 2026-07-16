@@ -70,7 +70,7 @@ export default function AboutUsPage() {
               <div className={styles['about-story__right-col']}>
                 <p className={`${styles['about-story__text']} ${styles['about-story__text--top-margin']}`}>
                   Drifully was built on a simple idea:<br />
-                  <strong>You deserve a better</strong> way to move. A way that gives you control when you want it, and <strong>comfort</strong> when you need it.
+                  You deserve a better way to move. A way that gives you control when you want it, and comfort when you need it.
                 </p>
 
                 <div className={styles['about-story__composite']}>
@@ -145,7 +145,7 @@ export default function AboutUsPage() {
                 />
                 <div className={styles['about-arrival__img-stack']}>
                   <Image
-                     src="/images/couple-w.png"
+                    src="/images/couple-w.png"
                     alt="Couple enjoying a ride"
                     width={240}
                     height={245}

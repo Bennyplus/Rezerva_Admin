@@ -123,6 +123,7 @@
 
 .about-story__text--top-margin {
   margin-top: var(--space-12);
+  font-weight: 500;
 }
 
 .about-story__text--spaced-margin {
@@ -163,6 +164,7 @@
 .about-story__composite-text {
   font-size: var(--text-base);
   line-height: 1.6;
+  font-weight: 500;
 }
 
 .about-story__text-wrapper {
@@ -198,6 +200,7 @@
   font-size: var(--text-lg);
   color: var(--color-primary);
   line-height: 1.6;
+  font-weight: 500;
 }
 
 .about-mission__highlight {
@@ -293,6 +296,7 @@
   font-size: var(--text-base);
   line-height: 170%;
   letter-spacing: -0.5px;
+  font-weight: 500;
 }
 
 .about-arrival__list-item::before {
@@ -632,10 +636,12 @@
   .about-story__text--tight-margin,
   .about-story__text--base-margin {
     font-size: 14px;
+    font-weight: 500;
   }
 
   .about-arrival__list-item {
     font-size: 14px;
+    font-weight: 500;
   }
 
   /* FAQ Section */
