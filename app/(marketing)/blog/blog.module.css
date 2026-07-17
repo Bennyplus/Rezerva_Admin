@@ -72,7 +72,7 @@
   border-radius: 10px;
   font-family: var(--font-body, "DM Sans", sans-serif);
   font-size: 13px;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
   text-decoration: none;
@@ -192,7 +192,7 @@
   color: var(--color-primary);
   /* max-width: 700px; */
   letter-spacing: -0.5px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 /* Top Blogs Grid */
@@ -269,7 +269,7 @@
   font-family: var(--font-body, "DM Sans", sans-serif);
   font-size: 15px;
   color: #000000;
-  font-weight: 500;
+  font-weight: 600;
   margin-bottom: 20px;
   line-height: 1.6;
 }

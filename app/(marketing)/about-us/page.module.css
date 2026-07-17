@@ -47,7 +47,7 @@
 
 .about-hero__actions .about-hero__download-btn {
   font-family: "DM Sans", sans-serif;
-  font-weight: 500;
+  font-weight: 600;
   font-size: 14px;
   line-height: 170%;
   letter-spacing: -0.3px;
@@ -78,7 +78,7 @@
 
 :global(.about-story__lead) {
   font-size: 20px;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: -0.75px;
   margin-bottom: 0;
 }
@@ -123,7 +123,7 @@
 
 .about-story__text--top-margin {
   margin-top: var(--space-12);
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .about-story__text--spaced-margin {
@@ -164,7 +164,7 @@
 .about-story__composite-text {
   font-size: var(--text-base);
   line-height: 1.6;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .about-story__text-wrapper {
@@ -200,7 +200,7 @@
   font-size: var(--text-lg);
   color: var(--color-primary);
   line-height: 1.6;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .about-mission__highlight {
@@ -272,14 +272,17 @@
   margin-top: var(--space-2);
   color: var(--color-muted);
   letter-spacing: -0.5px;
+  font-weight: 600;
 }
 
 .about-story__text--tight-margin {
   margin-top: var(--space-2);
+  font-weight: 600;
 }
 
 .about-story__text--base-margin {
   margin-top: var(--space-4);
+  font-weight: 600;
 }
 
 .about-arrival__list {
@@ -296,7 +299,7 @@
   font-size: var(--text-base);
   line-height: 170%;
   letter-spacing: -0.5px;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .about-arrival__list-item::before {
@@ -352,7 +355,7 @@
   border: 1px solid rgba(0, 0, 0, 0.05);
   text-align: left;
   font-family: var(--font-heading);
-  font-weight: 500;
+  font-weight: 600;
   font-size: var(--text-base);
   color: var(--color-primary);
   cursor: pointer;
@@ -395,7 +398,7 @@
   padding: var(--space-4) var(--space-6) var(--space-6);
   font-size: var(--text-sm);
   color: var(--color-muted);
-  font-weight: 500;
+  font-weight: 600;
   line-height: 1.6;
 }
 
@@ -407,7 +410,7 @@
 .about-faq__cta p {
   color: #000;
   margin-bottom: var(--space-4);
-  font-weight: 500;
+  font-weight: 600;
   font-size: 15px;
 }
 
@@ -518,7 +521,7 @@
   :global(.about-story__lead) {
     order: 2;
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
     letter-spacing: -0.3px;
     margin-bottom: 0;
   }
@@ -567,11 +570,13 @@
 
   .about-story__text {
     margin-bottom: 0;
+    font-weight: 600;
   }
 
   .about-story__text--spaced-margin {
     margin-top: 0;
     font-size: 14px;
+    font-weight: 600;
   }
 
   .about-story__bottom-text {
@@ -636,12 +641,12 @@
   .about-story__text--tight-margin,
   .about-story__text--base-margin {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   .about-arrival__list-item {
     font-size: 14px;
-    font-weight: 500;
+    font-weight: 600;
   }
 
   /* FAQ Section */

@@ -313,12 +313,12 @@ h6 {
   line-height: var(--leading-relaxed);
 }
 
-.body-md {
+/* .body-md {
   font-family: var(--font-body);
   font-size: var(--text-base);
   color: var(--color-muted);
   line-height: var(--leading-normal);
-}
+} */
 
 .body-sm {
   font-family: var(--font-body);
@@ -1986,6 +1986,7 @@ h6 {
   line-height: 1.6;
   letter-spacing: -0.5px;
   margin-bottom: var(--space-10);
+  font-weight: 600;
 }
 
 .contact-info-card {
@@ -2000,6 +2001,7 @@ h6 {
   font-size: 14px;
   color: var(--color-primary);
   margin-bottom: var(--space-2);
+  font-weight: 600;
 }
 
 .contact-info-item:last-child {
@@ -2008,7 +2010,6 @@ h6 {
 
 .contact-info-title {
   margin-bottom: var(--space-4);
-  color: #868C98;
   font-size: 14px;
   font-weight: 500;
 }
