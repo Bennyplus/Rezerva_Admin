@@ -288,6 +288,7 @@
 .blogBody p {
   margin-bottom: 24px;
   color: var(--color-muted);
+  font-weight: 600;
 }
 
 .blogBody ul,
@@ -303,5 +304,4 @@
 
 .blogBody em {
   font-style: italic;
-  color: #868C98;
 }

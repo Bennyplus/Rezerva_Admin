@@ -33,6 +33,23 @@ export interface ContactUsPayload {
 
 export const accountsService = {
   /**
+   * Sets the password for a team member
+   * @param uid - User ID
+   * @param token - Secure token
+   * @param payload - Password payload object
+   */
+  setPassword: async (uid: string, token: string, payload: any): Promise<any> => {
+    const response = await publicApi.post('', payload, {
+      params: {
+        path: `api/v1/admin/set-password/`,
+        uid: uid,
+        token: token
+      }
+    });
+    return response.data;
+  },
+
+  /**
    * Fetches the list of countries from accounts/countries/
    * Returns an array of countries
    */
@@ -159,8 +176,9 @@ export const accountsService = {
    */
   addTeamMember: async (payload: any): Promise<any> => {
     const response = await publicApi.post('', payload, {
-      params: { path: 'api/v1/admin/members/' }
-    });
+      params: { path: 'api/v1/admin/members/' },
+      // skipToast: true
+    } as any);
     return response.data;
   },
 

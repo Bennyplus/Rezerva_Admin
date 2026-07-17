@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import CustomSelect from "./CustomSelect";
 import styles from "./AddTeamMemberModal.module.css";
 import { ADMIN_ROLES, type Role } from "@/data/admin-teams";
+import { accountsService, type Country } from "@/services/accounts-service";
 
 interface AddTeamMemberModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (name: string, email: string, roleId: string, phone_number: string) => void;
+  onSubmit: (name: string, email: string, roleId: string, phone_number: string, countryCode?: string | number) => void;
   roles?: Role[];
 }
 
@@ -17,6 +18,28 @@ export default function AddTeamMemberModal({ isOpen, onClose, onSubmit, roles = 
   const [email, setEmail] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [roleId, setRoleId] = useState("");
+  const [countries, setCountries] = useState<Country[]>([]);
+  const [countryCode, setCountryCode] = useState<string | number>("");
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const fetchCountries = async () => {
+      try {
+        const data = await accountsService.getCountries();
+        setCountries(data);
+        if (data && data.length > 0) {
+          const defaultCountry = data.find((c: any) => c.id === 1 || String(c.id) === "1") || data[0];
+          setCountryCode(defaultCountry.id);
+        } else {
+          setCountryCode("1");
+        }
+      } catch (err) {
+        console.error("Failed to load countries in modal:", err);
+        setCountryCode("1");
+      }
+    };
+    fetchCountries();
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -29,7 +52,7 @@ export default function AddTeamMemberModal({ isOpen, onClose, onSubmit, roles = 
 
   const handleSubmit = () => {
     if (isValid) {
-      onSubmit(name, email, roleId, phoneNumber);
+      onSubmit(name, email, roleId, phoneNumber, countryCode);
       // Reset after submit
       setName("");
       setEmail("");
@@ -85,13 +108,30 @@ export default function AddTeamMemberModal({ isOpen, onClose, onSubmit, roles = 
 
           <div className={styles.field}>
             <label className={styles.label}>Phone Number</label>
-            <input
-              type="tel"
-              className={styles.input}
-              placeholder="e.g 09132323232"
-              value={phoneNumber}
-              onChange={(e) => setPhoneNumber(e.target.value)}
-            />
+            <div className={styles.phoneInputWrap}>
+              <div className={styles.countrySelectWrap}>
+                <CustomSelect
+                  name="countryCode"
+                  value={String(countryCode)}
+                  placeholder="+1"
+                  options={countries.map((c) => ({
+                    value: String(c.id),
+                    label: c.dial_code,
+                    icon: c.flag || undefined,
+                  }))}
+                  onChange={(_name, val) => setCountryCode(val)}
+                  variant="minimal"
+                />
+              </div>
+              <div className={styles.phoneDivider}></div>
+              <input
+                type="tel"
+                className={styles.phoneInput}
+                placeholder="(555) 000-0000"
+                value={phoneNumber}
+                onChange={(e) => setPhoneNumber(e.target.value)}
+              />
+            </div>
           </div>
 
           <div className={styles.field}>

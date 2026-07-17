@@ -262,14 +262,23 @@ export default function TeamsPage() {
   };
 
   /* Handle Add Team Member */
-  const handleAddMemberSubmit = async (name: string, email: string, roleId: string, phone_number: string) => {
+  const handleAddMemberSubmit = async (
+    name: string,
+    email: string,
+    roleId: string,
+    phone_number: string,
+    country?: string | number
+  ) => {
     try {
-      const payload = {
+      const payload: any = {
         full_name: name,
         email,
         phone_number,
         role: [Number(roleId)]
       };
+      if (country) {
+        payload.country = country;
+      }
 
       await accountsService.addTeamMember(payload);
 
@@ -281,11 +290,11 @@ export default function TeamsPage() {
       const assignedRole = roles.find(r => r.id === roleId);
       const roleName = assignedRole?.name || "Member";
       // Show toast
-      setToastMessage(`${name} has been successfully assigned ${roleName}`);
+      // setToastMessage(`${name} has been successfully assigned ${roleName}`);
     } catch (error: any) {
       console.error("Failed to add team member:", error);
       const serverMessage = error.response?.data?.message || error.message;
-      setToastMessage(`Error: ${serverMessage}`);
+      // setToastMessage(`Error: ${serverMessage}`);
     }
   };
 
@@ -295,13 +304,13 @@ export default function TeamsPage() {
     setIsModalActionLoading(true);
     try {
       await accountsService.updateTeamMember(editModalUser.id, { role_ids: [Number(roleId)] });
-      setToastMessage(`${editModalUser.name}'s role updated successfully.`);
+      // setToastMessage(`${editModalUser.name}'s role updated successfully.`);
       await fetchTeamMembers();
       setEditModalUser(null);
     } catch (error: any) {
       console.error("Failed to update team member:", error);
       const serverMessage = error.response?.data?.message || error.message;
-      setToastMessage(`Error: ${serverMessage}`);
+      // setToastMessage(`Error: ${serverMessage}`);
     } finally {
       setIsModalActionLoading(false);
     }
