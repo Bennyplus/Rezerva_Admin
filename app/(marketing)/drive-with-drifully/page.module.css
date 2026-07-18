@@ -274,7 +274,7 @@
   grid-template-columns: repeat(3, 1fr);
   gap: 6px;
   padding: 0px;
-  align-items: flex-start;
+  align-items: stretch;
   flex: none;
   order: 1;
   align-self: stretch;

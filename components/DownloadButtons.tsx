@@ -18,7 +18,7 @@ export default function DownloadButtons({
   const [os, setOs] = useState<"ios" | "android" | "desktop">("desktop");
 
   const GOOGLE_PLAY_URL = "https://play.google.com/store/apps/details?id=com.drifully.app";
-  const APP_STORE_URL = "https://apps.apple.com/app/idYOUR_APP_ID"; // Placeholder
+  const APP_STORE_URL = "https://apps.apple.com/ng/app/drifully/id6782419021";
 
   useEffect(() => {
     const userAgent = navigator.userAgent || navigator.vendor || (window as any).opera;
