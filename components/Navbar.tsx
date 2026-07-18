@@ -11,11 +11,13 @@ const NAV_LINKS = [
   { label: "Our Fleet", href: "/our-fleet" },
   { label: "Blog", href: "/blog" },
   { label: "Contact Us", href: "/contact-us" },
+  { label: "Drive with Drifully", href: "/drive-with-drifully" },
 ];
 
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const pathname = usePathname();
+  const [downloadLink, setDownloadLink] = useState("https://play.google.com/store/apps/details?id=com.drifully.app");
 
   // Close menu when route changes
   useEffect(() => {
@@ -30,6 +32,17 @@ export default function Navbar() {
       document.body.style.overflow = "unset";
     }
   }, [isOpen]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined" && window.navigator) {
+      const userAgent = window.navigator.userAgent.toLowerCase();
+      const isIOS = /ipad|iphone|ipod/.test(userAgent) ||
+        (window.navigator.maxTouchPoints && window.navigator.maxTouchPoints > 2 && /macintosh/.test(userAgent));
+      if (isIOS) {
+        setDownloadLink("https://apps.apple.com/ng/app/drifully/id6782419021");
+      }
+    }
+  }, []);
 
   const toggleMenu = () => setIsOpen(!isOpen);
 
@@ -105,13 +118,13 @@ export default function Navbar() {
           </ul>
 
           {/* Mobile CTA */}
-          <Link href="https://play.google.com/store/apps/details?id=com.drifully.app" className="btn btn-primary navbar__cta-mobile" onClick={() => setIsOpen(false)}>
+          <Link href={downloadLink} className="btn btn-primary navbar__cta-mobile" onClick={() => setIsOpen(false)}>
             Download App
           </Link>
         </div>
 
         {/* Desktop CTA */}
-        <Link href="https://play.google.com/store/apps/details?id=com.drifully.app" className="btn btn-primary btn-sm navbar__cta-desktop">
+        <Link href={downloadLink} className="btn btn-primary btn-sm navbar__cta-desktop">
           Download App
         </Link>
       </div>

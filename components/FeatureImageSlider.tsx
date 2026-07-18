@@ -24,20 +24,24 @@ export default function FeatureImageSlider({ images, alt, fill, sizes, style }: 
 
   return (
     <>
-      {images.map((img, idx) => (
-        <Image
-          key={img}
-          src={img}
-          alt={`${alt} ${idx + 1}`}
-          fill={fill}
-          sizes={sizes}
-          style={{
-            ...style,
-            opacity: currentIndex === idx ? 1 : 0,
-            transition: "opacity 0.5s ease-in-out",
-          }}
-        />
-      ))}
+      {images.map((img, idx) => {
+        const isFirstOrLast = idx === 0 || idx === images.length - 1;
+        return (
+          <Image
+            key={img}
+            src={img}
+            alt={`${alt} ${idx + 1}`}
+            fill={fill}
+            sizes={sizes}
+            style={{
+              ...style,
+              objectFit: isFirstOrLast ? "fill" : (style?.objectFit || "cover"),
+              opacity: currentIndex === idx ? 1 : 0,
+              transition: "opacity 0.5s ease-in-out",
+            }}
+          />
+        );
+      })}
     </>
   );
 }
