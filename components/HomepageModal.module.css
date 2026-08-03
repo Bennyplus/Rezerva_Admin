@@ -1,0 +1,248 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: fadeIn 0.25s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+.modal {
+  background-color: #ffffff;
+  border-radius: 10px;
+  width: calc(100vw - 40px);
+  max-width: 1240px;
+  height: min(673px, calc(100vh - 40px));
+  max-height: calc(100vh - 40px);
+  opacity: 1;
+  padding: 24px;
+  padding-top: 52px;
+  gap: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  text-align: center;
+  position: relative;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.3);
+  animation: slideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+
+  scrollbar-width: thin;
+  scrollbar-color: #e5e7eb transparent;
+}
+
+.modal::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal::-webkit-scrollbar-thumb {
+  background-color: #e5e7eb;
+  border-radius: 10px;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.97);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.closeButton {
+  position: absolute;
+  top: 36px;
+  right: 36px;
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid #E5E7EB;
+  background-color: #ffffff;
+  color: #6B7280;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  z-index: 10;
+  padding: 0;
+}
+
+.closeButton:hover {
+  background-color: #F3F4F6;
+  color: #111827;
+  border-color: #D1D5DB;
+}
+
+.visualCard {
+  max-width: 510px;
+  width: 100%;
+  background-color: #F6F8FA;
+  border-radius: 10px;
+  flex: 1;
+  min-height: 340px;
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+.phonesWrapper {
+  position: relative;
+  width: 100%;
+  max-width: 640px;
+  height: 100%;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* Background phone: iPhone 14 Pro-22.webp */
+.phoneBack {
+  position: absolute;
+  right: 10%;
+  top: 24px;
+  width: 277px;
+  height: auto;
+  z-index: 1;
+  object-fit: contain;
+  object-position: top center;
+  filter: drop-shadow(0 15px 30px rgba(0, 0, 0, 0.1));
+}
+
+/* Foreground phone: iPhone 14 Pro-222.webp */
+.phoneFront {
+  position: absolute;
+  left: 17%;
+  top: 175px;
+  width: 257px;
+  height: auto;
+  z-index: 2;
+  object-fit: contain;
+  object-position: top center;
+  filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.16));
+}
+
+.contentGroup {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.heading {
+  font-family: var(--font-heading), sans-serif;
+  font-size: 24px;
+  font-weight: 600;
+  color: #111111;
+  margin: 0;
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+.description {
+  font-family: var(--font-body), sans-serif;
+  font-size: 16px;
+  line-height: 1.6;
+  color: #868C98;
+  font-weight: 400;
+  max-width: 802px;
+  margin: 0;
+}
+
+.downloadBtn {
+  background-color: #18181B;
+  color: #ffffff;
+  font-family: var(--font-body), sans-serif;
+  font-size: 16px;
+  font-weight: 600;
+  padding: 10px 14px;
+  border-radius: 10px;
+  line-height: 170%;
+  letter-spacing: -0.5px;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.downloadBtn:hover {
+  background-color: #000000;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.18);
+}
+
+@media (max-width: 768px) {
+  .modal {
+    width: calc(100vw - 24px);
+    height: auto;
+    max-height: calc(100vh - 24px);
+    padding: 24px 16px;
+    gap: 16px;
+    border-radius: 10px;
+  }
+
+  .closeButton {
+    top: 16px;
+    right: 16px;
+    width: 32px;
+    height: 32px;
+  }
+
+  .visualCard {
+    height: 250px;
+    min-height: 250px;
+  }
+
+  .phoneBack {
+    width: 190px;
+    right: 14%;
+    top: 20px;
+  }
+
+  .phoneFront {
+    width: 175px;
+    left: 16%;
+    top: 85px;
+  }
+
+  .heading {
+    font-size: 22px;
+  }
+
+  .description {
+    font-size: 14px;
+  }
+
+  .downloadBtn {
+    width: 100%;
+    padding: 14px;
+  }
+}

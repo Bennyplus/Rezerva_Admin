@@ -6,6 +6,7 @@ import HowItWorks from "@/components/HowItWorks";
 import Reviews from "@/components/Reviews";
 import CtaSection from "@/components/CtaSection";
 import Footer from "@/components/Footer";
+import HomepageModal from "@/components/HomepageModal";
 
 export const metadata: Metadata = {
   title: "Drifully – Rent a Car, Your Way. Anytime, Anywhere.",
@@ -16,6 +17,7 @@ export const metadata: Metadata = {
 export default function HomePage() {
   return (
     <main>
+      <HomepageModal />
       <Navbar />
       <Hero />
       <Features />
