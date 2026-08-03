@@ -639,7 +639,7 @@ h6 {
 .hero__inner {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-40);
+  gap: 365px;
   align-items: center;
   min-height: calc(100vh - 80px);
 }
@@ -1239,7 +1239,7 @@ h6 {
   background: var(--color-white);
   border-radius: var(--radius-md);
   padding: var(--space-2);
-  border: 2px solid #E2E4E9;
+  border: 1px solid #E2E4E9;
   position: relative;
   overflow: hidden;
   display: flex;
@@ -1392,8 +1392,8 @@ h6 {
   line-height: 170%;
   letter-spacing: -0.3px;
   vertical-align: middle;
-  margin-top: 12px;
-  margin-bottom: 12px;
+  /* margin-top: 12px; */
+  margin-bottom: 8px;
   color: var(--color-primary);
 }
 

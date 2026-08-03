@@ -143,6 +143,7 @@
   display: flex;
   gap: var(--space-3);
   max-width: 400px;
+  width: 100%;
 }
 
 .footer__newsletter-input {
@@ -153,18 +154,19 @@
   background: #ffffff;
   font-size: 14px;
   color: var(--color-primary);
-  letter-spacing: 0.6px;
+  letter-spacing: -0.3px;
 }
 
 .footer__newsletter-input::placeholder {
-  letter-spacing: 0.1px;
+  font-family: var(--font-body);
+  letter-spacing: -0.3px;
   line-height: 170%;
 }
 
 .footer__newsletter-btn {
   background: #111111;
   color: var(--color-white);
-  padding: 12px 24px;
+  padding: 10px 16px;
   border-radius: var(--radius-md);
   font-weight: 400;
   font-size: 14px;
