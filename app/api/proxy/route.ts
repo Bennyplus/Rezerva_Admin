@@ -2,8 +2,8 @@ import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import axios from 'axios';
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://drifully-backend-1qa6.onrender.com';
-const API_KEY = process.env.DRIFULLY_BACKEND_API_KEY;
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || process.env.VITE_API_BASE_URL; 
+const API_KEY = process.env.DRIFULLY_BACKEND_API_KEY || process.env.VITE_RESERVA_API_KEY;
 
 let activeRefreshPromise: Promise<{ access: string; refresh: string }> | null = null;
 let lastRefreshedTokens: { access: string; refresh: string; timestamp: number } | null = null;

@@ -11,10 +11,12 @@ export interface Country {
 export interface RegisterPayload {
   full_name: string;
   email: string;
+  country_code: string | number; // Country ID selected from list countries
   phone_number: string;
   password: string;
   confirm_password: string;
-  country_code: string | number; // Country ID selected from list countries
+  gender: string;
+  user_type: string;
 }
 
 export interface LoginPayload {
@@ -55,7 +57,7 @@ export const accountsService = {
    */
   getCountries: async (): Promise<Country[]> => {
     const response = await publicApi.get('', {
-      params: { path: 'api/v1/accounts/countries/' }
+      params: { path: 'accounts/countries/' }
     });
 
     // API response formatting handles both arrays directly or wrapped results
@@ -70,19 +72,35 @@ export const accountsService = {
    * @param payload - LoginPayload object
    */
   login: async (payload: LoginPayload): Promise<any> => {
-    const response = await publicApi.post('', payload, {
-      params: { path: 'api/v1/accounts/login/' }
+    const formData = new FormData();
+    formData.append('email', payload.email);
+    formData.append('password', payload.password);
+
+    const response = await publicApi.post('', formData, {
+      params: { path: 'accounts/login/' },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return response.data;
   },
 
-  /**
-   * Creates a new user account at accounts/register/
-   * @param payload - RegisterPayload object
-   */
   register: async (payload: RegisterPayload): Promise<any> => {
-    const response = await publicApi.post('', payload, {
-      params: { path: 'api/v1/accounts/register/' }
+    const formData = new FormData();
+    formData.append('full_name', payload.full_name);
+    formData.append('email', payload.email);
+    formData.append('country_code', String(payload.country_code));
+    formData.append('phone_number', payload.phone_number);
+    formData.append('password', payload.password);
+    formData.append('confirm_password', payload.confirm_password);
+    if (payload.gender) formData.append('gender', payload.gender);
+    if (payload.user_type) formData.append('user_type', payload.user_type);
+
+    const response = await publicApi.post('', formData, {
+      params: { path: 'accounts/register/' },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return response.data;
   },
@@ -92,8 +110,15 @@ export const accountsService = {
    * @param otp - The one-time password code
    */
   verifyOTP: async (otp: string): Promise<any> => {
-    const response = await publicApi.post('', { otp }, {
-      params: { path: 'api/v1/accounts/verify-otp/' }
+    const formData = new FormData();
+    formData.append('otp', otp);
+    formData.append('otp_code', otp);
+
+    const response = await publicApi.post('', formData, {
+      params: { path: 'accounts/verify-otp/' },
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
     });
     return response.data;
   },
