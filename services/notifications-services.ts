@@ -1,13 +1,30 @@
 import { publicApi } from "@/lib/api-client";
 
+export interface CreateNotificationPayload {
+  title: string;
+  message: string;
+  call_to_action?: string;
+  media_attachment?: File | Blob | null;
+  recipient_type: string; // e.g. "all_users"
+  delivery_channel: string; // e.g. "email"
+  specific_recipients?: string[];
+  scheduled_time?: string;
+  [key: string]: any;
+}
+
 export const notificationsService = {
   /**
-   * Fetches notifications for the admin dashboard.
+   * List Notifications
+   * GET administration/notifications/
    */
-  getNotifications: async (page = 1) => {
+  getNotifications: async (page = 1, search = "") => {
     try {
       const response = await publicApi.get("", {
-        params: { path: "api/v1/admin/notifications/", page },
+        params: {
+          path: "administration/notifications/",
+          page,
+          ...(search && { search }),
+        },
       });
       const data = response.data;
       if (data && data.results !== undefined) {
@@ -21,57 +38,35 @@ export const notificationsService = {
   },
 
   /**
-   * Fetches a single notification by ID.
+   * Create Notification (Draft)
+   * POST administration/notifications/
+   * Body: formdata
    */
-  getNotificationById: async (id: string) => {
+  createNotification: async (payload: CreateNotificationPayload | FormData) => {
     try {
-      const response = await publicApi.get("", {
-        params: { path: `api/v1/admin/notifications/${id}/` },
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to fetch notification ${id}:`, error);
-      throw error;
-    }
-  },
+      let body: FormData;
+      if (payload instanceof FormData) {
+        body = payload;
+      } else {
+        body = new FormData();
+        Object.entries(payload).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            if (Array.isArray(value)) {
+              value.forEach((item) => body.append(key, item));
+            } else if (value instanceof File || value instanceof Blob) {
+              body.append(key, value);
+            } else {
+              body.append(key, String(value));
+            }
+          }
+        });
+      }
 
-  /**
-   * Fetches available delivery channel choices.
-   */
-  getDeliveryChannels: async () => {
-    try {
-      const response = await publicApi.get("", {
-        params: { path: "api/v1/admin/notifications/choices/delivery-channels/" },
-      });
-      return Array.isArray(response.data) ? response.data : response.data?.results || [];
-    } catch (error) {
-      console.error("Failed to fetch delivery channels:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * Fetches available recipient type choices.
-   */
-  getRecipientTypes: async () => {
-    try {
-      const response = await publicApi.get("", {
-        params: { path: "api/v1/admin/notifications/choices/recipient-types/" },
-      });
-      return Array.isArray(response.data) ? response.data : response.data?.results || [];
-    } catch (error) {
-      console.error("Failed to fetch recipient types:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * Creates a new notification.
-   */
-  createNotification: async (data: any) => {
-    try {
-      const response = await publicApi.post("", data, {
-        params: { path: "api/v1/admin/notifications/" },
+      const response = await publicApi.post("", body, {
+        params: { path: "administration/notifications/" },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
       return response.data;
     } catch (error) {
@@ -81,91 +76,45 @@ export const notificationsService = {
   },
 
   /**
-   * Sends an existing notification.
+   * Publish/Send Notification
+   * POST administration/notifications/send/?notification_id={id}
+   * Body: formdata (confirm=True)
    */
-  sendNotification: async (id: string, payload: any = {}) => {
+  sendNotification: async (notificationId: string | number) => {
     try {
-      const response = await publicApi.post("", payload, {
-        params: { path: `api/v1/admin/notifications/${id}/send/` },
+      const formData = new FormData();
+      formData.append("confirm", "True");
+
+      const response = await publicApi.post("", formData, {
+        params: {
+          path: "administration/notifications/send/",
+          notification_id: notificationId,
+        },
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
       });
       return response.data;
     } catch (error) {
-      console.error(`Failed to send notification ${id}:`, error);
+      console.error(`Failed to send notification ${notificationId}:`, error);
       throw error;
     }
   },
-
   /**
-   * Duplicates a notification.
+   * Fetch Single Notification Detail
+   * GET administration/notifications/?id={id}
    */
-  duplicateNotification: async (id: string) => {
-    try {
-      const response = await publicApi.post("", null, {
-        params: { path: "api/v1/admin/notifications/duplicate/", notification_id: id },
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to duplicate notification ${id}:`, error);
-      throw error;
-    }
-  },
-
-  /**
-   * Updates an existing notification.
-   */
-  editNotification: async (id: string, data: any) => {
-    try {
-      const response = await publicApi.put("", data, {
-        params: { path: "api/v1/admin/notifications/", notification_id: id },
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to update notification ${id}:`, error);
-      throw error;
-    }
-  },
-
-  /**
-   * Cancels a scheduled notification.
-   */
-  cancelScheduledNotification: async (id: string) => {
-    try {
-      const response = await publicApi.post("", null, {
-        params: { path: "api/v1/admin/notifications/cancel-schedule/", notification_id: id },
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to cancel notification schedule for ${id}:`, error);
-      throw error;
-    }
-  },
-
-  /**
-   * Fetches the list of users available for targeted notifications.
-   */
-  getUsersForNotifications: async () => {
+  getNotificationById: async (notificationId: string | number) => {
     try {
       const response = await publicApi.get("", {
-        params: { path: "api/v1/admin/notifications/users/" },
-      });
-      return Array.isArray(response.data) ? response.data : response.data?.results || [];
-    } catch (error) {
-      console.error("Failed to fetch notification users:", error);
-      throw error;
-    }
-  },
-
-  /**
-   * Deactivates a notification.
-   */
-  deactivateNotification: async (id: string) => {
-    try {
-      const response = await publicApi.post("", null, {
-        params: { path: "api/v1/admin/notifications/deactivate/", notification_id: id },
+        params: {
+          path: `administration/notifications/`,
+          id: notificationId,
+        },
       });
       return response.data;
     } catch (error) {
-      console.error(`Failed to deactivate notification ${id}:`, error);
+      console.error(`Failed to fetch notification ${notificationId}:`, error);
       throw error;
     }
   },

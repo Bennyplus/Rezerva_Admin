@@ -57,53 +57,22 @@ export default function NotificationsPage() {
     }
   };
 
-  const handleDuplicate = async (id: string) => {
+  const handleSendNotification = async (id: string | number) => {
     setActiveDropdown(null);
     try {
-      await notificationsService.duplicateNotification(id);
+      setIsLoading(true);
+      await notificationsService.sendNotification(id);
       fetchNotifications();
     } catch (error) {
-      console.error(`Failed to duplicate notification ${id}`, error);
-    }
-  };
-
-  const handleCancelSchedule = async (id: string) => {
-    setActiveDropdown(null);
-    try {
-      await notificationsService.cancelScheduledNotification(id);
-      fetchNotifications();
-    } catch (error) {
-      console.error(`Failed to cancel schedule for notification ${id}`, error);
-    }
-  };
-
-  const handleDeactivate = async (id: string) => {
-    setActiveDropdown(null);
-    try {
-      await notificationsService.deactivateNotification(id);
-      fetchNotifications();
-    } catch (error) {
-      console.error(`Failed to deactivate notification ${id}`, error);
+      console.error(`Failed to send notification ${id}`, error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleViewDetails = (id: string) => {
     setActiveDropdown(null);
     setSelectedNotificationId(id);
-  };
-
-  const handleEdit = async (id: string) => {
-    setActiveDropdown(null);
-    try {
-      setIsLoading(true);
-      const notif = await notificationsService.getNotificationById(id);
-      setEditingNotification(notif);
-      setCurrentView("create");
-    } catch (error) {
-      console.error(`Failed to fetch notification ${id}`, error);
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   useEffect(() => {
@@ -187,18 +156,14 @@ export default function NotificationsPage() {
           onSave={async (data) => {
             setSubmitError(null);
             try {
-              if (editingNotification) {
-                await notificationsService.editNotification(editingNotification.id, data);
-              } else {
-                await notificationsService.createNotification(data);
-              }
+              await notificationsService.createNotification(data);
               setCurrentView("list");
               setEditingNotification(null);
               fetchNotifications();
             } catch (error: any) {
               const msg = error?.response?.data
                 ? Object.values(error.response.data).flat().join(" ")
-                : `Failed to ${editingNotification ? "update" : "create"} notification. Please try again.`;
+                : "Failed to create notification. Please try again.";
               setSubmitError(msg);
             }
           }}
@@ -229,26 +194,9 @@ export default function NotificationsPage() {
         ))}
       </div>
 
-      {fetchError ? (
-        <div className={styles.errorCard}>
-          <h2 className={styles.errorTitle}>Unable to fetch notifications</h2>
-          <p className={styles.errorSubtitle}>{fetchError}</p>
-          <button className={styles.retryBtn} onClick={fetchNotifications}>
-            Retry
-          </button>
-        </div>
-      ) : isEmpty ? (
+      {fetchError || isEmpty ? (
         /* ─── Empty State ─── */
         <div className={styles.emptyCard} id="notifications-empty-state">
-          <div className={styles.illustration} aria-hidden="true">
-            <Image
-              src="/images/admin/Items.png"
-              alt="No notifications illustration"
-              width={460}
-              height={380}
-              className={styles.illustrationImg}
-            />
-          </div>
           <h2 className={styles.emptyTitle}>No Notifications Yet</h2>
           <p className={styles.emptySubtitle}>
             Send updates, promotions, and important announcements to your users instantly.
@@ -257,19 +205,8 @@ export default function NotificationsPage() {
             className={styles.createBtn}
             onClick={() => setCurrentView("create")}
           >
-            <PlusIcon />
             Create A New Notification
           </button>
-
-          <div style={{ marginTop: "40px" }}>
-            <button
-              onClick={() => setIsEmpty(false)}
-              className={styles.toolBtn}
-              style={{ fontSize: "11px", opacity: 0.5 }}
-            >
-              (Dev: Show Data)
-            </button>
-          </div>
         </div>
       ) : (
         /* ─── Populated State ─── */
@@ -364,19 +301,16 @@ export default function NotificationsPage() {
                             <div className={styles.dropdown}>
                               <button
                                 className={styles.dropdownItem}
-                                onClick={() => handleEdit(notif.id)}
-                              >
-                                Edit Notification
-                              </button>
-                              <button
-                                className={styles.dropdownItem}
                                 onClick={() => handleViewDetails(notif.id)}
                               >
                                 View Details
                               </button>
-                              <button className={styles.dropdownItem} onClick={() => handleCancelSchedule(notif.id)}>Cancel Schedule</button>
-                              <button className={styles.dropdownItem} onClick={() => handleDuplicate(notif.id)}>Duplicate</button>
-                              <button className={styles.dropdownItem} onClick={() => handleDeactivate(notif.id)}>Deactivate</button>
+                              <button
+                                className={styles.dropdownItem}
+                                onClick={() => handleSendNotification(notif.id)}
+                              >
+                                Send / Publish
+                              </button>
                             </div>
                           )}
                         </div>

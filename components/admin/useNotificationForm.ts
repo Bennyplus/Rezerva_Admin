@@ -71,8 +71,8 @@ export function useNotificationForm({ onSave, initialData }: UseNotificationForm
     title: initialData?.title || "",
     message: initialData?.message || "",
     cta: initialData?.call_to_action || "",
-    recipients: initialData?.recipient_type || "",
-    channel: initialData?.delivery_channel || "",
+    recipients: initialData?.recipient_type || "all_users",
+    channel: initialData?.delivery_channel || "email",
     date: initialData?.scheduled_at ? new Date(initialData.scheduled_at).toISOString() : new Date().toISOString(),
     schedule: initialData?.is_scheduled || false,
     userEmails: "",
@@ -90,15 +90,15 @@ export function useNotificationForm({ onSave, initialData }: UseNotificationForm
 
   // ── API data ────────────────────────────────────────────────────────────────
   const [recipientTypes, setRecipientTypes] = useState<SelectOption[]>([]);
-  const [recipientTypesLoading, setRecipientTypesLoading] = useState(true);
+  const [recipientTypesLoading, setRecipientTypesLoading] = useState(false);
   const [recipientTypesError, setRecipientTypesError] = useState(false);
 
   const [deliveryChannels, setDeliveryChannels] = useState<SelectOption[]>([]);
-  const [deliveryChannelsLoading, setDeliveryChannelsLoading] = useState(true);
+  const [deliveryChannelsLoading, setDeliveryChannelsLoading] = useState(false);
   const [deliveryChannelsError, setDeliveryChannelsError] = useState(false);
 
   const [availableUsers, setAvailableUsers] = useState<SelectOption[]>([]);
-  const [usersLoading, setUsersLoading] = useState(true);
+  const [usersLoading, setUsersLoading] = useState(false);
   const [usersError, setUsersError] = useState(false);
   const userIdMapRef = useRef<Record<string, number>>({});
 
@@ -109,54 +109,34 @@ export function useNotificationForm({ onSave, initialData }: UseNotificationForm
 
   // ── Prefetch ALL dropdown data on mount ──────────────────────────────────────
   const fetchRecipientTypes = useCallback(() => {
-    setRecipientTypesLoading(true);
+    setRecipientTypesLoading(false);
     setRecipientTypesError(false);
-    return notificationsService
-      .getRecipientTypes()
-      .then((types: { value: string; label?: string; display_name?: string }[]) => {
-        setRecipientTypes(
-          types.map((t) => ({ value: t.value, label: t.label ?? t.display_name ?? t.value }))
-        );
-      })
-      .catch(() => setRecipientTypesError(true))
-      .finally(() => setRecipientTypesLoading(false));
+    setRecipientTypes([
+      { value: "all_users", label: "All Users" },
+      { value: "drivers", label: "Drivers" },
+      { value: "customers", label: "Customers" },
+      { value: "specific_users", label: "Specific Users" },
+    ]);
+    return Promise.resolve();
   }, []);
 
   const fetchDeliveryChannels = useCallback(() => {
-    setDeliveryChannelsLoading(true);
+    setDeliveryChannelsLoading(false);
     setDeliveryChannelsError(false);
-    return notificationsService
-      .getDeliveryChannels()
-      .then((channels: SelectOption[]) => setDeliveryChannels(channels))
-      .catch(() => setDeliveryChannelsError(true))
-      .finally(() => setDeliveryChannelsLoading(false));
+    setDeliveryChannels([
+      { value: "email", label: "Email" },
+      { value: "push", label: "Push Notification" },
+      { value: "in_app", label: "In-App Notification" },
+    ]);
+    return Promise.resolve();
   }, []);
 
   const fetchUsers = useCallback(() => {
-    setUsersLoading(true);
+    setUsersLoading(false);
     setUsersError(false);
-    return notificationsService
-      .getUsersForNotifications()
-      .then((users: { id: number; email: string }[]) => {
-        const map: Record<string, number> = {};
-        const reverseMap: Record<number, string> = {};
-        users.forEach((u) => {
-          map[u.email] = u.id;
-          reverseMap[u.id] = u.email;
-        });
-        userIdMapRef.current = map;
-        setAvailableUsers(users.map((u) => ({ value: u.email, label: u.email })));
-
-        if (initialData?.specific_recipients?.length > 0) {
-          const emails = initialData.specific_recipients
-            .map((id: number) => reverseMap[id])
-            .filter(Boolean);
-          setFormData((prev) => ({ ...prev, userEmails: emails.join(", ") }));
-        }
-      })
-      .catch(() => setUsersError(true))
-      .finally(() => setUsersLoading(false));
-  }, [initialData]);
+    setAvailableUsers([]);
+    return Promise.resolve();
+  }, []);
 
   // All three fetched eagerly on mount — no waiting for user interaction
   useEffect(() => {
@@ -305,48 +285,24 @@ export function useNotificationForm({ onSave, initialData }: UseNotificationForm
     try {
       const payload = new FormData();
 
-      const appendIfChanged = (key: string, newValue: any, oldValue: any) => {
-        if (!initialData) {
-          payload.append(key, newValue);
-        } else if (newValue !== oldValue) {
-          payload.append(key, newValue);
-        }
-      };
+      payload.append("title", formData.title.trim());
+      payload.append("message", formData.message);
+      payload.append("recipient_type", formData.recipients || "all_users");
+      payload.append("delivery_channel", formData.channel || "email");
 
-      appendIfChanged("title", formData.title.trim(), initialData?.title);
-      appendIfChanged("message", formData.message, initialData?.message);
-      appendIfChanged("recipient_type", formData.recipients, initialData?.recipient_type);
-
-      const isScheduledValue = formData.schedule ? "True" : "False";
-      const initialIsScheduledValue = initialData?.is_scheduled ? "True" : "False";
-      appendIfChanged("is_scheduled", isScheduledValue, initialIsScheduledValue);
+      if (formData.cta.trim()) {
+        payload.append("call_to_action", formData.cta.trim());
+      }
 
       if (formData.schedule) {
-        const currentIso = new Date(formData.date).toISOString();
-        const initialIso = initialData?.scheduled_at ? new Date(initialData.scheduled_at).toISOString() : undefined;
-        appendIfChanged("scheduled_at", currentIso, initialIso);
+        payload.append("is_scheduled", "True");
+        payload.append("scheduled_at", new Date(formData.date).toISOString());
       }
 
-      const currentCta = formData.cta.trim();
-      const initialCta = initialData?.call_to_action || "";
-      if (!initialData || currentCta !== initialCta) {
-        payload.append("call_to_action", currentCta);
+      if (selectedFiles.length > 0) {
+        selectedFiles.forEach((file) => payload.append("media_attachment", file));
       }
 
-      appendIfChanged("delivery_channel", formData.channel, initialData?.delivery_channel);
-
-      // Each ID as a separate entry — backend expects integer PKs, not a comma string
-      if (formData.recipients === "specific" && formData.userEmails) {
-        const newEmails = formData.userEmails.split(",").map(v => v.trim()).filter(Boolean);
-        const newIds = newEmails.map(email => userIdMapRef.current[email]).filter(id => id != null).sort();
-        const oldIds = initialData?.specific_recipients ? [...initialData.specific_recipients].sort() : [];
-
-        if (!initialData || JSON.stringify(newIds) !== JSON.stringify(oldIds)) {
-          newIds.forEach(id => payload.append("specific_recipients", String(id)));
-        }
-      }
-
-      selectedFiles.forEach((file) => payload.append("media_attachment", file));
       onSave(payload);
     } finally {
       setIsSubmitting(false);
