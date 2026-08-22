@@ -102,14 +102,14 @@ export const notificationsService = {
   },
   /**
    * Fetch Single Notification Detail
-   * GET administration/notifications/?id={id}
+   * GET administration/notifications/?notification_id={id}
    */
   getNotificationById: async (notificationId: string | number) => {
     try {
       const response = await publicApi.get("", {
         params: {
-          path: `administration/notifications/`,
-          id: notificationId,
+          path: "administration/notifications/",
+          notification_id: notificationId,
         },
       });
       return response.data;

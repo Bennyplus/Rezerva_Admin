@@ -13,11 +13,11 @@ const dmSans = DM_Sans({
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.drifullyrentals.com"),
   title: {
-    default: "Drifully – Rent a Car, Your Way. Anytime, Anywhere.",
-    template: "%s | Drifully",
+    default: "Rezerva – Rent a Car, Your Way. Anytime, Anywhere.",
+    template: "%s | Rezerva",
   },
   description:
-    "Drive yourself or get a chauffeur. Book in seconds with Drifully — fast, flexible, and hassle-free car rentals for trips, events, and business.",
+    "Drive yourself or get a chauffeur. Book in seconds with  Rezerva fast, flexible, and hassle-free car rentals for trips, events, and business.",
   keywords: [
     // Core Nigeria keywords
     "car rental in Nigeria",
@@ -60,13 +60,13 @@ export const metadata: Metadata = {
     "ride booking",
     "self-drive",
   ],
-  authors: [{ name: "Drifully" }],
-  creator: "Drifully",
+  authors: [{ name: "Rezerva" }],
+  creator: "Rezerva",
   openGraph: {
     type: "website",
     locale: "en_US",
     url: "https://www.drifullyrentals.com",
-    siteName: "Drifully",
+    siteName: "Rezerva",
     title: "Drifully – Rent a Car, Your Way. Anytime, Anywhere.",
     description:
       "Drive yourself or get a chauffeur. Book in seconds — fast, flexible, and hassle-free.",
@@ -82,7 +82,8 @@ export const metadata: Metadata = {
   twitter: {
     card: "summary_large_image",
     title: "Drifully – Rent a Car, Your Way.",
-    description: "Book a car or chauffeur in seconds. Fast, flexible, hassle-free.",
+    description:
+      "Book a car or chauffeur in seconds. Fast, flexible, hassle-free.",
     images: ["/og-cover.png"],
   },
   alternates: {
@@ -116,7 +117,7 @@ const jsonLd = {
     "https://www.facebook.com/share/1YiruGKukG/?mibextid=wwXIfr",
     "https://www.instagram.com/drifullycarrentals?utm_source=qr",
     "https://x.com/drifullyrentals?s=11",
-    "https://www.linkedin.com/company/drifully-car-rentals"
+    "https://www.linkedin.com/company/drifully-car-rentals",
   ],
   offers: {
     "@type": "Offer",
@@ -126,9 +127,18 @@ const jsonLd = {
   },
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
-    <html lang="en" className={dmSans.variable} suppressHydrationWarning data-scroll-behavior="smooth">
+    <html
+      lang="en"
+      className={dmSans.variable}
+      suppressHydrationWarning
+      data-scroll-behavior="smooth"
+    >
       <body suppressHydrationWarning>
         <script
           type="application/ld+json"

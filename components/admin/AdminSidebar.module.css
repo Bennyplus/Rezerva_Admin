@@ -145,13 +145,13 @@
 }
 
 .navItemActive {
-  background: var(--admin-active-bg, #111111);
-  color: var(--admin-active-text, #ffffff);
+  background: #3B63F6;
+  color: #ffffff;
 }
 
 .navItemActive:hover {
-  background: var(--admin-active-bg, #111111);
-  color: var(--admin-active-text, #ffffff);
+  background: #3B63F6;
+  color: #ffffff;
 }
 
 .chevron {

@@ -1,8 +1,6 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import Link from "next/link";
-import Image from "next/image";
 import Pagination from "@/components/admin/Pagination";
 import Spinner from "@/components/admin/Spinner";
 import FilterBar from "@/components/admin/FilterBar";
@@ -22,50 +20,76 @@ export default function AuditLogsPage() {
   const [allLogs, setAllLogs] = useState<any[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [loading, setLoading] = useState(true);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [selectedLog, setSelectedLog] = useState<any | null>(null);
 
   // Search / filter state
+  const [localSearchQuery, setLocalSearchQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterCategories, setFilterCategories] = useState<string[]>([]);
+  const [filterModules, setFilterModules] = useState<string[]>([]);
   const [filterActions, setFilterActions] = useState<string[]>([]);
   const [filterStatuses, setFilterStatuses] = useState<string[]>([]);
   const [sortOption, setSortOption] = useState<string>("Newest to Oldest");
 
+  // Debounce search query
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setSearchQuery(localSearchQuery);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [localSearchQuery]);
+
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
+      if (isInitialLoad) {
+        setLoading(true);
+      }
       try {
-        const data = await auditLogsService.getAuditLogs({ page: currentPage });
-        setAllLogs(Array.isArray(data) ? data : data.results || data.data || []);
+        const data = await auditLogsService.getAuditLogs({ page: currentPage, search: searchQuery });
+        const logsList = Array.isArray(data) ? data : data.results || data.data || [];
+        setAllLogs(logsList);
         if (data && data.count !== undefined) {
           setTotalCount(data.count);
         } else {
-          setTotalCount(Array.isArray(data) ? data.length : (data.results?.length || 0));
+          setTotalCount(Array.isArray(data) ? data.length : (data.results?.length || logsList.length));
         }
       } catch (error) {
         console.error("Failed to load audit logs:", error);
       } finally {
         setLoading(false);
+        setIsInitialLoad(false);
       }
     };
     fetchData();
-  }, [currentPage]);
+  }, [currentPage, searchQuery, isInitialLoad]);
 
-  // Normalize status capitalisation (API returns lowercase "success")
-  const normalizeStatus = (s: string) =>
-    s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : "";
+  // Normalize status capitalization (API returns lowercase "success")
+  const normalizeStatus = (s: string) => {
+    if (!s) return "Unknown";
+    const lower = s.toLowerCase();
+    if (lower === "success") return "Success";
+    if (lower === "failed" || lower === "denied") return "Denied";
+    if (lower === "pending") return "Pending";
+    return s.charAt(0).toUpperCase() + s.slice(1);
+  };
 
   const statusClass = (status: string) => {
     switch (normalizeStatus(status)) {
-      case "Success": return styles.statusSuccess;
-      case "Denied": return styles.statusDenied;
-      case "Pending": return styles.statusPending;
-      default: return "";
+      case "Success":
+        return styles.statusSuccess;
+      case "Denied":
+        return styles.statusDenied;
+      case "Pending":
+        return styles.statusPending;
+      default:
+        return "";
     }
   };
 
-  // Derive unique filter options from the full dataset
-  const categories = useMemo(
-    () => [...new Set(allLogs.map((l) => l.category).filter(Boolean))],
+  // Unique filter options derived from current logs
+  const modules = useMemo(
+    () => [...new Set(allLogs.map((l) => l.module || l.category).filter(Boolean))],
     [allLogs]
   );
   const actions = useMemo(
@@ -77,23 +101,29 @@ export default function AuditLogsPage() {
     [allLogs]
   );
 
-  // Client-side filtering
+  // Client-side filtering & sorting
   const filteredLogs = useMemo(() => {
     const q = searchQuery.toLowerCase().trim();
     let result = allLogs.filter((log) => {
-      const userName = (log.user || "").toLowerCase();
+      const actor = (log.actor_name || log.user || "").toLowerCase();
+      const actionStr = (log.action || "").toLowerCase();
+      const moduleStr = (log.module || log.category || "").toLowerCase();
+      const statusStr = normalizeStatus(log.status).toLowerCase();
+      const summaryStr = (log.summary || "").toLowerCase();
+
       const matchesSearch =
         !q ||
-        userName.includes(q) ||
-        (log.category || "").toLowerCase().includes(q) ||
-        (log.action || "").toLowerCase().includes(q) ||
-        normalizeStatus(log.status).toLowerCase().includes(q);
+        actor.includes(q) ||
+        actionStr.includes(q) ||
+        moduleStr.includes(q) ||
+        statusStr.includes(q) ||
+        summaryStr.includes(q);
 
-      const matchesCategory = filterCategories.length === 0 || filterCategories.includes(log.category);
+      const matchesModule = filterModules.length === 0 || filterModules.includes(log.module || log.category);
       const matchesAction = filterActions.length === 0 || filterActions.includes(log.action);
       const matchesStatus = filterStatuses.length === 0 || filterStatuses.includes(normalizeStatus(log.status));
 
-      return matchesSearch && matchesCategory && matchesAction && matchesStatus;
+      return matchesSearch && matchesModule && matchesAction && matchesStatus;
     });
 
     if (sortOption === "Newest to Oldest") {
@@ -103,21 +133,16 @@ export default function AuditLogsPage() {
     }
 
     return result;
-  }, [allLogs, searchQuery, filterCategories, filterActions, filterStatuses, sortOption]);
-
-  // Reset to page 1 whenever filters change
-  const handleSearch = (v: string) => { setSearchQuery(v); setCurrentPage(1); };
+  }, [allLogs, searchQuery, filterModules, filterActions, filterStatuses, sortOption]);
 
   const handleApplyFilters = (filters: Record<string, string[]>) => {
-    setFilterCategories(filters.categories || []);
+    setFilterModules(filters.modules || filters.categories || []);
     setFilterActions(filters.actions || []);
     setFilterStatuses(filters.statuses || []);
     setCurrentPage(1);
   };
 
-  // Client-side pagination logic updated for server-side count
   const totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-  const paginatedLogs = filteredLogs;
 
   const handleDropdownToggle = (id: string) => {
     setOpenDropdownId(openDropdownId === id ? null : id);
@@ -158,13 +183,13 @@ export default function AuditLogsPage() {
       <div className={styles.header}>
         <div className={styles.headerLeft}>
           <FilterBar
-            searchValue={searchQuery}
-            onSearchChange={handleSearch}
-            hideSort={true}
+            searchValue={localSearchQuery}
+            onSearchChange={setLocalSearchQuery}
+            hideSort={false}
             filterDropdown={
               <FilterDropdown
                 tabs={[
-                  { id: 'categories', label: 'Categories', options: categories },
+                  { id: 'modules', label: 'Modules', options: modules },
                   { id: 'actions', label: 'Actions', options: actions },
                   { id: 'statuses', label: 'Statuses', options: statuses }
                 ]}
@@ -187,17 +212,43 @@ export default function AuditLogsPage() {
           <div style={{ position: "relative" }}>
             <button
               onClick={() => setExportDropdownOpen(!exportDropdownOpen)}
-              style={{ padding: "8px 16px", background: "#111", color: "#fff", border: "none", borderRadius: "8px", cursor: "pointer", fontSize: "13px", fontWeight: 600, display: "flex", alignItems: "center", gap: "8px" }}
+              style={{
+                padding: "8px 16px",
+                background: "#111111",
+                color: "#ffffff",
+                border: "none",
+                borderRadius: "8px",
+                cursor: "pointer",
+                fontSize: "13px",
+                fontWeight: 600,
+                display: "flex",
+                alignItems: "center",
+                gap: "8px"
+              }}
               disabled={!!exportingFormat}
             >
               {exportingFormat ? `Exporting ${exportingFormat.toUpperCase()}...` : "Export Logs"}
               <ChevronDownIcon />
             </button>
             {exportDropdownOpen && (
-              <div style={{ position: "absolute", top: "100%", right: 0, marginTop: "8px", background: "#fff", border: "1px solid #eee", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 10, minWidth: "120px", display: "flex", flexDirection: "column", overflow: "hidden" }}>
-                <button onClick={() => handleExport("csv")} style={{ padding: "10px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: "13px", color: "#333", borderBottom: "1px solid #eee" }}>Export as CSV</button>
-                <button onClick={() => handleExport("pdf")} style={{ padding: "10px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: "13px", color: "#333", borderBottom: "1px solid #eee" }}>Export as PDF</button>
-                <button onClick={() => handleExport("xlsx")} style={{ padding: "10px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: "13px", color: "#333" }}>Export as XLSX</button>
+              <div style={{
+                position: "absolute",
+                top: "100%",
+                right: 0,
+                marginTop: "8px",
+                background: "#ffffff",
+                border: "1px solid #E5E7EB",
+                borderRadius: "8px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                zIndex: 10,
+                minWidth: "140px",
+                display: "flex",
+                flexDirection: "column",
+                overflow: "hidden"
+              }}>
+                <button onClick={() => handleExport("csv")} style={{ padding: "10px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: "13px", color: "#374151", borderBottom: "1px solid #F3F4F6" }}>Export as CSV</button>
+                <button onClick={() => handleExport("pdf")} style={{ padding: "10px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: "13px", color: "#374151", borderBottom: "1px solid #F3F4F6" }}>Export as PDF</button>
+                <button onClick={() => handleExport("xlsx")} style={{ padding: "10px 16px", background: "transparent", border: "none", textAlign: "left", cursor: "pointer", fontSize: "13px", color: "#374151" }}>Export as XLSX</button>
               </div>
             )}
           </div>
@@ -207,16 +258,7 @@ export default function AuditLogsPage() {
       {!hasLogs ? (
         /* ─── Empty State ─── */
         <div className={styles.emptyCard} id="audit-logs-empty-state">
-          <div className={styles.illustration} aria-hidden="true">
-            <Image
-              src="/images/admin/Items.png"
-              alt="No audit logs illustration"
-              width={460}
-              height={380}
-              className={styles.illustrationImg}
-            />
-          </div>
-          <h2 className={styles.emptyTitle}>No audit logs available</h2>
+          <h2 className={styles.emptyTitle}>No Audit Logs Yet</h2>
           <p className={styles.emptySubtitle}>System and admin activities will appear here</p>
         </div>
       ) : (
@@ -225,48 +267,44 @@ export default function AuditLogsPage() {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th><input type="checkbox" className={styles.checkbox} /></th>
-                  <th>Timestamp</th>
-                  <th>User</th>
-                  <th>Category</th>
+                  <th style={{ width: "40px" }}>
+                    <input type="checkbox" className={styles.checkbox} aria-label="Select all logs" />
+                  </th>
+                  <th>Log ID</th>
+                  <th>Actor</th>
                   <th>Action</th>
+                  <th>Module</th>
+                  <th>IP Address</th>
                   <th>Status</th>
-                  <th></th>
+                  <th>Timestamp</th>
+                  <th style={{ width: "40px" }}></th>
                 </tr>
               </thead>
               <tbody>
-                {paginatedLogs.length === 0 ? (
+                {filteredLogs.length === 0 ? (
                   <tr>
-                    <td colSpan={7} style={{ textAlign: "center", padding: "40px", color: "#6f767e" }}>
-                      No results match your filters
+                    <td colSpan={9} style={{ textAlign: "center", padding: "40px", color: "#6B7280" }}>
+                      No results match your search/filters
                     </td>
                   </tr>
                 ) : (
-                  paginatedLogs.map((log) => (
+                  filteredLogs.map((log) => (
                     <tr key={log.id}>
-                      <td><input type="checkbox" className={styles.checkbox} /></td>
                       <td>
-                        {log.timestamp
-                          ? new Date(log.timestamp).toLocaleString("en-US", {
-                            day: "numeric",
-                            month: "short",
-                            year: "numeric",
-                            hour: "numeric",
-                            minute: "numeric",
-                            hour12: true,
-                          })
-                          : "N/A"}
+                        <input type="checkbox" className={styles.checkbox} aria-label={`Select log ${log.id}`} />
+                      </td>
+                      <td style={{ fontWeight: 600, color: "#111827" }}>
+                        #LOG-{String(log.id).padStart(3, "0")}
                       </td>
                       <td>
-                        <div className={styles.userCell}>
-                          {log.user || "System"}
+                        <div className={styles.userCell} style={{ fontWeight: 500 }}>
+                          {log.actor_name || log.user || "System"}
                         </div>
                       </td>
-                      <td>{log.category || "N/A"}</td>
-                      <td>
-                        {log.action
-                          ? log.action.split("_").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")
-                          : "N/A"}
+                      <td>{log.action || "--"}</td>
+                      <td style={{ textTransform: "capitalize" }}>{log.module || log.category || "--"}</td>
+                      <td style={{ fontFamily: "monospace", fontSize: "13px", color: "#4B5563" }}>
+                        {log.ip_address || "--"}
                       </td>
                       <td>
                         <span className={`${styles.badge} ${statusClass(log.status)}`}>
@@ -274,18 +312,28 @@ export default function AuditLogsPage() {
                           {normalizeStatus(log.status)}
                         </span>
                       </td>
+                      <td>{log.timestamp || "--"}</td>
                       <td className={styles.actionCell}>
                         <button
-                          className={`${styles.actionBtn} ${openDropdownId === log.id ? styles.actionBtnActive : ""}`}
-                          onClick={() => handleDropdownToggle(log.id)}
+                          className={`${styles.actionBtn} ${openDropdownId === String(log.id) ? styles.actionBtnActive : ""}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDropdownToggle(String(log.id));
+                          }}
                         >
                           <MoreIcon />
                         </button>
-                        {openDropdownId === log.id && (
+                        {openDropdownId === String(log.id) && (
                           <div className={styles.actionDropdown}>
-                            <Link href={`/admin/audit-logs/${log.id}`} className={styles.actionItem}>
+                            <button
+                              className={styles.actionItem}
+                              onClick={() => {
+                                setOpenDropdownId(null);
+                                setSelectedLog(log);
+                              }}
+                            >
                               View Details
-                            </Link>
+                            </button>
                           </div>
                         )}
                       </td>
@@ -302,19 +350,107 @@ export default function AuditLogsPage() {
             totalPages={totalPages}
             resultsPerPage={PAGE_SIZE}
             onPageChange={setCurrentPage}
+            variant="table"
           />
         </div>
       )}
-    </div>
-  );
-}
 
-function SearchIcon() {
-  return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <circle cx="11" cy="11" r="8" />
-      <line x1="21" y1="21" x2="16.65" y2="16.65" />
-    </svg>
+      {/* Details Modal */}
+      {selectedLog && (
+        <div style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          width: "100vw",
+          height: "100vh",
+          background: "rgba(0, 0, 0, 0.45)",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          zIndex: 1000,
+          padding: "24px",
+        }} onClick={() => setSelectedLog(null)}>
+          <div style={{
+            background: "#ffffff",
+            borderRadius: "16px",
+            width: "100%",
+            maxWidth: "560px",
+            overflow: "hidden",
+            boxShadow: "0 20px 40px rgba(0, 0, 0, 0.15)",
+          }} onClick={(e) => e.stopPropagation()}>
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              padding: "18px 24px",
+              borderBottom: "1px solid #F1F2F4",
+            }}>
+              <h2 style={{ fontSize: "17px", fontWeight: 600, color: "#111827", margin: 0 }}>
+                Audit Log Details (#LOG-{String(selectedLog.id).padStart(3, "0")})
+              </h2>
+              <button
+                onClick={() => setSelectedLog(null)}
+                style={{ background: "none", border: "none", cursor: "pointer", fontSize: "18px", color: "#9CA3AF" }}
+              >
+                ×
+              </button>
+            </div>
+
+            <div style={{ padding: "24px", display: "flex", flexDirection: "column", gap: "16px" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "16px" }}>
+                <div>
+                  <span style={{ fontSize: "12px", color: "#868C98" }}>Actor / User</span>
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: "#111827", marginTop: "2px" }}>
+                    {selectedLog.actor_name || selectedLog.user || "System"}
+                  </div>
+                </div>
+                <div>
+                  <span style={{ fontSize: "12px", color: "#868C98" }}>Action</span>
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: "#111827", marginTop: "2px" }}>
+                    {selectedLog.action || "--"}
+                  </div>
+                </div>
+                <div>
+                  <span style={{ fontSize: "12px", color: "#868C98" }}>Module</span>
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: "#111827", marginTop: "2px", textTransform: "capitalize" }}>
+                    {selectedLog.module || selectedLog.category || "--"}
+                  </div>
+                </div>
+                <div>
+                  <span style={{ fontSize: "12px", color: "#868C98" }}>IP Address</span>
+                  <div style={{ fontSize: "14px", fontWeight: 600, color: "#111827", marginTop: "2px", fontFamily: "monospace" }}>
+                    {selectedLog.ip_address || "--"}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <span style={{ fontSize: "12px", color: "#868C98" }}>Summary</span>
+                <div style={{ fontSize: "13.5px", color: "#374151", background: "#F9FAFB", padding: "12px 14px", borderRadius: "8px", marginTop: "4px", lineHeight: "1.5" }}>
+                  {selectedLog.summary || "No summary details available"}
+                </div>
+              </div>
+
+              <div>
+                <span style={{ fontSize: "12px", color: "#868C98" }}>Timestamp</span>
+                <div style={{ fontSize: "13.5px", color: "#111827", marginTop: "2px" }}>
+                  {selectedLog.timestamp || "--"}
+                </div>
+              </div>
+            </div>
+
+            <div style={{ padding: "16px 24px", background: "#F9FAFB", borderTop: "1px solid #F1F2F4", display: "flex", justifyContent: "flex-end" }}>
+              <button
+                onClick={() => setSelectedLog(null)}
+                style={{ padding: "8px 20px", background: "#3B63F6", color: "#ffffff", border: "none", borderRadius: "8px", fontSize: "13.5px", fontWeight: 500, cursor: "pointer" }}
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }
 

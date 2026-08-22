@@ -8,7 +8,7 @@ import CreateNotificationForm from "@/components/admin/CreateNotificationForm";
 import NotificationDetailsModal from "@/components/admin/NotificationDetailsModal";
 import Spinner from "@/components/admin/Spinner";
 import { notificationsService } from "@/services/notifications-services";
-import { NOTIFICATION_STATS, ADMIN_NOTIFICATIONS } from "@/data/admin-notifications";
+import { NOTIFICATION_STATS } from "@/data/admin-notifications";
 import FilterBar from "@/components/admin/FilterBar";
 import FilterDropdown from "@/components/admin/FilterDropdown";
 import SortDropdown from "@/components/admin/SortDropdown";
@@ -23,7 +23,9 @@ export default function NotificationsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
-  const [selectedNotificationId, setSelectedNotificationId] = useState<string | null>(null);
+  const [selectedNotificationId, setSelectedNotificationId] = useState<
+    string | null
+  >(null);
   const [editingNotification, setEditingNotification] = useState<any>(null);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -32,7 +34,11 @@ export default function NotificationsPage() {
 
   // filter/sort states
   const [searchQuery, setSearchQuery] = useState("");
-  const [activeFilters, setActiveFilters] = useState<{ statuses: string[], channels: string[], recipients: string[] }>({ statuses: [], channels: [], recipients: [] });
+  const [activeFilters, setActiveFilters] = useState<{
+    statuses: string[];
+    channels: string[];
+    recipients: string[];
+  }>({ statuses: [], channels: [], recipients: [] });
   const [sortOption, setSortOption] = useState<string>("date_desc");
 
   const toggleDropdown = (id: string) => {
@@ -50,7 +56,11 @@ export default function NotificationsPage() {
       setIsEmpty(!data.results || data.results.length === 0);
     } catch (error) {
       console.error("Error fetching notifications:", error);
-      setFetchError(error instanceof Error ? error.message : "Unable to load notifications.");
+      setFetchError(
+        error instanceof Error
+          ? error.message
+          : "Unable to load notifications.",
+      );
       setIsEmpty(false);
     } finally {
       setIsLoading(false);
@@ -89,26 +99,41 @@ export default function NotificationsPage() {
 
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
-      result = result.filter(notif =>
-        notif?.title?.toLowerCase().includes(q) ||
-        notif?.delivery_channel?.toLowerCase().includes(q)
+      result = result.filter(
+        (notif) =>
+          notif?.title?.toLowerCase().includes(q) ||
+          notif?.delivery_channel?.toLowerCase().includes(q),
       );
     }
 
     if (activeFilters.statuses.length > 0) {
-      result = result.filter(notif => activeFilters.statuses.includes(notif?.status));
+      result = result.filter((notif) =>
+        activeFilters.statuses.includes(notif?.status),
+      );
     }
 
     if (activeFilters.channels.length > 0) {
-      const channelsLower = activeFilters.channels.map(c => c.toLowerCase());
-      result = result.filter(notif => channelsLower.includes(notif?.delivery_channel?.toLowerCase()));
+      const channelsLower = activeFilters.channels.map((c) => c.toLowerCase());
+      result = result.filter((notif) =>
+        channelsLower.includes(notif?.delivery_channel?.toLowerCase()),
+      );
     }
 
     result.sort((a, b) => {
-      if (sortOption === "title_asc") return (a?.title || "").localeCompare(b?.title || "");
-      if (sortOption === "title_desc") return (b?.title || "").localeCompare(a?.title || "");
-      if (sortOption === "date_asc") return new Date(a?.created_at || 0).getTime() - new Date(b?.created_at || 0).getTime();
-      if (sortOption === "date_desc") return new Date(b?.created_at || 0).getTime() - new Date(a?.created_at || 0).getTime();
+      if (sortOption === "title_asc")
+        return (a?.title || "").localeCompare(b?.title || "");
+      if (sortOption === "title_desc")
+        return (b?.title || "").localeCompare(a?.title || "");
+      if (sortOption === "date_asc")
+        return (
+          new Date(a?.created_at || 0).getTime() -
+          new Date(b?.created_at || 0).getTime()
+        );
+      if (sortOption === "date_desc")
+        return (
+          new Date(b?.created_at || 0).getTime() -
+          new Date(a?.created_at || 0).getTime()
+        );
       return 0;
     });
 
@@ -128,18 +153,36 @@ export default function NotificationsPage() {
     return (
       <div style={{ position: "relative" }}>
         {submitError && (
-          <div style={{
-            position: "sticky", top: 0, zIndex: 100,
-            background: "#FEF2F2", border: "1px solid #FECACA",
-            borderRadius: "10px", padding: "12px 16px", marginBottom: "16px",
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            fontSize: "13px", color: "#B91C1C",
-          }}>
+          <div
+            style={{
+              position: "sticky",
+              top: 0,
+              zIndex: 100,
+              background: "#FEF2F2",
+              border: "1px solid #FECACA",
+              borderRadius: "10px",
+              padding: "12px 16px",
+              marginBottom: "16px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              fontSize: "13px",
+              color: "#B91C1C",
+            }}
+          >
             <span>⚠ {submitError}</span>
             <button
               type="button"
               onClick={() => setSubmitError(null)}
-              style={{ background: "none", border: "none", cursor: "pointer", color: "#B91C1C", fontWeight: 600, fontSize: 16, lineHeight: 1 }}
+              style={{
+                background: "none",
+                border: "none",
+                cursor: "pointer",
+                color: "#B91C1C",
+                fontWeight: 600,
+                fontSize: 16,
+                lineHeight: 1,
+              }}
               aria-label="Dismiss error"
             >
               ×
@@ -174,7 +217,16 @@ export default function NotificationsPage() {
 
   if (isLoading) {
     return (
-      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
+      <div
+        style={{
+          display: "flex",
+          height: "100%",
+          width: "100%",
+          minHeight: "60vh",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
         <Spinner size={40} />
       </div>
     );
@@ -199,7 +251,8 @@ export default function NotificationsPage() {
         <div className={styles.emptyCard} id="notifications-empty-state">
           <h2 className={styles.emptyTitle}>No Notifications Yet</h2>
           <p className={styles.emptySubtitle}>
-            Send updates, promotions, and important announcements to your users instantly.
+            Send updates, promotions, and important announcements to your users
+            instantly.
           </p>
           <button
             className={styles.createBtn}
@@ -219,15 +272,29 @@ export default function NotificationsPage() {
                 filterDropdown={
                   <FilterDropdown
                     tabs={[
-                      { id: 'statuses', label: 'Status', options: ['Active', 'Inactive'] },
-                      { id: 'channels', label: 'Channel', options: ['Push', 'Email', 'In-App'] },
-                      { id: 'recipients', label: 'Recipients', options: ['All', 'Drivers', 'Customers'] }
+                      {
+                        id: "statuses",
+                        label: "Status",
+                        options: ["Active", "Inactive"],
+                      },
+                      {
+                        id: "channels",
+                        label: "Channel",
+                        options: ["Push", "Email", "In-App"],
+                      },
+                      {
+                        id: "recipients",
+                        label: "Recipients",
+                        options: ["All", "Drivers", "Customers"],
+                      },
                     ]}
-                    onApply={(filters) => setActiveFilters({
-                      statuses: filters.statuses || [],
-                      channels: filters.channels || [],
-                      recipients: filters.recipients || []
-                    })}
+                    onApply={(filters) =>
+                      setActiveFilters({
+                        statuses: filters.statuses || [],
+                        channels: filters.channels || [],
+                        recipients: filters.recipients || [],
+                      })
+                    }
                   />
                 }
                 sortDropdown={
@@ -236,7 +303,7 @@ export default function NotificationsPage() {
                       { label: "Newest to Oldest", value: "date_desc" },
                       { label: "Oldest to Newest", value: "date_asc" },
                       { label: "Title A to Z", value: "title_asc" },
-                      { label: "Title Z to A", value: "title_desc" }
+                      { label: "Title Z to A", value: "title_desc" },
                     ]}
                     onSortSelect={setSortOption}
                   />
@@ -260,7 +327,11 @@ export default function NotificationsPage() {
                 <thead>
                   <tr>
                     <th className={styles.checkCol}>
-                      <input type="checkbox" className={styles.checkbox} aria-label="Select all notifications" />
+                      <input
+                        type="checkbox"
+                        className={styles.checkbox}
+                        aria-label="Select all notifications"
+                      />
                     </th>
                     <th>Title</th>
                     <th>Channel</th>
@@ -274,13 +345,22 @@ export default function NotificationsPage() {
                   {filteredAndSortedList.map((notif) => (
                     <tr key={notif?.id}>
                       <td className={styles.checkCol}>
-                        <input type="checkbox" className={styles.checkbox} aria-label={`Select notification ${notif?.title}`} />
+                        <input
+                          type="checkbox"
+                          className={styles.checkbox}
+                          aria-label={`Select notification ${notif?.title}`}
+                        />
                       </td>
                       <td>{notif?.title}</td>
-                      <td style={{ textTransform: "capitalize" }}>{notif?.delivery_channel}</td>
+                      <td style={{ textTransform: "capitalize" }}>
+                        {notif?.delivery_channel}
+                      </td>
                       <td>{notif?.recipient_count}</td>
                       <td>
-                        <span className={styles.statusBadge} data-status={notif?.status}>
+                        <span
+                          className={styles.statusBadge}
+                          data-status={notif?.status}
+                        >
                           <span className={styles.statusDot} />
                           {notif?.status}
                         </span>
@@ -345,8 +425,18 @@ export default function NotificationsPage() {
 /* ─── Icons ─── */
 function PlusIcon() {
   return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
   );
 }

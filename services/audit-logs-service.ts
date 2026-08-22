@@ -1,57 +1,54 @@
 import { publicApi } from '@/lib/api-client';
 
 export const auditLogsService = {
+  /**
+   * Fetches audit logs list
+   * GET administration/audit/logs/
+   */
   getAuditLogs: async (queryParams?: Record<string, any>) => {
     try {
       const response = await publicApi.get('', {
         params: { 
-          path: 'api/v1/admin/audit-logs/',
+          path: 'administration/audit/logs/',
           ...queryParams,
         }
       });
       return response.data;
     } catch (error) {
+      console.error("Failed to fetch audit logs:", error);
       throw error;
     }
   },
 
-  getAuditLogDetail: async (auditId: string) => {
+  /**
+   * Fetches single audit log detail
+   * GET administration/audit/logs/?log_id={id}
+   */
+  getAuditLogDetail: async (auditId: string | number) => {
     try {
       const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/audit-logs/info/', audit_id: auditId }
+        params: { path: 'administration/audit/logs/', log_id: auditId }
       });
       return response.data;
     } catch (error) {
-      try {
-        const fallbackResponse = await publicApi.get('', {
-          params: { path: 'admin/audit-logs/info/', audit_id: auditId }
-        });
-        return fallbackResponse.data;
-      } catch (fallbackError) {
-        console.error(`Failed to fetch audit log detail for ${auditId}:`, fallbackError);
-        throw fallbackError;
-      }
+      console.error(`Failed to fetch audit log detail for ${auditId}:`, error);
+      throw error;
     }
   },
 
+  /**
+   * Exports audit logs
+   */
   exportAuditLogs: async (format: string = 'csv') => {
     try {
       const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/audit-logs/', export: format },
+        params: { path: 'administration/audit/logs/', export: format },
         responseType: 'arraybuffer',
       });
       return response;
     } catch (error) {
-      try {
-        const fallbackResponse = await publicApi.get('', {
-          params: { path: 'admin/audit-logs/', export: format },
-          responseType: 'arraybuffer',
-        });
-        return fallbackResponse;
-      } catch (fallbackError) {
-        console.error('Failed to export audit logs:', fallbackError);
-        throw fallbackError;
-      }
+      console.error('Failed to export audit logs:', error);
+      throw error;
     }
   }
 };

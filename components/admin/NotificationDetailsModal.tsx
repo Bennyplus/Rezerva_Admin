@@ -14,18 +14,66 @@ export default function NotificationDetailsModal({ onClose, notificationId }: No
   const [notification, setNotification] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isContentExpanded, setIsContentExpanded] = useState(false);
+  const [isSending, setIsSending] = useState(false);
 
   // Helper to strip HTML tags from a string
   const stripHtml = (html: string) => {
+    if (!html) return "";
     return html.replace(/<[^>]+>/g, "").trim();
   };
 
-  // Helper to truncate to the first 3 words
+  // Helper to truncate to the first 6 words
   const getTruncatedContent = (html: string) => {
     const plainText = stripHtml(html);
     const words = plainText.split(/\s+/);
-    if (words.length <= 3) return plainText;
-    return words.slice(0, 3).join(" ") + "...";
+    if (words.length <= 6) return plainText;
+    return words.slice(0, 6).join(" ") + "...";
+  };
+
+  const formatDate = (dateStr?: string | null) => {
+    if (!dateStr) return "--";
+    try {
+      const d = new Date(dateStr);
+      if (isNaN(d.getTime())) return "--";
+      return d.toLocaleDateString("en-GB", {
+        day: "numeric",
+        month: "long",
+        year: "numeric",
+      });
+    } catch {
+      return "--";
+    }
+  };
+
+  const formatRecipients = (type?: string, count?: number) => {
+    if (!type) return count ? `${count} Users` : "All Users";
+    switch (type.toLowerCase()) {
+      case "all_users":
+        return "All Users";
+      case "drivers":
+        return "Drivers";
+      case "customers":
+        return "Customers";
+      case "specific_users":
+      case "specific":
+        return count ? `${count} Users` : "Specific Users";
+      default:
+        return type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+    }
+  };
+
+  const formatChannel = (channel?: string) => {
+    if (!channel) return "Email Notification";
+    switch (channel.toLowerCase()) {
+      case "email":
+        return "Email Notification";
+      case "push":
+        return "Push Notification";
+      case "in_app":
+        return "In-App Notification";
+      default:
+        return channel.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
+    }
   };
 
   useEffect(() => {
@@ -43,17 +91,34 @@ export default function NotificationDetailsModal({ onClose, notificationId }: No
     fetchDetails();
   }, [notificationId]);
 
+  const handleSend = async () => {
+    if (!notificationId) return;
+    setIsSending(true);
+    try {
+      await notificationsService.sendNotification(notificationId);
+      onClose();
+    } catch (error) {
+      console.error("Failed to send notification:", error);
+    } finally {
+      setIsSending(false);
+    }
+  };
+
   const details = {
     title: notification?.title || "--",
-    recipients: notification?.recipient_count?.toString() || "0",
+    recipients: formatRecipients(notification?.recipient_type, notification?.recipient_count),
     cta: notification?.call_to_action || "None",
     content: notification?.message || "--",
-    channel: notification?.delivery_channel === "email" ? "Email Notification" : "Push Notification",
-    createdOn: notification?.created_at ? new Date(notification.created_at).toLocaleDateString('en-GB') : "--",
+    channel: formatChannel(notification?.delivery_channel),
+    createdOn: formatDate(notification?.created_at),
     createdBy: notification?.created_by_name || "--",
-    updatedOn: notification?.updated_at ? new Date(notification.updated_at).toLocaleDateString('en-GB') : "--",
-    lastUpdatedBy: "--",
+    updatedOn: formatDate(notification?.updated_at),
+    lastUpdatedBy: notification?.last_updated_by || "--",
   };
+
+  const bannerImageSrc =
+    notification?.media_attachment ||
+    "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop";
 
   return (
     <div className={styles.overlay} onClick={onClose}>
@@ -62,7 +127,7 @@ export default function NotificationDetailsModal({ onClose, notificationId }: No
         {/* Header */}
         <div className={styles.header}>
           <h2 className={styles.title}>
-            {isLoading ? <div className={styles.skeletonText} style={{ width: '200px', height: '28px' }} /> : details.title}
+            {isLoading ? <div className={styles.skeletonText} style={{ width: '200px', height: '24px' }} /> : details.title}
           </h2>
           <button className={styles.closeBtn} onClick={onClose} aria-label="Close modal">
             <CloseIcon />
@@ -73,28 +138,25 @@ export default function NotificationDetailsModal({ onClose, notificationId }: No
         <div className={styles.contentBox}>
           {isLoading ? (
             <div className={styles.skeletonContainer}>
-              <div className={styles.skeletonBox} style={{ height: '160px', marginBottom: '24px' }} />
-              <div className={styles.skeletonText} style={{ width: '100px', height: '24px', marginBottom: '16px' }} />
-              <div className={styles.skeletonText} style={{ width: '100%', height: '20px', marginBottom: '12px' }} />
-              <div className={styles.skeletonText} style={{ width: '100%', height: '20px', marginBottom: '12px' }} />
-              <div className={styles.skeletonText} style={{ width: '80%', height: '20px', marginBottom: '24px' }} />
+              <div className={styles.skeletonBox} style={{ height: '180px', marginBottom: '24px' }} />
+              <div className={styles.skeletonText} style={{ width: '100px', height: '20px', marginBottom: '16px' }} />
+              <div className={styles.skeletonText} style={{ width: '100%', height: '18px', marginBottom: '12px' }} />
+              <div className={styles.skeletonText} style={{ width: '100%', height: '18px', marginBottom: '12px' }} />
+              <div className={styles.skeletonText} style={{ width: '80%', height: '18px', marginBottom: '24px' }} />
             </div>
           ) : (
             <>
-              {/* Hero Image */}
-              {notification?.media_attachment && (
-                <div className={styles.heroImage}>
-                  <Image 
-                    src={notification.media_attachment} 
-                    alt="Notification Hero" 
-                    fill 
-                    style={{ objectFit: "cover" }} 
-                    onError={(e) => {
-                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop";
-                    }}
-                  />
-                </div>
-              )}
+              {/* Hero Banner Image */}
+              <div className={styles.heroImage}>
+                <Image 
+                  src={bannerImageSrc} 
+                  alt="Notification Media Banner" 
+                  fill 
+                  priority
+                  style={{ objectFit: "cover" }} 
+                  unoptimized={bannerImageSrc.startsWith("http")}
+                />
+              </div>
 
               {/* Details Section */}
               <div className={styles.detailsSection}>
@@ -126,7 +188,8 @@ export default function NotificationDetailsModal({ onClose, notificationId }: No
                       <button 
                         className={styles.viewContentBtn}
                         onClick={() => setIsContentExpanded(!isContentExpanded)}
-                        style={isContentExpanded ? { marginTop: '4px' } : {}}
+                        title={isContentExpanded ? "Collapse preview" : "Expand preview"}
+                        aria-label="Toggle preview"
                       >
                         <EyeIcon />
                       </button>
@@ -171,10 +234,16 @@ export default function NotificationDetailsModal({ onClose, notificationId }: No
 
         {/* Footer */}
         <div className={styles.footer}>
-          <button className={styles.deactivateBtn} disabled={isLoading}>Deactivate</button>
+          <button className={styles.deactivateBtn} onClick={onClose} disabled={isLoading || isSending}>
+            Deactivate
+          </button>
           <div className={styles.footerRight}>
-            <button className={styles.sendBtn} disabled={isLoading}>Send Notification</button>
-            <button className={styles.editBtn} disabled={isLoading}>Edit Notification</button>
+            <button className={styles.sendBtn} onClick={handleSend} disabled={isLoading || isSending}>
+              {isSending ? "Sending..." : "Send Notification"}
+            </button>
+            <button className={styles.editBtn} onClick={onClose} disabled={isLoading || isSending}>
+              Edit Notification
+            </button>
           </div>
         </div>
 
