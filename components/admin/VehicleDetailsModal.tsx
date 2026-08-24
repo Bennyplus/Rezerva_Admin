@@ -8,7 +8,7 @@ import { AdminVehicle } from "@/data/admin-vehicles";
 interface VehicleDetailsModalProps {
   vehicle: AdminVehicle;
   onClose: () => void;
-  onStatusChange: (id: number, status: string) => void;
+  onStatusChange: (id: number | string, status: string) => void;
 }
 
 export default function VehicleDetailsModal({
@@ -83,10 +83,7 @@ export default function VehicleDetailsModal({
       aria-modal="true"
       aria-label={`${vehicle.brand} details`}
     >
-      <div
-        className={styles.modal}
-        onClick={(e) => e.stopPropagation()}
-      >
+      <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         {/* ── Header ── */}
         <div className={styles.header}>
           <div className={styles.titleGroup}>
@@ -158,20 +155,6 @@ export default function VehicleDetailsModal({
                 <span className={styles.detailValue}>{vehicle.brand}</span>
               </div>
               <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Daily Price</span>
-                <span className={styles.detailValue}>
-                  ${vehicle.dailyPrice.toLocaleString()}
-                </span>
-              </div>
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Fuel Type</span>
-                <span className={styles.detailValue}>
-                  {(vehicle as any).fuelType || "Diesel"}
-                </span>
-              </div>
-
-              {/* Row 2 */}
-              <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Category</span>
                 <span className={styles.detailValue}>{vehicle.category}</span>
               </div>
@@ -179,25 +162,23 @@ export default function VehicleDetailsModal({
                 <span className={styles.detailLabel}>Location</span>
                 <span className={styles.detailValue}>{vehicle.location}</span>
               </div>
+
+              {/* Row 2 */}
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Vehicle Number</span>
                 <span className={styles.detailValue}>
                   {(vehicle as any).vehicleNumber || vehicle.chassisNo}
                 </span>
               </div>
-              <div className={styles.detailItem} />
-
-              {/* Row 3 */}
+              <div className={styles.detailItem}>
+                <span className={styles.detailLabel}>Chassis Number</span>
+                <span className={styles.detailValue}>{vehicle.chassisNo}</span>
+              </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Seating Capacity</span>
                 <span className={styles.detailValue}>
                   {vehicle.capacity} Seats
                 </span>
-              </div>
-
-              <div className={styles.detailItem}>
-                <span className={styles.detailLabel}>Chassis Number</span>
-                <span className={styles.detailValue}>{vehicle.chassisNo}</span>
               </div>
               <div className={styles.detailItem}>
                 <span className={styles.detailLabel}>Transmission</span>
@@ -205,16 +186,75 @@ export default function VehicleDetailsModal({
                   {(vehicle as any).transmission || "Automatic"}
                 </span>
               </div>
-              <div className={styles.detailItem} />
 
-              {/* Features — full row */}
-              <div className={`${styles.detailItem} ${styles.fullWidth}`}>
-                <span className={styles.detailLabel}>Features</span>
-                <span className={styles.detailValue}>
-                  {(vehicle as any).features ||
-                    "Bluetooth, Car Radio, Cool Car Feature, Some other stuff lol, Vroom Vroom"}
-                </span>
-              </div>
+              {/* Documents — full row */}
+              {vehicle.documents && vehicle.documents.length > 0 && (
+                <div
+                  className={`${styles.detailItem} ${styles.fullWidth}`}
+                  style={{ marginTop: 12 }}
+                >
+                  <span className={styles.detailLabel}>Vehicle Documents</span>
+                  <div
+                    style={{
+                      display: "flex",
+                      flexDirection: "column",
+                      gap: 8,
+                      marginTop: 6,
+                    }}
+                  >
+                    {vehicle.documents.map((doc, i) => (
+                      <div
+                        key={i}
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "space-between",
+                          padding: "10px 14px",
+                          background: "#F8FAFC",
+                          borderRadius: "8px",
+                          border: "1px solid #E2E4E9",
+                        }}
+                      >
+                        <div>
+                          <div
+                            style={{
+                              fontWeight: 600,
+                              fontSize: "13px",
+                              color: "#111827",
+                            }}
+                          >
+                            {doc.document_type || "Document"}
+                          </div>
+                          <div style={{ fontSize: "11px", color: "#64748B" }}>
+                            Uploaded:{" "}
+                            {doc.uploaded_at
+                              ? new Date(doc.uploaded_at).toLocaleDateString()
+                              : "N/A"}
+                            {doc.verified
+                              ? " • Verified"
+                              : " • Pending Verification"}
+                          </div>
+                        </div>
+                        {doc.file && (
+                          <a
+                            href={doc.file}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              fontSize: "12px",
+                              color: "#3B63F6",
+                              fontWeight: 500,
+                              textDecoration: "underline",
+                            }}
+                          >
+                            View File ↗
+                          </a>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -263,10 +303,7 @@ export default function VehicleDetailsModal({
               )}
             </div>
 
-            <button
-              className={styles.btnEdit}
-              id="vehicle-detail-edit-btn"
-            >
+            <button className={styles.btnEdit} id="vehicle-detail-edit-btn">
               Edit Vehicle
             </button>
           </div>

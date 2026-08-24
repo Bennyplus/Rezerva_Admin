@@ -1,4 +1,4 @@
-/* ─── Admin Vehicles Mock Data ─── */
+/* ─── Admin Vehicles Data & Types ─── */
 
 export const VEHICLE_STATS_EMPTY = [
   { id: "total-vehicles", label: "Total Vehicles", value: 0 },
@@ -14,10 +14,20 @@ export const VEHICLE_STATS_POPULATED = [
   { id: "under-maintenance", label: "Under maintenance", value: 2 },
 ];
 
+export interface VehicleDocument {
+  document_type: string;
+  file: string;
+  expires_on: string | null;
+  verified: boolean;
+  uploaded_at: string;
+}
+
 export interface AdminVehicle {
-  id?: number;
+  id?: number | string;
   name: string;
   brand: string;
+  driverName?: string;
+  plateNumber?: string;
   image: string;
   images?: { image: string; is_primary: boolean }[];
   category: string;
@@ -26,106 +36,30 @@ export interface AdminVehicle {
   status: "Available" | "Maintenance" | "Booked" | "Inactive";
   chassisNo: string;
   location: string;
+  documents?: VehicleDocument[];
 }
 
 export const ADMIN_VEHICLES: AdminVehicle[] = [
   {
-    name: "Reynard FF89 FF1600",
-    brand: "Reynard",
-    image: "/images/3rd-img.png",
-    category: "Sports Car",
-    dailyPrice: 3000,
-    capacity: 4,
-    status: "Available",
-    chassisNo: "IHGCM826331D3456",
-    location: "Lagos",
-  },
-  {
-    name: "Toyota Highlander 2026",
+    name: "Toyota Camry",
     brand: "Toyota",
-    image: "/images/5th-img.png",
-    category: "Sedan",
-    dailyPrice: 3000,
-    capacity: 4,
-    status: "Maintenance",
-    chassisNo: "IHGCM826331D3456",
-    location: "Abuja",
-  },
-  {
-    name: "Lancia Delta Integrale ex Works, Unique",
-    brand: "Lancia",
-    image: "/images/4th-img.png",
-    category: "Sedan",
-    dailyPrice: 3000,
-    capacity: 4,
-    status: "Booked",
-    chassisNo: "IHGCM826331D3456",
-    location: "Lagos",
-  },
-  {
-    name: "AIM Mychron3 XG LOG",
-    brand: "AIM",
-    image: "/images/6th-img.png",
-    category: "Crossover",
-    dailyPrice: 3000,
-    capacity: 4,
-    status: "Booked",
-    chassisNo: "IHGCM826331D3456",
-    location: "Abuja",
-  },
-  {
-    name: "Aston Martin Vantage V12 GT3",
-    brand: "Aston Martin",
-    image: "/images/8th-img.png",
-    category: "Sedan",
-    dailyPrice: 3000,
-    capacity: 4,
-    status: "Maintenance",
-    chassisNo: "IHGCM826331D3456",
-    location: "Lagos",
-  },
-  {
-    name: "Porsche 2012 GT3 Cup",
-    brand: "Porsche",
-    image: "/images/1st-img.png",
-    category: "Light truck",
-    dailyPrice: 3000,
-    capacity: 4,
-    status: "Available",
-    chassisNo: "IHGCM826331D3456",
-    location: "Abuja",
-  },
-  {
-    name: "Camry 2026",
-    brand: "Toyota",
+    driverName: "Fade Bayo",
+    plateNumber: "KTU-812-FP",
     image: "/images/3rd-img.png",
     category: "Sedan",
-    dailyPrice: 120,
+    dailyPrice: 3000,
     capacity: 4,
     status: "Available",
-    chassisNo: "IHGCM82...",
-    location: "Abuja",
-  },
-  {
-    name: "Jeep Gladiator",
-    brand: "Jeep",
-    image: "/images/5th-img.png",
-    category: "Sedan",
-    dailyPrice: 120,
-    capacity: 4,
-    status: "Maintenance",
-    chassisNo: "IHGCM82...",
+    chassisNo: "KTU-812-FP",
     location: "Lagos",
-  },
-  {
-    name: "Ford Cortina",
-    brand: "Ford",
-    image: "/images/4th-img.png",
-    category: "Sedan",
-    dailyPrice: 120,
-    capacity: 4,
-    status: "Booked",
-    chassisNo: "IHGCM82...",
-    location: "Abuja",
-  },
+    documents: [
+      {
+        document_type: "INSURANCE",
+        file: "https://prosper-django-bucket.s3.amazonaws.com/media/vehicle_documents/Screenshot_2026-06-29_141214_8PFidYi.png",
+        expires_on: null,
+        verified: false,
+        uploaded_at: "2026-07-22T14:17:44.645976Z"
+      }
+    ]
+  }
 ];

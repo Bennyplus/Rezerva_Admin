@@ -36,6 +36,10 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Bookings",
     subtitle: "Manage reservations and trip activity",
   },
+  "/admin/rides": {
+    title: "Ride Management",
+    subtitle: "Manage reservations and trip activity",
+  },
   "/admin/notifications": {
     title: "Notifications",
     subtitle: "Notify users instantly across every channel.",

@@ -1,0 +1,283 @@
+/* ============================================================
+   RIDES SCREEN — Scoped Styles (rides.module.css)
+   ============================================================ */
+
+.container {
+ display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+ 
+}
+
+/* ─── Stat Cards Grid ─── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.toolbarRight {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+/* ─── Table Card ─── */
+.tableCard {
+ background: #ffffff;
+  border-radius: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tableWrap { 
+  position: relative;
+  z-index: 10;
+  flex: 1;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 16px;
+  background: #F6F8FA;
+  font-size: 12px;
+  font-weight: 500;
+  color: #868C98;
+}
+
+.table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.table th:last-child {
+  border-top-right-radius: 12px;
+}
+
+.table td {
+  padding: 16px;
+  font-size: 13.5px;
+  color: #111111;
+}
+
+
+.driverCell {
+  font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.addressCell {
+  color: #525866;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.timeCell {
+  color: #525866;
+  white-space: nowrap;
+}
+
+.seatsCell {
+  color: #525866;
+  white-space: nowrap;
+}
+
+.priceCell {
+  font-weight: 600;
+  color: #111827;
+  white-space: nowrap;
+}
+
+/* ─── Status Badges ─── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusCompleted {
+  background: #ECFDF5;
+  color: #065F46;
+}
+.statusCompleted .badgeDot {
+  background: #10B981;
+}
+
+.statusUpcoming {
+  background: #FFF7ED;
+  color: #C2410C;
+}
+.statusUpcoming .badgeDot {
+  background: #F97316;
+}
+
+.statusOngoing {
+  background: #EFF6FF;
+  color: #1D4ED8;
+}
+.statusOngoing .badgeDot {
+  background: #3B82F6;
+}
+
+.statusCancelled {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+.statusCancelled .badgeDot {
+  background: #9CA3AF;
+}
+
+/* ─── Action Menu (...) ─── */
+.actionsCol {
+  width: 44px;
+  text-align: center;
+}
+
+.actionMenuWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.moreBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: #868C98;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.moreBtn:hover {
+  background: #F6F8FA;
+  color: #111827;
+}
+
+.kebabMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  min-width: 150px;
+  z-index: 60;
+  padding: 6px 0;
+  border: 1px solid #E2E4E9;
+  text-align: left;
+}
+
+.kebabMenuItem {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  color: #111827;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.1s;
+}
+
+.kebabMenuItem:hover {
+  background: #F6F8FA;
+}
+
+/* ─── Empty State Container ─── */
+.emptyCard {
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 12px;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 6px 0;
+}
+
+.emptySubtitle {
+  font-size: 13.5px;
+  color: #868C98;
+  margin: 0;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .container {
+    padding: 20px 16px;
+  }
+
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .toolbar {
+    flex-wrap: wrap;
+  }
+
+  .searchBox {
+    width: 100%;
+  }
+}

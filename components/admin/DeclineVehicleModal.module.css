@@ -1,0 +1,149 @@
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal {
+  background: #ffffff;
+  border-radius: 16px;
+  width: 100%;
+  max-width: 480px;
+  padding: 24px;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.titleGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #6B7280;
+  margin: 0;
+}
+
+.closeBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #9CA3AF;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+}
+
+.closeBtn:hover {
+  color: #111827;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.label {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.requiredMark {
+  color: #3B63F6;
+  margin-left: 2px;
+}
+
+.textarea {
+  width: 100%;
+  height: 120px;
+  padding: 12px 14px;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  resize: none;
+  font-family: inherit;
+  transition: border-color 0.2s ease;
+}
+
+.textarea::placeholder {
+  color: #9CA3AF;
+}
+
+.textarea:focus {
+  border-color: #3B63F6;
+}
+
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.dismissBtn {
+  padding: 10px 20px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.dismissBtn:hover {
+  background: #F9FAFB;
+}
+
+.declineBtn {
+  padding: 10px 20px;
+  background: #F6F8FA;
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 500;
+  color: #CDD0D5;
+  cursor: not-allowed;
+  transition: all 0.15s ease;
+}
+
+.declineBtnActive {
+  background: #EF4444;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.declineBtnActive:hover {
+  background: #DC2626;
+}
