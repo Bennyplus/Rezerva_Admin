@@ -1,0 +1,636 @@
+/* ============================================================
+   WALLET DETAIL VIEW — Scoped styles (CSS Module)
+   ============================================================ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Top Bar: Back & Actions ─── */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  cursor: pointer;
+  color: #111827;
+  transition: background 0.15s ease;
+}
+
+.backBtn:hover {
+  background: #F9FAFB;
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.debitBtn {
+  height: 40px;
+  padding: 0 20px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.debitBtn:hover {
+  background: #F9FAFB;
+}
+
+.freezeBtn {
+  height: 40px;
+  padding: 0 20px;
+  background: #2563EB;
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #ffffff;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.freezeBtn:hover {
+  background: #1D4ED8;
+}
+
+/* ─── Balance Header ─── */
+.balanceHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.balanceLabel {
+  font-size: 13px;
+  color: #868C98;
+}
+
+.balanceAmount {
+  font-size: 28px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.walletMeta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 2px;
+}
+
+.walletIdTag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.copyBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #868C98;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.copyBtn:hover {
+  color: #111827;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.statusActive {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.statusActive .badgeDot {
+  background: #059669;
+}
+
+.statusFrozen {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.statusFrozen .badgeDot {
+  background: #2563EB;
+}
+
+/* ─── Tabs ─── */
+.tabsContainer {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 1px solid #E5E7EB;
+  margin-top: 4px;
+}
+
+.tabItem {
+  padding: 10px 4px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #868C98;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.tabItem:hover {
+  color: #111827;
+}
+
+.tabItemActive {
+  color: #111827;
+  font-weight: 600;
+}
+
+.tabItemActive::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #111111;
+  border-radius: 2px;
+}
+
+/* ============================================================
+   USER DETAILS TAB: SPLIT LAYOUT
+   ============================================================ */
+.mainGrid {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: start;
+}
+
+/* Left Details Card */
+.detailsCard {
+  background: #ffffff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.sectionTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 16px;
+}
+
+.passengerRow {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+}
+
+.passengerAvatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px 24px;
+  flex: 1;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoLabel {
+  font-size: 12.5px;
+  color: #868C98;
+}
+
+.infoValue {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+  word-break: break-word;
+}
+
+/* Last Activity Sub-Card */
+.activitySection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activityTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.activityBox {
+  background: #F8FAFC;
+  border-radius: 10px;
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.activityType {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #111827;
+}
+
+.activityRow {
+  display: flex;
+  align-items: center;
+  gap: 48px;
+}
+
+.activityCol {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.activityColLabel {
+  color: #64748B;
+}
+
+.activityColValue {
+  font-weight: 600;
+  color: #111827;
+}
+
+.statusSuccess {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  color: #059669;
+}
+
+.statusSuccessDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #059669;
+}
+
+/* Right Quick Actions */
+.quickActionsCard {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.quickActionsTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.actionList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #525866;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.actionButton:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+  color: #111827;
+}
+
+/* ============================================================
+   WALLET ACTIVITY TAB: STATS, TOOLBAR & TABLE
+   ============================================================ */
+.activityStatsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.activityToolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  padding: 0 12px;
+  height: 40px;
+  width: 280px;
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  width: 100%;
+}
+
+.toolBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #525866;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.toolBtn:hover {
+  background: #F9FAFB;
+}
+
+.exportBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 20px;
+  background: #2563EB;
+  color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.exportBtn:hover {
+  background: #1D4ED8;
+}
+
+/* ─── Activity Table ─── */
+.tableCard {
+  background: #ffffff;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.tableWrap {
+  position: relative;
+  z-index: 10;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 16px;
+  background: #F6F8FA;
+  font-size: 12px;
+  font-weight: 500;
+  color: #868C98;
+}
+
+.table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.table th:last-child {
+  border-top-right-radius: 12px;
+}
+
+.table td {
+  padding: 16px;
+  font-size: 13.5px;
+  color: #111827;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: #F9FAFB;
+}
+
+.refCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #111827;
+}
+
+/* Amounts */
+.amountPositive {
+  color: #059669;
+  font-weight: 600;
+}
+
+.amountNegative {
+  color: #EF4444;
+  font-weight: 600;
+}
+
+/* Status Badges */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.statusCompleted {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.statusCompleted .badgeDot {
+  background: #059669;
+}
+
+.statusPending {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+
+.statusPending .badgeDot {
+  background: #9CA3AF;
+}
+
+.statusFailed {
+  background: #FEF2F2;
+  color: #EF4444;
+}
+
+.statusFailed .badgeDot {
+  background: #EF4444;
+}
+
+.statusReversed {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.statusReversed .badgeDot {
+  background: #2563EB;
+}
+
+/* Actions & Kebab Dropdown */
+.actionsCol {
+  width: 44px;
+  text-align: right;
+}
+
+.actionsWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.moreBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #868C98;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+
+.moreBtn:hover {
+  color: #111827;
+}
+
+.kebabMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  min-width: 170px;
+  z-index: 100;
+  padding: 6px 0;
+  border: 1px solid #E2E4E9;
+  text-align: left;
+}
+
+.kebabMenuItem {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+
+.kebabMenuItem:hover {
+  background: #F6F8FA;
+}

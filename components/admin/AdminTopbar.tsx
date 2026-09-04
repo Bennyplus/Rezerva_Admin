@@ -1,5 +1,4 @@
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
@@ -72,9 +71,13 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Payment Details",
     subtitle: "Review transaction details and payment status",
   },
-  "/admin/refunds": {
-    title: "Refunds",
-    subtitle: "Manage and monitor customer refund requests",
+  "/admin/wallet": {
+    title: "Wallet Management",
+    subtitle: "Monitor payments, refunds, and wallet activity",
+  },
+  "/admin/referrals": {
+    title: "Referrals",
+    subtitle: "Track referral performance, reward eligible users, and monitor campaign growth.",
   },
   "/admin/settings": {
     title: "Settings",
@@ -91,14 +94,26 @@ export default function AdminTopbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const notifRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
-  const { notifications, unreadCount, markAsRead, markAllAsRead, clearNotifications } = useNotifications();
+  const {
+    notifications,
+    unreadCount,
+    markAsRead,
+    markAllAsRead,
+    clearNotifications,
+  } = useNotifications();
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (notifRef.current && !notifRef.current.contains(event.target as Node)) {
+      if (
+        notifRef.current &&
+        !notifRef.current.contains(event.target as Node)
+      ) {
         setIsNotifOpen(false);
       }
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
+      if (
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
         setIsProfileOpen(false);
       }
     };
@@ -127,7 +142,7 @@ export default function AdminTopbar() {
       if (userStr) {
         try {
           setCurrentUser(JSON.parse(userStr));
-        } catch (e) { }
+        } catch (e) {}
       }
     };
     loadUser();
@@ -155,14 +170,16 @@ export default function AdminTopbar() {
 
   // Resolve dynamic routes before exact lookup
   const resolvedPath = (() => {
-    if (/^\/admin\/payments\/[^/]+$/.test(pathname)) return "/admin/payments/:id";
+    if (/^\/admin\/payments\/[^/]+$/.test(pathname))
+      return "/admin/payments/:id";
     return pathname;
   })();
 
   const meta = PAGE_META[resolvedPath] || { title: "Dashboard", subtitle: "" };
 
   const name = currentUser?.full_name || ADMIN_USER.name;
-  const profilePic = currentUser?.profile?.profile_picture || currentUser?.profile_picture;
+  const profilePic =
+    currentUser?.profile?.profile_picture || currentUser?.profile_picture;
   const hasProfilePic = profilePic && !profilePic.includes("default.jpg");
 
   const handleLogout = async () => {
@@ -194,12 +211,23 @@ export default function AdminTopbar() {
             id="admin-notification-btn"
             onClick={() => setIsNotifOpen(!isNotifOpen)}
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
               <path d="M13.73 21a2 2 0 0 1-3.46 0" />
             </svg>
             {unreadCount > 0 && (
-              <span className={styles.notifBadge} aria-hidden="true">{unreadCount > 99 ? '99+' : unreadCount}</span>
+              <span className={styles.notifBadge} aria-hidden="true">
+                {unreadCount > 99 ? "99+" : unreadCount}
+              </span>
             )}
           </button>
 
@@ -208,7 +236,10 @@ export default function AdminTopbar() {
               <div className={styles.dropdownHeader}>
                 <h3 className={styles.dropdownTitle}>Notifications</h3>
                 {unreadCount > 0 && (
-                  <button className={styles.markAllReadBtn} onClick={markAllAsRead}>
+                  <button
+                    className={styles.markAllReadBtn}
+                    onClick={markAllAsRead}
+                  >
                     Mark all as read
                   </button>
                 )}
@@ -219,11 +250,15 @@ export default function AdminTopbar() {
                   {notifications.map((notif: Notification) => (
                     <li
                       key={notif.id}
-                      className={`${styles.notificationItem} ${!notif.is_read ? styles.unread : ''}`}
+                      className={`${styles.notificationItem} ${!notif.is_read ? styles.unread : ""}`}
                       onClick={() => markAsRead(notif.id)}
                     >
-                      <h4 className={styles.notificationTitle}>{notif.title}</h4>
-                      <p className={styles.notificationMessage}>{notif.message}</p>
+                      <h4 className={styles.notificationTitle}>
+                        {notif.title}
+                      </h4>
+                      <p className={styles.notificationMessage}>
+                        {notif.message}
+                      </p>
                       {notif.created_at && (
                         <span className={styles.notificationTime}>
                           {new Date(notif.created_at).toLocaleDateString()}
@@ -233,13 +268,14 @@ export default function AdminTopbar() {
                   ))}
                 </ul>
               ) : (
-                <div className={styles.emptyState}>
-                  No new notifications
-                </div>
+                <div className={styles.emptyState}>No new notifications</div>
               )}
               {notifications.length > 0 && (
                 <div className={styles.dropdownFooter}>
-                  <button className={styles.clearAllBtn} onClick={clearNotifications}>
+                  <button
+                    className={styles.clearAllBtn}
+                    onClick={clearNotifications}
+                  >
                     Clear all
                   </button>
                 </div>
@@ -254,7 +290,16 @@ export default function AdminTopbar() {
           aria-label="Logout"
           onClick={() => setIsLogoutModalOpen(true)}
         >
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="1.8"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -277,10 +322,24 @@ export default function AdminTopbar() {
                   width={36}
                   height={36}
                   className={styles.avatarImg}
-                  style={{ objectFit: 'cover', borderRadius: '50%' }}
+                  style={{ objectFit: "cover", borderRadius: "50%" }}
                 />
               ) : (
-                <div style={{ width: 36, height: 36, borderRadius: "50%", background: "#f1f5f9", color: "#0f172a", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: "600", fontSize: "13px", flexShrink: 0 }}>
+                <div
+                  style={{
+                    width: 36,
+                    height: 36,
+                    borderRadius: "50%",
+                    background: "#f1f5f9",
+                    color: "#0f172a",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "600",
+                    fontSize: "13px",
+                    flexShrink: 0,
+                  }}
+                >
                   {getInitials(name)}
                 </div>
               )}
@@ -296,36 +355,66 @@ export default function AdminTopbar() {
                       className={styles.editBtn}
                       title="Edit Profile"
                     >
-                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                      >
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                        <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                      </svg>
                     </button>
                   </div>
-                  <p className={styles.profileEmail}>{currentUser?.email || ADMIN_USER.email}</p>
+                  <p className={styles.profileEmail}>
+                    {currentUser?.email || ADMIN_USER.email}
+                  </p>
                 </div>
                 <div className={styles.profileInfoSection}>
                   <div className={styles.profileDetailRow}>
-                    <span className={styles.profileDetailLabel}>Phone Number</span>
-                    <span className={styles.profileDetailValue}>{currentUser?.phone_number || "Not Provided"}</span>
-                  </div>
-                  <div className={styles.profileDetailRow}>
-                    <span className={styles.profileDetailLabel}>Referral Code</span>
-                    <span className={styles.profileDetailValue}>{currentUser?.referral_code || "N/A"}</span>
-                  </div>
-                  <div className={styles.profileDetailRow}>
-                    <span className={styles.profileDetailLabel}>MFA Status</span>
+                    <span className={styles.profileDetailLabel}>
+                      Phone Number
+                    </span>
                     <span className={styles.profileDetailValue}>
-                      <span className={`${styles.mfaBadge} ${currentUser?.mfa_enabled ? styles.mfaEnabled : styles.mfaDisabled}`}>
+                      {currentUser?.phone_number || "Not Provided"}
+                    </span>
+                  </div>
+                  <div className={styles.profileDetailRow}>
+                    <span className={styles.profileDetailLabel}>
+                      Referral Code
+                    </span>
+                    <span className={styles.profileDetailValue}>
+                      {currentUser?.referral_code || "N/A"}
+                    </span>
+                  </div>
+                  <div className={styles.profileDetailRow}>
+                    <span className={styles.profileDetailLabel}>
+                      MFA Status
+                    </span>
+                    <span className={styles.profileDetailValue}>
+                      <span
+                        className={`${styles.mfaBadge} ${currentUser?.mfa_enabled ? styles.mfaEnabled : styles.mfaDisabled}`}
+                      >
                         {currentUser?.mfa_enabled ? "Enabled" : "Disabled"}
                       </span>
                     </span>
                   </div>
                   <div className={styles.profileDetailRow}>
                     <span className={styles.profileDetailLabel}>Address</span>
-                    <span className={styles.profileDetailValue}>{currentUser?.address_line_1 || "Not Provided"}</span>
+                    <span className={styles.profileDetailValue}>
+                      {currentUser?.address_line_1 || "Not Provided"}
+                    </span>
                   </div>
                   {currentUser?.country && (
                     <div className={styles.profileDetailRow}>
                       <span className={styles.profileDetailLabel}>Country</span>
-                      <span className={styles.profileDetailValue}>{getCountryName(currentUser.country)}</span>
+                      <span className={styles.profileDetailValue}>
+                        {getCountryName(currentUser.country)}
+                      </span>
                     </div>
                   )}
                 </div>

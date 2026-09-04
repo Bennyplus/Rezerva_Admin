@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import styles from "./ProcessRefundModal.module.css";
 import CustomSelect from "./CustomSelect";
-import { refundsService } from "@/services/refunds-service";
+import { refundsService } from "@/services/wallet-service";
 
 interface ProcessRefundModalProps {
   isOpen: boolean;
@@ -68,8 +68,20 @@ export default function ProcessRefundModal({
           {/* Header */}
           <div className={styles.header}>
             <h2 className={styles.title}>Process Refund</h2>
-            <button className={styles.closeBtn} onClick={onClose} aria-label="Close">
-              <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+            <button
+              className={styles.closeBtn}
+              onClick={onClose}
+              aria-label="Close"
+            >
+              <svg
+                width={20}
+                height={20}
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={2}
+                strokeLinecap="round"
+              >
                 <path d="M18 6L6 18M6 6l12 12" />
               </svg>
             </button>
@@ -100,8 +112,18 @@ export default function ProcessRefundModal({
                 />
                 <div className={styles.currencySelect}>
                   <div className={styles.currencyFlag}></div>
-                  <span className={styles.currencyLabel}>{formData.currency}</span>
-                  <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
+                  <span className={styles.currencyLabel}>
+                    {formData.currency}
+                  </span>
+                  <svg
+                    width={14}
+                    height={14}
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={2}
+                    strokeLinecap="round"
+                  >
                     <polyline points="6 9 12 15 18 9" />
                   </svg>
                 </div>
@@ -146,11 +168,25 @@ export default function ProcessRefundModal({
 
       {/* Confirmation Modal Overlay */}
       {showConfirm && (
-        <div className={styles.overlayConfirm} onClick={() => setShowConfirm(false)}>
-          <div className={styles.confirmModal} onClick={(e) => e.stopPropagation()}>
+        <div
+          className={styles.overlayConfirm}
+          onClick={() => setShowConfirm(false)}
+        >
+          <div
+            className={styles.confirmModal}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.confirmHeader}>
               <div className={styles.iconWrap}>
-                <svg width={20} height={20} viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth={2} strokeLinecap="round">
+                <svg
+                  width={20}
+                  height={20}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#2563EB"
+                  strokeWidth={2}
+                  strokeLinecap="round"
+                >
                   <circle cx="12" cy="12" r="10" />
                   <line x1="12" y1="8" x2="12" y2="12" />
                   <line x1="12" y1="16" x2="12.01" y2="16" />
@@ -159,12 +195,16 @@ export default function ProcessRefundModal({
               <div className={styles.confirmText}>
                 <h3 className={styles.confirmTitle}>Process Refund?</h3>
                 <p className={styles.confirmSubtitle}>
-                  Are you sure you want to process this refund. This action cannot be reversed once processed.
+                  Are you sure you want to process this refund. This action
+                  cannot be reversed once processed.
                 </p>
               </div>
             </div>
             <div className={styles.confirmFooter}>
-              <button className={styles.secondaryBtn} onClick={() => setShowConfirm(false)}>
+              <button
+                className={styles.secondaryBtn}
+                onClick={() => setShowConfirm(false)}
+              >
                 Cancel
               </button>
               <button

@@ -1,0 +1,353 @@
+/* ============================================================
+   ADMIN WALLET — Scoped styles (CSS Module)
+   ============================================================ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+/* ─── Stats Grid (4 columns) ─── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+/* ─── Tab Navigation ─── */
+.tabsContainer {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 1px solid #E5E7EB;
+  margin-top: 4px;
+}
+
+.tabItem {
+  padding: 10px 4px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #868C98;
+  background: none;
+  border: none;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.tabItem:hover {
+  color: #111827;
+}
+
+.tabItemActive {
+  color: #111827;
+  font-weight: 600;
+}
+
+.tabItemActive::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #111111;
+  border-radius: 2px;
+}
+
+/* ─── Toolbar ─── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  padding: 0 12px;
+  height: 40px;
+  width: 280px;
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  font-size: 13px;
+  width: 100%;
+}
+
+.toolBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #525866;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.toolBtn:hover {
+  background: #F9FAFB;
+}
+
+/* ─── Table ─── */
+.tableCard {
+  background: #ffffff;
+  border-radius: 12px;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.tableWrap {
+  position: relative;
+  z-index: 10;
+  flex: 1;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 16px;
+  background: #F6F8FA;
+  font-size: 12px;
+  font-weight: 500;
+  color: #868C98;
+}
+
+.table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.table th:last-child {
+  border-top-right-radius: 12px;
+}
+
+.table td {
+  padding: 16px;
+  font-size: 13.5px;
+  color: #111111;
+  border-bottom: 1px solid #F3F4F6;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: #F9FAFB;
+}
+
+/* Customer Cell */
+.customerCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  background: #F3F4F6;
+  flex-shrink: 0;
+}
+
+.avatarFallback {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #EFF6FF;
+  color: #3B63F6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+.customerName {
+  font-weight: 500;
+  color: #111827;
+}
+
+/* Wallet ID & Copy */
+.walletIdCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.copyBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #868C98;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.copyBtn:hover {
+  color: #111827;
+}
+
+/* Status Badges */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.statusActive {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.statusActive .badgeDot {
+  background: #059669;
+}
+
+.statusFrozen {
+  background: #EFF6FF;
+  color: #2563EB;
+}
+
+.statusFrozen .badgeDot {
+  background: #2563EB;
+}
+
+/* More Button & Kebab Menu */
+.actionsCol {
+  width: 44px;
+  text-align: right;
+}
+
+.actionsWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.moreBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #868C98;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+
+.moreBtn:hover {
+  color: #111827;
+}
+
+.kebabMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
+  min-width: 140px;
+  z-index: 100;
+  padding: 6px 0;
+  border: 1px solid #E2E4E9;
+  text-align: left;
+}
+
+.kebabMenuItem {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  color: #111827;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+
+.kebabMenuItem:hover {
+  background: #F6F8FA;
+}
+
+/* ─── Empty State Card ─── */
+.emptyCard {
+  background: #ffffff;
+  border: 1px solid #E5E7EB;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 120px 24px;
+  min-height: 480px;
+  text-align: center;
+  flex: 1;
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 6px;
+  letter-spacing: -0.01em;
+}
+
+.emptySubtitle {
+  font-size: 13.5px;
+  color: #6B7280;
+  margin: 0;
+  text-align: center;
+  max-width: 420px;
+  line-height: 1.5;
+}

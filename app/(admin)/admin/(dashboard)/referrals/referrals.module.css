@@ -1,0 +1,298 @@
+/* ============================================================
+   REFERRALS DASHBOARD — Scoped styles (CSS Module)
+   ============================================================ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Top Stats Grid (4 Cards) ─── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Empty State Card (Screenshot 1) ─── */
+.emptyCard {
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 16px;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0;
+}
+
+.emptySubtitle {
+  font-size: 13.5px;
+  color: #868C98;
+  margin: 0;
+}
+
+/* ─── Toolbar (Screenshot 2) ─── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.toolbarLeft {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  padding: 0 12px;
+  height: 40px;
+  width: 280px;
+  transition: border-color 0.15s ease;
+}
+
+.searchBox:focus-within {
+  border-color: #2563EB;
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  font-size: 13.5px;
+  width: 100%;
+  color: #111827;
+  background: transparent;
+}
+
+.searchInput::placeholder {
+  color: #868C98;
+}
+
+.toolBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #525866;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.toolBtn:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+/* ─── Table Card & Table ─── */
+.tableCard {
+  background: #ffffff;
+  border-radius: 12px;
+  border: 1px solid #E2E4E9;
+  display: flex;
+  flex-direction: column;
+}
+
+.tableWrap {
+  position: relative;
+  z-index: 10;
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 16px;
+  background: #F6F8FA;
+  font-size: 12px;
+  font-weight: 500;
+  color: #868C98;
+  white-space: nowrap;
+}
+
+.table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.table th:last-child {
+  border-top-right-radius: 12px;
+}
+
+.table td {
+  padding: 16px;
+  font-size: 13.5px;
+  color: #111827;
+  border-bottom: 1px solid #F3F4F6;
+  white-space: nowrap;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: #F9FAFB;
+}
+
+/* ─── Referral ID Cell ─── */
+.referralIdCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.copyBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #868C98;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 4px;
+  transition: color 0.15s ease;
+}
+
+.copyBtn:hover {
+  color: #111827;
+}
+
+/* ─── Status Badges (Pills) ─── */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+
+.statusSuccessful {
+  background: #ECFDF5;
+  color: #059669;
+}
+
+.statusSuccessful .badgeDot {
+  background: #059669;
+}
+
+.statusFailed {
+  background: #FEF2F2;
+  color: #EF4444;
+}
+
+.statusFailed .badgeDot {
+  background: #EF4444;
+}
+
+/* ─── Actions & Kebab Menu (Screenshot 3) ─── */
+.actionsCol {
+  width: 44px;
+  text-align: right;
+}
+
+.actionsWrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.moreBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: #868C98;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  border-radius: 6px;
+  transition: color 0.15s ease;
+}
+
+.moreBtn:hover {
+  color: #111827;
+}
+
+.kebabMenu {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 4px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  min-width: 190px;
+  z-index: 100;
+  padding: 6px 0;
+  border: 1px solid #E2E4E9;
+  text-align: left;
+}
+
+.kebabMenuItem {
+  display: block;
+  width: 100%;
+  padding: 10px 16px;
+  background: transparent;
+  border: none;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+
+.kebabMenuItem:hover {
+  background: #F6F8FA;
+}
