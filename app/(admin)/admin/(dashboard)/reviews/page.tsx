@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Review } from "@/data/admin-reviews";
 import Pagination from "@/components/admin/Pagination";
 import ReviewDetailsModal from "@/components/admin/ReviewDetailsModal";
-import RemoveReviewModal from "@/components/admin/RemoveReviewModal";
+import ConfirmActionModal from "@/components/admin/ConfirmActionModal";
 import FilterBar from "@/components/admin/FilterBar";
 import Spinner from "@/components/admin/Spinner";
 import MoreIcon from "@/components/admin/icons/MoreIcon";
@@ -261,10 +261,15 @@ export default function ReviewsPage() {
       )}
 
       {reviewToRemove && (
-        <RemoveReviewModal
+        <ConfirmActionModal
           isOpen={!!reviewToRemove}
           onClose={() => setReviewToRemove(null)}
           onConfirm={handleRemoveReview}
+          title="Remove Review"
+          message="Are you sure you want to remove this review? This action cannot be undone."
+          confirmText="Remove"
+          cancelText="Cancel"
+          isDanger={true}
           isLoading={isActionLoading}
         />
       )}
