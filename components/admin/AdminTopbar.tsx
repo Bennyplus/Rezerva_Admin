@@ -23,10 +23,6 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Audit Logs",
     subtitle: "Track admin and system activity across the platform",
   },
-  "/admin/tickets": {
-    title: "Tickets",
-    subtitle: "Monitor platform growth, bookings, and revenue trends",
-  },
   "/admin/vehicles": {
     title: "Vehicles",
     subtitle: "View, update, and track vehicle status",

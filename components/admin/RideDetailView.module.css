@@ -1,0 +1,269 @@
+/* ============================================================
+   RIDE DETAIL VIEW — Scoped Styles (RideDetailView.module.css)
+   ============================================================ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  flex: 1;
+}
+
+/* ─── Top Bar ─── */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  color: #525866;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.backBtn:hover {
+  background: #F6F8FA;
+  border-color: #D1D5DB;
+  color: #111827;
+}
+
+.actionsGroup {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.editBtn {
+  height: 40px;
+  padding: 0 20px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #111827;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.editBtn:hover {
+  background: #F9FAFB;
+  border-color: #D1D5DB;
+}
+
+.cancelBtn {
+  height: 40px;
+  padding: 0 20px;
+  background: #375DFB;
+  border: none;
+  border-radius: 8px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #ffffff;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background-color 0.15s ease;
+}
+
+.cancelBtn:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.cancelBtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* ─── Main Details Card ─── */
+.detailsCard {
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 12px;
+  padding: 28px 32px;
+}
+
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionTitle {
+  font-size: 15px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0 0 18px 0;
+}
+
+/* ─── Fields Grid ─── */
+.infoGrid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+}
+
+.infoGrid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-bottom: 20px;
+}
+
+.infoGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.label {
+  font-size: 12.5px;
+  color: #868C98;
+  font-weight: 400;
+}
+
+.value {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  word-break: break-word;
+}
+
+/* ─── Divider ─── */
+.divider {
+  height: 1px;
+  background: #F1F3F5;
+  border: none;
+  margin: 26px 0;
+}
+
+/* ─── Status Badges ─── */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.statusCompleted {
+  background: #ECFDF5;
+  color: #065F46;
+}
+.statusCompleted .badgeDot {
+  background: #10B981;
+}
+
+.statusUpcoming {
+  background: #FFF7ED;
+  color: #C2410C;
+}
+.statusUpcoming .badgeDot {
+  background: #F97316;
+}
+
+.statusOngoing {
+  background: #EFF6FF;
+  color: #1D4ED8;
+}
+.statusOngoing .badgeDot {
+  background: #3B82F6;
+}
+
+.statusCancelled {
+  background: #F3F4F6;
+  color: #6B7280;
+}
+.statusCancelled .badgeDot {
+  background: #9CA3AF;
+}
+
+/* ─── Passengers List ─── */
+.passengersList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.passengerItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #F8FAFC;
+  border-radius: 8px;
+  padding: 14px 20px;
+  transition: background 0.15s ease;
+}
+
+.passengerItem:hover {
+  background: #F1F5F9;
+}
+
+.passengerName {
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+}
+
+.passengerArrow {
+  color: #868C98;
+  display: flex;
+  align-items: center;
+}
+
+.noPassengers {
+  font-size: 13.5px;
+  color: #868C98;
+  margin: 0;
+  padding: 4px 0;
+}
+
+/* ─── Loading / Error Container ─── */
+.stateCard {
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 12px;
+  min-height: 400px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .infoGrid4 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .infoGrid3 {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .detailsCard {
+    padding: 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .infoGrid4,
+  .infoGrid3 {
+    grid-template-columns: 1fr;
+  }
+}
