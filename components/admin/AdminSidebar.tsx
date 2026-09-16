@@ -1,11 +1,12 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { ADMIN_USER, AdminRole } from "@/data/admin-mock";
+import { AdminRole } from "@/types/admin";
 import ConfirmActionModal from "./ConfirmActionModal";
+import EditProfileModal from "./EditProfileModal";
 import { accountsService } from "@/services/accounts-service";
 import styles from "./AdminSidebar.module.css";
 
@@ -407,8 +408,30 @@ export default function AdminSidebar() {
   });
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
+  const [isEditProfileOpen, setIsEditProfileOpen] = useState(false);
+  const profileMenuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
   const router = useRouter();
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        profileMenuRef.current &&
+        !profileMenuRef.current.contains(event.target as Node)
+      ) {
+        setIsUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const handleProfileUpdate = (updatedUser: any) => {
+    localStorage.setItem("drifully_admin_user", JSON.stringify(updatedUser));
+    setCurrentUser(updatedUser);
+    window.dispatchEvent(new Event("admin-user-updated"));
+  };
 
   useEffect(() => {
     const loadUser = () => {
@@ -424,7 +447,7 @@ export default function AdminSidebar() {
     return () => window.removeEventListener("admin-user-updated", loadUser);
   }, []);
 
-  const currentRole = (currentUser?.user_type || ADMIN_USER.role) as AdminRole;
+  const currentRole = (currentUser?.user_type || "Admin") as AdminRole;
 
   // Filter sections and items based on role permissions
   const visibleSections = useMemo(() => {
@@ -513,8 +536,8 @@ export default function AdminSidebar() {
     return name.substring(0, 2).toUpperCase();
   };
 
-  const name = currentUser?.full_name || ADMIN_USER.name;
-  const email = currentUser?.email || ADMIN_USER.email;
+  const name = currentUser?.full_name || "Admin User";
+  const email = currentUser?.email || "admin@reserva.com";
   const profilePic =
     currentUser?.profile?.profile_picture || currentUser?.profile_picture;
   const hasProfilePic = profilePic && !profilePic.includes("default.jpg");
@@ -694,86 +717,149 @@ export default function AdminSidebar() {
             </div>
           ))}
 
-          {/* Dedicated Logout option */}
-          <div
-            className={styles.section}
-            style={{
-              borderTop: "1px solid var(--admin-sidebar-border, #E2E4E9)",
-              marginTop: "8px",
-              paddingTop: "8px",
-            }}
-          >
-            <ul className={styles.navList}>
-              <li>
-                <button
-                  onClick={() => setIsLogoutModalOpen(true)}
-                  className={styles.navItem}
-                  style={{
-                    width: "100%",
-                    textAlign: "left",
-                    background: "none",
-                    border: "none",
-                    cursor: "pointer",
-                  }}
-                  id="admin-nav-logout"
-                >
-                  <NavIcon icon="logout" />
-                  {!collapsed && <span>Logout</span>}
-                </button>
-              </li>
-            </ul>
-          </div>
         </nav>
 
-        {/* User profile */}
-        <div className={styles.profile}>
-          <div className={styles.profileAvatar}>
-            {hasProfilePic ? (
-              <Image
-                src={profilePic}
-                alt={name}
-                width={40}
-                height={40}
-                className={styles.avatarImg}
-                style={{ objectFit: "cover", borderRadius: "50%" }}
-              />
-            ) : (
-              <div
-                style={{
-                  width: 40,
-                  height: 40,
-                  borderRadius: "50%",
-                  background: "#f1f5f9",
-                  color: "#0f172a",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  fontWeight: "600",
-                  fontSize: "14px",
-                  flexShrink: 0,
+        {/* User profile & Popover menu */}
+        <div className={styles.profileWrapper} ref={profileMenuRef}>
+          {isUserMenuOpen && (
+            <div className={styles.userMenuPopover} id="admin-sidebar-user-menu">
+              <button
+                type="button"
+                className={styles.userMenuItem}
+                onClick={() => {
+                  setIsUserMenuOpen(false);
+                  setIsEditProfileOpen(true);
                 }}
+                id="admin-user-menu-profile"
               >
-                {getInitials(name)}
+                <Image
+                  src="/profile.svg"
+                  alt=""
+                  width={18}
+                  height={18}
+                  className={styles.userMenuIcon}
+                />
+                <span>Profile</span>
+              </button>
+
+              <button
+                type="button"
+                className={styles.userMenuItem}
+                onClick={() => {
+                  setIsUserMenuOpen(false);
+                  router.push("/admin/settings");
+                }}
+                id="admin-user-menu-settings"
+              >
+                <Image
+                  src="/setting-5.svg"
+                  alt=""
+                  width={18}
+                  height={18}
+                  className={styles.userMenuIcon}
+                />
+                <span>Account Settings</span>
+              </button>
+
+              <button
+                type="button"
+                className={styles.userMenuItem}
+                onClick={() => {
+                  setIsUserMenuOpen(false);
+                  setIsLogoutModalOpen(true);
+                }}
+                id="admin-user-menu-logout"
+              >
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 18 18"
+                  fill="none"
+                  stroke="#868C98"
+                  strokeWidth="1.2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className={styles.userMenuIcon}
+                >
+                  <path d="M6.75 15.75H11.25C13.73 15.75 15.75 13.73 15.75 11.25V6.75C15.75 4.27 13.73 2.25 11.25 2.25H6.75" />
+                  <path d="M6.75 9H2.25" />
+                  <path d="M4.5 6.75L2.25 9L4.5 11.25" />
+                </svg>
+                <span>Logout</span>
+              </button>
+            </div>
+          )}
+
+          <div
+            className={styles.profile}
+            onClick={() => setIsUserMenuOpen((prev) => !prev)}
+            role="button"
+            tabIndex={0}
+            aria-haspopup="true"
+            aria-expanded={isUserMenuOpen}
+            id="admin-sidebar-profile-bar"
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                setIsUserMenuOpen((prev) => !prev);
+              }
+            }}
+          >
+            <div className={styles.profileAvatar}>
+              {hasProfilePic ? (
+                <Image
+                  src={profilePic}
+                  alt={name}
+                  width={40}
+                  height={40}
+                  className={styles.avatarImg}
+                  style={{ objectFit: "cover", borderRadius: "50%" }}
+                />
+              ) : (
+                <div
+                  style={{
+                    width: 40,
+                    height: 40,
+                    borderRadius: "50%",
+                    background: "#f1f5f9",
+                    color: "#0f172a",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontWeight: "600",
+                    fontSize: "14px",
+                    flexShrink: 0,
+                  }}
+                >
+                  {getInitials(name)}
+                </div>
+              )}
+            </div>
+            {!collapsed && (
+              <div className={styles.profileInfo}>
+                <div className={styles.profileName}>
+                  {name}
+                  <Image
+                    src="/images/admin/profile-checkmark.svg"
+                    alt="Verified"
+                    width={14}
+                    height={14}
+                    className={styles.verifiedBadge}
+                  />
+                </div>
+                <span className={styles.profileEmail}>{email}</span>
               </div>
             )}
           </div>
-          {!collapsed && (
-            <div className={styles.profileInfo}>
-              <div className={styles.profileName}>
-                {name}
-                <Image
-                  src="/images/admin/profile-checkmark.svg"
-                  alt="Verified"
-                  width={14}
-                  height={14}
-                  className={styles.verifiedBadge}
-                />
-              </div>
-              <span className={styles.profileEmail}>{email}</span>
-            </div>
-          )}
         </div>
       </aside>
+
+      <EditProfileModal
+        isOpen={isEditProfileOpen}
+        onClose={() => setIsEditProfileOpen(false)}
+        currentUser={currentUser}
+        onUpdate={handleProfileUpdate}
+      />
 
       <ConfirmActionModal
         isOpen={isLogoutModalOpen}

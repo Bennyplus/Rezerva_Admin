@@ -1,126 +1,116 @@
-import { publicApi } from '@/lib/api-client';
+import { publicApi } from "@/lib/api-client";
+
+export interface ApiDriver {
+  id?: number;
+  full_name: string;
+  rating?: number;
+  profile_picture?: string;
+  email?: string;
+  phone_number?: string;
+  license_status?: string;
+}
+
+export interface ApiVehicle {
+  brand: string;
+  model: string;
+  colour?: string;
+  plate_number?: string;
+}
+
+export interface ApiStopPoint {
+  id?: number;
+  stop_type: "pickup" | "dropoff" | string;
+  name: string;
+  latitude?: number | null;
+  longitude?: number | null;
+  created_at?: string;
+}
+
+export interface ApiPassenger {
+  id?: number | string;
+  full_name?: string;
+  name?: string;
+  email?: string;
+  phone_number?: string;
+  profile_picture?: string;
+}
+
+export interface ApiBooking {
+  id: string;
+  booking_reference?: string;
+  driver?: ApiDriver;
+  vehicle?: ApiVehicle;
+  passenger?: ApiPassenger;
+  rider?: ApiPassenger;
+  user?: ApiPassenger;
+  pickup_location: string;
+  destination: string;
+  pickup_point?: ApiStopPoint;
+  dropoff_point?: ApiStopPoint;
+  seats_requested: number;
+  price_at_booking: string;
+  status: "pending" | "confirmed" | "completed" | "ongoing" | "cancelled" | string;
+  payment_status?: "completed" | "pending" | "failed" | string;
+  trip_date?: string;
+  departure_time?: string;
+  trip_frequency?: string;
+  recurrence_days?: number[];
+  start_date?: string;
+  end_date?: string;
+  trip_status?: string;
+  trip_price_per_seat?: string;
+  created_at?: string;
+}
+
+export interface BookingsApiResponse {
+  count: number;
+  results: ApiBooking[];
+}
 
 export const bookingsService = {
-  getBookings: async () => {
+  /**
+   * List Bookings
+   * GET riders/bookings/?status=confirmed
+   */
+  getBookings: async (params?: Record<string, any>): Promise<ApiBooking[]> => {
     try {
-      const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/bookings/list/' }
+      const response = await publicApi.get("", {
+        params: {
+          path: "riders/bookings/",
+          status: "confirmed",
+          ...params,
+        },
       });
-      return response.data;
+      const data = response.data;
+      if (Array.isArray(data)) return data;
+      if (Array.isArray(data?.results)) return data.results;
+      if (Array.isArray(data?.data)) return data.data;
+      return [];
     } catch (error) {
-      console.error('Failed to fetch bookings:', error);
+      console.error("Failed to fetch bookings:", error);
       throw error;
     }
   },
 
-  getBookingDetail: async (bookingRef: string) => {
+  /**
+   * Cancel Booking
+   * Can be hooked to backend cancellation endpoint if available
+   */
+  cancelBooking: async (bookingId: string, data?: { reason: string }): Promise<any> => {
     try {
-      const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/bookings/', booking_ref: bookingRef }
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to fetch booking detail for ${bookingRef}:`, error);
-      throw error;
-    }
-  },
-
-  cancelBooking: async (bookingRef: string, data: { reason: string }) => {
-    try {
-      const response = await publicApi.post('', data, {
-        params: { path: `api/v1/admin/bookings/cancel/`, booking_ref: bookingRef },
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to cancel booking ${bookingRef}:`, error);
-      throw error;
-    }
-  },
-
-  getMetrics: async () => {
-    try {
-      const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/bookings/metrics/' }
-      });
-      return response.data;
-    } catch (error) {
-      console.error('Failed to fetch booking metrics:', error);
-      throw error;
-    }
-  },
-
-  exportBookings: async () => {
-    try {
-      const response = await publicApi.get('', {
-        params: { path: 'api/v1/admin/bookings/list/', export: 'xlsx' },
-        responseType: 'arraybuffer',
-      });
-      return response;
-    } catch (error) {
-      console.error('Failed to export bookings:', error);
-      throw error;
-    }
-  },
-
-  confirmPickup: async (bookingRef: string, data?: { otp_code: string }) => {
-    try {
-      const formData = new FormData();
-      if (data?.otp_code) {
-        formData.append('otp_code', data.otp_code);
-      }
-      const response = await publicApi.post('', formData, {
-        params: { path: `api/v1/admin/bookings/confirm-pickup/`, booking_ref: bookingRef },
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to confirm pickup for booking ${bookingRef}:`, error);
-      throw error;
-    }
-  },
-
-  uploadVehicleImages: async (
-    bookingRef: string,
-    data: { images: { [key: string]: File }; mileage: string }
-  ) => {
-    try {
-      const formData = new FormData();
-      Object.entries(data.images).forEach(([key, file]) => {
-        if (file) {
-          formData.append("images", file);
+      const response = await publicApi.put(
+        "",
+        data || {},
+        {
+          params: {
+            path: "riders/bookings/cancel/",
+            booking_id: bookingId,
+          },
         }
-      });
-      formData.append("mileage_at_pickup", data.mileage);
-
-      const response = await publicApi.post("", formData, {
-        params: { path: `api/v1/admin/bookings/upload-pickup-data/`, booking_ref: bookingRef },
-      });
+      );
       return response.data;
     } catch (error) {
-      console.error(`Failed to upload vehicle images for booking ${bookingRef}:`, error);
-      throw error;
-    }
-  },
-
-  modifyBooking: async (bookingRef: string, data: {}) => {
-    try {
-      const response = await publicApi.put('', data, {
-        params: { path: `api/v1/admin/bookings/`, booking_ref: bookingRef },
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to modify booking ${bookingRef}:`, error);
-      throw error;
-    }
-  },
-
-  sendReminder: async (bookingRef: string, data: { reason: string }) => {
-    try {
-      const response = await publicApi.post('', data, {
-        params: { path: `api/v1/admin/bookings/send-reminder/`, booking_ref: bookingRef },
-      });
-      return response.data;
-    } catch (error) {
-      console.error(`Failed to send reminder for booking ${bookingRef}:`, error);
+      console.error(`Failed to cancel booking ${bookingId}:`, error);
       throw error;
     }
   },

@@ -2,7 +2,6 @@
 import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
-import { ADMIN_USER } from "@/data/admin-mock";
 import ConfirmActionModal from "./ConfirmActionModal";
 import EditProfileModal from "./EditProfileModal";
 import { accountsService, Country } from "@/services/accounts-service";
@@ -13,7 +12,7 @@ import styles from "./AdminTopbar.module.css";
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/admin": {
     title: "Dashboard",
-    subtitle: "Welcome back, monitor your fleet at a glance",
+    subtitle: "Monitor platform performance, user activity, and key operational insights from one centralized dashboard.",
   },
   "/admin/analytics": {
     title: "Analytics",
@@ -173,7 +172,7 @@ export default function AdminTopbar() {
 
   const meta = PAGE_META[resolvedPath] || { title: "Dashboard", subtitle: "" };
 
-  const name = currentUser?.full_name || ADMIN_USER.name;
+  const name = currentUser?.full_name || "Admin User";
   const profilePic =
     currentUser?.profile?.profile_picture || currentUser?.profile_picture;
   const hasProfilePic = profilePic && !profilePic.includes("default.jpg");
@@ -367,7 +366,7 @@ export default function AdminTopbar() {
                     </button>
                   </div>
                   <p className={styles.profileEmail}>
-                    {currentUser?.email || ADMIN_USER.email}
+                    {currentUser?.email || "admin@reserva.com"}
                   </p>
                 </div>
                 <div className={styles.profileInfoSection}>

@@ -6,23 +6,16 @@
   display: flex;
   flex-direction: column;
   gap: 0;
+  width: 100%;
 }
 
 /* ─── Top Actions ─── */
 .topActions {
-  margin-bottom: 20px;
-}
-
-/* ─── Header Row ─── */
-.headerRow {
-  display: flex;
-  align-items: flex-end;
-  gap: 20px;
-  margin-bottom: 20px;
+  margin-bottom: 24px;
 }
 
 .backBtn {
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   width: 36px;
@@ -41,23 +34,39 @@
   border-color: #D1D1D6;
 }
 
-/* Role Name Field */
+/* ─── Header Row ─── */
+.headerRow {
+  display: flex;
+  align-items: flex-end;
+  gap: 20px;
+  margin-bottom: 24px;
+  width: 100%;
+}
+
 .nameField {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
   flex: 1;
-  max-width: 340px;
+  max-width: 320px;
 }
 
-.nameLabel {
+.descriptionField {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  flex: 1.5;
+  max-width: 440px;
+}
+
+.fieldLabel {
   font-family: var(--font-body);
-  font-size: 13px;
+  font-size: 13.5px;
   font-weight: 500;
   color: var(--color-text, #111111);
 }
 
-.nameInput {
+.textInput {
   height: 40px;
   padding: 0 14px;
   border: 1px solid var(--admin-card-border, #E2E4E9);
@@ -68,21 +77,23 @@
   color: var(--color-text, #111111);
   outline: none;
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
 }
 
-.nameInput::placeholder {
+.textInput::placeholder {
   color: var(--admin-section-label, #868C98);
 }
 
-.nameInput:focus {
-  border-color: #D1D1D6;
-  box-shadow: 0 0 0 3px rgba(17, 17, 17, 0.05);
+.textInput:focus {
+  border-color: #375DFB;
+  box-shadow: 0 0 0 3px rgba(55, 93, 251, 0.08);
 }
 
-/* Create Role Button */
+/* ─── Create / Save Role Button ─── */
 .createBtn {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 8px;
   height: 40px;
   padding: 0 24px;
@@ -92,26 +103,25 @@
   font-size: 13.5px;
   font-weight: 600;
   cursor: not-allowed;
-  background: var(--admin-content-bg, #F6F8FA);
-  color: var(--admin-section-label, #868C98);
-  transition: background 0.2s ease, color 0.2s ease, opacity 0.2s ease;
+  background: #A0B7FB;
+  color: #ffffff;
+  transition: background 0.2s ease, opacity 0.2s ease;
   white-space: nowrap;
   flex-shrink: 0;
   margin-left: auto;
 }
 
 .createBtnActive {
-  background: var(--admin-active-bg, #111111);
-  color: var(--admin-active-text, #ffffff);
+  background: #375DFB;
   cursor: pointer;
 }
 
 .createBtnActive:hover {
-  opacity: 0.88;
+  background: #2b4ed9;
 }
 
 .createBtnActive:active {
-  opacity: 0.75;
+  background: #233fb5;
 }
 
 /* Spinner */
@@ -132,31 +142,39 @@
   flex-shrink: 0;
 }
 
-/* ─── Permission Matrix ─── */
-.matrix {
-  margin-top: 20px;
+/* ─── Permissions Matrix Card ─── */
+.matrixCard {
   background: var(--admin-card-bg, #ffffff);
   border: 1px solid var(--admin-card-border, #E2E4E9);
-  border-radius: var(--radius-md, 10px);
-  overflow: hidden;
-  padding: 12px;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
 }
 
 /* Select All Row */
 .selectAllRow {
-  padding: 14px 20px;
+  padding-bottom: 24px;
+  margin-bottom: 24px;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+}
+
+.selectAllText {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
 }
 
 /* Scrollable area */
 .scrollArea {
-  /* max-height: 480px; */
+  max-height: 520px;
   overflow-y: auto;
-  padding: 4px 0 8px;
-  scrollbar-width: thin;
-  scrollbar-color: var(--admin-card-border, #E2E4E9) transparent;
+  padding-right: 12px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 32px;
+  scrollbar-width: thin;
+  scrollbar-color: #868C98 transparent;
 }
 
 .scrollArea::-webkit-scrollbar {
@@ -168,33 +186,31 @@
 }
 
 .scrollArea::-webkit-scrollbar-thumb {
-  background: var(--admin-card-border, #E2E4E9);
+  background: #868C98;
   border-radius: 3px;
 }
 
 /* ─── Permission Group ─── */
 .group {
-  padding: 16px 20px 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
-
-/* .group+.group {
-  border-top: 1px solid var(--admin-card-border, #E2E4E9);
-} */
 
 .groupTitle {
   font-family: var(--font-heading);
-  font-size: 20px;
+  font-size: 18px;
   font-weight: 600;
   color: var(--color-text, #111111);
-  margin: 0 0 12px;
-  letter-spacing: -0.75px;
+  margin: 0;
+  letter-spacing: -0.3px;
 }
 
 /* Permission checkboxes row */
 .permRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px 28px;
+  gap: 14px 32px;
 }
 
 /* ─── Checkbox Label ─── */
@@ -202,15 +218,19 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-body);
-  font-size: 13px;
-  color: var(--color-text, #111111);
   cursor: pointer;
   user-select: none;
 }
 
-.checkLabel:hover .checkbox {
-  border-color: #111111;
+.checkItemLabel {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: #868C98;
+  transition: color 0.15s ease;
+}
+
+.checkLabel:hover .checkItemLabel {
+  color: var(--color-text, #111111);
 }
 
 .checkbox {
@@ -218,7 +238,7 @@
   -webkit-appearance: none;
   width: 16px;
   height: 16px;
-  border: 1px solid #E2E4E9;
+  border: 1px solid #D1D5DB;
   border-radius: 4px;
   background-color: #ffffff;
   cursor: pointer;
@@ -229,11 +249,16 @@
   justify-content: center;
   flex-shrink: 0;
   margin: 0;
+  transition: background-color 0.15s ease, border-color 0.15s ease;
+}
+
+.checkbox:hover {
+  border-color: #375DFB;
 }
 
 .checkbox:checked {
-  background-color: var(--admin-active-bg, #111111);
-  border-color: var(--admin-active-bg, #111111);
+  background-color: #375DFB;
+  border-color: #375DFB;
 }
 
 .checkbox:checked::after {
@@ -248,21 +273,23 @@
 }
 
 /* ─── Responsive ─── */
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .headerRow {
     flex-wrap: wrap;
   }
 
-  .nameField {
+  .nameField,
+  .descriptionField {
     max-width: 100%;
-    flex: 1 1 200px;
+    flex: 1 1 100%;
   }
 
   .createBtn {
     margin-left: 0;
+    width: 100%;
   }
 
   .permRow {
-    gap: 10px 20px;
+    gap: 12px 20px;
   }
 }

@@ -1,284 +1,382 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import Spinner from "@/components/admin/Spinner";
-import { bookingsService } from "@/services/bookings-service";
+import React from "react";
+import { ApiBooking } from "@/services/bookings-service";
 import styles from "./BookingDetailView.module.css";
 
 interface BookingDetailViewProps {
-  bookingId: string;
+  booking: ApiBooking;
   onBack: () => void;
   onCancelBooking: (bookingId: string) => void;
+  onReassignPassenger?: (bookingId: string) => void;
+  onIssueRefund?: (bookingId: string) => void;
 }
 
-export default function BookingDetailView({ bookingId, onBack, onCancelBooking }: BookingDetailViewProps) {
-  const [detailData, setDetailData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+export default function BookingDetailView({
+  booking,
+  onBack,
+  onCancelBooking,
+  onReassignPassenger,
+  onIssueRefund,
+}: BookingDetailViewProps) {
+  const getStatusBadgeClass = (status?: string) => {
+    const norm = (status || "").toLowerCase();
+    switch (norm) {
+      case "completed":
+        return styles.statusCompleted;
+      case "upcoming":
+        return styles.statusUpcoming;
+      case "ongoing":
+        return styles.statusOngoing;
+      case "cancelled":
+        return styles.statusCancelled;
+      default:
+        return styles.statusOngoing;
+    }
+  };
 
-  useEffect(() => {
-    const fetchDetail = async () => {
-      setLoading(true);
+  const getNormalizedStatusText = (status?: string) => {
+    if (!status) return "Ongoing";
+    return status.charAt(0).toUpperCase() + status.slice(1).toLowerCase();
+  };
+
+  // Format timeline date if present
+  const formatTimelineDate = () => {
+    if (booking.start_date) {
       try {
-        const data = await bookingsService.getBookingDetail(bookingId);
-        setDetailData(data);
-      } catch (error) {
-        console.error("Failed to fetch booking detail", error);
-      } finally {
-        setLoading(false);
-      }
-    };
-    if (bookingId) fetchDetail();
-  }, [bookingId]);
+        const d = new Date(booking.start_date);
+        return d.toLocaleDateString("en-GB", {
+          day: "numeric",
+          month: "short",
+          year: "numeric",
+        });
+      } catch {}
+      return booking.start_date;
+    }
+    return "11 May 2026 11:34AM";
+  };
 
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
-        <Spinner size={40} />
-      </div>
-    );
-  }
+  const isCancelled = (booking.status || "").toLowerCase() === "cancelled";
 
-  if (!detailData) {
-    return (
-      <div className={styles.container}>
-        <div className={styles.header}>
-          <div className={styles.headerLeft}>
-            <button className={styles.backBtn} onClick={onBack}>
-              <BackIcon />
-            </button>
-            <div className={styles.headerTitle}>
-              <p>Booking not found</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
+  // Vehicle title / ID representation matching Screenshot 4
+  const bookingVehicleTitle = booking.vehicle?.brand
+    ? `${booking.vehicle.brand} ${booking.vehicle.model || ""} 2026`.trim()
+    : booking.booking_reference || (booking.id ? `Booking #${booking.id.slice(0, 8).toUpperCase()}` : "Toyota HighLander 2026");
 
-  const { booking_info, car_info, extras_info, booking_timeline } = detailData;
+  const passengerName =
+    booking.passenger?.full_name ||
+    booking.passenger?.name ||
+    booking.rider?.full_name ||
+    booking.user?.full_name ||
+    "Jane Cooper";
 
-  //  "extras_info": {
-  //       "extras": [
-  //           {
-  //               "extra": "Dashcam",
-  //               "price": 6500
-  //           },
-  //           {
-  //               "extra": "Airport Meet & Greet",
-  //               "price": 20000
-  //           }
-  //       ],
-  //       "extras_total": "26500.00"
-  //   },
-  const extras = extras_info?.extras || [];
-  const extrasTotal = extras_info?.extras_total || 0;
+  const passengerEmail =
+    booking.passenger?.email ||
+    booking.rider?.email ||
+    booking.user?.email ||
+    "jane@gmail.com";
 
-  // Derive subtotal/total assuming we don't have detailed tax info
-  const total = parseFloat(extrasTotal) || 0; // The mock only showed extras total, adjust as needed
+  const passengerPhone =
+    booking.passenger?.phone_number ||
+    booking.rider?.phone_number ||
+    booking.user?.phone_number ||
+    "+234801234573";
+
+  const driverName = booking.driver?.full_name || "Jane Cooper";
+  const driverEmail = booking.driver?.email || "jane@gmail.com";
+  const driverPhone = booking.driver?.phone_number || "+234801234573";
+  const driverLicense = booking.driver?.license_status || "Valid";
 
   return (
     <div className={styles.container}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft} style={{ display: "block" }}>
-          <button className={styles.backBtn} onClick={onBack} aria-label="Go back">
-            <BackIcon />
+      {/* ─── Top Action Bar ─── */}
+      <div className={styles.topBar}>
+        <button
+          type="button"
+          className={styles.backBtn}
+          onClick={onBack}
+          aria-label="Back to bookings list"
+          id="booking-detail-back"
+        >
+          <ChevronLeftIcon />
+        </button>
+
+        <div className={styles.actionsGroup}>
+          <button
+            type="button"
+            className={styles.reassignBtn}
+            onClick={() =>
+              onReassignPassenger ? onReassignPassenger(booking.id) : null
+            }
+            id="booking-detail-reassign"
+          >
+            Reassign Passenger
           </button>
-          <div className={styles.headerTitle}>
-            <p className={styles.headerTitleText}>Booking ID</p>
-            <div className={styles.idRow}>
-              <h1 className={styles.bookingId}>{booking_info?.reference || booking_info?.id || 'N/A'}</h1>
-              <button className={styles.copyBtn} aria-label="Copy ID" onClick={() => navigator.clipboard.writeText(booking_info?.reference || '')}>
-                <CopyIcon />
-              </button>
-              <span className={`${styles.badge} ${styles[`status${booking_info?.status ? booking_info.status.charAt(0).toUpperCase() + booking_info.status.slice(1) : 'Scheduled'}`] || styles.statusUpcoming}`}>
-                <span className={styles.badgeDot} />
-                {booking_info?.status || 'Scheduled'}
-              </span>
-            </div>
-            <p className={styles.dateRange}>
-              Booked from <span className={styles.dateBold}>{booking_info?.pickup_date}</span> to <span className={styles.dateBold}>{booking_info?.dropoff_date}</span>
-            </p>
-          </div>
-        </div>
-        <div className={styles.headerRight}>
-          <button className={styles.modifyBtn}>Modify Booking</button>
-          <button className={styles.cancelBtn} onClick={() => onCancelBooking(booking_info?.id)}>Cancel Booking</button>
+          <button
+            type="button"
+            className={styles.cancelBtn}
+            onClick={() => onCancelBooking(booking.id)}
+            disabled={isCancelled}
+            id="booking-detail-cancel"
+          >
+            {isCancelled ? "Booking Cancelled" : "Cancel Booking"}
+          </button>
         </div>
       </div>
 
-      <div className={styles.mainContent}>
-        {/* Left Column */}
-        <div className={styles.leftCol}>
-          {/* Booking Information */}
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Booking Information</h2>
-            <div className={styles.infoGrid}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Name</span>
-                <span className={styles.infoValue}>{booking_info?.customer || "N/A"}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Email</span>
-                <span className={styles.infoValue}>{booking_info?.email || "N/A"}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Phone</span>
-                <span className={styles.infoValue}>{booking_info?.phone_number || "N/A"}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Date Created</span>
-                <span className={styles.infoValue}>{booking_timeline?.booking_confirmed || "N/A"}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Booking Type</span>
-                <span className={styles.infoValue}>{"N/A"}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Payment Status</span>
-                {booking_info?.payment_status?.toLowerCase() === 'paid' ? (
-                  <span style={{ color: "rgba(1, 102, 48, 1)", fontWeight: "600" }}>
-                    <span style={{ height: "7px", width: "7px", borderRadius: "50%", backgroundColor: "rgba(1, 102, 48, 1)", marginRight: "14px", display: "inline-block" }} />
-                    Paid
-                  </span>
-                ) : (
-                  <span style={{ color: "rgba(220, 38, 38, 1)", fontWeight: "600" }}>
-                    <span style={{ height: "7px", width: "7px", borderRadius: "50%", backgroundColor: "rgba(220, 38, 38, 1)", marginRight: "14px", display: "inline-block" }} />
-                    {booking_info?.payment_status || "Not Paid"}
-                  </span>
-                )}
-              </div>
-            </div>
-          </section>
-          <div style={{ border: "1px solid rgba(226, 228, 233, 1)", margin: "0 20px" }} />
+      {/* ─── 2-Column Main Layout (Screenshot 4) ─── */}
+      <div className={styles.mainLayout}>
+        {/* Left Column: Details Card */}
+        <div className={styles.leftCard}>
+          {/* Section 1: Ride Details */}
+          <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>Ride Details</h3>
 
-          {/* Car Details */}
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Car Details</h2>
-            <div className={styles.infoGrids}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Vehicle Name</span>
-                <span className={styles.infoValue}>{car_info?.vehicle_name || "N/A"}</span>
+            {/* Row 1: Booking ID | Destination | Origin */}
+            <div className={styles.infoGrid3}>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Booking ID</span>
+                <span className={styles.value}>{bookingVehicleTitle}</span>
               </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Vehicle Category</span>
-                <span className={styles.infoValue}>{car_info?.vehicle_category || "N/A"}</span>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Destination</span>
+                <span className={styles.value}>
+                  {booking.destination || "Jeep"}
+                </span>
               </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Fuel Type</span>
-                <span className={styles.infoValue}>{car_info?.fuel_type || "N/A"}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Transmission</span>
-                <span className={styles.infoValue}>{car_info?.transmission || "N/A"}</span>
-              </div>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Current Car Status</span>
-                <span className={`${styles.badge} ${car_info?.car_status === 'Available' ? styles.statusAvailable : styles.statusBooked}`}>
-                  <span className={styles.badgeDot} />
-                  {car_info?.car_status || "N/A"}
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Origin</span>
+                <span className={styles.value}>
+                  {booking.pickup_location || "Petrol"}
                 </span>
               </div>
             </div>
-          </section>
-          <div style={{ border: "1px solid rgba(226, 228, 233, 1)", margin: "0 20px" }} />
 
-          {/* Extras */}
-          {extras.length > 0 && (
-            <>
-              <section className={styles.section}>
-                <h2 className={styles.sectionTitle}>Extras</h2>
-                <table className={styles.extrasTable}>
-                  <thead>
-                    <tr>
-                      <th>Extra</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {extras?.map((extra: any, i: number) => (
-                      <tr key={i}>
-                        <td>{extra.extra}</td>
-                        <td className={styles.amount}>N{parseFloat(extra.price || '0').toLocaleString()}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </section>
-              <div style={{ border: "1px solid rgba(226, 228, 233, 1)", margin: "0 20px" }} />
-            </>
-          )}
-
-          {/* Payment Summary */}
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Payment Summary</h2>
-            <div className={styles.infoGrid}>
-              <div className={styles.infoItem}>
-                <span className={styles.infoLabel}>Extras Total</span>
-                <span className={styles.infoValue}>N{total.toLocaleString()}</span>
+            {/* Row 2: Available Seats | Seats Booked | Booking Status */}
+            <div className={styles.infoGrid3}>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Available Seats</span>
+                <span className={styles.value}>Automatic</span>
+              </div>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Seats Booked</span>
+                <span className={styles.value}>
+                  {booking.seats_requested ? `${booking.seats_requested}` : "Automatic"}
+                </span>
+              </div>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Booking Status</span>
+                <span
+                  className={`${styles.statusBadge} ${getStatusBadgeClass(
+                    booking.status || booking.trip_status
+                  )}`}
+                >
+                  <span className={styles.badgeDot} />
+                  {getNormalizedStatusText(booking.status || booking.trip_status)}
+                </span>
               </div>
             </div>
-          </section>
+
+            {/* Row 3: Payment Status */}
+            <div className={styles.infoGrid3} style={{ marginBottom: 0 }}>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Payment Status</span>
+                <span className={styles.paymentBadge}>
+                  <CheckIcon />
+                  Completed
+                </span>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.divider} />
+
+          {/* Section 2: Passenger Information */}
+          <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>Passenger Information</h3>
+            <div className={styles.infoGrid3} style={{ marginBottom: 0 }}>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Name</span>
+                <span className={styles.value}>{passengerName}</span>
+              </div>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Email</span>
+                <span className={styles.value}>{passengerEmail}</span>
+              </div>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Phone</span>
+                <span className={styles.value}>{passengerPhone}</span>
+              </div>
+            </div>
+          </div>
+
+          <div className={styles.divider} />
+
+          {/* Section 3: Driver Information */}
+          <div className={styles.section}>
+            <h3 className={styles.sectionTitle}>Driver Information</h3>
+            <div className={styles.infoGrid4}>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Name</span>
+                <span className={styles.value}>{driverName}</span>
+              </div>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Email</span>
+                <span className={styles.value}>{driverEmail}</span>
+              </div>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>Phone</span>
+                <span className={styles.value}>{driverPhone}</span>
+              </div>
+              <div className={styles.infoGroup}>
+                <span className={styles.label}>License Status</span>
+                <span className={styles.value}>{driverLicense}</span>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Right Column */}
-        <div className={styles.rightCol}>
-          {/* Booking Status Timeline */}
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Booking Status</h2>
+        {/* Right Column: Timeline & Quick Actions */}
+        <div className={styles.rightColumn}>
+          {/* Card 1: Timeline */}
+          <div className={styles.rightCard}>
+            <h4 className={styles.rightCardTitle}>Timeline</h4>
             <div className={styles.timeline}>
-              <TimelineItem label="Booking Confirmed" date={booking_timeline?.booking_confirmed} checked={!!booking_timeline?.booking_confirmed} />
-              <TimelineItem label="Payment Completed" date={booking_timeline?.payment_completed} checked={!!booking_timeline?.payment_completed} />
-              <TimelineItem label="Trip Started" date={booking_timeline?.trip_started} checked={!!booking_timeline?.trip_started} />
-              <TimelineItem label="Trip Completed" date={booking_timeline?.trip_completed} checked={!!booking_timeline?.trip_completed} />
-              <TimelineItem label="Vehicle Returned" date={booking_timeline?.vehicle_returned} checked={!!booking_timeline?.vehicle_returned} />
-            </div>
-          </section>
+              {/* Step 1: Active */}
+              <div className={styles.timelineItem}>
+                <div className={styles.timelineTrack}>
+                  <div className={styles.timelineIconActive}>
+                    <SmallCheckIcon />
+                  </div>
+                  <div className={styles.timelineLine} />
+                </div>
+                <div className={styles.timelineContent}>
+                  <p className={styles.timelineTitle}>Booking Request Placed</p>
+                  <p className={styles.timelineTime}>{formatTimelineDate()}</p>
+                </div>
+              </div>
 
-          {/* Quick Actions */}
-          <section className={styles.section}>
-            <h2 className={styles.sectionTitle}>Quick Actions</h2>
-            <div className={styles.actionList}>
-              <ActionButton label="Send Reminder" />
-              <ActionButton label="Approve Extension" />
-              <ActionButton label="Issue Refund" />
+              {/* Step 2 */}
+              <div className={styles.timelineItem}>
+                <div className={styles.timelineTrack}>
+                  <div className={styles.timelineIconInactive} />
+                  <div className={styles.timelineLine} />
+                </div>
+                <div className={styles.timelineContent}>
+                  <p className={styles.timelineTitleInactive}>
+                    Booking Approved/Declined
+                  </p>
+                </div>
+              </div>
+
+              {/* Step 3 */}
+              <div className={styles.timelineItem}>
+                <div className={styles.timelineTrack}>
+                  <div className={styles.timelineIconInactive} />
+                  <div className={styles.timelineLine} />
+                </div>
+                <div className={styles.timelineContent}>
+                  <p className={styles.timelineTitleInactive}>Trip Started</p>
+                </div>
+              </div>
+
+              {/* Step 4 */}
+              <div className={styles.timelineItem}>
+                <div className={styles.timelineTrack}>
+                  <div className={styles.timelineIconInactive} />
+                </div>
+                <div className={styles.timelineContent}>
+                  <p className={styles.timelineTitleInactive}>Trip Ended</p>
+                </div>
+              </div>
             </div>
-          </section>
+          </div>
+
+          {/* Card 2: Quick Actions */}
+          <div className={styles.rightCard}>
+            <h4 className={styles.rightCardTitle}>Quick Actions</h4>
+            <button
+              type="button"
+              className={styles.actionBtn}
+              onClick={() => (onIssueRefund ? onIssueRefund(booking.id) : null)}
+            >
+              <span>Issue Refund</span>
+              <div className={styles.actionChevron}>
+                <ChevronRightIcon />
+              </div>
+            </button>
+          </div>
         </div>
       </div>
     </div>
   );
 }
 
-/* ─── Sub-components ─── */
-
-function TimelineItem({ label, date, checked = false }: { label: string; date?: string; checked?: boolean }) {
+/* ─── Inline SVG Icons ─── */
+function ChevronLeftIcon() {
   return (
-    <div className={styles.timelineItem}>
-      <div className={`${styles.timelineCheck} ${checked ? styles.timelineCheckActive : ""}`}>
-        {checked && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>}
-      </div>
-      <div className={styles.timelineContent}>
-        <span className={styles.timelineLabel}>{label}</span>
-        <span className={styles.timelineDate}>{date || "-"}</span>
-      </div>
-    </div>
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="15 18 9 12 15 6" />
+    </svg>
   );
 }
 
-function ActionButton({ label }: { label: string }) {
+function ChevronRightIcon() {
   return (
-    <button className={styles.actionBtn}>
-      {label}
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="9 18 15 12 9 6" /></svg>
-    </button>
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="9 18 15 12 9 6" />
+    </svg>
   );
 }
 
-/* ─── Icons ─── */
-function BackIcon() { return <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(134, 140, 152, 1)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12" /><polyline points="12 19 5 12 12 5" /></svg>; }
-function CopyIcon() {
-  return <Image src="/images/admin/copy.svg" alt="Copy" width={16} height={16} />;
+function CheckIcon() {
+  return (
+    <svg
+      width={14}
+      height={14}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2.5}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
 }
 
+function SmallCheckIcon() {
+  return (
+    <svg
+      width={11}
+      height={11}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={3}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  );
+}

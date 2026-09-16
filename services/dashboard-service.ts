@@ -1,26 +1,36 @@
 import { publicApi } from "@/lib/api-client";
 
+export interface DashboardStatMetric {
+  label: string;
+  value: string;
+  raw_value: string;
+  growth_percentage: string;
+  growth_direction: "up" | "down" | "flat" | string;
+}
+
+export interface DashboardTrendItem {
+  label: string;
+  value: string;
+}
+
+export interface AdminDashboardResponse {
+  total_revenue: DashboardStatMetric;
+  total_passengers: DashboardStatMetric;
+  total_drivers: DashboardStatMetric;
+  total_trips: DashboardStatMetric;
+  user_growth: DashboardTrendItem[];
+  revenue_trend: DashboardTrendItem[];
+}
+
 export const dashboardService = {
   /**
-   * Fetches data for the admin dashboard.
+   * Fetches data for the main admin dashboard.
+   * GET administration/admin/dashboard/
    */
-  fetchDashboardOverview: async () => {
-    try {
-      console.log("Dashboard Service: Fetching dashboard overview...");
-      const response = await publicApi.get("", {
-        params: { path: "api/v1/admin/dashboard/" },
-      });
-      console.log("Dashboard Service: Response received", response);
-      return response.data;
-    } catch (error: any) {
-      console.error("Dashboard Service: Failed to fetch dashboard overview:", error);
-      console.error("Error details:", {
-        status: error.response?.status,
-        statusText: error.response?.statusText,
-        data: error.response?.data,
-        message: error.message,
-      });
-      throw error;
-    }
+  getMainDashboard: async (): Promise<AdminDashboardResponse> => {
+    const response = await publicApi.get("", {
+      params: { path: "administration/admin/dashboard/" },
+    });
+    return response.data;
   },
 };

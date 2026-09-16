@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { ADMIN_USER, AdminRole } from "@/data/admin-mock";
+import { AdminRole } from "@/types/admin";
 import Spinner from "./Spinner";
 import styles from "./AdminGuard.module.css";
 
@@ -30,7 +30,19 @@ export default function AdminGuard({ children }: { children: React.ReactNode }) 
 
   useEffect(() => {
     const savedRole = localStorage.getItem("drifully_admin_role") as AdminRole | null;
-    setCurrentRole(savedRole || (ADMIN_USER.role as AdminRole));
+    if (savedRole) {
+      setCurrentRole(savedRole);
+      return;
+    }
+    const userStr = localStorage.getItem("drifully_admin_user");
+    if (userStr) {
+      try {
+        const user = JSON.parse(userStr);
+        setCurrentRole((user?.user_type || user?.role || "Admin") as AdminRole);
+        return;
+      } catch {}
+    }
+    setCurrentRole("Admin");
   }, []);
 
   if (currentRole === null) {

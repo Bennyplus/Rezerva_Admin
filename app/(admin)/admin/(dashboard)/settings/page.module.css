@@ -1,0 +1,378 @@
+/* ============================================================
+   ADMIN SETTINGS — Scoped styles (CSS Module)
+   ============================================================ */
+
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* ─── Tabs Bar ─── */
+.tabsBar {
+  display: flex;
+  align-items: center;
+  gap: 28px;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.tabsBar::-webkit-scrollbar {
+  display: none;
+}
+
+.tabBtn {
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 0 12px 0;
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 500;
+  color: #9EA5AD;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  white-space: nowrap;
+}
+
+.tabBtn:hover {
+  color: var(--color-text, #111111);
+}
+
+.tabBtnActive {
+  color: var(--color-text, #111111);
+  border-bottom-color: var(--color-text, #111111);
+  font-weight: 600;
+}
+
+/* ─── Toolbar (Search, Filter, Add Role) ─── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 4px;
+}
+
+.searchWrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 320px;
+  max-width: 100%;
+}
+
+.searchIcon {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #868C98;
+  pointer-events: none;
+  z-index: 1;
+}
+
+.searchInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px 0 38px;
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  font-size: 13.5px;
+  color: var(--color-text, #111111);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.searchInput:focus {
+  border-color: #375DFB;
+  box-shadow: 0 0 0 3px rgba(55, 93, 251, 0.12);
+}
+
+.searchInput::placeholder {
+  color: #868C98;
+}
+
+.filterBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #525866;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+  white-space: nowrap;
+}
+
+.filterBtn:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+  border-color: #D1D1D6;
+}
+
+.filterActive {
+  background: #EFF6FF;
+  border-color: #375DFB;
+  color: #375DFB;
+}
+
+.addRoleBtn {
+  margin-left: auto;
+  height: 40px;
+  padding: 0 20px;
+  background: #375DFB;
+  color: #ffffff;
+  border: none;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s ease, background 0.15s ease;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  white-space: nowrap;
+}
+
+.addRoleBtn:hover {
+  background: #254EDB;
+}
+
+/* ─── Table Card & Table ─── */
+.tableCard {
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 10px;
+  overflow: visible;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13.5px;
+}
+
+.th {
+  padding: 14px 20px;
+  background: #F6F8FA;
+  color: #868C98;
+  font-weight: 500;
+  font-size: 12.5px;
+  text-align: left;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+  white-space: nowrap;
+}
+
+.td {
+  padding: 16px 20px;
+  color: var(--color-text, #111111);
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+  vertical-align: middle;
+}
+
+.tr:last-child .td {
+  border-bottom: none;
+}
+
+.tr:hover .td {
+  background: #FAFBFC;
+}
+
+.roleName {
+  font-family: var(--font-heading);
+  font-size: 13.5px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+}
+
+.permissionsText {
+  color: #525866;
+  font-size: 13px;
+  max-width: 420px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.createdOn {
+  color: #525866;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+/* ─── Status Badge ─── */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.statusDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.statusActive {
+  background: #ECFDF3;
+  color: #027A48;
+}
+
+.statusInactive {
+  background: #F8FAFC;
+  color: #64748B;
+}
+
+/* ─── Actions & Kebab Menu ─── */
+.actionsCell {
+  position: relative;
+  text-align: right;
+  width: 48px;
+}
+
+.kebabBtn {
+  width: 32px;
+  height: 32px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: #868C98;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.kebabBtn:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+  color: var(--color-text, #111111);
+}
+
+.kebabPopover {
+  position: absolute;
+  right: 12px;
+  top: 100%;
+  margin-top: 4px;
+  background: #ffffff;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 10px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  padding: 4px;
+  z-index: 60;
+  min-width: 145px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: popoverFade 0.12s ease-out;
+}
+
+@keyframes popoverFade {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.kebabItem {
+  width: 100%;
+  padding: 8px 12px;
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s ease;
+  white-space: nowrap;
+}
+
+.kebabItem:hover {
+  background: var(--admin-content-bg, #F6F8FA);
+}
+
+.kebabItemDanger {
+  color: #DC2626;
+}
+
+.kebabItemDanger:hover {
+  background: #FEF2F2;
+}
+
+/* ─── Empty & Loading States ─── */
+.emptyState {
+  padding: 60px 20px;
+  text-align: center;
+  color: #868C98;
+  font-size: 14px;
+}
+
+/* ─── Generic Settings Tab Shell ─── */
+.card {
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: var(--radius-md, 10px);
+  padding: 24px;
+}
+
+.cardHeader {
+  margin-bottom: 20px;
+}
+
+.cardTitle {
+  font-family: var(--font-heading);
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0 0 4px;
+}
+
+.cardSubtitle {
+  font-family: var(--font-body);
+  font-size: 13px;
+  color: var(--admin-section-label, #868C98);
+  margin: 0;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .toolbar {
+    flex-wrap: wrap;
+  }
+
+  .searchWrapper {
+    width: 100%;
+  }
+
+  .addRoleBtn {
+    margin-left: 0;
+  }
+}

@@ -1,3 +1,7 @@
+/* ============================================================
+   BOOKINGS SCREEN — Scoped Styles (bookings.module.css)
+   ============================================================ */
+
 .page {
   display: flex;
   flex-direction: column;
@@ -5,233 +9,158 @@
   flex: 1;
 }
 
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-  gap: 24px;
-}
-
-/* ─── Empty State ─── */
-.emptyCard {
-  background: var(--admin-card-bg, #ffffff);
-  border: 1px solid var(--admin-card-border, #E2E4E9);
-  border-radius: var(--radius-md, 10px);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 32px;
-  min-height: 540px;
-}
-
-.illustration {
-  margin-bottom: 12px;
-  opacity: 0.85;
-}
-
-.illustrationImg {
-  width: 200px;
-  height: auto;
-  max-width: none;
-}
-
-.emptyTitle {
-  font-family: var(--font-heading);
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--color-text, #111111);
-  margin: 0 0 6px;
-  letter-spacing: -0.01em;
-}
-
-.emptySubtitle {
-  font-size: 13.5px;
-  color: var(--admin-section-label, #868C98);
-  margin: 0 0 24px;
-  text-align: center;
-  line-height: 1.5;
-}
-
-/* ─── Populated State ─── */
+/* ============================================================
+   TOOLBAR
+   ============================================================ */
 .toolbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  gap: 16px;
-  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 12px;
 }
 
 .toolbarLeft {
   display: flex;
   align-items: center;
   gap: 12px;
-  flex-wrap: wrap;
+  flex: 1;
 }
 
 .searchBox {
-  position: relative;
-  display: flex;
-  align-items: center;
-}
-
-.searchIcon {
-  position: absolute;
-  left: 12px;
-  color: #667085;
-  pointer-events: none;
-}
-
-.searchInput {
-  height: 40px;
-  padding: 0 12px 0 36px;
-  background: #ffffff;
-  border: 1px solid #eef0f2;
-  border-radius: 8px;
-  font-size: 14px;
-  width: 240px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.searchInput:focus {
-  border-color: #1a1c1e;
-}
-
-.toolBtn {
-  height: 40px;
-  padding: 0 16px;
-  background: #ffffff;
-  border: 1px solid #eef0f2;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #1a1c1e;
   display: flex;
   align-items: center;
   gap: 8px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  padding: 0 12px;
+  height: 40px;
+  width: 280px;
+  transition: border-color 0.15s ease;
+}
+
+.searchBox:focus-within {
+  border-color: #2563EB;
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  font-size: 13.5px;
+  width: 100%;
+  color: #111827;
+  background: transparent;
+}
+
+.searchInput::placeholder {
+  color: #868C98;
+}
+
+.toolBtn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 500;
+  color: #525866;
   cursor: pointer;
-  transition: background 0.2s;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .toolBtn:hover {
-  background: #f9fafb;
+  background: #F9FAFB;
+  border-color: #D1D5DB;
 }
 
-.toolbarRight {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.exportBtn {
-  height: 40px;
-  padding: 0 16px;
-  background: #1a1c1e;
-  border: none;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #ffffff;
-  cursor: pointer;
-  transition: opacity 0.2s;
-}
-
-.exportBtn:hover {
-  opacity: 0.9;
-}
-
+/* ============================================================
+   TABLE (Screenshot 1)
+   ============================================================ */
 .tableCard {
   background: #ffffff;
-  border: 1px solid #eef0f2;
-  border-radius: 16px;
-  overflow: hidden;
+  border-radius: 12px;
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
 .tableWrap {
-  overflow-x: auto;
+  position: relative;
+  z-index: 10;
   flex: 1;
+  overflow: visible;
 }
 
 .table {
   width: 100%;
   border-collapse: collapse;
-  text-align: left;
-  min-width: 800px;
 }
 
 .table th {
-  padding: 16px 20px;
+  text-align: left;
+  padding: 16px;
+  background: #F6F8FA;
   font-size: 12px;
   font-weight: 500;
-  color: #667085;
-  background: #f9fafb;
-  border-bottom: 1px solid #eef0f2;
+  color: #868C98;
+}
+
+.table th:first-child {
+  border-top-left-radius: 12px;
+}
+
+.table th:last-child {
+  border-top-right-radius: 12px;
 }
 
 .table td {
-  padding: 16px 20px;
-  font-size: 14px;
-  color: #1a1c1e;
-  border-bottom: 1px solid #eef0f2;
-  vertical-align: middle;
+  padding: 16px;
+  font-size: 13.5px;
+  color: #111111;
+  border-bottom: 1px solid #F1F3F5;
 }
 
-.table tr:last-child td {
-  border-bottom: none;
-}
-
-/* Checkbox column */
-.checkCol {
-  width: 44px;
-  text-align: center;
-}
-
-.checkbox {
-  appearance: none;
-  -webkit-appearance: none;
-  width: 16px;
-  height: 16px;
-  border: 1px solid #E2E4E9;
-  border-radius: 4px;
-  background-color: #ffffff;
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  margin: 0;
-}
-
-.checkbox:checked {
-  background-color: var(--admin-active-bg, #111111);
-  border-color: var(--admin-active-bg, #111111);
-}
-
-.checkbox:checked::after {
-  content: "";
-  position: absolute;
-  width: 4px;
-  height: 8px;
-  border: solid white;
-  border-width: 0 2px 2px 0;
-  transform: rotate(45deg);
-  margin-top: -2px;
-}
-
-/* Status Badges */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 14px;
-  border-radius: var(--radius-full, 9999px);
-  font-size: 13px;
+.bookingIdCell {
   font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.passengerCell {
+  color: #111827;
+  white-space: nowrap;
+}
+
+.driverCell {
+  color: #111827;
+  white-space: nowrap;
+}
+
+.priceCell {
+  font-weight: 500;
+  color: #111827;
+  white-space: nowrap;
+}
+
+.seatsCell {
+  color: #111827;
+  white-space: nowrap;
+}
+
+/* ─── Status Badges ─── */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .badgeDot {
@@ -242,134 +171,168 @@
 }
 
 .statusCompleted {
-  background: #F0FDF4;
-  color: #16A34A;
+  background: #ECFDF5;
+  color: #065F46;
 }
-
 .statusCompleted .badgeDot {
-  background: #16A34A;
+  background: #10B981;
 }
 
 .statusUpcoming {
   background: #FFF7ED;
-  color: #EA580C;
+  color: #C2410C;
 }
-
 .statusUpcoming .badgeDot {
-  background: #EA580C;
+  background: #F97316;
 }
 
 .statusOngoing {
   background: #EFF6FF;
-  color: #2563EB;
+  color: #1D4ED8;
 }
-
 .statusOngoing .badgeDot {
-  background: #2563EB;
+  background: #3B82F6;
 }
 
 .statusCancelled {
-  background: #F8FAFC;
-  color: #64748B;
+  background: #F3F4F6;
+  color: #6B7280;
 }
-
 .statusCancelled .badgeDot {
-  background: #64748B;
+  background: #9CA3AF;
 }
 
+/* ─── Payment Status Pill (with Checkmark) ─── */
+.paymentBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+  background: #ECFDF5;
+  color: #065F46;
+  border: 1px solid #A7F3D0;
+}
+
+.paymentCheckIcon {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #10B981;
+  color: #ffffff;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ─── Action Menu (...) ─── */
 .actionsCol {
-  width: 48px;
+  width: 44px;
   text-align: center;
 }
 
+.actionMenuWrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .moreBtn {
-  width: 32px;
-  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: transparent;
+  width: 28px;
+  height: 28px;
   border: none;
+  background: transparent;
   border-radius: 6px;
-  color: #667085;
+  color: #868C98;
   cursor: pointer;
-  transition: background 0.2s;
-  position: relative;
+  transition: background 0.15s ease;
 }
 
 .moreBtn:hover {
-  background: #f2f4f7;
+  background: #F6F8FA;
+  color: #111827;
 }
 
-/* Dropdown Menu */
-.dropdown {
+.kebabMenu {
   position: absolute;
   top: 100%;
   right: 0;
-  width: 180px;
-  background: #ffffff;
-  border: 1px solid #eef0f2;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  z-index: 10;
   margin-top: 4px;
-  padding: 4px;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+  min-width: 170px;
+  z-index: 100;
+  padding: 8px 0;
+  border: 1px solid #E2E4E9;
+  text-align: left;
 }
 
-.dropdownItem {
+.kebabMenuItem {
+  display: block;
   width: 100%;
-  padding: 10px 12px;
-  font-size: 14px;
-  color: #1a1c1e;
-  text-align: left;
+  padding: 10px 18px;
   background: transparent;
   border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.dropdownItem:hover {
-  background: #f9fafb;
-}
-
-.dropdownItemDanger {
-  color: #d92d20;
-}
-
-/* Dev State Toggle */
-.devToggleWrap {
-  display: flex;
-  justify-content: center;
-}
-
-.stateToggle {
-  padding: 8px 16px;
-  background: #f2f4f7;
-  border: 1px solid #eef0f2;
-  border-radius: 20px;
-  font-size: 12px;
+  font-size: 13.5px;
   font-weight: 500;
-  color: #667085;
+  color: #111827;
   cursor: pointer;
+  text-align: left;
+  transition: background 0.1s ease;
 }
 
-.stateToggle:hover {
-  background: #eef0f2;
+.kebabMenuItem:hover {
+  background: #F6F8FA;
 }
 
-@media (max-width: 768px) {
+/* ============================================================
+   EMPTY STATE (Screenshot 2)
+   ============================================================ */
+.emptyCard {
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 12px;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 40px 24px;
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 6px 0;
+}
+
+.emptySubtitle {
+  font-size: 13.5px;
+  color: #868C98;
+  margin: 0;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 900px) {
+  .tableWrap {
+    overflow-x: auto;
+  }
+}
+
+@media (max-width: 640px) {
   .toolbar {
-    flex-direction: column;
-    align-items: stretch;
+    flex-wrap: wrap;
   }
 
-  .toolbarLeft {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .searchInput {
+  .searchBox {
     width: 100%;
   }
 }
