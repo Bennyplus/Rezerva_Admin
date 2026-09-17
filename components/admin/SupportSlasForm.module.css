@@ -1,0 +1,336 @@
+/* ============================================================
+   SUPPORT & SLA'S CONFIGURATION FORM
+   ============================================================ */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+/* ─── Loading State ─── */
+.loadingWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  width: 100%;
+}
+
+/* ─── Section Card ─── */
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+/* ─── Header ─── */
+.sectionHeader {
+  padding: 16px 0 14px;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+  margin-bottom: 4px;
+}
+
+.title {
+  font-family: var(--font-body);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0 0 6px;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: #868C98;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ─── Form Row (label + input side-by-side) ─── */
+.formRow {
+  display: flex;
+  align-items: flex-start;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+  gap: 32px;
+}
+
+.formLabel {
+  flex: 0 0 240px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+  padding-top: 10px;
+}
+
+.inputColumn {
+  flex: 1;
+  max-width: 440px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.categoryInputWrap {
+  display: flex;
+  gap: 10px;
+  width: 100%;
+}
+
+.formInput {
+  flex: 1;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text, #111111);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.formInput::placeholder {
+  color: #CDD0D5;
+}
+
+.formInput:focus {
+  border-color: #375DFB;
+}
+
+.addCategoryBtn {
+  align-self: flex-end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  background: #fff;
+  color: var(--color-text, #111111);
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+}
+
+.addCategoryBtn:hover {
+  background: #F9FAFB;
+  border-color: #D1D1D6;
+}
+
+/* ─── Category Chips ─── */
+.categoryChips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.categoryChip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: #F2F4F7;
+  color: #344054;
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.chipRemoveBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: none;
+  color: #868C98;
+  cursor: pointer;
+  padding: 0;
+  border-radius: 50%;
+  transition: color 0.15s ease;
+}
+
+.chipRemoveBtn:hover {
+  color: #E63946;
+}
+
+/* ─── Priority SLA Matrix ─── */
+.priorityTableWrap {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.priorityHeaderRow {
+  display: grid;
+  grid-template-columns: 240px 1fr 1fr;
+  gap: 24px;
+  padding: 14px 0;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+}
+
+.priorityColHeader {
+  font-family: var(--font-body);
+  font-size: 13px;
+  font-weight: 500;
+  color: #868C98;
+}
+
+.priorityRow {
+  display: grid;
+  grid-template-columns: 240px 1fr 1fr;
+  gap: 24px;
+  align-items: center;
+  padding: 16px 0;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+}
+
+.priorityLabel {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+}
+
+/* ─── Select (dropdown) ─── */
+.formSelect {
+  width: 100%;
+  max-width: 320px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text, #111111);
+  background: #fff;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23868C98' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  transition: border-color 0.15s ease;
+}
+
+.formSelect:focus {
+  border-color: #375DFB;
+}
+
+.selectPlaceholder {
+  color: #CDD0D5;
+}
+
+/* ─── Toggle Switch ─── */
+.toggleLabel {
+  position: relative;
+  display: inline-block;
+  width: 44px;
+  height: 24px;
+  cursor: pointer;
+}
+
+.toggleInput {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.toggleSlider {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #E4E7EC;
+  border-radius: 24px;
+  transition: 0.2s ease;
+}
+
+.toggleSlider:before {
+  position: absolute;
+  content: "";
+  height: 18px;
+  width: 18px;
+  left: 3px;
+  bottom: 3px;
+  background-color: white;
+  border-radius: 50%;
+  transition: 0.2s ease;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+.toggleInput:checked + .toggleSlider {
+  background-color: #375DFB;
+}
+
+.toggleInput:checked + .toggleSlider:before {
+  transform: translateX(20px);
+}
+
+/* ─── Action Button ─── */
+.actionRow {
+  display: flex;
+  justify-content: flex-end;
+  padding: 18px 0 0;
+}
+
+.submitBtn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: #375DFB;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #2B4CD6;
+}
+
+.submitBtn:disabled {
+  background: #F2F4F7;
+  color: #868C98;
+  cursor: not-allowed;
+}
+
+/* ─── Success Toast ─── */
+.successToast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  background: #22C55E;
+  color: #fff;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 10000;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

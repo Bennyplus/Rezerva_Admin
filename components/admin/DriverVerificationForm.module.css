@@ -1,0 +1,172 @@
+/* ============================================================
+   DRIVER VERIFICATION FORM
+   ============================================================ */
+
+.container {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+/* ─── Loading State ─── */
+.loadingWrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 280px;
+  width: 100%;
+}
+
+/* ─── Header ─── */
+.header {
+  padding: 24px 0 16px;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+  margin-bottom: 8px;
+}
+
+.title {
+  font-family: var(--font-body);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0 0 6px;
+}
+
+.subtitle {
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: #868C98;
+  margin: 0;
+  line-height: 1.5;
+}
+
+/* ─── Form Row (label + input side-by-side) ─── */
+.formRow {
+  display: flex;
+  align-items: center;
+  padding: 20px 0;
+  border-bottom: 1px solid var(--admin-card-border, #E2E4E9);
+  gap: 32px;
+}
+
+.formLabel {
+  flex: 0 0 240px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+}
+
+.formInput {
+  flex: 1;
+  max-width: 400px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text, #111111);
+  background: #fff;
+  outline: none;
+  transition: border-color 0.15s ease;
+}
+
+.formInput::placeholder {
+  color: #CDD0D5;
+}
+
+.formInput:focus {
+  border-color: #375DFB;
+}
+
+/* ─── Select (dropdown) ─── */
+.formSelect {
+  flex: 1;
+  max-width: 400px;
+  height: 42px;
+  padding: 0 14px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  color: var(--color-text, #111111);
+  background: #fff;
+  outline: none;
+  cursor: pointer;
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg width='12' height='8' viewBox='0 0 12 8' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M1 1.5L6 6.5L11 1.5' stroke='%23868C98' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  padding-right: 36px;
+  transition: border-color 0.15s ease;
+}
+
+.formSelect:focus {
+  border-color: #375DFB;
+}
+
+.selectPlaceholder {
+  color: #CDD0D5;
+}
+
+/* ─── Footer / Submit ─── */
+.footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 24px 0 0;
+  border-top: 1px solid var(--admin-card-border, #E2E4E9);
+  margin-top: 8px;
+}
+
+.submitBtn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  color: #fff;
+  background: #375DFB;
+  cursor: pointer;
+  transition: background-color 0.15s ease, opacity 0.15s ease;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #2B4CD6;
+}
+
+.submitBtn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ─── Success Toast ─── */
+.successToast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  background: #22C55E;
+  color: #fff;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  z-index: 10000;
+  animation: slideUp 0.2s ease-out;
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(8px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}

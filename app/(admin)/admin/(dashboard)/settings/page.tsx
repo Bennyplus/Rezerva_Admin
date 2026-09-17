@@ -4,6 +4,19 @@ import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import Pagination from "@/components/admin/Pagination";
 import ConfirmActionModal from "@/components/admin/ConfirmActionModal";
 import RolePermissionsForm from "@/components/admin/RolePermissionsForm";
+import PlatformRulesMenu from "@/components/admin/PlatformRulesMenu";
+import RulesConfigurationForm from "@/components/admin/RulesConfigurationForm";
+import RulesHistoryView from "@/components/admin/RulesHistoryView";
+import DriverVerificationMenu from "@/components/admin/DriverVerificationMenu";
+import DriverVerificationForm from "@/components/admin/DriverVerificationForm";
+import DriverVerificationHistory from "@/components/admin/DriverVerificationHistory";
+import PaymentsWalletMenu from "@/components/admin/PaymentsWalletMenu";
+import PaymentsWalletForm from "@/components/admin/PaymentsWalletForm";
+import PaymentsWalletHistory from "@/components/admin/PaymentsWalletHistory";
+import SupportSlasMenu from "@/components/admin/SupportSlasMenu";
+import SupportSlasForm from "@/components/admin/SupportSlasForm";
+import SupportSlasHistory from "@/components/admin/SupportSlasHistory";
+import Spinner from "@/components/admin/Spinner";
 import { roleService, Role, Permission } from "@/services/role-services";
 import styles from "./page.module.css";
 
@@ -81,6 +94,22 @@ function formatDate(dateStr?: string): string {
 
 export default function SettingsPage() {
   const [activeTab, setActiveTab] = useState<SettingsTab>("roles");
+
+  // Platform Rules sub-view ("config" | "history") & popover state
+  const [platformRulesSubView, setPlatformRulesSubView] = useState<"config" | "history">("config");
+  const [isRulesMenuOpen, setIsRulesMenuOpen] = useState(false);
+
+  // Driver Verification sub-view & popover state
+  const [driverVerifSubView, setDriverVerifSubView] = useState<"config" | "history">("config");
+  const [isDriverVerifMenuOpen, setIsDriverVerifMenuOpen] = useState(false);
+
+  // Payments & Wallet sub-view & popover state
+  const [paymentsWalletSubView, setPaymentsWalletSubView] = useState<"config" | "history">("config");
+  const [isPaymentsWalletMenuOpen, setIsPaymentsWalletMenuOpen] = useState(false);
+
+  // Support & SLA's sub-view & popover state
+  const [supportSlasSubView, setSupportSlasSubView] = useState<"config" | "history">("config");
+  const [isSupportSlasMenuOpen, setIsSupportSlasMenuOpen] = useState(false);
 
   // Live roles state from roleService
   const [roles, setRoles] = useState<FormattedRoleItem[]>([]);
@@ -279,6 +308,7 @@ export default function SettingsPage() {
       <div className={styles.tabsBar} role="tablist" aria-label="Settings categories">
         {SETTINGS_TABS.map((tab) => {
           const isActive = activeTab === tab.id;
+          const isPlatformRules = tab.id === "platform-rules";
           return (
             <button
               key={tab.id}
@@ -287,8 +317,22 @@ export default function SettingsPage() {
               aria-selected={isActive}
               className={`${styles.tabBtn} ${isActive ? styles.tabBtnActive : ""}`}
               onClick={() => {
-                setActiveTab(tab.id);
-                setCurrentPage(1);
+                if (isPlatformRules) {
+                  setIsRulesMenuOpen(true);
+                } else if (tab.id === "driver-verification") {
+                  setIsDriverVerifMenuOpen(true);
+                } else if (tab.id === "payments-wallet") {
+                  setIsPaymentsWalletMenuOpen(true);
+                } else if (tab.id === "support-slas") {
+                  setIsSupportSlasMenuOpen(true);
+                } else {
+                  setActiveTab(tab.id);
+                  setIsRulesMenuOpen(false);
+                  setIsDriverVerifMenuOpen(false);
+                  setIsPaymentsWalletMenuOpen(false);
+                  setIsSupportSlasMenuOpen(false);
+                  setCurrentPage(1);
+                }
               }}
               id={`tab-${tab.id}`}
             >
@@ -371,7 +415,9 @@ export default function SettingsPage() {
                   {loadingRoles ? (
                     <tr>
                       <td colSpan={5} className={styles.emptyState}>
-                        Loading roles...
+                        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", padding: "36px 0" }}>
+                          <Spinner size={36} color="#375DFB" />
+                        </div>
                       </td>
                     </tr>
                   ) : filteredRoles.length === 0 ? (
@@ -479,6 +525,38 @@ export default function SettingsPage() {
             )}
           </div>
         </>
+      ) : activeTab === "platform-rules" ? (
+        platformRulesSubView === "config" ? (
+          <RulesConfigurationForm />
+        ) : (
+          <RulesHistoryView
+            onNavigateToConfig={() => setPlatformRulesSubView("config")}
+          />
+        )
+      ) : activeTab === "driver-verification" ? (
+        driverVerifSubView === "config" ? (
+          <DriverVerificationForm />
+        ) : (
+          <DriverVerificationHistory
+            onNavigateToConfig={() => setDriverVerifSubView("config")}
+          />
+        )
+      ) : activeTab === "payments-wallet" ? (
+        paymentsWalletSubView === "config" ? (
+          <PaymentsWalletForm />
+        ) : (
+          <PaymentsWalletHistory
+            onNavigateToConfig={() => setPaymentsWalletSubView("config")}
+          />
+        )
+      ) : activeTab === "support-slas" ? (
+        supportSlasSubView === "config" ? (
+          <SupportSlasForm />
+        ) : (
+          <SupportSlasHistory
+            onNavigateToConfig={() => setSupportSlasSubView("config")}
+          />
+        )
       ) : (
         /* ─── Other Tabs Placeholder ─── */
         <div className={styles.card} role="tabpanel" aria-labelledby={`tab-${activeTab}`}>
@@ -517,6 +595,54 @@ export default function SettingsPage() {
         cancelText="Dismiss"
         isDanger={true}
         isLoading={isRemoving}
+      />
+
+      {/* ─── Platform Rules Destination Modal ─── */}
+      <PlatformRulesMenu
+        isOpen={isRulesMenuOpen}
+        onClose={() => setIsRulesMenuOpen(false)}
+        onSelect={(dest) => {
+          setActiveTab("platform-rules");
+          setPlatformRulesSubView(dest);
+          setIsRulesMenuOpen(false);
+        }}
+        activeDestination={activeTab === "platform-rules" ? platformRulesSubView : undefined}
+      />
+
+      {/* ─── Driver Verification Destination Modal ─── */}
+      <DriverVerificationMenu
+        isOpen={isDriverVerifMenuOpen}
+        onClose={() => setIsDriverVerifMenuOpen(false)}
+        onSelect={(dest) => {
+          setActiveTab("driver-verification");
+          setDriverVerifSubView(dest);
+          setIsDriverVerifMenuOpen(false);
+        }}
+        activeDestination={activeTab === "driver-verification" ? driverVerifSubView : undefined}
+      />
+
+      {/* ─── Payments & Wallet Destination Modal ─── */}
+      <PaymentsWalletMenu
+        isOpen={isPaymentsWalletMenuOpen}
+        onClose={() => setIsPaymentsWalletMenuOpen(false)}
+        onSelect={(dest) => {
+          setActiveTab("payments-wallet");
+          setPaymentsWalletSubView(dest);
+          setIsPaymentsWalletMenuOpen(false);
+        }}
+        activeDestination={activeTab === "payments-wallet" ? paymentsWalletSubView : undefined}
+      />
+
+      {/* ─── Support & SLA's Destination Modal ─── */}
+      <SupportSlasMenu
+        isOpen={isSupportSlasMenuOpen}
+        onClose={() => setIsSupportSlasMenuOpen(false)}
+        onSelect={(dest) => {
+          setActiveTab("support-slas");
+          setSupportSlasSubView(dest);
+          setIsSupportSlasMenuOpen(false);
+        }}
+        activeDestination={activeTab === "support-slas" ? supportSlasSubView : undefined}
       />
     </div>
   );

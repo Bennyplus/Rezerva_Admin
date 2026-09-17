@@ -1,0 +1,326 @@
+/* ============================================================
+   RULES CONFIGURATION FORM (Screenshots 2 & 3)
+   ============================================================ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+  width: 100%;
+  padding-bottom: 60px;
+}
+
+/* ─── Notification Flash Banner ─── */
+.notificationBanner {
+  background: #ECFDF3;
+  border: 1px solid #A6F4C5;
+  color: #027A48;
+  padding: 12px 18px;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  animation: bannerFade 0.2s ease-out;
+}
+
+@keyframes bannerFade {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ─── Rule Section ─── */
+.section {
+  display: flex;
+  flex-direction: column;
+}
+
+.sectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.sectionTitle {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0;
+  letter-spacing: -0.3px;
+}
+
+.sectionSubtitle {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--admin-section-label, #868C98);
+  margin: 0;
+}
+
+/* ─── Dividers ─── */
+.divider {
+  border-top: 1px solid var(--admin-card-border, #E2E4E9);
+  margin: 16px 0 20px;
+}
+
+/* ─── Fields List ─── */
+.fieldsList {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fieldRow {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.fieldLabel {
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.labelWithInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 260px;
+  flex-shrink: 0;
+}
+
+.labelWithInfo .fieldLabel {
+  width: auto;
+}
+
+.infoIcon {
+  color: #868C98;
+  font-size: 14px;
+  cursor: help;
+  user-select: none;
+}
+
+.fieldControl {
+  width: 440px;
+  max-width: 100%;
+}
+
+/* ─── Inputs ─── */
+.textInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 14px;
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--color-text, #111111);
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.textInput::placeholder {
+  color: #868C98;
+}
+
+.textInput:focus {
+  border-color: #375DFB;
+  box-shadow: 0 0 0 3px rgba(55, 93, 251, 0.08);
+}
+
+/* Input with Prefix (%, $) */
+.inputWithPrefix {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.inputPrefix {
+  position: absolute;
+  left: 14px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: #868C98;
+  pointer-events: none;
+}
+
+.inputWithPrefix .textInput {
+  padding-left: 30px;
+}
+
+/* Input with Suffix (clock icon) */
+.inputWithSuffix {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.inputSuffixIcon {
+  position: absolute;
+  right: 14px;
+  color: #868C98;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+}
+
+.inputWithSuffix .textInput {
+  padding-right: 38px;
+}
+
+/* ─── Select Input ─── */
+.selectWrapper {
+  position: relative;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+.selectInput {
+  width: 100%;
+  height: 40px;
+  padding: 0 36px 0 14px;
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 13.5px;
+  color: var(--color-text, #111111);
+  outline: none;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.selectInput:focus {
+  border-color: #375DFB;
+  box-shadow: 0 0 0 3px rgba(55, 93, 251, 0.08);
+}
+
+.selectArrow {
+  position: absolute;
+  right: 14px;
+  color: #868C98;
+  pointer-events: none;
+}
+
+/* ─── Compound Rows ─── */
+.compoundRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+}
+
+.compoundInputHalf {
+  flex: 1;
+}
+
+/* ─── Toggle Switch ─── */
+.toggleSwitch {
+  width: 44px;
+  height: 24px;
+  background-color: var(--admin-card-border, #E2E4E9);
+  border-radius: 24px;
+  position: relative;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  padding: 0;
+  display: flex;
+  align-items: center;
+}
+
+.toggleSwitchActive {
+  background-color: #375DFB;
+}
+
+.toggleThumb {
+  width: 18px;
+  height: 18px;
+  background-color: #ffffff;
+  border-radius: 50%;
+  position: absolute;
+  left: 3px;
+  transition: transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+}
+
+.toggleSwitchActive .toggleThumb {
+  transform: translateX(20px);
+}
+
+/* ─── Action Row & Buttons ─── */
+.actionRow {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+
+.updateBtn {
+  height: 40px;
+  padding: 0 20px;
+  border: none;
+  border-radius: 8px;
+  font-family: var(--font-heading);
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: not-allowed;
+  background: var(--admin-content-bg, #F6F8FA);
+  color: var(--admin-section-label, #868C98);
+  transition: background 0.15s ease, color 0.15s ease, opacity 0.15s ease;
+  white-space: nowrap;
+}
+
+.updateBtnActive {
+  background: #375DFB;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.updateBtnActive:hover {
+  background: #2b4ed9;
+}
+
+.updateBtnActive:active {
+  background: #233fb5;
+}
+
+/* ─── Responsive ─── */
+@media (max-width: 768px) {
+  .fieldRow {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  .fieldLabel,
+  .labelWithInfo {
+    width: 100%;
+  }
+
+  .fieldControl {
+    width: 100%;
+  }
+
+  .compoundRow {
+    flex-direction: column;
+  }
+
+  .selectWrapper[style] {
+    width: 100% !important;
+  }
+}

@@ -11,13 +11,13 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://www.drifullyrentals.com"),
+  metadataBase: new URL("https://rezarva.com/"),
   title: {
-    default: "Rezerva – Rent a Car, Your Way. Anytime, Anywhere.",
-    template: "%s | Rezerva",
+    default: "Rezarva – Rent a Car, Your Way. Anytime, Anywhere.",
+    template: "%s | Rezarva",
   },
   description:
-    "Drive yourself or get a chauffeur. Book in seconds with  Rezerva fast, flexible, and hassle-free car rentals for trips, events, and business.",
+    "Drive yourself or get a chauffeur. Book in seconds with  Rezarva fast, flexible, and hassle-free car rentals for trips, events, and business.",
   keywords: [
     // Core Nigeria keywords
     "car rental in Nigeria",
@@ -61,13 +61,13 @@ export const metadata: Metadata = {
     "self-drive",
   ],
   authors: [{ name: "Rezerva" }],
-  creator: "Rezerva",
+  creator: "Rezarva",
   openGraph: {
     type: "website",
     locale: "en_US",
-    url: "https://www.drifullyrentals.com",
-    siteName: "Rezerva",
-    title: "Drifully – Rent a Car, Your Way. Anytime, Anywhere.",
+    url: "https://rezarva.com/",
+    siteName: "Rezarva",
+    title: "Rezarva – Rent a Car, Your Way. Anytime, Anywhere.",
     description:
       "Drive yourself or get a chauffeur. Book in seconds — fast, flexible, and hassle-free.",
     images: [
@@ -101,7 +101,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/icons/favicon.ico",
+    icon: "/R.png",
+    shortcut: "/R.png",
+    apple: "/R.png",
   },
 };
 

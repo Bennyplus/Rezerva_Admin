@@ -1,0 +1,78 @@
+/* ============================================================
+   PLATFORM RULES DESTINATION MODAL (Screenshot 1)
+   ============================================================ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(1px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.15s ease-out;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalCard {
+  background: #ffffff;
+  width: 300px;
+  max-width: 90vw;
+  border-radius: 14px;
+  padding: 20px 22px;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: scaleUp 0.15s ease-out;
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.menuOption {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px 14px;
+  border: none;
+  background: transparent;
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: 15px;
+  font-weight: 500;
+  color: #525866;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease;
+  user-select: none;
+}
+
+.menuOption:hover {
+  background-color: var(--admin-content-bg, #F6F8FA);
+  color: var(--color-text, #111111);
+}
+
+.menuOptionActive {
+  background-color: #EFF4FE;
+  color: #375DFB;
+  font-weight: 600;
+}
