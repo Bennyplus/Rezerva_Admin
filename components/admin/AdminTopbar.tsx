@@ -263,7 +263,13 @@ export default function AdminTopbar() {
                       </p>
                       {notif.created_at && (
                         <span className={styles.notificationTime}>
-                          {new Date(notif.created_at).toLocaleDateString()}
+                          {(() => {
+                            const sanitized = notif.created_at.replace(/\s*\|\s*/, " ");
+                            const d = new Date(sanitized);
+                            return !isNaN(d.getTime())
+                              ? d.toLocaleDateString()
+                              : notif.created_at;
+                          })()}
                         </span>
                       )}
                     </li>
