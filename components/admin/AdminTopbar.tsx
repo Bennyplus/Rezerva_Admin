@@ -12,7 +12,8 @@ import styles from "./AdminTopbar.module.css";
 const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/admin": {
     title: "Dashboard",
-    subtitle: "Monitor platform performance, user activity, and key operational insights from one centralized dashboard.",
+    subtitle:
+      "Monitor platform performance, user activity, and key operational insights from one centralized dashboard.",
   },
   "/admin/analytics": {
     title: "Analytics",
@@ -41,6 +42,11 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   "/admin/users": {
     title: "Users",
     subtitle: "Manage customer accounts and access",
+  },
+  "/admin/promotions": {
+    title: "Promotions",
+    subtitle:
+      "Create, manage, and track promotions, discounts, and referral campaigns.",
   },
   "/admin/teams": {
     title: "Team Management",
@@ -72,7 +78,8 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   },
   "/admin/referrals": {
     title: "Referrals",
-    subtitle: "Track referral performance, reward eligible users, and monitor campaign growth.",
+    subtitle:
+      "Track referral performance, reward eligible users, and monitor campaign growth.",
   },
   "/admin/settings": {
     title: "Settings",

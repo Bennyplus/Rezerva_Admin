@@ -1,0 +1,420 @@
+/* ============================================================
+   CREATE PROMOTION FORM STYLES
+   ============================================================ */
+
+.container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  width: 100%;
+}
+
+/* ─── Top Bar ─── */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.backBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  background: #ffffff;
+  color: #525866;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.backBtn:hover {
+  background-color: var(--admin-content-bg, #F6F8FA);
+  color: #111827;
+  border-color: #D1D5DB;
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.topCancelBtn {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  background: #ffffff;
+  color: #525866;
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.topCancelBtn:hover {
+  background-color: var(--admin-content-bg, #F6F8FA);
+  color: #111827;
+}
+
+.topSubmitBtn {
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 8px;
+  border: none;
+  background-color: #E2E4E9;
+  color: #8C92A4;
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: not-allowed;
+  transition: all 0.15s ease;
+}
+
+.topSubmitBtnActive {
+  background-color: #375DFB;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.topSubmitBtnActive:hover {
+  background-color: #2747D9;
+}
+
+/* ─── Form Card ─── */
+.formCardWrapper {
+  display: flex;
+  justify-content: center;
+  width: 100%;
+}
+
+.formCard {
+  background: #ffffff;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 16px;
+  padding: 32px 36px;
+  width: 100%;
+  max-width: 680px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+}
+
+.cardTitle {
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 18px;
+  font-weight: 700;
+  color: #111827;
+  margin: 0 0 6px 0;
+}
+
+/* ─── Field Groups ─── */
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  position: relative;
+}
+
+.label {
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.labelOptional {
+  font-weight: 400;
+  color: #8C92A4;
+  font-size: 13px;
+}
+
+.input {
+  height: 44px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  background-color: #ffffff;
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 14px;
+  color: #111827;
+  outline: none;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  width: 100%;
+}
+
+.input::placeholder {
+  color: #9CA3AF;
+}
+
+.input:focus {
+  border-color: #375DFB;
+  box-shadow: 0 0 0 3px rgba(55, 93, 251, 0.1);
+}
+
+.inputError {
+  border-color: #EF4444;
+}
+
+.inputError:focus {
+  border-color: #EF4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.15);
+}
+
+.fieldError {
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 12px;
+  color: #EF4444;
+  margin: 0;
+}
+
+/* ─── Two-Column Row (Dates) ─── */
+.twoColRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+@media (max-width: 600px) {
+  .twoColRow {
+    grid-template-columns: 1fr;
+  }
+}
+
+.inputWithIcon {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+}
+
+.inputWithIcon .input {
+  padding-right: 40px;
+}
+
+.inputIconRight {
+  position: absolute;
+  right: 12px;
+  color: #9CA3AF;
+  pointer-events: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.datePickerWrapper {
+  width: 100%;
+}
+
+.datePickerWrapper :global(.react-datepicker) {
+  font-family: var(--font-body, Inter, sans-serif);
+  border-radius: 12px;
+  border: 1px solid #E2E4E9;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.datePickerWrapper :global(.react-datepicker__header) {
+  background-color: #F8F9FA;
+  border-bottom: 1px solid #E2E4E9;
+  padding-top: 10px;
+}
+
+.datePickerWrapper :global(.react-datepicker__day--selected),
+.datePickerWrapper :global(.react-datepicker__day--keyboard-selected),
+.datePickerWrapper :global(.react-datepicker__day--in-range) {
+  background-color: #375DFB !important;
+  color: #ffffff !important;
+  border-radius: 6px;
+}
+
+.datePickerWrapper :global(.react-datepicker__day:hover) {
+  border-radius: 6px;
+}
+
+/* ─── Custom Select / Dropdown ─── */
+.selectTrigger {
+  height: 44px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  background-color: #ffffff;
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 14px;
+  color: #111827;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  width: 100%;
+}
+
+.selectTrigger:hover {
+  border-color: #D1D5DB;
+}
+
+.selectTriggerActive {
+  border-color: #375DFB;
+  box-shadow: 0 0 0 3px rgba(55, 93, 251, 0.1);
+}
+
+.placeholderText {
+  color: #9CA3AF;
+}
+
+.selectPopover {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #ffffff;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.08);
+  padding: 6px;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  animation: fadeIn 0.1s ease-out;
+}
+
+.selectOption {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 10px 12px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 14px;
+  color: #374151;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.12s ease;
+}
+
+.selectOption:hover {
+  background-color: #F3F4F6;
+  color: #111827;
+}
+
+.selectOptionSelected {
+  background-color: #EFF4FE;
+  color: #375DFB;
+  font-weight: 600;
+}
+
+/* ─── Eligibility Checkboxes Grid ─── */
+.eligibilityGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 14px;
+  column-gap: 16px;
+  padding-top: 4px;
+}
+
+@media (max-width: 540px) {
+  .eligibilityGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.checkboxInput {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1px solid #D1D5DB;
+  accent-color: #375DFB;
+  cursor: pointer;
+}
+
+.checkboxText {
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 14px;
+  color: #374151;
+  font-weight: 400;
+}
+
+/* ─── Card Bottom Actions ─── */
+.cardFooter {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 10px;
+  padding-top: 18px;
+  border-top: 1px solid var(--admin-card-border, #E2E4E9);
+}
+
+.cardCancelBtn {
+  height: 42px;
+  padding: 0 24px;
+  border-radius: 8px;
+  border: 1px solid #FEE2E2;
+  background: #ffffff;
+  color: #EF4444;
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.cardCancelBtn:hover {
+  background-color: #FEF2F2;
+  border-color: #EF4444;
+}
+
+.cardSubmitBtn {
+  height: 42px;
+  padding: 0 24px;
+  border-radius: 8px;
+  border: none;
+  background-color: #E2E4E9;
+  color: #8C92A4;
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: not-allowed;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cardSubmitBtnActive {
+  background-color: #375DFB;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.cardSubmitBtnActive:hover {
+  background-color: #2747D9;
+}
+
+.helperText {
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 13px;
+  color: #8C92A4;
+  margin: 4px 0 0 0;
+}

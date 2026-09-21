@@ -1,0 +1,141 @@
+/* ============================================================
+   SELECT PROMOTION TYPE MODAL
+   ============================================================ */
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background-color: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(2px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  animation: fadeIn 0.15s ease-out;
+  padding: 16px;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.modalCard {
+  background: #ffffff;
+  width: 480px;
+  max-width: 100%;
+  border-radius: 14px;
+  padding: 24px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.14), 0 4px 12px rgba(0, 0, 0, 0.04);
+  border: 1px solid #E2E4E9;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  animation: scaleUp 0.15s ease-out;
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.96);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.modalTitle {
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin: 0;
+}
+
+.closeBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #E5E7EB;
+  background: #FFFFFF;
+  color: #9CA3AF;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  padding: 0;
+}
+
+.closeBtn:hover {
+  background-color: #F3F4F6;
+  color: #4B5563;
+  border-color: #D1D5DB;
+}
+
+.optionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.optionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 16px 20px;
+  border: 1px solid transparent;
+  background-color: #F8F9FB;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  text-align: left;
+}
+
+.optionBtn:hover {
+  background-color: #F0F4FE;
+  border-color: #DCE6FD;
+}
+
+.optionLabel {
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 15px;
+  font-weight: 500;
+  color: #6B7280;
+  transition: color 0.15s ease;
+}
+
+.optionBtn:hover .optionLabel {
+  color: #111827;
+}
+
+.chevronIcon {
+  color: #9CA3AF;
+  transition: transform 0.15s ease, color 0.15s ease;
+}
+
+.optionBtn:hover .chevronIcon {
+  color: #375DFB;
+  transform: translateX(2px);
+}
+
+.helperText {
+  font-family: var(--font-body, Inter, sans-serif);
+  font-size: 14px;
+  color: #6B7280;
+  text-align: center;
+  padding: 20px 0;
+  margin: 0;
+}
