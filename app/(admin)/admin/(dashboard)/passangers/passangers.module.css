@@ -1,59 +1,45 @@
 /* ============================================================
-   ADMIN DRIVERS — Scoped styles (CSS Module)
+   ADMIN PASSENGERS — Scoped styles (CSS Module)
    ============================================================ */
 
-.page {
+.container {
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 20px;
   position: relative;
   flex: 1;
   width: 100%;
 }
 
-/* ─── Tabs Navigation ─── */
-.tabsContainer {
+/* ─── State 1: Inactive / Empty State (Screenshot 1) ─── */
+.emptyCard {
+  background: #ffffff;
+  border: 1px solid #EAECF0;
+  border-radius: 12px;
+  min-height: 420px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 24px;
-  border-bottom: 1px solid #EAECF0;
-  margin-bottom: 2px;
+  justify-content: center;
+  text-align: center;
+  padding: 60px 24px;
 }
 
-.tabBtn {
-  background: transparent;
-  border: none;
-  padding: 8px 4px 12px 4px;
-  font-family: inherit;
-  font-size: 14px;
-  font-weight: 500;
-  color: #667085;
-  cursor: pointer;
-  position: relative;
-  transition: color 0.15s ease;
-}
-
-.tabBtn:hover {
-  color: #101828;
-}
-
-.tabBtnActive {
-  color: #101828;
+.emptyTitle {
+  font-size: 18px;
   font-weight: 600;
+  color: #101828;
+  margin: 0 0 8px 0;
 }
 
-.tabBtnActive::after {
-  content: "";
-  position: absolute;
-  bottom: -1px;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: #101828;
-  border-radius: 2px;
+.emptySubtitle {
+  font-size: 14px;
+  font-weight: 400;
+  color: #667085;
+  margin: 0;
 }
 
-/* ─── Toolbar (Search, Filter, Sort by, Add Driver) ─── */
+/* ─── State 2: Toolbar (Screenshot 2) ─── */
 .toolbar {
   display: flex;
   align-items: center;
@@ -69,33 +55,6 @@
   flex-wrap: wrap;
 }
 
-.toolbarRight {
-  display: flex;
-  align-items: center;
-  margin-left: auto;
-}
-
-.addDriverBtn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  height: 40px;
-  padding: 0 16px;
-  background: #111111;
-  color: #ffffff;
-  border-radius: 8px;
-  font-family: inherit;
-  font-size: 13.5px;
-  font-weight: 500;
-  border: none;
-  cursor: pointer;
-  transition: background 0.15s ease;
-}
-
-.addDriverBtn:hover {
-  background: #2a2a2a;
-}
-
 .searchBox {
   display: flex;
   align-items: center;
@@ -105,7 +64,7 @@
   padding: 0 14px;
   height: 40px;
   background: #ffffff;
-  width: 320px;
+  width: 300px;
   max-width: 100%;
 }
 
@@ -121,12 +80,6 @@
 
 .searchInput::placeholder {
   color: #667085;
-}
-
-.actionsWrap {
-  display: flex;
-  align-items: center;
-  gap: 12px;
 }
 
 .popoverWrapper {
@@ -162,7 +115,34 @@
   z-index: 100;
 }
 
-/* ─── Table ─── */
+.toolbarRight {
+  display: flex;
+  align-items: center;
+}
+
+/* Black export button matching Screenshot 2 */
+.exportBtn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  padding: 0 18px;
+  border-radius: 8px;
+  background: #111111;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.exportBtn:hover {
+  background: #2a2a2a;
+}
+
+/* ─── Table Card (Screenshot 2) ─── */
 .tableCard {
   background: #ffffff;
   border: 1px solid #EAECF0;
@@ -184,7 +164,7 @@
 
 .table th {
   text-align: left;
-  padding: 12px 20px;
+  padding: 12px 18px;
   font-weight: 500;
   font-size: 12.5px;
   color: #667085;
@@ -193,12 +173,8 @@
   white-space: nowrap;
 }
 
-.actionsHeader {
-  width: 44px;
-}
-
 .table td {
-  padding: 14px 20px;
+  padding: 14px 18px;
   color: #344054;
   white-space: nowrap;
   font-size: 13.5px;
@@ -219,7 +195,26 @@
   background: #F9FAFB;
 }
 
-/* Driver cell (Avatar + Name + ID) */
+.checkCol {
+  width: 44px;
+  text-align: center;
+  padding-left: 18px;
+  padding-right: 8px;
+}
+
+.checkbox {
+  width: 16px;
+  height: 16px;
+  accent-color: #2F68FE;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.actionsHeader {
+  width: 44px;
+}
+
+/* Passenger cell (Avatar + Name + US-ID) */
 .driverCell {
   display: flex;
   align-items: center;
@@ -265,7 +260,7 @@
 }
 
 .emailCell {
-  max-width: 180px;
+  max-width: 220px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -278,112 +273,7 @@
   color: #344054;
 }
 
-/* Status Badges */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  padding: 2px 8px;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 500;
-  width: fit-content;
-}
-
-.badgeDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-  flex-shrink: 0;
-}
-
-.badgeActive {
-  background: #ECFDF3;
-  color: #027A48;
-}
-
-.badgeActive .badgeDot {
-  background: #12B76A;
-}
-
-.badgeInactive {
-  background: #FEF3F2;
-  color: #B42318;
-}
-
-.badgeInactive .badgeDot {
-  background: #F04438;
-}
-
-.badgeSuspended {
-  background: #111827;
-  color: #ffffff;
-  padding: 2px 10px;
-}
-
-.badgeDeactivated {
-  background: #FEF6EE;
-  color: #B54708;
-}
-
-.badgeDeactivated .badgeDot {
-  background: #F79009;
-}
-
-/* ─── Pending Drivers Status Badges (Screenshot 1) ─── */
-.badgeUnderReview {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  background: #FFFAEB;
-  border: 1px solid #FEDF89;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #B54708;
-}
-
-.badgePending {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  background: #F2F4F7;
-  border: 1px solid #EAECF0;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #475467;
-}
-
-.badgeVerified {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  background: #ECFDF3;
-  border: 1px solid #ABEFC6;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #027A48;
-}
-
-.badgeRejected {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 10px;
-  background: #FEF3F2;
-  border: 1px solid #FECDCA;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 500;
-  color: #B42318;
-}
-
-/* Rating Cell */
+/* Rating Cell with solid blue star */
 .ratingCell {
   display: inline-flex;
   align-items: center;
@@ -396,7 +286,12 @@
   color: #101828;
 }
 
-/* Actions Column & Kebab Menu */
+.reportsCell {
+  font-size: 13.5px;
+  color: #344054;
+}
+
+/* Actions Column & Floating Kebab Menu */
 .actionsCol {
   width: 44px;
   text-align: center;
@@ -426,12 +321,11 @@
   color: #101828;
 }
 
-/* Floating Kebab Card (Screenshot 2) */
 .kebabMenu {
   position: absolute;
   right: 0;
   top: calc(100% + 4px);
-  min-width: 160px;
+  min-width: 170px;
   background: #ffffff;
   border: 1px solid #EAECF0;
   border-radius: 12px;

@@ -1,0 +1,552 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  width: 100%;
+}
+
+/* ─── Top Bar ─── */
+.topBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 2px;
+}
+
+.backBtn {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #D0D5DD;
+  border-radius: 8px;
+  background: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #344054;
+  transition: all 0.15s ease;
+}
+
+.backBtn:hover {
+  background: #F9FAFB;
+  border-color: #98A2B3;
+}
+
+.topActions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.deactivateBtn {
+  height: 40px;
+  padding: 0 18px;
+  border: 1px solid #D0D5DD;
+  border-radius: 8px;
+  background: #ffffff;
+  color: #344054;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.deactivateBtn:hover {
+  background: #F9FAFB;
+  border-color: #98A2B3;
+}
+
+.suspendBtn {
+  height: 40px;
+  padding: 0 18px;
+  border: none;
+  border-radius: 8px;
+  background: #D92D20;
+  color: #ffffff;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.15s ease;
+}
+
+.suspendBtn:hover {
+  opacity: 0.9;
+}
+
+/* ─── Sub-tabs Navigation ─── */
+.tabsContainer {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  border-bottom: 1px solid #EAECF0;
+  margin-bottom: 4px;
+}
+
+.tabBtn {
+  background: transparent;
+  border: none;
+  padding: 8px 4px 12px 4px;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 500;
+  color: #667085;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.15s ease;
+}
+
+.tabBtn:hover {
+  color: #101828;
+}
+
+.tabBtnActive {
+  color: #101828;
+  font-weight: 600;
+}
+
+.tabBtnActive::after {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: #101828;
+  border-radius: 2px;
+}
+
+/* ─── Two-column layout ─── */
+.layout {
+  display: grid;
+  grid-template-columns: 1.05fr 0.95fr;
+  gap: 24px;
+  align-items: start;
+}
+
+/* ─── Left Panel (Profile Card) ─── */
+.leftPanel {
+  background: #ffffff;
+  padding: 20px;
+  border: 1px solid #EAECF0;
+  border-radius: 12px;
+  display: flex;
+  flex-direction: column;
+}
+
+.photoWrap {
+  width: 100%;
+  height: 290px;
+  border-radius: 10px;
+  overflow: hidden;
+  background: #F2F4F7;
+  margin-bottom: 22px;
+}
+
+.photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  max-width: none;
+  display: block;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  row-gap: 22px;
+  column-gap: 16px;
+}
+
+.infoGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.addressGroup {
+  grid-column: span 3;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.infoLabel {
+  font-size: 12.5px;
+  color: #667085;
+  font-weight: 400;
+}
+
+.infoValue {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #101828;
+}
+
+.ratingValue {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #101828;
+}
+
+/* ─── Right Panel ─── */
+.rightPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.perfGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.perfCard {
+  background: #F8F9FA;
+  border-radius: 10px;
+  padding: 16px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.perfLabel {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12.5px;
+  color: #667085;
+}
+
+.perfValue {
+  font-size: 20px;
+  font-weight: 700;
+  color: #101828;
+}
+
+/* Flags And Reports */
+.flagsSection {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.flagsHeader {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.flagsTitle {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #101828;
+}
+
+.flagsBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 10px;
+  background: #FFFAEB;
+  border: 1px solid #FEDF89;
+  border-radius: 9999px;
+  font-size: 11.5px;
+  font-weight: 600;
+  color: #B54708;
+}
+
+.flagsCard {
+  background: #ffffff;
+  border: 1px solid #EAECF0;
+  border-radius: 12px;
+  min-height: 320px;
+}
+
+/* ─── Bookings Tab (Screenshot) ─── */
+.bookingsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+}
+
+.bookingsToolbar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #D0D5DD;
+  border-radius: 8px;
+  padding: 0 14px;
+  height: 40px;
+  background: #ffffff;
+  width: 320px;
+  max-width: 100%;
+}
+
+.searchInput {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: inherit;
+  font-size: 14px;
+  color: #101828;
+  width: 100%;
+}
+
+.searchInput::placeholder {
+  color: #667085;
+}
+
+.actionsWrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.popoverWrapper {
+  position: relative;
+}
+
+.toolBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 40px;
+  padding: 0 16px;
+  border: 1px solid #D0D5DD;
+  border-radius: 8px;
+  background: #ffffff;
+  font-family: inherit;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #344054;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.toolBtn:hover {
+  border-color: #98A2B3;
+  background: #F9FAFB;
+}
+
+.dropdownContainer {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  z-index: 100;
+}
+
+/* ─── Bookings Table ─── */
+.tableCard {
+  background: #ffffff;
+  border: 1px solid #EAECF0;
+  border-radius: 12px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tableWrap {
+  overflow-x: auto;
+  flex: 1;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th {
+  text-align: left;
+  padding: 14px 20px;
+  font-weight: 500;
+  font-size: 12.5px;
+  color: #667085;
+  background: #F9FAFB;
+  border-bottom: 1px solid #EAECF0;
+  white-space: nowrap;
+}
+
+.table td {
+  padding: 16px 20px;
+  color: #101828;
+  white-space: nowrap;
+  font-size: 13.5px;
+  border-bottom: 1px solid #F2F4F7;
+  vertical-align: middle;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.tableRow {
+  transition: background 0.12s ease;
+}
+
+.tableRow:hover {
+  background: #F9FAFB;
+}
+
+.bookingCodeCell {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #101828;
+}
+
+.vehicleCell {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: #101828;
+}
+
+.locationCell {
+  font-size: 13.5px;
+  color: #101828;
+}
+
+.amountCell {
+  font-size: 13.5px;
+  font-weight: 600;
+  color: #101828;
+}
+
+/* Status Badge */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 9999px;
+  font-size: 12px;
+  font-weight: 500;
+  width: fit-content;
+}
+
+.badgeOngoing {
+  background: #ECFDF3;
+  color: #027A48;
+}
+
+.badgeOngoing .badgeDot {
+  background: #12B76A;
+}
+
+.badgeCompleted {
+  background: #EFF8FF;
+  color: #175CD3;
+}
+
+.badgeCompleted .badgeDot {
+  background: #2F68FE;
+}
+
+.badgeCancelled {
+  background: #FEF3F2;
+  color: #B42318;
+}
+
+.badgeCancelled .badgeDot {
+  background: #F04438;
+}
+
+.badgeDot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+/* Actions Column & Kebab Menu */
+.actionsCol {
+  width: 44px;
+  text-align: center;
+}
+
+.kebabWrap {
+  position: relative;
+  display: inline-block;
+}
+
+.moreBtn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border: none;
+  background: transparent;
+  border-radius: 6px;
+  color: #667085;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.moreBtn:hover {
+  background: #F2F4F7;
+  color: #101828;
+}
+
+.kebabMenu {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 4px);
+  min-width: 140px;
+  background: #ffffff;
+  border: 1px solid #EAECF0;
+  border-radius: 10px;
+  box-shadow: 0px 10px 24px -4px rgba(16, 24, 40, 0.1), 0px 4px 6px -2px rgba(16, 24, 40, 0.05);
+  z-index: 50;
+  overflow: hidden;
+  padding: 6px 0;
+  animation: fadeIn 0.15s ease;
+}
+
+.kebabItem {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  text-align: left;
+  background: transparent;
+  border: none;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 500;
+  color: #344054;
+  cursor: pointer;
+  transition: background 0.12s ease;
+  white-space: nowrap;
+}
+
+.kebabItem:hover {
+  background: #F9FAFB;
+  color: #101828;
+}
+
+.emptyRow {
+  text-align: center;
+  padding: 48px;
+  color: #667085;
+  font-size: 14px;
+}
+
+/* Responsive */
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}

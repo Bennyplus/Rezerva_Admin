@@ -183,18 +183,13 @@ const NAV_SECTIONS: NavSection[] = [
         allowedRoles: ["Super Admin", "Admin", "Customer Engagement"],
         children: [
           {
-            label: "Teams",
-            href: "/admin/teams",
-            allowedRoles: ["Super Admin", "Admin"],
-          },
-          {
             label: "Drivers",
             href: "/admin/drivers",
             allowedRoles: ["Super Admin", "Admin", "Customer Engagement"],
           },
           {
-            label: "Customers",
-            href: "/admin/customers",
+            label: "Passengers",
+            href: "/admin/passangers",
             allowedRoles: ["Super Admin", "Admin", "Customer Engagement"],
           },
         ],

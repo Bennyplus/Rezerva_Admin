@@ -53,12 +53,13 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     subtitle: "Manage all administrative users",
   },
   "/admin/drivers": {
-    title: "Drivers",
+    title: "Drivers Management",
     subtitle: "Manage and monitor all drivers",
   },
-  "/admin/customers": {
-    title: "Customers",
-    subtitle: "Manage customer accounts and activity",
+  "/admin/passangers": {
+    title: "Passengers Management",
+    subtitle:
+      "View, manage, and monitor passenger accounts, activity, and trip history",
   },
   "/admin/reviews": {
     title: "Reviews",

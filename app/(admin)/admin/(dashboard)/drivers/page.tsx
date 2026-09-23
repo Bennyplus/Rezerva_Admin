@@ -3,41 +3,107 @@
 import { useState, useEffect } from "react";
 import Image from "next/image";
 import Pagination from "@/components/admin/Pagination";
-import AddDriverModal from "@/components/admin/AddDriverModal";
 import SuspendDriverModal from "@/components/admin/SuspendDriverModal";
 import DriverDetailView from "@/components/admin/DriverDetailView";
-import FilterBar from "@/components/admin/FilterBar";
-import Spinner from "@/components/admin/Spinner";
-import { type Driver } from "@/data/admin-drivers";
-import { driversService } from "@/services/drivers-service";
 import FilterDropdown from "@/components/admin/FilterDropdown";
 import SortDropdown from "@/components/admin/SortDropdown";
+import AddDriverModal from "@/components/admin/AddDriverModal";
+import Spinner from "@/components/admin/Spinner";
 import MoreIcon from "@/components/admin/icons/MoreIcon";
+import { type Driver, driversService } from "@/services/drivers-service";
 import styles from "./drivers.module.css";
 
-type ViewMode = "list" | "grid";
+type TabType = "pending" | "drivers";
+
+export interface PendingDriverItem {
+  id: string;
+  name: string;
+  driverCode: string;
+  phone: string;
+  email: string;
+  status: "Under Review" | "Pending" | "Verified" | "Rejected";
+  avatar?: string;
+  licenseNumber?: string;
+}
+
+const INITIAL_PENDING_DRIVERS: PendingDriverItem[] = [
+  {
+    id: "pend-1",
+    name: "Bessie Cooper",
+    driverCode: "DRI-ID01-123",
+    phone: "(252) 555-0126",
+    email: "sara.cruz@example.com",
+    status: "Under Review",
+    avatar: "/images/reliableandsecure-female.png",
+  },
+  {
+    id: "pend-2",
+    name: "Jacob Jones",
+    driverCode: "DRI-ID01-123",
+    phone: "(205) 555-0100",
+    email: "alma.lawson@example.com",
+    status: "Pending",
+    avatar: "/images/man-img.png",
+  },
+  {
+    id: "pend-3",
+    name: "Courtney Henry",
+    driverCode: "DRI-ID01-123",
+    phone: "(307) 555-0133",
+    email: "michael.mitc@example.com",
+    status: "Verified",
+    avatar: "/images/man-img.png",
+  },
+  {
+    id: "pend-4",
+    name: "Jerome Bell",
+    driverCode: "DRI-ID01-123",
+    phone: "(603) 555-0123",
+    email: "willie.jennings@example.com",
+    status: "Rejected",
+    avatar: "/images/reliableandsecure-female.png",
+  },
+  {
+    id: "pend-5",
+    name: "Dianne Russell",
+    driverCode: "DRI-ID01-123",
+    phone: "(319) 555-0115",
+    email: "kenzi.lawson@example.com",
+    status: "Pending",
+    avatar: "/images/man-img.png",
+  },
+  {
+    id: "pend-6",
+    name: "Cameron Williamson",
+    driverCode: "DRI-ID01-123",
+    phone: "(201) 555-0124",
+    email: "debbie.baker@example.com",
+    status: "Rejected",
+    avatar: "/images/man-img.png",
+  },
+];
 
 export default function DriversPage() {
+  const [activeTab, setActiveTab] = useState<TabType>("pending");
   const [drivers, setDrivers] = useState<Driver[]>([]);
+  const [pendingDrivers, setPendingDrivers] = useState<PendingDriverItem[]>(INITIAL_PENDING_DRIVERS);
   const [isLoading, setIsLoading] = useState(true);
-  const [isEmpty, setIsEmpty] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>("list");
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [suspendTarget, setSuspendTarget] = useState<Driver | null>(null);
+  const [suspendTarget, setSuspendTarget] = useState<Driver | PendingDriverItem | null>(null);
   const [openKebab, setOpenKebab] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<string>("Name A to Z");
   const [activeDriverFilters, setActiveDriverFilters] = useState<{ status: string[] }>({ status: [] });
+
+  const [activeDropdown, setActiveDropdown] = useState<"filter" | "sort" | null>(null);
+  const [isAddDriverOpen, setIsAddDriverOpen] = useState(false);
 
   const fetchDrivers = async () => {
     setIsLoading(true);
     try {
       const data = await driversService.getDrivers();
       setDrivers(data);
-      if (data.length === 0) setIsEmpty(true);
-      else setIsEmpty(false);
     } catch (error) {
       console.error("Failed to fetch drivers:", error);
     } finally {
@@ -49,20 +115,27 @@ export default function DriversPage() {
     fetchDrivers();
   }, []);
 
-  const totalPages = 16;
-  const resultsPerPage = 9;
+  // Close menus on outside click
+  useEffect(() => {
+    const handleGlobalClick = () => {
+      setOpenKebab(null);
+      setActiveDropdown(null);
+    };
+    window.addEventListener("click", handleGlobalClick);
+    return () => window.removeEventListener("click", handleGlobalClick);
+  }, []);
 
-  /* Filter + Sort */
+  /* ─── Filter & Sort for Active Tab ─── */
   const filteredDrivers = (() => {
     let result = drivers.filter((d) =>
       d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       d.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.licenseNo.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      d.location.toLowerCase().includes(searchQuery.toLowerCase())
+      (d.driverCode && d.driverCode.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      d.phone.includes(searchQuery)
     );
 
     if (activeDriverFilters.status && activeDriverFilters.status.length > 0) {
-      result = result.filter(d => activeDriverFilters.status.includes(d.status));
+      result = result.filter((d) => activeDriverFilters.status.includes(d.status));
     }
 
     if (sortOption === "Name A to Z") {
@@ -74,379 +147,742 @@ export default function DriversPage() {
     return result;
   })();
 
+  const filteredPendingDrivers = (() => {
+    let result = pendingDrivers.filter((d) =>
+      d.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      d.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (d.driverCode && d.driverCode.toLowerCase().includes(searchQuery.toLowerCase())) ||
+      d.phone.includes(searchQuery)
+    );
+
+    if (activeDriverFilters.status && activeDriverFilters.status.length > 0) {
+      result = result.filter((d) => activeDriverFilters.status.includes(d.status));
+    }
+
+    if (sortOption === "Name A to Z") {
+      result.sort((a, b) => a.name.localeCompare(b.name));
+    } else if (sortOption === "Name Z to A") {
+      result.sort((a, b) => b.name.localeCompare(a.name));
+    }
+
+    return result;
+  })();
+
+  const resultsPerPage = 9;
+  const currentListLength =
+    activeTab === "pending" ? filteredPendingDrivers.length : filteredDrivers.length;
+  const totalPages = Math.max(1, Math.ceil(currentListLength / resultsPerPage));
+
+  const paginatedDrivers = filteredDrivers.slice(
+    (currentPage - 1) * resultsPerPage,
+    currentPage * resultsPerPage
+  );
+
+  const paginatedPendingDrivers = filteredPendingDrivers.slice(
+    (currentPage - 1) * resultsPerPage,
+    currentPage * resultsPerPage
+  );
+
+  /* ─── Suspend handler ─── */
+  const handleSuspendConfirm = async (reason?: string) => {
+    if (!suspendTarget) return;
+    try {
+      await driversService.suspendUser(suspendTarget.id, reason || "User suspended by admin");
+      setDrivers((prev) =>
+        prev.map((d) =>
+          d.id === suspendTarget.id
+            ? { ...d, status: "Suspended" as const, availability: "Offline" as const }
+            : d
+        )
+      );
+      setPendingDrivers((prev) =>
+        prev.map((d) =>
+          d.id === suspendTarget.id ? { ...d, status: "Rejected" as const } : d
+        )
+      );
+      setSuspendTarget(null);
+    } catch (error) {
+      console.error("Failed to suspend user:", error);
+      throw error;
+    }
+  };
+
+  /* ─── Deactivate handler ─── */
+  const handleDeactivate = async (driverId: string) => {
+    setDrivers((prev) =>
+      prev.map((d) =>
+        d.id === driverId ? { ...d, status: "Deactivated" as const } : d
+      )
+    );
+  };
+
+  /* ─── Add Driver Handler ─── */
+  const handleAddDriverSuccess = (newDriver: {
+    name: string;
+    email: string;
+    phone: string;
+    licenseNumber: string;
+  }) => {
+    const createdItem: PendingDriverItem = {
+      id: `pend-${Date.now()}`,
+      name: newDriver.name,
+      driverCode: `DRI-ID01-${Math.floor(100 + Math.random() * 900)}`,
+      phone: newDriver.phone,
+      email: newDriver.email,
+      status: "Under Review",
+      avatar: "/images/admin/profile-Avatar.svg",
+      licenseNumber: newDriver.licenseNumber,
+    };
+    setPendingDrivers((prev) => [createdItem, ...prev]);
+    setActiveTab("pending");
+  };
+
   /* ─── Detail view ─── */
-  const selectedDriver = drivers.find((d) => d.id === selectedDriverId);
+  const selectedDriver = (() => {
+    if (!selectedDriverId) return null;
+    const fromDrivers = drivers.find((d) => d.id === selectedDriverId);
+    if (fromDrivers) return fromDrivers;
+
+    const fromPending = pendingDrivers.find((d) => d.id === selectedDriverId);
+    if (fromPending) {
+      const fallback: Driver = {
+        id: fromPending.id,
+        name: fromPending.name,
+        driverCode: fromPending.driverCode,
+        avatar: fromPending.avatar || "/images/man-img.png",
+        rating: 5,
+        phone: fromPending.phone,
+        email: fromPending.email,
+        licenseNo: fromPending.licenseNumber || "LGST1234-WRE-ERTYUI-2345678",
+        licenseStatus: "Valid",
+        status: fromPending.status === "Verified" ? "Active" : "Inactive",
+        availability: "Available",
+        location: "Lagos, Nigeria",
+        totalTrips: 0,
+        reports: 0,
+        currentBooking: null,
+        assignedTrips: 0,
+        verificationStatus: fromPending.status === "Verified" ? "Verified" : "Unverified",
+        accountNumber: "123456789098",
+        bankName: "Zenith Bank",
+        totalEarnings: "$0.00",
+        tripsHistory: [],
+        documents: {
+          driversLicense: { label: "Drivers License", filename: "drivers_license.pdf", size: "120 KB" },
+          vehicleDocuments: { label: "Vehicle Documents", filename: "vehicle_documents.pdf", size: "120 KB" },
+          nin: { label: "NIN", filename: "nin_document.pdf", size: "120 KB" },
+        },
+      };
+      return fallback;
+    }
+    return null;
+  })();
+
   if (selectedDriverId && selectedDriver) {
     return (
       <DriverDetailView
         driver={selectedDriver}
         onBack={() => setSelectedDriverId(null)}
         onSuspend={(id) => {
-          const d = drivers.find((dr) => dr.id === id);
-          if (d) setSuspendTarget(d);
+          setDrivers((prev) =>
+            prev.map((d) =>
+              d.id === id
+                ? { ...d, status: "Suspended" as const, availability: "Offline" as const }
+                : d
+            )
+          );
         }}
+        onDeactivate={(id) => handleDeactivate(id)}
       />
     );
   }
 
-  /* ─── Add driver handler ─── */
-  const handleAddDriver = async (data: {
-    name: string;
-    email: string;
-    phone: string;
-    licenseNumber: string;
-    passportPhoto: File | null;
-    proofOfAddress: File | null;
-    driversLicense: File | null;
-    nin: File | null;
-  }) => {
-    try {
-      const formData = new FormData();
-      formData.append("full_name", data.name);
-      formData.append("email", data.email);
-      formData.append("phone_number", data.phone);
-      formData.append("license_number", data.licenseNumber);
-      if (data.driversLicense) formData.append("drivers_license", data.driversLicense);
-      if (data.nin) formData.append("nin_document", data.nin);
-      if (data.passportPhoto) formData.append("passport_photo", data.passportPhoto);
-
-      await driversService.addDriver(formData);
-      fetchDrivers(); // refresh list
-    } catch (error) {
-      console.error("Failed to add driver:", error);
-      // Re-throw so the modal's loading state resolves and it stays open on failure
-      throw error;
-    }
-  };
-
-  /* ─── Suspend handler ─── */
-  const handleSuspendConfirm = async () => {
-    if (!suspendTarget) return;
-    try {
-      await driversService.suspendDriver(suspendTarget.id);
-      // Optimistically update local state
-      setDrivers((prev) =>
-        prev.map((d) =>
-          d.id === suspendTarget.id ? { ...d, status: "Suspended", availability: "Offline" } : d
-        )
-      );
-      setSuspendTarget(null);
-      setSelectedDriverId(null);
-    } catch (error) {
-      console.error("Failed to suspend driver:", error);
-      // Re-throw so the modal stays open and loading state resets
-      throw error;
-    }
-  };
-
   return (
-    <div className={styles.page} onClick={() => setOpenKebab(null)}>
+    <div className={styles.page}>
+      {/* ─── Tabs Navigation ─── */}
+      <div className={styles.tabsContainer}>
+        <button
+          className={`${styles.tabBtn} ${activeTab === "pending" ? styles.tabBtnActive : ""}`}
+          onClick={() => {
+            setActiveTab("pending");
+            setCurrentPage(1);
+          }}
+          id="tab-pending-drivers"
+        >
+          Pending Drivers
+        </button>
+        <button
+          className={`${styles.tabBtn} ${activeTab === "drivers" ? styles.tabBtnActive : ""}`}
+          onClick={() => {
+            setActiveTab("drivers");
+            setCurrentPage(1);
+          }}
+          id="tab-drivers"
+        >
+          Drivers
+        </button>
+      </div>
 
-      {isLoading ? (
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: "300px" }}>
-          <Spinner />
-        </div>
-      ) : isEmpty ? (
-        <div className={styles.emptyCard} id="drivers-empty-state">
-          <div className={styles.illustration} aria-hidden="true">
-            <Image
-              src="/images/admin/Items.png"
-              alt="No drivers illustration"
-              width={460}
-              height={380}
-              className={styles.illustrationImg}
+      {/* ─── Toolbar (Search, Filter, Sort by, Add Driver) ─── */}
+      <div className={styles.toolbar} id="drivers-toolbar">
+        <div className={styles.toolbarLeft}>
+          <div className={styles.searchBox}>
+            <SearchGlassIcon />
+            <input
+              type="text"
+              placeholder="Search..."
+              className={styles.searchInput}
+              value={searchQuery}
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setCurrentPage(1);
+              }}
             />
           </div>
-          <h2 className={styles.emptyTitle}>No drivers yet</h2>
-          <p className={styles.emptySubtitle}>Add your first driver to start assigning trips</p>
-          <button className={styles.addBtn} onClick={() => setIsAddModalOpen(true)}>
+
+          <div className={styles.actionsWrap}>
+            {/* Filter Popover */}
+            <div
+              className={styles.popoverWrapper}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className={styles.toolBtn}
+                onClick={() =>
+                  setActiveDropdown((prev) => (prev === "filter" ? null : "filter"))
+                }
+                id="filter-btn"
+              >
+                <FilterIcon />
+                Filter
+              </button>
+              {activeDropdown === "filter" && (
+                <div className={styles.dropdownContainer}>
+                  <FilterDropdown
+                    tabs={[
+                      {
+                        id: "status",
+                        label: "Status",
+                        options:
+                          activeTab === "pending"
+                            ? ["Under Review", "Pending", "Verified", "Rejected"]
+                            : ["Active", "Inactive", "Suspended", "Deactivated"],
+                      },
+                    ]}
+                    onApply={(filters) => {
+                      setActiveDriverFilters({ status: filters.status || [] });
+                      setActiveDropdown(null);
+                    }}
+                    onClose={() => setActiveDropdown(null)}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Sort By Popover */}
+            <div
+              className={styles.popoverWrapper}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                className={styles.toolBtn}
+                onClick={() =>
+                  setActiveDropdown((prev) => (prev === "sort" ? null : "sort"))
+                }
+                id="sort-btn"
+              >
+                <SortIcon />
+                Sort by
+              </button>
+              {activeDropdown === "sort" && (
+                <div className={styles.dropdownContainer}>
+                  <SortDropdown
+                    options={[
+                      { label: "Name A to Z", value: "Name A to Z" },
+                      { label: "Name Z to A", value: "Name Z to A" },
+                    ]}
+                    onSortSelect={(val) => {
+                      setSortOption(val);
+                      setActiveDropdown(null);
+                    }}
+                    onClose={() => setActiveDropdown(null)}
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+
+        {/* Right side: Add Driver Button (Screenshot 1) */}
+        <div className={styles.toolbarRight}>
+          <button
+            className={styles.addDriverBtn}
+            onClick={() => setIsAddDriverOpen(true)}
+            id="add-driver-btn"
+          >
             <PlusIcon />
             Add Driver
           </button>
         </div>
-      ) : (
-        <>
-          {/* Toolbar */}
-          <div className={styles.toolbar} id="drivers-toolbar">
-            <div className={styles.toolbarLeft}>
-              <FilterBar 
-                searchValue={searchQuery} 
-                onSearchChange={(v) => { setSearchQuery(v); setCurrentPage(1); }}
-                filterDropdown={
-                  <FilterDropdown
-                    tabs={[
-                      { id: 'status', label: 'Status', options: ['Active', 'Suspended', 'Inactive'] }
-                    ]}
-                    onApply={(filters) => setActiveDriverFilters({ status: filters.status || [] })}
-                  />
-                }
-                sortDropdown={
-                  <SortDropdown
-                    options={[
-                      { label: "Name A to Z", value: "Name A to Z" },
-                      { label: "Name Z to A", value: "Name Z to A" }
-                    ]}
-                    onSortSelect={setSortOption}
-                  />
-                }
-              />
-              {/* View toggles */}
-              <div className={styles.viewToggle}>
-                <button
-                  className={`${styles.viewBtn} ${viewMode === "grid" ? styles.viewBtnActive : ""}`}
-                  onClick={() => setViewMode("grid")}
-                  aria-label="Grid view"
-                  id="drivers-grid-view"
-                >
-                  <GridIcon />
-                </button>
-                <button
-                  className={`${styles.viewBtn} ${viewMode === "list" ? styles.viewBtnActive : ""}`}
-                  onClick={() => setViewMode("list")}
-                  aria-label="List view"
-                  id="drivers-list-view"
-                >
-                  <ListIcon />
-                </button>
-              </div>
-            </div>
-            <div className={styles.toolbarRight}>
-              <button
-                className={styles.addBtnSmall}
-                id="add-driver-btn"
-                onClick={() => setIsAddModalOpen(true)}
-              >
-                <PlusIcon /> Add Driver
-              </button>
-            </div>
-          </div>
+      </div>
 
-          {/* ─── List View ─── */}
-          {viewMode === "list" ? (
-            <div className={styles.tableCard} id="drivers-table">
-              <div className={styles.tableWrap}>
-                <table className={styles.table}>
-                  <thead>
-                    <tr>
-                      <th className={styles.checkCol}>
-                        <input type="checkbox" className={styles.checkbox} aria-label="Select all drivers" />
-                      </th>
-                      <th>Name</th>
-                      <th>Phone Number</th>
-                      <th>Email</th>
-                      <th>Drivers License</th>
-                      <th>Status</th>
-                      {/* <th>Location</th> */}
-                      <th className={styles.actionsCol} />
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {filteredDrivers.map((driver) => (
-                      <tr
-                        key={driver.id}
-                        className={styles.tableRow}
-                        onClick={() => setSelectedDriverId(driver.id)}
-                      >
-                        <td className={styles.checkCol} onClick={(e) => e.stopPropagation()}>
-                          <input type="checkbox" className={styles.checkbox} aria-label={`Select driver ${driver.name}`} />
-                        </td>
-                        <td>
-                          <div className={styles.driverCell}>
-                            <div className={styles.avatarWrap}>
-                              <Image
-                                src={driver.avatar}
-                                alt={driver.name}
-                                width={36}
-                                height={36}
-                                className={styles.avatarImg}
-                              />
-                            </div>
-                            <div className={styles.driverInfo}>
-                              <span className={styles.driverName}>{driver.name}</span>
-                              <span className={styles.driverRating}>{driver.rating.toFixed(1)}</span>
-                            </div>
-                          </div>
-                        </td>
-                        <td>{driver.phone}</td>
-                        <td className={styles.emailCell}>{driver.email}</td>
-                        <td>{driver.licenseNo}</td>
-                        <td>
-                          <DriverStatusBadge status={driver.status} />
-                        </td>
-                        {/* <td>{driver.location}</td> */}
-                        <td
-                          className={styles.actionsCol}
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <div className={styles.kebabWrap}>
-                            <button
-                              className={styles.moreBtn}
-                              aria-label={`More actions for ${driver.name}`}
-                              id={`kebab-${driver.id}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setOpenKebab((prev) => (prev === driver.id ? null : driver.id));
-                              }}
-                            >
-                              <MoreIcon />
-                            </button>
-                            {openKebab === driver.id && (
-                              <div className={styles.kebabMenu}>
-                                <button
-                                  className={styles.kebabItem}
-                                  onClick={() => { setOpenKebab(null); setSelectedDriverId(driver.id); }}
-                                >
-                                  View
-                                </button>
-                                <button
-                                  className={`${styles.kebabItem} ${styles.kebabItemDanger}`}
-                                  onClick={() => { setOpenKebab(null); setSuspendTarget(driver); }}
-                                >
-                                  Suspend Driver
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                    {filteredDrivers.length === 0 && (
-                      <tr>
-                        <td colSpan={8} className={styles.emptyRow}>No drivers found.</td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              <Pagination
-                  currentPage={currentPage}
-                  totalPages={Math.max(1, Math.ceil(filteredDrivers.length / resultsPerPage))}
-                  resultsPerPage={resultsPerPage}
-                  onPageChange={setCurrentPage}
-                  variant="table"
-                />
-            </div>
-          ) : (
-            /* ─── Grid View ─── */
-            <>
-              <div className={styles.cardGrid} id="drivers-grid">
-                {filteredDrivers.slice(0, 6).map((driver) => (
-                  <div
+      {/* ─── Drivers Table ─── */}
+      {isLoading ? (
+        <div className={styles.loadingContainer}>
+          <Spinner />
+        </div>
+      ) : activeTab === "pending" ? (
+        /* ─── Pending Drivers Table (Screenshot 1) ─── */
+        <div className={styles.tableCard} id="pending-drivers-table">
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone Number</th>
+                  <th>Email</th>
+                  <th>Status</th>
+                  <th className={styles.actionsHeader} />
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedPendingDrivers.map((driver) => (
+                  <tr
                     key={driver.id}
-                    className={styles.driverCard}
+                    className={styles.tableRow}
                     onClick={() => setSelectedDriverId(driver.id)}
                   >
-                    {/* Full-bleed photo */}
-                    <div className={styles.cardPhoto}>
-                      <Image
-                        src={driver.avatar}
-                        alt={driver.name}
-                        width={400}
-                        height={240}
-                        className={styles.cardPhotoImg}
-                      />
-                      {/* Overlay row */}
-                      <div className={styles.cardOverlay}>
-                        <span className={styles.cardLocation}>
-                          <LocationIcon /> {driver.location}
-                        </span>
-                        <DriverStatusBadge status={driver.status} />
+                    {/* Name + Driver ID */}
+                    <td>
+                      <div className={styles.driverCell}>
+                        <div className={styles.avatarWrap}>
+                          <Image
+                            src={driver.avatar || "/images/admin/profile-Avatar.svg"}
+                            alt={driver.name}
+                            width={40}
+                            height={40}
+                            className={styles.avatarImg}
+                            unoptimized={Boolean(driver.avatar?.startsWith("http"))}
+                          />
+                        </div>
+                        <div className={styles.driverInfo}>
+                          <span className={styles.driverName}>{driver.name}</span>
+                          <span className={styles.driverCode}>
+                            {driver.driverCode || `DRI-ID01-${driver.id}`}
+                          </span>
+                        </div>
                       </div>
-                    </div>
-                    {/* Card info */}
-                    <div className={styles.cardBody}>
-                      <div className={styles.cardRow}>
-                        <span className={styles.cardName}>{driver.name}</span>
-                        <span className={styles.cardEmail}>{driver.email}</span>
+                    </td>
+
+                    {/* Phone Number */}
+                    <td className={styles.phoneCell}>{driver.phone}</td>
+
+                    {/* Email */}
+                    <td className={styles.emailCell}>
+                      <span title={driver.email}>{driver.email}</span>
+                    </td>
+
+                    {/* Status Badge */}
+                    <td>
+                      <PendingDriverStatusBadge status={driver.status} />
+                    </td>
+
+                    {/* Kebab Action */}
+                    <td
+                      className={styles.actionsCol}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className={styles.kebabWrap}>
+                        <button
+                          className={styles.moreBtn}
+                          aria-label={`Actions for ${driver.name}`}
+                          id={`kebab-${driver.id}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenKebab((prev) =>
+                              prev === driver.id ? null : driver.id
+                            );
+                          }}
+                        >
+                          <MoreIcon />
+                        </button>
+
+                        {/* Kebab Menu Popup */}
+                        {openKebab === driver.id && (
+                          <div className={styles.kebabMenu}>
+                            <button
+                              className={styles.kebabItem}
+                              onClick={() => {
+                                setOpenKebab(null);
+                                setSelectedDriverId(driver.id);
+                              }}
+                            >
+                              View Details
+                            </button>
+                            <button
+                              className={styles.kebabItem}
+                              onClick={() => {
+                                setOpenKebab(null);
+                                setPendingDrivers((prev) =>
+                                  prev.map((d) =>
+                                    d.id === driver.id
+                                      ? { ...d, status: "Verified" as const }
+                                      : d
+                                  )
+                                );
+                              }}
+                            >
+                              Verify Driver
+                            </button>
+                            <button
+                              className={styles.kebabItem}
+                              onClick={() => {
+                                setOpenKebab(null);
+                                setSuspendTarget(driver);
+                              }}
+                            >
+                              Suspend Driver
+                            </button>
+                          </div>
+                        )}
                       </div>
-                      <div className={styles.cardRow}>
-                        <span className={styles.cardPhone}>{driver.phone}</span>
-                        <span className={styles.cardLicense}>{driver.licenseNo}</span>
-                      </div>
-                    </div>
-                  </div>
+                    </td>
+                  </tr>
                 ))}
-              </div>
-              <Pagination
-                  currentPage={currentPage}
-                  totalPages={Math.max(1, Math.ceil(filteredDrivers.length / 6))}
-                  resultsPerPage={6}
-                  onPageChange={setCurrentPage}
-                  variant="standalone"
-                />
-            </>
-          )}
-        </>
+
+                {filteredPendingDrivers.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className={styles.emptyRow}>
+                      No pending drivers found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            resultsPerPage={resultsPerPage}
+            onPageChange={setCurrentPage}
+            variant="table"
+          />
+        </div>
+      ) : (
+        /* ─── All Drivers Table ─── */
+        <div className={styles.tableCard} id="drivers-table">
+          <div className={styles.tableWrap}>
+            <table className={styles.table}>
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Phone Number</th>
+                  <th>Email</th>
+                  <th>Total Trips</th>
+                  <th>Account Status</th>
+                  <th>Ratings</th>
+                  <th className={styles.actionsHeader} />
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedDrivers.map((driver) => (
+                  <tr
+                    key={driver.id}
+                    className={styles.tableRow}
+                    onClick={() => setSelectedDriverId(driver.id)}
+                  >
+                    {/* Name + Driver ID */}
+                    <td>
+                      <div className={styles.driverCell}>
+                        <div className={styles.avatarWrap}>
+                          <Image
+                            src={driver.avatar || "/images/admin/profile-Avatar.svg"}
+                            alt={driver.name}
+                            width={40}
+                            height={40}
+                            className={styles.avatarImg}
+                            unoptimized={Boolean(driver.avatar?.startsWith("http"))}
+                          />
+                        </div>
+                        <div className={styles.driverInfo}>
+                          <span className={styles.driverName}>{driver.name}</span>
+                          <span className={styles.driverCode}>
+                            {driver.driverCode || `DRI-ID01-${driver.id}`}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* Phone Number */}
+                    <td className={styles.phoneCell}>{driver.phone}</td>
+
+                    {/* Email */}
+                    <td className={styles.emailCell}>
+                      <span title={driver.email}>{driver.email}</span>
+                    </td>
+
+                    {/* Total Trips */}
+                    <td className={styles.tripsCell}>{driver.totalTrips}</td>
+
+                    {/* Account Status */}
+                    <td>
+                      <DriverStatusBadge status={driver.status} />
+                    </td>
+
+                    {/* Ratings */}
+                    <td>
+                      <div className={styles.ratingCell}>
+                        <SolidBlueStarIcon />
+                        <span className={styles.ratingNum}>
+                          {Math.round(driver.rating)}
+                        </span>
+                      </div>
+                    </td>
+
+                    {/* Kebab Action */}
+                    <td
+                      className={styles.actionsCol}
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <div className={styles.kebabWrap}>
+                        <button
+                          className={styles.moreBtn}
+                          aria-label={`Actions for ${driver.name}`}
+                          id={`kebab-${driver.id}`}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenKebab((prev) =>
+                              prev === driver.id ? null : driver.id
+                            );
+                          }}
+                        >
+                          <MoreIcon />
+                        </button>
+
+                        {/* Kebab Menu Popup */}
+                        {openKebab === driver.id && (
+                          <div className={styles.kebabMenu}>
+                            <button
+                              className={styles.kebabItem}
+                              onClick={() => {
+                                setOpenKebab(null);
+                                setSelectedDriverId(driver.id);
+                              }}
+                            >
+                              View Details
+                            </button>
+                            <button
+                              className={styles.kebabItem}
+                              onClick={() => {
+                                setOpenKebab(null);
+                                handleDeactivate(driver.id);
+                              }}
+                            >
+                              Deactivate Driver
+                            </button>
+                            <button
+                              className={styles.kebabItem}
+                              onClick={() => {
+                                setOpenKebab(null);
+                                setSuspendTarget(driver);
+                              }}
+                            >
+                              Suspend Driver
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+
+                {filteredDrivers.length === 0 && (
+                  <tr>
+                    <td colSpan={7} className={styles.emptyRow}>
+                      No drivers found.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+
+          {/* Pagination */}
+          <Pagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            resultsPerPage={resultsPerPage}
+            onPageChange={setCurrentPage}
+            variant="table"
+          />
+        </div>
       )}
 
-      {/* Dev toggle */}
-      {/* <div className={styles.devToggleWrap}>
-        <button
-          className={styles.stateToggle}
-          onClick={() => setIsEmpty((v) => !v)}
-          id="toggle-drivers-state"
-        >
-          {isEmpty ? "Show Populated State" : "Show Empty State"} →
-        </button>
-      </div> */}
-
-      {/* Modals */}
-      <AddDriverModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSubmit={handleAddDriver}
-      />
+      {/* Suspend Driver Modal */}
       <SuspendDriverModal
         isOpen={!!suspendTarget}
         driverName={suspendTarget?.name ?? ""}
         onDismiss={() => setSuspendTarget(null)}
         onConfirm={handleSuspendConfirm}
       />
+
+      {/* Add New Driver Modal (Screenshot 2) */}
+      <AddDriverModal
+        isOpen={isAddDriverOpen}
+        onClose={() => setIsAddDriverOpen(false)}
+        onAddDriver={handleAddDriverSuccess}
+      />
     </div>
   );
 }
 
-/* ─── Status Badge ─── */
+/* ─── Status Badges ─── */
 function DriverStatusBadge({ status }: { status: string }) {
-  const cls =
-    status === "Active" ? styles.badgeActive :
-      status === "Suspended" ? styles.badgeSuspended :
-        styles.badgeInactive;
+  if (status === "Suspended") {
+    return <span className={`${styles.badge} ${styles.badgeSuspended}`}>Suspended</span>;
+  }
+  if (status === "Deactivated") {
+    return (
+      <span className={`${styles.badge} ${styles.badgeDeactivated}`}>
+        <span className={styles.badgeDot} />
+        Deactivated
+      </span>
+    );
+  }
+  if (status === "Inactive") {
+    return (
+      <span className={`${styles.badge} ${styles.badgeInactive}`}>
+        <span className={styles.badgeDot} />
+        Inactive
+      </span>
+    );
+  }
   return (
-    <span className={`${styles.badge} ${cls}`}>
+    <span className={`${styles.badge} ${styles.badgeActive}`}>
       <span className={styles.badgeDot} />
-      {status}
+      Active
     </span>
+  );
+}
+
+function PendingDriverStatusBadge({
+  status,
+}: {
+  status: "Under Review" | "Pending" | "Verified" | "Rejected";
+}) {
+  if (status === "Under Review") {
+    return (
+      <span className={styles.badgeUnderReview}>
+        <ClockOrangeIcon />
+        Under Review
+      </span>
+    );
+  }
+  if (status === "Pending") {
+    return (
+      <span className={styles.badgePending}>
+        <SlashCircleIcon />
+        Pending
+      </span>
+    );
+  }
+  if (status === "Verified") {
+    return (
+      <span className={styles.badgeVerified}>
+        <CheckCircleGreenIcon />
+        Verified
+      </span>
+    );
+  }
+  return (
+    <span className={styles.badgeRejected}>
+      <XCircleRedIcon />
+      Rejected
+    </span>
+  );
+}
+
+/* ─── SVG Icons ─── */
+function SearchGlassIcon() {
+  return (
+    <svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="#667085" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="11" cy="11" r="8" />
+      <line x1="21" y1="21" x2="16.65" y2="16.65" />
+    </svg>
+  );
+}
+
+function FilterIcon() {
+  return (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#344054" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="4" y1="6" x2="20" y2="6" />
+      <line x1="7" y1="12" x2="17" y2="12" />
+      <line x1="10" y1="18" x2="14" y2="18" />
+    </svg>
+  );
+}
+
+function SortIcon() {
+  return (
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#344054" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <polyline points="7 10 12 15 17 10" />
+      <line x1="12" y1="15" x2="12" y2="3" />
+    </svg>
+  );
+}
+
+function SolidBlueStarIcon() {
+  return (
+    <svg width={15} height={15} viewBox="0 0 24 24" fill="#2F68FE" stroke="#2F68FE" strokeWidth={1}>
+      <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+    </svg>
   );
 }
 
 function PlusIcon() {
   return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <line x1="12" y1="5" x2="12" y2="19" />
+      <line x1="5" y1="12" x2="19" y2="12" />
     </svg>
   );
 }
-function GridIcon() {
+
+function ClockOrangeIcon() {
   return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-      <rect x="3" y="3" width="7" height="7" rx="1" /><rect x="14" y="3" width="7" height="7" rx="1" />
-      <rect x="3" y="14" width="7" height="7" rx="1" /><rect x="14" y="14" width="7" height="7" rx="1" />
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#F79009" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="12 6 12 12 16 14" />
     </svg>
   );
 }
-function ListIcon() {
+
+function SlashCircleIcon() {
   return (
-    <svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round">
-      <line x1="8" y1="6" x2="21" y2="6" /><line x1="8" y1="12" x2="21" y2="12" /><line x1="8" y1="18" x2="21" y2="18" />
-      <line x1="3" y1="6" x2="3.01" y2="6" /><line x1="3" y1="12" x2="3.01" y2="12" /><line x1="3" y1="18" x2="3.01" y2="18" />
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#667085" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="4.93" y1="4.93" x2="19.07" y2="19.07" />
     </svg>
   );
 }
-function LocationIcon() {
+
+function CheckCircleGreenIcon() {
   return (
-    <svg width={13} height={13} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#12B76A" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <polyline points="9 12 11.5 14.5 16 10" />
+    </svg>
+  );
+}
+
+function XCircleRedIcon() {
+  return (
+    <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#F04438" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
+      <line x1="15" y1="9" x2="9" y2="15" />
+      <line x1="9" y1="9" x2="15" y2="15" />
     </svg>
   );
 }

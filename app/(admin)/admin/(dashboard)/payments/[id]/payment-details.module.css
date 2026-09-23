@@ -6,6 +6,7 @@
   display: flex;
   flex-direction: column;
   gap: 20px;
+  flex: 1;
 }
 
 /* ─── Top Action Bar ─── */
@@ -19,35 +20,36 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
+  width: 38px;
+  height: 38px;
   border: 1px solid var(--admin-card-border, #E2E4E9);
   border-radius: 8px;
   background: var(--admin-card-bg, #ffffff);
   color: var(--color-text, #111111);
   cursor: pointer;
-  transition: background 0.15s ease;
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
 
 .backBtn:hover {
   background: var(--admin-content-bg, #F6F8FA);
+  border-color: #D1D1D6;
 }
 
 .actionBtns {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
 }
 
 .btnOutline {
   height: 38px;
-  padding: 0 18px;
+  padding: 0 16px;
   border: 1px solid var(--admin-card-border, #E2E4E9);
   border-radius: 8px;
   background: var(--admin-card-bg, #ffffff);
-  font-family: var(--font-heading);
-  font-size: 13.5px;
-  font-weight: 600;
+  font-family: var(--font-body, inherit);
+  font-size: 13px;
+  font-weight: 500;
   color: var(--color-text, #111111);
   cursor: pointer;
   transition: all 0.15s ease;
@@ -55,6 +57,7 @@
 
 .btnOutline:hover {
   background: var(--admin-content-bg, #F6F8FA);
+  border-color: #D1D1D6;
 }
 
 .btnFill {
@@ -63,68 +66,138 @@
   border: none;
   border-radius: 8px;
   background: var(--color-text, #111111);
-  font-family: var(--font-heading);
-  font-size: 13.5px;
-  font-weight: 600;
+  font-family: var(--font-body, inherit);
+  font-size: 13px;
+  font-weight: 500;
   color: #ffffff;
   cursor: pointer;
   transition: opacity 0.15s ease;
 }
 
 .btnFill:hover {
-  opacity: 0.88;
+  opacity: 0.9;
 }
 
-/* ─── Page Header ─── */
-.pageHeader {
+/* ─── Two-Column Layout ─── */
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 20px;
+  align-items: start;
+}
+
+@media (max-width: 1024px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Main Details Card (Unified left card) ─── */
+.mainCard {
+  background: var(--admin-card-bg, #ffffff);
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 12px;
+  padding: 24px;
+}
+
+.section {
   display: flex;
   flex-direction: column;
-  gap: 4px;
 }
 
-.transactionIdRow {
+.sectionTitle {
+  font-family: var(--font-heading, inherit);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--color-text, #111111);
+  margin: 0 0 20px 0;
+}
+
+.divider {
+  height: 1px;
+  background: var(--admin-card-border, #F0F2F5);
+  margin: 28px 0;
+  border: none;
+}
+
+/* ─── Grid layouts for fields ─── */
+.grid4 {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 20px;
+}
+
+.grid3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 20px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fieldLabel {
+  font-size: 12.5px;
+  font-weight: 400;
+  color: var(--admin-section-label, #868C98);
+}
+
+.fieldValue {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--color-text, #111111);
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 6px;
 }
 
-.transactionId {
-  font-family: var(--font-heading);
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--color-text, #111111);
-  letter-spacing: -0.03em;
-  margin: 0;
-}
-
-.copyBtn {
+.inlineCopyBtn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 28px;
-  height: 28px;
+  width: 22px;
+  height: 22px;
   border: none;
   background: transparent;
-  border-radius: 6px;
-  color: var(--admin-section-label, #868C98);
+  border-radius: 4px;
+  color: #868C98;
   cursor: pointer;
-  transition: background 0.15s ease;
+  position: relative;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-.copyBtn:hover {
-  background: var(--admin-content-bg, #F6F8FA);
-  color: var(--color-text, #111111);
+.inlineCopyBtn:hover {
+  background: var(--admin-content-bg, #F2F4F7);
+  color: #111111;
 }
 
-/* Status badge */
+.copiedToast {
+  position: absolute;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #111111;
+  color: #ffffff;
+  font-size: 11px;
+  padding: 3px 6px;
+  border-radius: 4px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+/* ─── Status Badge with green dot ─── */
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 5px;
+  gap: 6px;
   padding: 3px 10px;
   border-radius: 9999px;
-  font-size: 11.5px;
+  font-size: 12px;
   font-weight: 500;
+  width: fit-content;
 }
 
 .badgeDot {
@@ -134,131 +207,49 @@
   flex-shrink: 0;
 }
 
-.badgePending { background: #F6F8FA; color: #868C98; }
-.badgePending .badgeDot { background: #868C98; }
-.badgeCompleted { background: #F0FDF4; color: #16A34A; }
-.badgeCompleted .badgeDot { background: #16A34A; }
-.badgeFailed { background: #FEF2F2; color: #DC2626; }
-.badgeFailed .badgeDot { background: #DC2626; }
-.badgeReversed { background: #EFF6FF; color: #2563EB; }
-.badgeReversed .badgeDot { background: #2563EB; }
-.badgeProcessing { background: #FFF7ED; color: #EA580C; }
-.badgeProcessing .badgeDot { background: #EA580C; }
-
-.headerDate {
-  font-size: 13px;
-  color: var(--admin-section-label, #868C98);
-  margin: 0;
+.badgeCompleted {
+  background: #ECFDF3;
+  color: #027A48;
+}
+.badgeCompleted .badgeDot {
+  background: #027A48;
 }
 
-/* ─── Two-column Layout ─── */
-.layout {
-  display: grid;
-  grid-template-columns: 1fr 280px;
-  gap: 16px;
-  align-items: start;
+.badgePending {
+  background: #F2F4F7;
+  color: #667085;
+}
+.badgePending .badgeDot {
+  background: #667085;
 }
 
-@media (max-width: 900px) {
-  .layout {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ─── Info Cards ─── */
-.cardsCol {
+/* ─── Right Column Side Cards ─── */
+.sideCol {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 20px;
 }
 
-.card {
+.sideCard {
   background: var(--admin-card-bg, #ffffff);
   border: 1px solid var(--admin-card-border, #E2E4E9);
-  border-radius: var(--radius-md, 10px);
-  padding: 24px;
+  border-radius: 12px;
+  padding: 22px;
 }
 
-.cardTitle {
-  font-family: var(--font-heading);
-  font-size: 15px;
+.sideTitle {
+  font-family: var(--font-heading, inherit);
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--color-text, #111111);
-  margin: 0 0 20px 0;
-}
-
-.grid3 {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 20px;
-}
-
-.grid2 {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
-}
-
-.field {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.fieldLabel {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--admin-section-label, #868C98);
-  letter-spacing: 0.01em;
-}
-
-.fieldValue {
-  font-size: 13.5px;
-  font-weight: 500;
-  color: var(--color-text, #111111);
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-.inlineCopyBtn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 20px;
-  height: 20px;
-  border: none;
-  background: transparent;
-  border-radius: 4px;
-  color: var(--admin-section-label, #868C98);
-  cursor: pointer;
-  transition: background 0.15s;
-}
-
-.inlineCopyBtn:hover {
-  background: var(--admin-content-bg, #F6F8FA);
+  margin: 0 0 18px 0;
 }
 
 /* ─── Payment Status Timeline ─── */
-.statusCard {
-  background: var(--admin-card-bg, #ffffff);
-  border: 1px solid var(--admin-card-border, #E2E4E9);
-  border-radius: var(--radius-md, 10px);
-  padding: 24px;
-}
-
-.statusTitle {
-  font-family: var(--font-heading);
-  font-size: 15px;
-  font-weight: 600;
-  color: var(--color-text, #111111);
-  margin: 0 0 20px 0;
-}
-
 .timeline {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  position: relative;
 }
 
 .timelineStep {
@@ -268,52 +259,86 @@
   position: relative;
 }
 
-.timelineStep:not(:last-child)::before {
-  content: "";
-  position: absolute;
-  left: 9px;
-  top: 22px;
-  width: 2px;
-  height: calc(100% + 4px);
-  background: var(--admin-card-border, #E2E4E9);
+.connectorLine {
+  width: 1px;
+  height: 28px;
+  border-left: 1.5px dashed #D0D5DD;
+  margin-left: 9px;
 }
 
-.stepIndicator {
-  width: 20px;
-  height: 20px;
+.checkboxIndicatorActive {
+  width: 18px;
+  height: 18px;
   border-radius: 4px;
-  border: 2px solid var(--admin-card-border, #E2E4E9);
-  background: var(--admin-card-bg, #ffffff);
-  flex-shrink: 0;
-  margin-top: 2px;
+  background: #2563EB;
   display: flex;
   align-items: center;
   justify-content: center;
-  position: relative;
-  z-index: 1;
-}
-
-.stepIndicatorDone {
-  border-color: var(--color-text, #111111);
-  background: var(--color-text, #111111);
-}
-
-.stepIndicatorDone svg {
+  flex-shrink: 0;
   color: #ffffff;
 }
 
+.checkboxIndicatorPending {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 1.5px solid #D0D5DD;
+  background: #ffffff;
+  flex-shrink: 0;
+}
+
 .stepContent {
-  padding-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
 }
 
 .stepLabel {
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
   color: var(--color-text, #111111);
 }
 
 .stepDate {
-  font-size: 12px;
+  font-size: 11.5px;
   color: var(--admin-section-label, #868C98);
-  margin-top: 2px;
+}
+
+/* ─── Quick Actions ─── */
+.quickActionsList {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.quickActionBtn {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 14px;
+  border: 1px solid var(--admin-card-border, #E2E4E9);
+  border-radius: 8px;
+  background: var(--admin-card-bg, #ffffff);
+  font-family: var(--font-body, inherit);
+  font-size: 13px;
+  color: #868C98;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.quickActionBtn:hover {
+  border-color: #111111;
+  color: #111111;
+  background: var(--admin-content-bg, #F9FAFB);
+}
+
+.quickActionBtn svg {
+  color: #868C98;
+  transition: transform 0.15s ease;
+}
+
+.quickActionBtn:hover svg {
+  color: #111111;
+  transform: translateX(2px);
 }

@@ -11,6 +11,7 @@ interface ConfirmActionModalProps {
   confirmText: string;
   cancelText?: string;
   isDanger?: boolean;
+  variant?: "danger" | "primary" | "blue";
   isLoading?: boolean;
 }
 
@@ -23,29 +24,55 @@ export default function ConfirmActionModal({
   confirmText,
   cancelText = "Dismiss",
   isDanger = true,
+  variant,
   isLoading = false,
 }: ConfirmActionModalProps) {
   if (!isOpen) return null;
+
+  // Determine actual variant
+  const effectiveVariant: "danger" | "primary" | "blue" =
+    variant || (isDanger ? "danger" : "primary");
+
+  const iconColor =
+    effectiveVariant === "blue"
+      ? "#2F68FE"
+      : effectiveVariant === "danger"
+      ? "#D92D20"
+      : "#E04F16";
+
+  const iconBgClass =
+    effectiveVariant === "blue"
+      ? styles.iconWrapperBlue
+      : effectiveVariant === "danger"
+      ? styles.iconWrapperDanger
+      : styles.iconWrapper;
+
+  const confirmBtnClass =
+    effectiveVariant === "blue"
+      ? styles.blueBtn
+      : effectiveVariant === "danger"
+      ? styles.dangerBtn
+      : styles.primaryBtn;
 
   return (
     <div className={styles.overlay} onClick={onClose}>
       <div className={styles.modal} onClick={(e) => e.stopPropagation()}>
         <div className={styles.contentWrapper}>
-          <div className={styles.iconWrapper}>
-            <AlertIcon />
+          <div className={`${styles.iconWrapper} ${iconBgClass}`}>
+            <CircleExclamationIcon color={iconColor} />
           </div>
           <div className={styles.textContent}>
             <h2 className={styles.title}>{title}</h2>
             <p className={styles.message}>{message}</p>
           </div>
         </div>
-        
+
         <div className={styles.footer}>
           <button className={styles.cancelBtn} onClick={onClose} disabled={isLoading}>
             {cancelText}
           </button>
-          <button 
-            className={`${styles.confirmBtn} ${isDanger ? styles.dangerBtn : styles.primaryBtn}`} 
+          <button
+            className={`${styles.confirmBtn} ${confirmBtnClass}`}
             onClick={onConfirm}
             disabled={isLoading}
           >
@@ -57,10 +84,10 @@ export default function ConfirmActionModal({
   );
 }
 
-function AlertIcon() {
+function CircleExclamationIcon({ color }: { color: string }) {
   return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#E04F16" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 2 7.86 7.86 2" />
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <circle cx="12" cy="12" r="10" />
       <line x1="12" y1="8" x2="12" y2="12" />
       <line x1="12" y1="16" x2="12.01" y2="16" />
     </svg>
