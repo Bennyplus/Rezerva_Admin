@@ -1,71 +1,15 @@
 /* ============================================================
-   REFERRALS DASHBOARD — Scoped styles (CSS Module)
-   Matches Screenshots 1, 2, 3
+   USERS TAB CONTENT — Scoped styles
    ============================================================ */
 
-.page {
+.container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
-}
-
-/* ─── Top Stats Grid (4 Cards - Screenshots 1 & 2) ─── */
-.statsGrid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
   gap: 16px;
 }
 
-@media (max-width: 1024px) {
-  .statsGrid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
-  .statsGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-/* ─── Inactive / Empty State Card (Screenshot 1) ─── */
-.emptyCard {
-  background: #ffffff;
-  border: 1px solid #e2e4e9;
-  border-radius: 16px;
-  min-height: 480px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 40px 20px;
-  text-align: center;
-}
-
-.emptyTitle {
-  font-size: 16px;
-  font-weight: 700;
-  color: #111827;
-  margin: 0;
-}
-
-.emptySubtitle {
-  font-size: 13.5px;
-  color: #868c98;
-  margin: 0;
-}
-
-/* ─── Toolbar (Screenshot 2) ─── */
+/* ─── Toolbar ─── */
 .toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.toolbarLeft {
   display: flex;
   align-items: center;
   gap: 12px;
@@ -81,7 +25,7 @@
   border-radius: 10px;
   padding: 0 14px;
   height: 40px;
-  width: 280px;
+  width: 300px;
   transition: border-color 0.15s ease;
 }
 
@@ -115,7 +59,7 @@
   font-weight: 500;
   color: #525866;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .toolBtn:hover {
@@ -123,18 +67,11 @@
   border-color: #d1d5db;
 }
 
-/* ─── Table Card & Table (Screenshot 2) ─── */
-.tableCard {
-  background: transparent;
-  border: none;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
+/* ─── Table ─── */
 .tableWrap {
   overflow-x: auto;
   border-radius: 8px;
+  margin-top: 4px;
 }
 
 .table {
@@ -147,7 +84,7 @@
   text-align: left;
   padding: 14px 16px;
   background: #f8f9fa;
-  font-size: 12px;
+  font-size: 12.5px;
   font-weight: 500;
   color: #868c98;
   white-space: nowrap;
@@ -164,7 +101,7 @@
 }
 
 .table td {
-  padding: 16px;
+  padding: 18px 16px;
   font-size: 13.5px;
   color: #111827;
   border-bottom: 1px solid #f3f4f6;
@@ -180,50 +117,9 @@
   border-bottom: 1px solid #f3f4f6;
 }
 
-/* ─── Status Badges (Pills) ─── */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 4px 10px;
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 500;
-}
-
-.badgeDot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
-}
-
-.statusSuccessful {
-  background: #ecfdf3;
-  color: #027a48;
-}
-
-.statusSuccessful .badgeDot {
-  background: #12b76a;
-}
-
-.statusFailed {
-  background: #fef3f2;
-  color: #b42318;
-}
-
-.statusFailed .badgeDot {
-  background: #f04438;
-}
-
-/* ─── Actions & Kebab Menu (Screenshot 3) ─── */
 .actionsCol {
   width: 44px;
   text-align: right;
-}
-
-.actionsWrapper {
-  position: relative;
-  display: inline-block;
 }
 
 .moreBtn {
@@ -231,7 +127,7 @@
   border: none;
   cursor: pointer;
   color: #868c98;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 4px;
@@ -243,15 +139,20 @@
   color: #111827;
 }
 
+.kebabWrapper {
+  position: relative;
+  display: inline-block;
+}
+
 .kebabMenu {
   position: absolute;
   top: calc(100% + 4px);
   right: 0;
   background: #ffffff;
-  border-radius: 12px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-  min-width: 200px;
-  z-index: 100;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  min-width: 150px;
+  z-index: 50;
   padding: 6px 0;
   border: 1px solid #e2e4e9;
   text-align: left;
@@ -260,10 +161,10 @@
 .kebabMenuItem {
   display: block;
   width: 100%;
-  padding: 10px 16px;
+  padding: 8px 14px;
   background: transparent;
   border: none;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 500;
   color: #111827;
   cursor: pointer;

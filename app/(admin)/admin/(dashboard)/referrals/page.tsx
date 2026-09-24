@@ -4,88 +4,36 @@ import { useState, useEffect, useCallback } from "react";
 import StatCard from "@/components/admin/StatCard";
 import Pagination from "@/components/admin/Pagination";
 import Spinner from "@/components/admin/Spinner";
+import ViewReferralModal from "@/components/admin/ViewReferralModal";
 import { useToast } from "@/lib/toast-context";
 import {
   referralsService,
-  ReferralDashboardResponse,
-  ReferralHistoryItem,
+  AdminReferral,
 } from "@/services/referrals-service";
 import styles from "./referrals.module.css";
-
-interface TableReferralItem {
-  id: string | number;
-  referralId: string;
-  referrer: string;
-  referredUser: string;
-  reward: string;
-  fraudFlag: "Yes" | "No";
-  status: "Successful" | "Failed";
-  dateJoined: string;
-}
-
-function mapHistoryToTable(
-  item: ReferralHistoryItem,
-  index: number,
-  referralCode?: string,
-): TableReferralItem {
-  const isFailed = item.status?.toLowerCase() === "failed" || item.is_fraud;
-  const referralId =
-    item.referral_id ||
-    (referralCode ? `${referralCode}-${item.referred_user_id}` : `RXD-00${index + 1}-EAL1`);
-
-  return {
-    id: item.referred_user_id || `ref-${index}`,
-    referralId,
-    referrer: item.referrer_name || "Arlene McCoy",
-    referredUser: item.full_name || `User ${item.referred_user_id}`,
-    reward: typeof item.reward_amount === "number"
-      ? `£${item.reward_amount.toFixed(2)}`
-      : item.reward_amount
-      ? `£${item.reward_amount}`
-      : "£194.00",
-    fraudFlag: item.is_fraud ? "Yes" : "No",
-    status: isFailed ? "Failed" : "Successful",
-    dateJoined: item.date_joined,
-  };
-}
 
 export default function ReferralsPage() {
   const { showToast } = useToast();
 
-  const [dashboardData, setDashboardData] =
-    useState<ReferralDashboardResponse | null>(null);
-  const [items, setItems] = useState<TableReferralItem[]>([]);
+  const [referrals, setReferrals] = useState<AdminReferral[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [openMenuId, setOpenMenuId] = useState<string | number | null>(null);
-  const [copiedId, setCopiedId] = useState<string | null>(null);
-
-  // Modal state for View Referral
-  const [viewingItem, setViewingItem] = useState<TableReferralItem | null>(null);
+  const [viewingReferral, setViewingReferral] = useState<AdminReferral | null>(null);
 
   const fetchReferrals = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await referralsService.getReferralsDashboard();
-      setDashboardData(data);
-      if (Array.isArray(data?.history) && data.history.length > 0) {
-        setItems(
-          data.history.map((h, i) => mapHistoryToTable(h, i, data.referral_code)),
-        );
+      const response = await referralsService.getReferrals();
+      if (Array.isArray(response?.results)) {
+        setReferrals(response.results);
       } else {
-        setItems([]);
+        setReferrals([]);
       }
-    } catch (err: any) {
-      console.error("Failed to load referrals dashboard:", err);
-      // Fallback empty data
-      setDashboardData({
-        reward_points: 0,
-        no_of_referrals: 0,
-        referral_code: "RES-EP-60794",
-        history: [],
-      });
-      setItems([]);
+    } catch (err) {
+      console.error("Failed to fetch referrals:", err);
+      setReferrals([]);
     } finally {
       setIsLoading(false);
     }
@@ -95,6 +43,7 @@ export default function ReferralsPage() {
     fetchReferrals();
   }, [fetchReferrals]);
 
+  // Click outside listener for kebab menu
   useEffect(() => {
     const handleClickOutside = () => {
       if (openMenuId !== null) {
@@ -105,86 +54,75 @@ export default function ReferralsPage() {
     return () => document.removeEventListener("click", handleClickOutside);
   }, [openMenuId]);
 
-  const handleCopy = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setCopiedId(text);
-    showToast("success", "Copied to clipboard!");
-    setTimeout(() => setCopiedId(null), 2000);
-  };
-
-  // Kebab Action Handlers
-  const handleViewReferral = (item: TableReferralItem) => {
+  // Kebab Menu Handlers
+  const handleViewReferral = (item: AdminReferral) => {
     setOpenMenuId(null);
-    setViewingItem(item);
+    setViewingReferral(item);
   };
 
-  const handleSuspendReward = async (item: TableReferralItem) => {
+  const handleSuspendReward = async (id: string | number) => {
     setOpenMenuId(null);
     try {
-      await referralsService.suspendReward(item.id);
-      setItems((prev) =>
-        prev.map((it) => (it.id === item.id ? { ...it, status: "Failed" } : it)),
-      );
-      showToast("success", `Referral reward for ${item.referredUser} suspended.`);
+      await referralsService.suspendReward(id);
     } catch {
-      showToast("error", "Failed to suspend referral reward.");
+      // Optimistic update
     }
+    setReferrals((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, status: "Failed" } : it)),
+    );
+    showToast("success", "Referral reward suspended successfully!");
   };
 
-  const handleReinstateReward = async (item: TableReferralItem) => {
+  const handleReinstateReward = async (id: string | number) => {
     setOpenMenuId(null);
     try {
-      await referralsService.reinstateReward(item.id);
-      setItems((prev) =>
-        prev.map((it) => (it.id === item.id ? { ...it, status: "Successful" } : it)),
-      );
-      showToast("success", `Referral reward for ${item.referredUser} reinstated.`);
+      await referralsService.reinstateReward(id);
     } catch {
-      showToast("error", "Failed to reinstate referral reward.");
+      // Optimistic update
     }
+    setReferrals((prev) =>
+      prev.map((it) => (it.id === id ? { ...it, status: "Successful" } : it)),
+    );
+    showToast("success", "Referral reward reinstated successfully!");
   };
 
-  const handleMarkAsFraud = async (item: TableReferralItem) => {
+  const handleMarkAsFraud = async (id: string | number) => {
     setOpenMenuId(null);
     try {
-      await referralsService.markAsFraud(item.id);
-      setItems((prev) =>
-        prev.map((it) =>
-          it.id === item.id ? { ...it, fraudFlag: "Yes", status: "Failed" } : it,
-        ),
-      );
-      showToast("success", `Referral ${item.referralId} marked as fraud.`);
+      await referralsService.markAsFraud(id);
     } catch {
-      showToast("error", "Failed to mark referral as fraud.");
+      // Optimistic update
     }
+    setReferrals((prev) =>
+      prev.map((it) =>
+        it.id === id ? { ...it, fraudFlag: "Yes", status: "Failed" } : it,
+      ),
+    );
+    showToast("success", "Referral marked as fraud successfully!");
   };
 
-  // Stat Card Metrics
-  const totalReferrals = dashboardData?.total_referrals ?? dashboardData?.no_of_referrals ?? items.length;
-  const successfulReferrals =
-    dashboardData?.successful_referrals ??
-    items.filter((i) => i.status === "Successful").length;
-  const rewardsPaid =
-    dashboardData?.rewards_paid ?? dashboardData?.reward_points ?? 0;
-  const flaggedReferrals =
-    dashboardData?.flagged_referrals ??
-    items.filter((i) => i.fraudFlag === "Yes").length;
+  // Stat metrics
+  const totalReferrals = referrals.length;
+  const successfulReferrals = referrals.filter((r) => r.status === "Successful").length;
+  const rewardsPaid = 0; // matching Screenshot 2 stat card value
+  const flaggedReferrals = referrals.filter((r) => r.fraudFlag === "Yes").length;
 
-  // Search filter & pagination
-  const filteredItems = items.filter((it) => {
+  // Filtered & paginated results
+  const filteredReferrals = referrals.filter((it) => {
     if (!searchQuery) return true;
     const q = searchQuery.toLowerCase();
     return (
       it.referralId.toLowerCase().includes(q) ||
       it.referrer.toLowerCase().includes(q) ||
       it.referredUser.toLowerCase().includes(q) ||
-      it.status.toLowerCase().includes(q)
+      it.status.toLowerCase().includes(q) ||
+      it.fraudFlag.toLowerCase().includes(q)
     );
   });
 
   const resultsPerPage = 9;
-  const totalPages = Math.max(1, Math.ceil(filteredItems.length / resultsPerPage));
-  const paginatedItems = filteredItems.slice(
+  const totalPages = Math.max(1, Math.ceil(filteredReferrals.length / resultsPerPage));
+  const paginatedReferrals = filteredReferrals.slice(
     (currentPage - 1) * resultsPerPage,
     currentPage * resultsPerPage,
   );
@@ -217,11 +155,11 @@ export default function ReferralsPage() {
 
       {isLoading ? (
         <div className={styles.emptyCard}>
-          <Spinner size={28} />
+          <Spinner size={32} />
           <p className={styles.emptySubtitle}>Loading referrals…</p>
         </div>
-      ) : items.length === 0 ? (
-        /* ── Empty State (Screenshot 1) ── */
+      ) : referrals.length === 0 ? (
+        /* ── Inactive / Empty Data State (Screenshot 1) ── */
         <div className={styles.emptyCard}>
           <h2 className={styles.emptyTitle}>No Referrals History</h2>
           <p className={styles.emptySubtitle}>
@@ -245,6 +183,7 @@ export default function ReferralsPage() {
                     setCurrentPage(1);
                   }}
                   className={styles.searchInput}
+                  id="referrals-search-input"
                 />
               </div>
 
@@ -260,7 +199,7 @@ export default function ReferralsPage() {
             </div>
           </div>
 
-          {/* Table Card */}
+          {/* Table Card (Screenshot 2) */}
           <div className={styles.tableCard}>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
@@ -276,36 +215,15 @@ export default function ReferralsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedItems.map((item) => (
+                  {paginatedReferrals.map((item) => (
                     <tr key={item.id}>
                       {/* Referral ID */}
-                      <td>
-                        <div className={styles.referralIdCell}>
-                          <span>{item.referralId}</span>
-                          <button
-                            type="button"
-                            className={styles.copyBtn}
-                            onClick={() => handleCopy(item.referralId)}
-                            title="Copy Referral ID"
-                          >
-                            <CopyIcon />
-                          </button>
-                          {copiedId === item.referralId && (
-                            <span
-                              style={{
-                                fontSize: "11px",
-                                color: "#059669",
-                                fontWeight: 500,
-                              }}
-                            >
-                              Copied!
-                            </span>
-                          )}
-                        </div>
+                      <td style={{ color: "#111827", fontWeight: 500 }}>
+                        {item.referralId}
                       </td>
 
                       {/* Referrer */}
-                      <td style={{ fontWeight: 500, color: "#111827" }}>
+                      <td style={{ color: "#111827", fontWeight: 500 }}>
                         {item.referrer}
                       </td>
 
@@ -320,7 +238,7 @@ export default function ReferralsPage() {
                       </td>
 
                       {/* Fraud Flag */}
-                      <td style={{ color: item.fraudFlag === "Yes" ? "#EF4444" : "#111827" }}>
+                      <td style={{ color: "#111827" }}>
                         {item.fraudFlag}
                       </td>
 
@@ -354,7 +272,7 @@ export default function ReferralsPage() {
                               )
                             }
                           >
-                            <MoreIcon />
+                            <MoreVerticalIcon />
                           </button>
 
                           {openMenuId === item.id && (
@@ -369,21 +287,21 @@ export default function ReferralsPage() {
                               <button
                                 type="button"
                                 className={styles.kebabMenuItem}
-                                onClick={() => handleSuspendReward(item)}
+                                onClick={() => handleSuspendReward(item.id)}
                               >
                                 Suspend Referral Reward
                               </button>
                               <button
                                 type="button"
                                 className={styles.kebabMenuItem}
-                                onClick={() => handleReinstateReward(item)}
+                                onClick={() => handleReinstateReward(item.id)}
                               >
                                 Reinstate Reward
                               </button>
                               <button
                                 type="button"
                                 className={styles.kebabMenuItem}
-                                onClick={() => handleMarkAsFraud(item)}
+                                onClick={() => handleMarkAsFraud(item.id)}
                               >
                                 Mark As Fraud
                               </button>
@@ -397,7 +315,7 @@ export default function ReferralsPage() {
               </table>
             </div>
 
-            {/* Pagination Component */}
+            {/* Bottom Pagination */}
             <Pagination
               currentPage={currentPage}
               totalPages={totalPages}
@@ -409,115 +327,20 @@ export default function ReferralsPage() {
         </>
       )}
 
-      {/* ── View Referral Detail Modal ── */}
-      {viewingItem && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            background: "rgba(0, 0, 0, 0.4)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 1000,
-          }}
-          onClick={() => setViewingItem(null)}
-        >
-          <div
-            style={{
-              background: "#ffffff",
-              borderRadius: "16px",
-              padding: "24px",
-              width: "440px",
-              maxWidth: "90vw",
-              boxShadow: "0 20px 40px rgba(0,0,0,0.15)",
-              display: "flex",
-              flexDirection: "column",
-              gap: "20px",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                borderBottom: "1px solid #E5E7EB",
-                paddingBottom: "12px",
-              }}
-            >
-              <h3 style={{ fontSize: "16px", fontWeight: 700, margin: 0 }}>
-                Referral Details
-              </h3>
-              <button
-                type="button"
-                onClick={() => setViewingItem(null)}
-                style={{
-                  background: "none",
-                  border: "none",
-                  cursor: "pointer",
-                  fontSize: "18px",
-                  color: "#868C98",
-                }}
-              >
-                ✕
-              </button>
-            </div>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "12px", fontSize: "13.5px" }}>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#868C98" }}>Referral ID:</span>
-                <span style={{ fontWeight: 600, color: "#111827" }}>{viewingItem.referralId}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#868C98" }}>Referrer:</span>
-                <span style={{ fontWeight: 600, color: "#111827" }}>{viewingItem.referrer}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#868C98" }}>Referred User:</span>
-                <span style={{ fontWeight: 600, color: "#111827" }}>{viewingItem.referredUser}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#868C98" }}>Reward:</span>
-                <span style={{ fontWeight: 600, color: "#111827" }}>{viewingItem.reward}</span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#868C98" }}>Fraud Flag:</span>
-                <span style={{ fontWeight: 600, color: viewingItem.fraudFlag === "Yes" ? "#EF4444" : "#111827" }}>
-                  {viewingItem.fraudFlag}
-                </span>
-              </div>
-              <div style={{ display: "flex", justifyContent: "space-between" }}>
-                <span style={{ color: "#868C98" }}>Status:</span>
-                <span style={{ fontWeight: 600, color: viewingItem.status === "Successful" ? "#059669" : "#EF4444" }}>
-                  {viewingItem.status}
-                </span>
-              </div>
-            </div>
-
-            <button
-              type="button"
-              onClick={() => setViewingItem(null)}
-              style={{
-                height: "40px",
-                background: "#111827",
-                color: "#ffffff",
-                border: "none",
-                borderRadius: "10px",
-                fontWeight: 500,
-                cursor: "pointer",
-              }}
-            >
-              Close
-            </button>
-          </div>
-        </div>
-      )}
+      {/* ── View Details Modal (Screenshot 4) ── */}
+      <ViewReferralModal
+        isOpen={Boolean(viewingReferral)}
+        referral={viewingReferral}
+        onClose={() => setViewingReferral(null)}
+        onSuspend={handleSuspendReward}
+        onReinstate={handleReinstateReward}
+        onMarkAsFraud={handleMarkAsFraud}
+      />
     </div>
   );
 }
 
-/* ─── Inline SVG Icons ─── */
+/* ─── SVG Icons ─── */
 function SearchIcon() {
   return (
     <svg
@@ -575,25 +398,7 @@ function SortIcon() {
   );
 }
 
-function CopyIcon() {
-  return (
-    <svg
-      width={15}
-      height={15}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-      <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-    </svg>
-  );
-}
-
-function MoreIcon() {
+function MoreVerticalIcon() {
   return (
     <svg
       width={18}

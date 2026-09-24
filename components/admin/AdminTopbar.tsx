@@ -17,7 +17,7 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
   },
   "/admin/analytics": {
     title: "Analytics",
-    subtitle: "Monitor platform growth, bookings, and revenue trends",
+    subtitle: "Track Key Metrics & User Insights",
   },
   "/admin/audit-logs": {
     title: "Audit Logs",
@@ -62,8 +62,9 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
       "View, manage, and monitor passenger accounts, activity, and trip history",
   },
   "/admin/reviews": {
-    title: "Reviews",
-    subtitle: "Manage customer feedback and moderate reported content",
+    title: "Reviews & Ratings",
+    subtitle:
+      "Monitor reviews, ratings, and user feedback to maintain a trusted community.",
   },
   "/admin/payments": {
     title: "Payments",

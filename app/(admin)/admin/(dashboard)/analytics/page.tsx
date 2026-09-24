@@ -1,447 +1,238 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import dynamic from "next/dynamic";
-import Image from "next/image";
-import { REPORTS_DATA } from "@/data/admin-analytics";
-import Spinner from "@/components/admin/Spinner";
-import { analyticsService } from "@/services/analytics-services";
+import { useState, useEffect, useCallback } from "react";
 import StatCard from "@/components/admin/StatCard";
-import { useCurrencyFormatter } from "@/hooks/useCurrencyFormatter";
+import AnalyticsTabs, {
+  AnalyticsTabType,
+} from "@/components/admin/analytics/AnalyticsTabs";
+import AnalyticsEmptyState from "@/components/admin/analytics/AnalyticsEmptyState";
+import OverviewTabContent from "@/components/admin/analytics/OverviewTabContent";
+import UsersTabContent from "@/components/admin/analytics/UsersTabContent";
+import TripsTabContent from "@/components/admin/analytics/TripsTabContent";
+import DriversTabContent from "@/components/admin/analytics/DriversTabContent";
+import PassengersTabContent from "@/components/admin/analytics/PassengersTabContent";
+import {
+  analyticsService,
+  OverviewSummaryResponse,
+  RevenueTrendResponse,
+  PayoutsResponse,
+} from "@/services/analytics-services";
 import styles from "./analytics.module.css";
 
-// Dynamically import ApexCharts to avoid SSR issues
-const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
-
 export default function AnalyticsPage() {
-  const formatCurrency = useCurrencyFormatter();
-  const [showEmptyState, setShowEmptyState] = useState(false);
-  const [bookingsTimeframe, setBookingsTimeframe] = useState<"Weekly" | "Monthly">("Weekly");
-  const [analyticsData, setAnalyticsData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [showExportMenu, setShowExportMenu] = useState(false);
+  const [activeTab, setActiveTab] = useState<AnalyticsTabType>("Overview");
+  const [selectedTimeframe, setSelectedTimeframe] = useState("Today");
+  const [hasData, setHasData] = useState(true);
 
-  useEffect(() => {
-    console.log("Analytics page mounted, fetching data...");
-    fetchAnalyticsData();
+  // Endpoint data states
+  const [overviewSummary, setOverviewSummary] =
+    useState<OverviewSummaryResponse | null>(null);
+  const [revenueTrend, setRevenueTrend] =
+    useState<RevenueTrendResponse | null>(null);
+  const [payoutsData, setPayoutsData] =
+    useState<PayoutsResponse | null>(null);
+
+  const fetchAnalyticsData = useCallback(async () => {
+    try {
+      const [summaryRes, trendRes, payoutsRes] = await Promise.allSettled([
+        analyticsService.getOverviewSummary("this_year"),
+        analyticsService.getRevenueTrend("this_month"),
+        analyticsService.getPayouts("this_month"),
+      ]);
+
+      if (summaryRes.status === "fulfilled" && summaryRes.value) {
+        setOverviewSummary(summaryRes.value);
+      }
+      if (trendRes.status === "fulfilled" && trendRes.value) {
+        setRevenueTrend(trendRes.value);
+      }
+      if (payoutsRes.status === "fulfilled" && payoutsRes.value) {
+        setPayoutsData(payoutsRes.value);
+      }
+    } catch (err) {
+      console.error("Failed to load analytics endpoints:", err);
+    }
   }, []);
 
-  const fetchAnalyticsData = async () => {
-    try {
-      console.log("Starting fetchAnalyticsData...");
-      setLoading(true);
-      setError(null);
-      console.log("Calling analyticsService.fetchDashboardAnalytics()...");
-      const data = await analyticsService.fetchDashboardAnalytics();
-      console.log("Analytics data received:", data);
-      setAnalyticsData(data);
-    } catch (err) {
-      console.error("Error fetching analytics:", err);
-      const errorMsg = err instanceof Error ? err.message : "Failed to load analytics data";
-      setError(errorMsg);
-    } finally {
-      setLoading(false);
-    }
+  useEffect(() => {
+    fetchAnalyticsData();
+  }, [fetchAnalyticsData]);
+
+  const handleExport = () => {
+    console.log(`Exporting analytics data for ${activeTab}...`);
   };
 
-  const handleExportReport = async (reportType: string, format: string = "pdf") => {
-    try {
-      const blob = await analyticsService.exportReportanalytics(format) as Blob;
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `${reportType}-report-${new Date().toISOString().split("T")[0]}.${format}`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (err) {
-      console.error("Error exporting report:", err);
-      setError("Failed to export report");
-    }
-  };
-
-  const commonOptions = {
-    chart: {
-      toolbar: { show: false },
-      zoom: { enabled: false },
-      fontFamily: "inherit",
-    },
-    dataLabels: { enabled: false },
-    grid: {
-      borderColor: "#e2e4e9",
-      strokeDashArray: 3,
-      xaxis: { lines: { show: false } },
-      yaxis: { lines: { show: true } },
-    },
-    legend: { show: false },
-  };
-
-  const bookingsChartOptions = {
-    ...commonOptions,
-    stroke: { curve: "smooth" as const, width: 2, dashArray: 4 },
-    colors: ["#9ea5ad"],
-    markers: {
-      size: 4,
-      colors: ["#fff"],
-      strokeColors: "#9ea5ad",
-      strokeWidth: 2,
-    },
-    xaxis: {
-      categories: analyticsData?.bookings_over_time?.map((item: any) => item.label) || [],
-      labels: { style: { colors: "#6f767e", fontSize: "12px" } },
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-    },
-    yaxis: {
-      min: 0,
-      max: 60,
-      tickAmount: 6,
-      labels: { style: { colors: "#6f767e", fontSize: "12px" } },
-    },
-  };
-
-  const revenueChartOptions = {
-    ...commonOptions,
-    chart: { ...commonOptions.chart, type: "bar" as const },
-    plotOptions: {
-      bar: {
-        columnWidth: "12%",
-        borderRadius: 4,
-      }
-    },
-    colors: ["#1a1d1f"],
-    xaxis: {
-      categories: analyticsData?.revenue_performance?.map((item: any) => item.label) || [],
-      labels: { style: { colors: "#6f767e", fontSize: "12px" } },
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-    },
-    yaxis: {
-      min: 0,
-      max: analyticsData?.revenue_performance
-        ? Math.ceil(Math.max(...analyticsData.revenue_performance.map((item: any) => Number(item.value)), 1) * 1.25)
-        : 100000,
-      tickAmount: 5,
-      labels: {
-        style: { colors: "#6f767e", fontSize: "12px" },
-        formatter: (val: number) => formatCurrency(val, { compact: true }),
-      },
-    },
-  };
-
-  const userGrowthChartOptions = {
-    ...commonOptions,
-    stroke: { curve: "smooth" as const, width: 2 },
-    colors: ["#d94625", "#4a6ee0"], // orange-red and blue
-    xaxis: {
-      categories: analyticsData?.user_growth?.map((item: any) => item.label) || [],
-      labels: { style: { colors: "#6f767e", fontSize: "12px" } },
-      axisBorder: { show: false },
-      axisTicks: { show: false },
-    },
-    yaxis: {
-      min: 0,
-      tickAmount: 5,
-      labels: { style: { colors: "#6f767e", fontSize: "12px" } },
-    },
-  };
-  if (loading) {
-    return (
-      <div style={{ display: 'flex', height: '100%', width: '100%', minHeight: '60vh', alignItems: 'center', justifyContent: 'center' }}>
-        <Spinner size={40} />
-      </div>
-    );
-  }
+  // Overview stat values from endpoint
+  const activeUsersVal = overviewSummary?.active_users?.value ?? 0;
+  const platformRevenueVal = overviewSummary?.platform_revenue?.value
+    ? `$${overviewSummary.platform_revenue.value}`
+    : 0;
+  const completedTripsVal = overviewSummary?.completed_trips?.value ?? 0;
+  const totalBookingsVal = overviewSummary?.total_bookings?.value ?? 0;
 
   return (
     <div className={styles.page}>
-      {/* Header */}
-      <div className={styles.header}>
-        <div className={styles.headerLeft}>
-        </div>
-        <div className={styles.headerRight}>
-          {/* <button
-            className={styles.toggleBtn}
-            onClick={() => setShowEmptyState(!showEmptyState)}
-          >
-            Toggle Empty State
-          </button> */}
-          {!showEmptyState && (
-            <>
-              <button className={styles.todaySelect}>
-                Today <ChevronDownIcon />
-              </button>
-              <div style={{ position: "relative" }}>
-                <button
-                  className={styles.exportBtn}
-                  onClick={() => setShowExportMenu(!showExportMenu)}
-                >
-                  Export <ChevronDownIcon />
-                </button>
-                {showExportMenu && (
-                  <div style={{ position: "absolute", top: "100%", right: 0, marginTop: "8px", backgroundColor: "#fff", border: "1px solid #e2e4e9", borderRadius: "8px", boxShadow: "0 4px 12px rgba(0,0,0,0.1)", zIndex: 10, display: "flex", flexDirection: "column", padding: "4px", minWidth: "140px" }}>
-                    <button
-                      onClick={() => { handleExportReport("analytics", "pdf"); setShowExportMenu(false); }}
-                      style={{ padding: "8px 12px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRadius: "4px", fontSize: "14px", color: "#1a1d1f", width: "100%" }}
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#f4f5f6"}
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      Export as PDF
-                    </button>
-                    <button
-                      onClick={() => { handleExportReport("analytics", "csv"); setShowExportMenu(false); }}
-                      style={{ padding: "8px 12px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRadius: "4px", fontSize: "14px", color: "#1a1d1f", width: "100%" }}
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#f4f5f6"}
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      Export as CSV
-                    </button>
-                    <button
-                      onClick={() => { handleExportReport("analytics", "xlsx"); setShowExportMenu(false); }}
-                      style={{ padding: "8px 12px", textAlign: "left", background: "none", border: "none", cursor: "pointer", borderRadius: "4px", fontSize: "14px", color: "#1a1d1f", width: "100%" }}
-                      onMouseOver={(e) => e.currentTarget.style.backgroundColor = "#f4f5f6"}
-                      onMouseOut={(e) => e.currentTarget.style.backgroundColor = "transparent"}
-                    >
-                      Export as XLSX
-                    </button>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </div>
+      {/* ── Tabs Navigation & Right Toolbar ── */}
+      <AnalyticsTabs
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        showToolbar={activeTab === "Overview" && hasData}
+        selectedTimeframe={selectedTimeframe}
+        onTimeframeChange={setSelectedTimeframe}
+        onExport={handleExport}
+      />
+
+      {/* ── Top Stats Grid (4 Cards - Contextual to active tab) ── */}
+      <div className={styles.statsGrid}>
+        {activeTab === "Drivers" ? (
+          <>
+            <StatCard
+              label="Active Drivers"
+              value={0}
+              id="stat-active-drivers"
+            />
+            <StatCard
+              label="Average Rating"
+              value={0}
+              id="stat-average-rating"
+            />
+            <StatCard
+              label="Acceptance Rate"
+              value={0}
+              id="stat-acceptance-rate"
+            />
+            <StatCard
+              label="Cancellation Rate"
+              value={0}
+              id="stat-cancellation-rate"
+            />
+          </>
+        ) : activeTab === "Passengers" ? (
+          <>
+            <StatCard
+              label="Active Passengers"
+              value={0}
+              id="stat-active-passengers"
+            />
+            <StatCard
+              label="Average Trips Per Passenger"
+              value={0}
+              id="stat-avg-trips-passenger"
+            />
+            <StatCard
+              label="Repeat Rate"
+              value={0}
+              id="stat-repeat-rate"
+            />
+            <StatCard
+              label="Cancellation Rate"
+              value={0}
+              id="stat-cancellation-rate"
+            />
+          </>
+        ) : activeTab === "Trips" ? (
+          <>
+            <StatCard
+              label="Total Trips"
+              value={0}
+              id="stat-total-trips"
+            />
+            <StatCard
+              label="Average Occupancy"
+              value={0}
+              id="stat-average-occupancy"
+            />
+            <StatCard
+              label="Average Distance"
+              value={0}
+              id="stat-average-distance"
+            />
+            <StatCard
+              label="Completion Rate"
+              value={0}
+              id="stat-completion-rate"
+            />
+          </>
+        ) : activeTab === "Users" ? (
+          <>
+            <StatCard
+              label="Active Users"
+              value={0}
+              id="stat-active-users"
+            />
+            <StatCard
+              label="Total Users"
+              value={0}
+              growth="+18% growth"
+              isPositive={true}
+              id="stat-total-users"
+            />
+            <StatCard
+              label="New Users"
+              value={0}
+              id="stat-new-users"
+            />
+            <StatCard
+              label="Retention Rate"
+              value={0}
+              id="stat-retention-rate"
+            />
+          </>
+        ) : (
+          <>
+            <StatCard
+              label="Active Users"
+              value={activeUsersVal}
+              id="stat-active-users"
+            />
+            <StatCard
+              label="Platform Revenue"
+              value={platformRevenueVal}
+              id="stat-platform-revenue"
+            />
+            <StatCard
+              label="Completed Trips"
+              value={completedTripsVal}
+              id="stat-completed-trips"
+            />
+            <StatCard
+              label="Total Bookings"
+              value={totalBookingsVal}
+              id="stat-total-bookings"
+            />
+          </>
+        )}
       </div>
 
-      {showEmptyState ? (
-        /* ─── Empty State ─── */
-        <div className={styles.emptyCard}>
-          <div className={styles.illustration} aria-hidden="true">
-            <Image
-              src="/images/admin/Items.png"
-              alt="No analytics illustration"
-              width={460}
-              height={380}
-              className={styles.illustrationImg}
-            />
-          </div>
-          <h2 className={styles.emptyTitle}>No analytics data available</h2>
-          <p className={styles.emptySubtitle}>Platform activity and reports will appear here</p>
-        </div>
-      ) : error ? (
-        /* ─── Error State ─── */
-        <div className={styles.emptyCard}>
-          <p className={styles.emptySubtitle}>{error}</p>
-          <button
-            className={styles.exportBtn}
-            onClick={fetchAnalyticsData}
-            style={{ marginTop: "16px" }}
-          >
-            Retry
-          </button>
-        </div>
+      {/* ── Tab Content ── */}
+      {!hasData ? (
+        /* Inactive Data State (Screenshot 1) */
+        <AnalyticsEmptyState />
+      ) : activeTab === "Overview" ? (
+        /* Overview 2x2 Vertical Grid Graphs */
+        <OverviewTabContent
+          revenueTrendData={revenueTrend}
+          payoutsData={payoutsData}
+        />
+      ) : activeTab === "Users" ? (
+        /* Users Tab Screen Flow */
+        <UsersTabContent />
+      ) : activeTab === "Trips" ? (
+        /* Trips Tab Screen Flow */
+        <TripsTabContent />
+      ) : activeTab === "Drivers" ? (
+        /* Drivers Tab Screen Flow */
+        <DriversTabContent />
+      ) : activeTab === "Passengers" ? (
+        /* Passengers Tab Screen Flow */
+        <PassengersTabContent />
       ) : (
-        /* ─── Populated State ─── */
-        <>
-          {/* Stats Grid */}
-          <div className={styles.statsGrid}>
-            {analyticsData && (
-              <>
-                <StatCard
-                  label="Total Bookings"
-                  value={analyticsData.total_bookings?.toString() || "0"}
-                  id="stat-total-bookings"
-                  isPositive={true}
-                />
-                <StatCard
-                  label="Revenue"
-                  value={formatCurrency(Number(analyticsData.revenue || 0))}
-                  id="stat-revenue"
-                  isPositive={true}
-                />
-                <StatCard
-                  label="Completed Trips"
-                  value={analyticsData.completed_trips?.toString() || "0"}
-                  id="stat-completed-trips"
-                  isPositive={true}
-                />
-                <StatCard
-                  label="Active Users"
-                  value={analyticsData.active_users?.toString() || "0"}
-                  id="stat-active-users"
-                  isPositive={true}
-                />
-              </>
-            )}
-          </div>
-
-          {/* Top Charts */}
-          <div className={styles.chartsGrid}>
-            {/* Bookings Line Chart */}
-            <div className={styles.chartCard}>
-              <div className={styles.chartHeader}>
-                <span className={styles.chartTitle}>Bookings Over Time</span>
-                <div className={styles.chartControls}>
-                  <button
-                    className={`${styles.chartToggle} ${bookingsTimeframe === "Weekly" ? styles.active : ""}`}
-                    onClick={() => setBookingsTimeframe("Weekly")}
-                  >
-                    Weekly
-                  </button>
-                  <button
-                    className={`${styles.chartToggle} ${bookingsTimeframe === "Monthly" ? styles.active : ""}`}
-                    onClick={() => setBookingsTimeframe("Monthly")}
-                  >
-                    Monthly
-                  </button>
-                </div>
-              </div>
-              <div style={{ height: 280 }}>
-                <ReactApexChart
-                  options={bookingsChartOptions}
-                  series={[{
-                    name: "Bookings",
-                    data: analyticsData?.bookings_over_time?.map((item: any) => item.value) || []
-                  }]}
-                  type="line"
-                  height="100%"
-                />
-              </div>
-            </div>
-
-            {/* Revenue Bar Chart */}
-            <div className={styles.chartCard}>
-              <div className={styles.chartHeader}>
-                <span className={styles.chartTitle}>Revenue Performance</span>
-                <button className={styles.chartSelect}>
-                  By Week <ChevronDownIcon />
-                </button>
-              </div>
-              <div style={{ height: 280 }}>
-                <ReactApexChart
-                  options={revenueChartOptions}
-                  series={[{
-                    name: "Revenue",
-                    data: analyticsData?.revenue_performance?.map((item: any) => Number(item.value)) || []
-                  }]}
-                  type="bar"
-                  height="100%"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Bottom Charts */}
-          <div className={styles.chartsGrid}>
-            {/* User Growth */}
-            <div className={styles.chartCard}>
-              <div className={styles.chartHeader}>
-                <span className={styles.chartTitle}>User Growth</span>
-                <div className={styles.legend}>
-                  <div className={styles.legendItem}>
-                    <span className={`${styles.legendDot} ${styles.new}`}></span>
-                    New Users
-                  </div>
-                  <div className={styles.legendItem}>
-                    <span className={`${styles.legendDot} ${styles.returning}`}></span>
-                    Returning Users
-                  </div>
-                </div>
-              </div>
-              <div style={{ height: 280 }}>
-                <ReactApexChart
-                  options={userGrowthChartOptions}
-                  series={[
-                    {
-                      name: "New Users",
-                      data: analyticsData?.user_growth?.map((item: any) => item.new_users) || []
-                    },
-                    {
-                      name: "Returning Users",
-                      data: analyticsData?.user_growth?.map((item: any) => item.returning_users) || []
-                    }
-                  ]}
-                  type="line"
-                  height="100%"
-                />
-              </div>
-            </div>
-
-            {/* Bookings By Location */}
-            <div className={styles.chartCard}>
-              <div className={styles.chartHeader}>
-                <span className={styles.chartTitle}>Bookings By Location</span>
-              </div>
-              <div className={styles.locationList}>
-                {analyticsData?.bookings_by_location && analyticsData.bookings_by_location.length > 0 ? (
-                  analyticsData.bookings_by_location.map((loc: any, idx: number) => {
-                    const maxCount = Math.max(...analyticsData.bookings_by_location.map((l: any) => l.count));
-                    const percentage = (loc.count / maxCount) * 100;
-                    const colors = ["#FFE8CC", "#F4F5F6", "#FFE2E5", "#D1FADF", "#E0EAFF"];
-                    return (
-                      <div key={idx} className={styles.locationItem}>
-                        <span style={{ width: 60, fontSize: "13px", color: "#1a1d1f" }}>{loc.location}</span>
-                        <div className={styles.locationBarWrap}>
-                          <div
-                            className={styles.locationBar}
-                            style={{ width: `${percentage}%`, backgroundColor: colors[idx % colors.length] }}
-                          ></div>
-                        </div>
-                        <span className={styles.locationCount}>{loc.count}</span>
-                      </div>
-                    );
-                  })
-                ) : (
-                  <p style={{ color: "#6f767e", fontSize: "13px", margin: "12px 0" }}>No location data available</p>
-                )}
-              </div>
-            </div>
-          </div>
-
-          {/* Reports Section */}
-          {/* <div className={styles.reportsSection}>
-            <div className={styles.reportsHeader}>
-              <h2 className={styles.reportsTitle}>Reports</h2>
-              <p className={styles.reportsSubtitle}>Generate detailed reports and export data</p>
-            </div>
-            <div className={styles.reportsGrid}>
-              {REPORTS_DATA.map((report) => (
-                <div key={report.id} className={styles.reportCard}>
-                  <div className={`${styles.reportIcon} ${report.type.toLowerCase() === 'pdf' ? styles.pdf : ''}`}>
-                    {report.type}
-                  </div>
-                  <div className={styles.reportInfo}>
-                    <div className={styles.reportName}>{report.title}</div>
-                    <div className={styles.reportDesc}>{report.description}</div>
-                  </div>
-                  <button
-                    className={styles.reportDownloadBtn}
-                    onClick={() => handleExportReport(report.id.replace('-report', ''))}
-                  >
-                    <DownloadIcon />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div> */}
-        </>
+        /* Other tabs empty state placeholder until designs are attached */
+        <AnalyticsEmptyState
+          title={`No ${activeTab} Data`}
+          subtitle={`No ${activeTab.toLowerCase()} data is available for now`}
+        />
       )}
     </div>
-  );
-}
-
-// Icons
-function ChevronDownIcon() {
-  return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9" /></svg>;
-}
-
-function DownloadIcon() {
-  return (
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-      <polyline points="7 10 12 15 17 10" />
-      <line x1="12" y1="15" x2="12" y2="3" />
-    </svg>
   );
 }
