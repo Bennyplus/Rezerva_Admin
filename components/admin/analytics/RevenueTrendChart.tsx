@@ -7,8 +7,8 @@ interface RevenueTrendChartProps {
   trendData?: RevenueTrendResponse | null;
 }
 
-const DEFAULT_Y_TICKS = ["$60", "$50", "$40", "$30", "$20", "$10", "0"];
-const DEFAULT_X_DAYS = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
+const ZERO_Y_TICKS = ["$0", "$0", "$0", "$0", "$0", "$0", "$0"];
+const ZERO_X_DAYS = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"];
 
 export default function RevenueTrendChart({ trendData }: RevenueTrendChartProps) {
   const width = 500;
@@ -17,33 +17,54 @@ export default function RevenueTrendChart({ trendData }: RevenueTrendChartProps)
   const points = trendData?.points || [];
   const hasDynamicPoints = points.length > 0;
 
-  // Calculate dynamic scale and points if available
-  let pathD = `M 0,140 C 30,135 60,115 100,110 C 140,100 170,90 200,98 C 230,105 260,75 300,70 C 340,65 370,75 400,60 C 430,45 460,45 500,55`;
-  let areaD = `${pathD} L 500,${height} L 0,${height} Z`;
-  let yTicks = DEFAULT_Y_TICKS;
-  let xLabels = DEFAULT_X_DAYS;
-  let tooltip = { show: true, text: "$42", leftPercent: 38, topPx: 70 };
+  // Zero flat baseline when backend doesn't render data
+  let pathD = `M 0,${height - 10} L ${width},${height - 10}`;
+  let areaD = `M 0,${height - 10} L ${width},${height - 10} L ${width},${height} L 0,${height} Z`;
+  let yTicks = ZERO_Y_TICKS;
+  let xLabels = ZERO_X_DAYS;
+  let tooltip = { show: false, text: "$0", leftPercent: 0, topPx: 0 };
 
   if (hasDynamicPoints) {
-    const maxVal = Math.max(...points.map((p) => p.value), 20);
-    const maxY = Math.ceil(maxVal * 1.25);
+    const maxVal = Math.max(...points.map((p) => p.value), 0);
+    const maxY = maxVal > 0 ? Math.ceil(maxVal * 1.25) : 10;
 
     // Build SVG coordinates
     const coords = points.map((p, i) => {
       const x = (i / Math.max(1, points.length - 1)) * width;
-      const y = height - (p.value / maxY) * (height - 20) - 10;
+      const y =
+        maxVal > 0
+          ? height - (p.value / maxY) * (height - 20) - 10
+          : height - 10;
       return { x, y, value: p.value, label: p.label };
     });
 
     pathD = coords.reduce(
-      (acc, curr, i) => (i === 0 ? `M ${curr.x},${curr.y}` : `${acc} L ${curr.x},${curr.y}`),
+      (acc, curr, i) =>
+        i === 0 ? `M ${curr.x},${curr.y}` : `${acc} L ${curr.x},${curr.y}`,
       "",
     );
     areaD = `${pathD} L ${width},${height} L 0,${height} Z`;
 
-    // Dynamic Y ticks (6 intervals)
-    const step = maxY / 6;
-    yTicks = [6, 5, 4, 3, 2, 1, 0].map((multiplier) => `$${Math.round(multiplier * step)}`);
+    if (maxVal > 0) {
+      const step = maxY / 6;
+      yTicks = [6, 5, 4, 3, 2, 1, 0].map(
+        (multiplier) => `$${Math.round(multiplier * step)}`,
+      );
+
+      // Peak tooltip
+      const peakPoint = coords.reduce(
+        (max, c) => (c.value > max.value ? c : max),
+        coords[0],
+      );
+      if (peakPoint && peakPoint.value > 0) {
+        tooltip = {
+          show: true,
+          text: `$${peakPoint.value}`,
+          leftPercent: (peakPoint.x / width) * 100,
+          topPx: Math.max(20, peakPoint.y - 12),
+        };
+      }
+    }
 
     // Dynamic X labels (pick ~7 evenly spaced labels)
     const stepSize = Math.max(1, Math.floor(points.length / 7));
@@ -51,17 +72,6 @@ export default function RevenueTrendChart({ trendData }: RevenueTrendChartProps)
       .filter((_, idx) => idx % stepSize === 0 || idx === points.length - 1)
       .slice(0, 7)
       .map((p) => p.label);
-
-    // Peak tooltip
-    const peakPoint = coords.reduce((max, c) => (c.value > max.value ? c : max), coords[0]);
-    if (peakPoint) {
-      tooltip = {
-        show: true,
-        text: `$${peakPoint.value}`,
-        leftPercent: (peakPoint.x / width) * 100,
-        topPx: Math.max(20, peakPoint.y - 12),
-      };
-    }
   }
 
   return (
@@ -124,7 +134,6 @@ export default function RevenueTrendChart({ trendData }: RevenueTrendChartProps)
                 stroke="#2F68FE"
                 strokeWidth="2.5"
                 strokeLinecap="round"
-                strokeLinejoin="round"
               />
             </svg>
 

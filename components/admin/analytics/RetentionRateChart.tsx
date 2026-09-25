@@ -1,22 +1,51 @@
 "use client";
 
+import { RetentionResponse } from "@/services/analytics-services";
 import styles from "./AnalyticsCharts.module.css";
 
-const MONTHS = [
+interface RetentionRateChartProps {
+  retentionData?: RetentionResponse | null;
+}
+
+const DEFAULT_MONTHS = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
 
-const COHORTS = [
-  { label: "10%", bg: "#D4E4FC", color: "#2F68FE" },
-  { label: "30%", bg: "#9BBDFB", color: "#ffffff" },
-  { label: "52%", bg: "#699BFA", color: "#ffffff" },
-  { label: "65%", bg: "#3D7CF9", color: "#ffffff" },
-  { label: "80%", bg: "#2263F6", color: "#ffffff" },
-  { label: "100%", bg: "#164ECF", color: "#ffffff" },
-];
+const DEFAULT_PERIODS = ["Wk 5", "Wk 4", "Wk 3", "Wk 2", "Wk 1", "Wk 0"];
 
-export default function RetentionRateChart() {
+function getCohortStyle(val: number | null) {
+  if (val === null) {
+    return { bg: "#F9FAFB", color: "transparent", label: "" };
+  }
+  if (val === 0) {
+    return { bg: "#F3F4F6", color: "#9CA3AF", label: "0%" };
+  }
+  if (val <= 25) {
+    return { bg: "#D4E4FC", color: "#2F68FE", label: `${val}%` };
+  }
+  if (val <= 50) {
+    return { bg: "#9BBDFB", color: "#ffffff", label: `${val}%` };
+  }
+  if (val <= 75) {
+    return { bg: "#699BFA", color: "#ffffff", label: `${val}%` };
+  }
+  if (val < 100) {
+    return { bg: "#3D7CF9", color: "#ffffff", label: `${val}%` };
+  }
+  return { bg: "#164ECF", color: "#ffffff", label: `${val}%` };
+}
+
+export default function RetentionRateChart({
+  retentionData,
+}: RetentionRateChartProps) {
+  const cohorts = retentionData?.cohorts || [];
+  const hasCohorts = cohorts.length > 0;
+
+  const yLabels = retentionData?.period_labels?.length
+    ? [...retentionData.period_labels].reverse()
+    : DEFAULT_PERIODS;
+
   return (
     <div className={styles.card}>
       <div className={styles.header}>
@@ -27,7 +56,7 @@ export default function RetentionRateChart() {
       </div>
 
       <div style={{ display: "flex", gap: "10px", flex: 1, marginTop: "10px" }}>
-        {/* Y-Axis: Wk 4, Wk 3, Wk 2, Wk 1 */}
+        {/* Y-Axis: Period Labels (Wk 5 down to Wk 0) */}
         <div
           style={{
             display: "flex",
@@ -38,10 +67,14 @@ export default function RetentionRateChart() {
             paddingBottom: "8px",
           }}
         >
-          <span style={{ fontSize: "11px", color: "#868C98" }}>Wk 4</span>
-          <span style={{ fontSize: "11px", color: "#868C98" }}>Wk 3</span>
-          <span style={{ fontSize: "11px", color: "#868C98" }}>Wk 2</span>
-          <span style={{ fontSize: "11px", color: "#868C98" }}>Wk 1</span>
+          {yLabels.map((lbl) => (
+            <span
+              key={lbl}
+              style={{ fontSize: "11px", color: "#868C98", whiteSpace: "nowrap" }}
+            >
+              {lbl}
+            </span>
+          ))}
         </div>
 
         {/* Stacked Bars for 12 months */}
@@ -54,42 +87,77 @@ export default function RetentionRateChart() {
               gap: "4px",
             }}
           >
-            {MONTHS.map((month) => (
-              <div
-                key={month}
-                style={{
-                  flex: 1,
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "2px",
-                  height: "100%",
-                }}
-              >
-                {COHORTS.map((c, idx) => (
+            {hasCohorts
+              ? cohorts.map((c) => {
+                  const reversedPeriods = [...c.periods].reverse();
+                  return (
+                    <div
+                      key={c.cohort}
+                      style={{
+                        flex: 1,
+                        display: "flex",
+                        flexDirection: "column",
+                        gap: "2px",
+                        height: "100%",
+                      }}
+                    >
+                      {reversedPeriods.map((val, idx) => {
+                        const style = getCohortStyle(val);
+                        return (
+                          <div
+                            key={idx}
+                            style={{
+                              flex: 1,
+                              background: style.bg,
+                              borderRadius:
+                                idx === 0
+                                  ? "4px 4px 0 0"
+                                  : idx === reversedPeriods.length - 1
+                                  ? "0 0 4px 4px"
+                                  : "0",
+                              display: "flex",
+                              alignItems: "center",
+                              justifyContent: "center",
+                              fontSize: "9px",
+                              fontWeight: 600,
+                              color: style.color,
+                            }}
+                          >
+                            {style.label}
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                })
+              : DEFAULT_MONTHS.map((m) => (
                   <div
-                    key={idx}
+                    key={m}
                     style={{
                       flex: 1,
-                      background: c.bg,
-                      borderRadius:
-                        idx === 0
-                          ? "4px 4px 0 0"
-                          : idx === COHORTS.length - 1
-                          ? "0 0 4px 4px"
-                          : "0",
                       display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontSize: "9px",
-                      fontWeight: 600,
-                      color: c.color,
+                      flexDirection: "column",
+                      gap: "2px",
+                      height: "100%",
                     }}
                   >
-                    {c.label}
+                    {[0, 1, 2, 3, 4, 5].map((idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          flex: 1,
+                          background: "#F9FAFB",
+                          borderRadius:
+                            idx === 0
+                              ? "4px 4px 0 0"
+                              : idx === 5
+                              ? "0 0 4px 4px"
+                              : "0",
+                        }}
+                      />
+                    ))}
                   </div>
                 ))}
-              </div>
-            ))}
           </div>
 
           {/* X-Axis Months */}
@@ -100,19 +168,21 @@ export default function RetentionRateChart() {
               paddingTop: "12px",
             }}
           >
-            {MONTHS.map((m) => (
-              <span
-                key={m}
-                style={{
-                  fontSize: "11px",
-                  color: "#868C98",
-                  textAlign: "center",
-                  flex: 1,
-                }}
-              >
-                {m}
-              </span>
-            ))}
+            {(hasCohorts ? cohorts.map((c) => c.cohort) : DEFAULT_MONTHS).map(
+              (m) => (
+                <span
+                  key={m}
+                  style={{
+                    fontSize: "11px",
+                    color: "#868C98",
+                    textAlign: "center",
+                    flex: 1,
+                  }}
+                >
+                  {m}
+                </span>
+              ),
+            )}
           </div>
         </div>
       </div>

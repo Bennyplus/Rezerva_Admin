@@ -1,38 +1,74 @@
 "use client";
 
+import { CommissionTrendResponse } from "@/services/analytics-services";
 import styles from "./AnalyticsCharts.module.css";
 
-const POINTS = [
-  { day: "Mon", val: 1 },
-  { day: "Tue", val: 9 },
-  { day: "Wed", val: 6 },
-  { day: "Thur", val: 45 },
-  { day: "Fri", val: 9 },
-  { day: "Sat", val: 34 },
-  { day: "Sun", val: 40 },
+interface CommissionTrendChartProps {
+  commissionData?: CommissionTrendResponse | null;
+}
+
+const ZERO_Y_TICKS = ["$0", "$0", "$0", "$0", "$0", "$0", "$0"];
+const ZERO_X_MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
-const Y_TICKS = ["$60M", "$50M", "$40M", "$30M", "$20M", "$10M", "$0"];
-const MAX_VAL = 60;
-
-export default function CommissionTrendChart() {
-  // SVG coordinates: viewBox 0 0 500 240
+export default function CommissionTrendChart({
+  commissionData,
+}: CommissionTrendChartProps) {
+  // SVG coordinates: viewBox 0 0 460 200
   const width = 460;
   const height = 200;
   const paddingLeft = 10;
   const paddingRight = 10;
   const chartWidth = width - paddingLeft - paddingRight;
 
-  const coords = POINTS.map((p, i) => {
-    const x = paddingLeft + (i / (POINTS.length - 1)) * chartWidth;
-    const y = height - (p.val / MAX_VAL) * height;
-    return { x, y, day: p.day, val: p.val };
-  });
+  const points = commissionData?.points || [];
+  const hasDynamicPoints = points.length > 0;
 
-  const pathD = coords.reduce(
-    (acc, curr, i) => (i === 0 ? `M ${curr.x} ${curr.y}` : `${acc} L ${curr.x} ${curr.y}`),
-    "",
-  );
+  let yTicks = ZERO_Y_TICKS;
+  let xLabels = ZERO_X_MONTHS;
+  let coords: { x: number; y: number; label: string; value: number }[] = [];
+  let pathD = `M ${paddingLeft} ${height - 10} L ${width - paddingRight} ${height - 10}`;
+
+  if (hasDynamicPoints) {
+    const maxVal = Math.max(...points.map((p) => p.value), 0);
+    const maxY = maxVal > 0 ? Math.ceil(maxVal * 1.25) : 10;
+
+    coords = points.map((p, i) => {
+      const x = paddingLeft + (i / Math.max(1, points.length - 1)) * chartWidth;
+      const y =
+        maxVal > 0
+          ? height - (p.value / maxY) * (height - 24) - 12
+          : height - 12;
+      return { x, y, label: p.label, value: p.value };
+    });
+
+    pathD = coords.reduce(
+      (acc, curr, i) =>
+        i === 0 ? `M ${curr.x} ${curr.y}` : `${acc} L ${curr.x} ${curr.y}`,
+      "",
+    );
+
+    if (maxVal > 0) {
+      const step = maxY / 6;
+      yTicks = [6, 5, 4, 3, 2, 1, 0].map(
+        (multiplier) => `$${Math.round(multiplier * step)}`,
+      );
+    }
+
+    xLabels = points.map((p) => p.label);
+  }
 
   return (
     <div className={styles.card}>
@@ -54,9 +90,9 @@ export default function CommissionTrendChart() {
             paddingRight: "8px",
           }}
         >
-          {Y_TICKS.map((tick) => (
+          {yTicks.map((tick, idx) => (
             <span
-              key={tick}
+              key={idx}
               style={{
                 fontSize: "12px",
                 color: "#868C98",
@@ -108,7 +144,7 @@ export default function CommissionTrendChart() {
                   key={i}
                   cx={c.x}
                   cy={c.y}
-                  r="4.5"
+                  r="4"
                   fill="#667085"
                 />
               ))}
@@ -125,16 +161,17 @@ export default function CommissionTrendChart() {
               paddingRight: `${paddingRight}px`,
             }}
           >
-            {POINTS.map((p) => (
+            {xLabels.map((lbl, idx) => (
               <span
-                key={p.day}
+                key={idx}
                 style={{
-                  fontSize: "12px",
+                  fontSize: "11px",
                   color: "#868C98",
                   fontWeight: 400,
+                  textAlign: "center",
                 }}
               >
-                {p.day}
+                {lbl}
               </span>
             ))}
           </div>

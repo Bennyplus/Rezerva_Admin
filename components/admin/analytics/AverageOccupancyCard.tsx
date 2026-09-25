@@ -1,23 +1,28 @@
 "use client";
 
+import { AverageOccupancyResponse } from "@/services/analytics-services";
 import styles from "./AnalyticsCharts.module.css";
 
 interface AverageOccupancyCardProps {
-  value?: number;
-  totalSeats?: number;
-  growthPercent?: string;
+  occupancyData?: AverageOccupancyResponse | null;
 }
 
 export default function AverageOccupancyCard({
-  value = 3.8,
-  totalSeats = 4,
-  growthPercent = "5.6%",
+  occupancyData,
 }: AverageOccupancyCardProps) {
+  const value = occupancyData?.avg_seats_booked ?? 0;
+  const totalSeats = occupancyData
+    ? occupancyData.capacity || occupancyData.avg_capacity || 0
+    : 0;
+  const changePct = occupancyData?.change_pct ?? null;
+  const isPositive = changePct !== null && changePct >= 0;
+
   // Semi-circle gauge using SVG
   const radius = 90;
   const strokeWidth = 14;
   const circumference = Math.PI * radius; // Half-circle perimeter
-  const progressPercent = Math.min(1, Math.max(0, value / totalSeats));
+  const progressPercent =
+    totalSeats > 0 ? Math.min(1, Math.max(0, value / totalSeats)) : 0;
   const strokeDashoffset = circumference * (1 - progressPercent);
 
   return (
@@ -25,7 +30,7 @@ export default function AverageOccupancyCard({
       <div className={styles.header}>
         <div className={styles.headerText}>
           <h3 className={styles.title}>Average Occupancy</h3>
-          <p className={styles.subtitle}>Top destination locations by trip count</p>
+          <p className={styles.subtitle}>Average vehicle occupancy rate</p>
         </div>
       </div>
 
@@ -103,7 +108,7 @@ export default function AverageOccupancyCard({
             </span>
           </div>
 
-          {/* Range Labels: 0 and 4 */}
+          {/* Range Labels: 0 and totalSeats */}
           <div
             style={{
               position: "absolute",
@@ -143,9 +148,21 @@ export default function AverageOccupancyCard({
             border: "1px solid #EFEFEF",
           }}
         >
-          <span style={{ color: "#027A48", fontWeight: 600 }}>
-            ↑ {growthPercent}
-          </span>
+          {changePct !== null ? (
+            <span
+              style={{
+                color: isPositive ? "#027A48" : "#D92D20",
+                fontWeight: 600,
+              }}
+            >
+              {isPositive ? "↑ +" : "↓ "}
+              {changePct}%
+            </span>
+          ) : (
+            <span style={{ color: "#525866", fontWeight: 500 }}>
+              0%
+            </span>
+          )}
           <span>vs Last month</span>
         </div>
       </div>

@@ -1,27 +1,67 @@
 "use client";
 
+import { ActiveVsNewUsersResponse } from "@/services/analytics-services";
 import styles from "./AnalyticsCharts.module.css";
 
-interface DayData {
-  day: string;
-  active: number;
-  newUsers: number;
+interface ActiveVsNewUsersChartProps {
+  activeVsNewData?: ActiveVsNewUsersResponse | null;
 }
 
-const DAYS_DATA: DayData[] = [
-  { day: "Mon", active: 45, newUsers: 22 },
-  { day: "Tue", active: 25, newUsers: 32 },
-  { day: "Wed", active: 36, newUsers: 23 },
-  { day: "Thur", active: 45, newUsers: 42 },
-  { day: "Fri", active: 14, newUsers: 23 },
-  { day: "Sat", active: 34, newUsers: 23 },
-  { day: "Sun", active: 45, newUsers: 36 },
+const ZERO_Y_TICKS = ["0", "0", "0", "0", "0", "0", "0"];
+const ZERO_X_MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
 ];
 
-const Y_TICKS = ["60", "50", "40", "30", "20", "10", "0"];
-const MAX_VAL = 60;
+export default function ActiveVsNewUsersChart({
+  activeVsNewData,
+}: ActiveVsNewUsersChartProps) {
+  const points = activeVsNewData?.points || [];
+  const hasDynamicPoints = points.length > 0;
 
-export default function ActiveVsNewUsersChart() {
+  let yTicks = ZERO_Y_TICKS;
+  let xLabels = ZERO_X_MONTHS;
+  let maxY = 10;
+  let maxVal = 0;
+  let peakItem: { label: string; maxVal: number } | null = null;
+
+  if (hasDynamicPoints) {
+    maxVal = Math.max(
+      ...points.flatMap((p) => [p.active_users, p.new_users]),
+      0,
+    );
+    maxY = maxVal > 0 ? Math.ceil(maxVal * 1.25) : 10;
+
+    if (maxVal > 0) {
+      const step = maxY / 6;
+      yTicks = [6, 5, 4, 3, 2, 1, 0].map(
+        (multiplier) => `${Math.round(multiplier * step)}`,
+      );
+
+      // Find highest single bar point for peak badge
+      let currentMax = 0;
+      points.forEach((p) => {
+        const higher = Math.max(p.active_users, p.new_users);
+        if (higher > currentMax) {
+          currentMax = higher;
+          peakItem = { label: p.label, maxVal: currentMax };
+        }
+      });
+    }
+
+    xLabels = points.map((p) => p.label);
+  }
+
   return (
     <div className={styles.card}>
       <div className={styles.header}>
@@ -31,7 +71,7 @@ export default function ActiveVsNewUsersChart() {
         </div>
 
         <button type="button" className={styles.selectBtn}>
-          <span>By Week</span>
+          <span>This Year</span>
           <ChevronDownIcon />
         </button>
       </div>
@@ -47,9 +87,9 @@ export default function ActiveVsNewUsersChart() {
             paddingRight: "8px",
           }}
         >
-          {Y_TICKS.map((tick) => (
+          {yTicks.map((tick, idx) => (
             <span
-              key={tick}
+              key={idx}
               style={{
                 fontSize: "12px",
                 color: "#868C98",
@@ -70,72 +110,90 @@ export default function ActiveVsNewUsersChart() {
               display: "flex",
               alignItems: "flex-end",
               justifyContent: "space-between",
-              padding: "0 10px",
+              padding: "0 6px",
               position: "relative",
               borderBottom: "1px solid #F3F4F6",
             }}
           >
-            {DAYS_DATA.map((item) => {
-              const activeHeight = (item.active / MAX_VAL) * 100;
-              const newHeight = (item.newUsers / MAX_VAL) * 100;
+            {hasDynamicPoints ? (
+              points.map((item) => {
+                const activeHeight =
+                  maxVal > 0 ? (item.active_users / maxY) * 100 : 0;
+                const newHeight =
+                  maxVal > 0 ? (item.new_users / maxY) * 100 : 0;
+                const isPeak =
+                  peakItem &&
+                  peakItem.label === item.label &&
+                  peakItem.maxVal > 0;
 
-              return (
-                <div
-                  key={item.day}
-                  style={{
-                    display: "flex",
-                    alignItems: "flex-end",
-                    gap: "4px",
-                    height: "100%",
-                    position: "relative",
-                  }}
-                >
-                  {/* Active User Bar (Light Blue) */}
+                return (
                   <div
+                    key={item.date}
                     style={{
-                      width: "8px",
-                      height: `${activeHeight}%`,
-                      background: "#D4E4FC",
-                      borderRadius: "4px 4px 0 0",
-                    }}
-                  />
-
-                  {/* New User Bar (Dark Blue) */}
-                  <div
-                    style={{
-                      width: "8px",
-                      height: `${newHeight}%`,
-                      background: "#2F68FE",
-                      borderRadius: "4px 4px 0 0",
+                      display: "flex",
+                      alignItems: "flex-end",
+                      gap: "3px",
+                      height: "100%",
                       position: "relative",
                     }}
                   >
-                    {/* Tooltip on Saturday */}
-                    {item.day === "Sat" && (
-                      <div
-                        style={{
-                          position: "absolute",
-                          top: "-24px",
-                          left: "50%",
-                          transform: "translateX(-50%)",
-                          background: "#ffffff",
-                          border: "1px solid #E2E4E9",
-                          borderRadius: "4px",
-                          padding: "1px 6px",
-                          fontSize: "10px",
-                          fontWeight: 600,
-                          color: "#2F68FE",
-                          boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
-                          whiteSpace: "nowrap",
-                        }}
-                      >
-                        23
-                      </div>
-                    )}
+                    {/* Active User Bar (Light Blue) */}
+                    <div
+                      style={{
+                        width: "6px",
+                        height: `${Math.max(activeHeight, item.active_users > 0 ? 4 : 0)}%`,
+                        background: "#D4E4FC",
+                        borderRadius: "3px 3px 0 0",
+                      }}
+                    />
+
+                    {/* New User Bar (Dark Blue) */}
+                    <div
+                      style={{
+                        width: "6px",
+                        height: `${Math.max(newHeight, item.new_users > 0 ? 4 : 0)}%`,
+                        background: "#2F68FE",
+                        borderRadius: "3px 3px 0 0",
+                        position: "relative",
+                      }}
+                    >
+                      {/* Tooltip on peak bar */}
+                      {isPeak && peakItem && (
+                        <div
+                          style={{
+                            position: "absolute",
+                            top: "-24px",
+                            left: "50%",
+                            transform: "translateX(-50%)",
+                            background: "#ffffff",
+                            border: "1px solid #E2E4E9",
+                            borderRadius: "4px",
+                            padding: "1px 6px",
+                            fontSize: "10px",
+                            fontWeight: 600,
+                            color: "#2F68FE",
+                            boxShadow: "0 2px 6px rgba(0,0,0,0.06)",
+                            whiteSpace: "nowrap",
+                            zIndex: 10,
+                          }}
+                        >
+                          {peakItem.maxVal}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              );
-            })}
+                );
+              })
+            ) : (
+              /* Flat baseline when no data */
+              <div
+                style={{
+                  width: "100%",
+                  height: "2px",
+                  background: "#E2E4E9",
+                }}
+              />
+            )}
           </div>
 
           {/* X-Axis */}
@@ -144,22 +202,21 @@ export default function ActiveVsNewUsersChart() {
               display: "flex",
               justifyContent: "space-between",
               paddingTop: "12px",
-              paddingLeft: "10px",
-              paddingRight: "10px",
+              paddingLeft: "6px",
+              paddingRight: "6px",
             }}
           >
-            {DAYS_DATA.map((d) => (
+            {xLabels.map((lbl, idx) => (
               <span
-                key={d.day}
+                key={idx}
                 style={{
-                  fontSize: "12px",
+                  fontSize: "11px",
                   color: "#868C98",
                   fontWeight: 400,
                   textAlign: "center",
-                  width: "20px",
                 }}
               >
-                {d.day}
+                {lbl}
               </span>
             ))}
           </div>

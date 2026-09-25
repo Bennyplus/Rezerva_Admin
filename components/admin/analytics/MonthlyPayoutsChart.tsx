@@ -13,26 +13,28 @@ interface MonthlyPayoutsChartProps {
   payoutsData?: PayoutsResponse | null;
 }
 
-const DEFAULT_PAYOUTS: PayoutDay[] = [
-  { day: "Mon", amount: 40.5, label: "$40.5M" },
-  { day: "Tue", amount: 19.8, label: "$19.8M" },
-  { day: "Wed", amount: 26.4, label: "$26.4M" },
-  { day: "Thur", amount: 38.7, label: "$38.7M" },
-  { day: "Fri", amount: 18.9, label: "$18.9M" },
-  { day: "Sat", amount: 34.6, label: "$34.6M" },
-  { day: "Sun", amount: 26.8, label: "$26.8M" },
+const ZERO_PAYOUTS: PayoutDay[] = [
+  { day: "Mon", amount: 0, label: "$0" },
+  { day: "Tue", amount: 0, label: "$0" },
+  { day: "Wed", amount: 0, label: "$0" },
+  { day: "Thur", amount: 0, label: "$0" },
+  { day: "Fri", amount: 0, label: "$0" },
+  { day: "Sat", amount: 0, label: "$0" },
+  { day: "Sun", amount: 0, label: "$0" },
 ];
 
-const DEFAULT_TICKS = ["$0", "$10M", "$20M", "$30M", "$40M", "$50M", "$60M"];
+const ZERO_TICKS = ["$0", "$0", "$0", "$0", "$0", "$0", "$0"];
 
 export default function MonthlyPayoutsChart({
   payoutsData,
 }: MonthlyPayoutsChartProps) {
-  const hasDynamicPoints = Boolean(payoutsData?.points && payoutsData.points.length > 0);
+  const hasDynamicPoints = Boolean(
+    payoutsData?.points && payoutsData.points.length > 0,
+  );
 
-  let payoutsList = DEFAULT_PAYOUTS;
-  let maxVal = 60;
-  let ticks = DEFAULT_TICKS;
+  let payoutsList = ZERO_PAYOUTS;
+  let maxVal = 10;
+  let ticks = ZERO_TICKS;
 
   if (hasDynamicPoints && payoutsData) {
     const dayTotals: Record<string, number> = {
@@ -48,23 +50,35 @@ export default function MonthlyPayoutsChart({
     payoutsData.points.forEach((p) => {
       const d = new Date(p.date);
       if (!isNaN(d.getTime())) {
-        const rawDay = ["Sun", "Mon", "Tue", "Wed", "Thur", "Fri", "Sat"][d.getDay()];
+        const rawDay = [
+          "Sun",
+          "Mon",
+          "Tue",
+          "Wed",
+          "Thur",
+          "Fri",
+          "Sat",
+        ][d.getDay()];
         const key = rawDay === "Thu" ? "Thur" : rawDay;
         dayTotals[key] = (dayTotals[key] || 0) + (p.value || 0);
       }
     });
 
-    const highest = Math.max(...Object.values(dayTotals), 10);
-    maxVal = Math.ceil(highest * 1.25);
+    const highest = Math.max(...Object.values(dayTotals), 0);
+    maxVal = highest > 0 ? Math.ceil(highest * 1.25) : 10;
 
-    payoutsList = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"].map((day) => ({
-      day,
-      amount: dayTotals[day],
-      label: `$${dayTotals[day].toLocaleString()}`,
-    }));
+    payoutsList = ["Mon", "Tue", "Wed", "Thur", "Fri", "Sat", "Sun"].map(
+      (day) => ({
+        day,
+        amount: dayTotals[day],
+        label: `$${dayTotals[day].toLocaleString()}`,
+      }),
+    );
 
-    const step = maxVal / 6;
-    ticks = [0, 1, 2, 3, 4, 5, 6].map((i) => `$${Math.round(i * step)}`);
+    if (highest > 0) {
+      const step = maxVal / 6;
+      ticks = [0, 1, 2, 3, 4, 5, 6].map((i) => `$${Math.round(i * step)}`);
+    }
   }
 
   return (
@@ -86,7 +100,11 @@ export default function MonthlyPayoutsChart({
         }}
       >
         {payoutsList.map((item) => {
-          const widthPercent = Math.min(100, Math.max(2, (item.amount / maxVal) * 100));
+          const widthPercent =
+            maxVal > 0 && item.amount > 0
+              ? Math.min(100, Math.max(2, (item.amount / maxVal) * 100))
+              : 0;
+
           return (
             <div
               key={item.day}
@@ -150,9 +168,9 @@ export default function MonthlyPayoutsChart({
             paddingLeft: "52px",
           }}
         >
-          {ticks.map((t) => (
+          {ticks.map((t, idx) => (
             <span
-              key={t}
+              key={idx}
               style={{
                 fontSize: "12px",
                 color: "#868C98",

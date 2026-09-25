@@ -27,3 +27,24 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* ─── Loading State Card ─── */
+.loadingCard {
+  background: #ffffff;
+  border: 1px solid #e2e4e9;
+  border-radius: 16px;
+  min-height: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.loadingSubtitle {
+  font-size: 13.5px;
+  color: #868c98;
+  margin: 0;
+}
