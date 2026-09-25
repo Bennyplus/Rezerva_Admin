@@ -87,6 +87,19 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Settings",
     subtitle: "Configure your dashboard preferences",
   },
+  "/admin/emergency-incidents": {
+    title: "Emergency Incidents",
+    subtitle:
+      "Monitor emergency alerts, manage incidents, and respond quickly to ensure user safety.",
+  },
+  "/admin/reports": {
+    title: "Safety & Reports",
+    subtitle: "Manage customer support requests, reports, and complaints",
+  },
+  "/admin/support-center": {
+    title: "Support Center",
+    subtitle: "Manage customer support requests, reports, and complaints",
+  },
 };
 
 export default function AdminTopbar() {
@@ -266,7 +279,10 @@ export default function AdminTopbar() {
                       {notif.created_at && (
                         <span className={styles.notificationTime}>
                           {(() => {
-                            const sanitized = notif.created_at.replace(/\s*\|\s*/, " ");
+                            const sanitized = notif.created_at.replace(
+                              /\s*\|\s*/,
+                              " ",
+                            );
                             const d = new Date(sanitized);
                             return !isNaN(d.getTime())
                               ? d.toLocaleDateString()

@@ -1,0 +1,91 @@
+/* EMERGENCY INCIDENTS PAGE — Scoped styles */
+.page {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  width: 100%;
+}
+
+.headerArea {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.title {
+  font-size: 22px;
+  font-weight: 700;
+  color: #111827;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  font-size: 13.5px;
+  color: #6b7280;
+  line-height: 1.4;
+}
+
+/* ─── Top 4 Stat Cards Grid ─── */
+.statsGrid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+@media (max-width: 1024px) {
+  .statsGrid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .statsGrid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ─── Inactive / Empty State (Screenshot 1) ─── */
+.emptyCard {
+  background: #ffffff;
+  border: 1px solid #e2e4e9;
+  border-radius: 12px;
+  min-height: 520px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 48px 24px;
+}
+
+.emptyTitle {
+  font-size: 16px;
+  font-weight: 700;
+  color: #111827;
+  margin-bottom: 6px;
+}
+
+.emptySubtitle {
+  font-size: 13.5px;
+  color: #6b7280;
+  max-width: 400px;
+  line-height: 1.5;
+}
+
+/* ─── Loading Card ─── */
+.loadingCard {
+  background: #ffffff;
+  border: 1px solid #e2e4e9;
+  border-radius: 12px;
+  min-height: 380px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.loadingSubtitle {
+  font-size: 13.5px;
+  color: #6b7280;
+}

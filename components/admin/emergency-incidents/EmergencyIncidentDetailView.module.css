@@ -1,0 +1,116 @@
+/* EMERGENCY INCIDENT DETAIL VIEW — Scoped styles */
+.container { display: flex; flex-direction: column; gap: 20px; }
+
+/* ─── Top Bar ─── */
+.topBar {
+  display: flex; align-items: center; justify-content: space-between;
+}
+.backBtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px; border-radius: 8px; border: 1px solid #e2e4e9;
+  background: #ffffff; color: #111827; cursor: pointer; transition: background 0.15s ease;
+}
+.backBtn:hover { background: #f9fafb; }
+
+.exportBtn {
+  display: inline-flex; align-items: center; justify-content: center;
+  height: 38px; padding: 0 18px; border-radius: 8px; border: none;
+  background: #111827; color: #ffffff; font-size: 13px; font-weight: 500;
+  cursor: pointer; transition: opacity 0.15s ease;
+}
+.exportBtn:hover { opacity: 0.9; }
+
+/* ─── Headline Area ─── */
+.headlineArea { display: flex; flex-direction: column; }
+.sosLabel { font-size: 12px; font-weight: 500; color: #6b7280; }
+.sosHeaderRow {
+  display: flex; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 4px;
+}
+.sosTitle { font-size: 22px; font-weight: 700; color: #111827; }
+
+.copyBtn {
+  background: none; border: none; cursor: pointer; color: #868c98;
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 2px; border-radius: 4px; transition: color 0.15s ease;
+}
+.copyBtn:hover { color: #111827; }
+
+.statusPill {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px;
+  border-radius: 9999px; font-size: 12px; font-weight: 500;
+  background: #ecfdf3; color: #027a48; border: 1px solid #d1fadf;
+}
+.statusDot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+.priorityPill {
+  display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px;
+  border-radius: 9999px; font-size: 12px; font-weight: 500;
+  background: #eff8ff; color: #175cd3; border: 1px solid #b2ddff;
+}
+
+.timestamp { font-size: 13px; color: #6b7280; margin-top: 6px; }
+
+/* ─── 2-Column Grid Layout ─── */
+.grid {
+  display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px;
+}
+@media (max-width: 1024px) {
+  .grid { grid-template-columns: 1fr; }
+}
+
+.col { display: flex; flex-direction: column; gap: 20px; }
+
+/* ─── Card Containers ─── */
+.card {
+  background: #ffffff; border: 1px solid #e2e4e9; border-radius: 12px;
+  padding: 22px; display: flex; flex-direction: column; gap: 16px;
+}
+.cardTitle { font-size: 15px; font-weight: 600; color: #111827; }
+
+.fieldRow {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 16px;
+}
+.field { display: flex; flex-direction: column; gap: 4px; }
+.fieldLabel { font-size: 12px; color: #868c98; font-weight: 400; }
+.fieldValue {
+  font-size: 13.5px; color: #111827; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+}
+
+/* ─── Victim Report Box ─── */
+.victimBox {
+  background: #f8fafc; border-radius: 10px; padding: 16px;
+  border: 1px solid #f1f5f9; display: flex; flex-direction: column; gap: 6px;
+}
+.victimCategory { font-size: 14px; font-weight: 700; color: #111827; }
+.victimDesc { font-size: 13px; color: #64748b; line-height: 1.5; }
+
+/* ─── Investigation Timeline ─── */
+.timelineGrid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+}
+@media (max-width: 640px) {
+  .timelineGrid { grid-template-columns: 1fr; }
+}
+.timelineCol { display: flex; flex-direction: column; gap: 14px; }
+.timelineItem { display: flex; gap: 10px; }
+.timelineIcon {
+  width: 18px; height: 18px; border-radius: 4px; background: #2563eb;
+  color: #ffffff; display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0; margin-top: 2px;
+}
+.timelineDetails { display: flex; flex-direction: column; }
+.timelineTitle { font-size: 13px; font-weight: 600; color: #111827; }
+.timelineTime { font-size: 11px; color: #868c98; margin-top: 2px; }
+
+/* ─── Quick Actions ─── */
+.actionsStack { display: flex; flex-direction: column; gap: 10px; }
+.actionBtn {
+  display: flex; align-items: center; justify-content: space-between;
+  width: 100%; padding: 14px 18px; background: #ffffff;
+  border: 1px solid #e2e4e9; border-radius: 10px; font-size: 13.5px;
+  font-weight: 500; color: #525866; cursor: pointer; transition: all 0.15s ease;
+}
+.actionBtn:hover {
+  background: #f8fafc; border-color: #2563eb; color: #2563eb;
+}
