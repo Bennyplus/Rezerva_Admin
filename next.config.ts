@@ -20,14 +20,14 @@ const nextConfig: import('next').NextConfig = {
       },
     ],
   },
-  // async rewrites() {
-  //   return [
-  //     {
-  //       source: '/api/backend/:path*',
-  //       destination: 'https://drifully-backend-1qa6.onrender.com/:path*',
-  //     },
-  //   ];
-  // },
+  async rewrites() {
+    return [
+      {
+        source: '/admin/api/:path*',
+        destination: '/api/:path*',
+      },
+    ];
+  },
 };
 
 

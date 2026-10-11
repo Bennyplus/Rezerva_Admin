@@ -12,7 +12,9 @@ interface RulesHistoryViewProps {
   onNavigateToConfig: () => void;
 }
 
-export default function RulesHistoryView({ onNavigateToConfig }: RulesHistoryViewProps) {
+export default function RulesHistoryView({
+  onNavigateToConfig,
+}: RulesHistoryViewProps) {
   const [history, setHistory] = useState<RuleHistoryItem[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -57,7 +59,8 @@ export default function RulesHistoryView({ onNavigateToConfig }: RulesHistoryVie
       <div className={styles.header}>
         <h2 className={styles.title}>Platform Rules History</h2>
         <p className={styles.subtitle}>
-          Track modifications and configuration audit trails across all platform rules.
+          Track modifications and configuration audit trails across all platform
+          rules.
         </p>
       </div>
 
@@ -74,9 +77,8 @@ export default function RulesHistoryView({ onNavigateToConfig }: RulesHistoryVie
                 <tr>
                   <th className={styles.th}>Date &amp; Time</th>
                   <th className={styles.th}>Rule Section</th>
-                  <th className={styles.th}>Change Summary</th>
+                  <th className={styles.th}>Driver No-Show Fee Amount</th>
                   <th className={styles.th}>Modified By</th>
-                  <th className={styles.th}>Status</th>
                 </tr>
               </thead>
               <tbody>
@@ -90,22 +92,22 @@ export default function RulesHistoryView({ onNavigateToConfig }: RulesHistoryVie
                   history.map((item) => (
                     <tr key={item.id} className={styles.tr}>
                       <td className={styles.td}>
-                        <span className={styles.timestamp}>{item.updatedAt}</span>
+                        <span className={styles.timestamp}>
+                          {item.date_and_time || item.updatedAt}
+                        </span>
                       </td>
                       <td className={styles.td}>
-                        <span className={styles.sectionBadge}>{item.section}</span>
+                        <span className={styles.sectionBadge}>
+                          {item.section}
+                        </span>
                       </td>
                       <td className={styles.td}>
-                        <span className={styles.description}>{item.changeDescription}</span>
+                        <span className={styles.description}>
+                          {item.driver_no_show_fee_amount || "—"}
+                        </span>
                       </td>
                       <td className={styles.td}>
                         <span className={styles.user}>{item.updatedBy}</span>
-                      </td>
-                      <td className={styles.td}>
-                        <span className={styles.statusBadge}>
-                          <span className={styles.statusDot} />
-                          Applied
-                        </span>
                       </td>
                     </tr>
                   ))

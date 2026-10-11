@@ -84,7 +84,7 @@ export function useNotifications() {
     const connectWebSocket = async () => {
       try {
         // Fetch session auth token
-        const response = await fetch("/api/auth/token");
+        const response = await fetch("/admin/api/auth/token");
         if (!response.ok) {
           // User might not be logged in yet
           return;

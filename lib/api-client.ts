@@ -14,7 +14,7 @@ declare module 'axios' {
 const MUTATION_METHODS = new Set(['post', 'put', 'patch', 'delete']);
 
 export const publicApi = axios.create({
-  baseURL: '/api/proxy',
+  baseURL: '/admin/api/proxy',
   timeout: 30000, // 30 seconds
 });
 

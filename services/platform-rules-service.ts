@@ -58,8 +58,12 @@ export interface RuleHistoryItem {
   changeDescription: string;
   updatedBy: string;
   updatedAt: string;
+  date_and_time?: string;
+  driver_no_show_fee_amount?: string;
+  status?: string;
   previousValue?: string;
   newValue?: string;
+  raw?: any;
 }
 
 /* ─── Backend Payload & Response Types ─── */
@@ -520,8 +524,142 @@ export const platformRulesService = {
 
   /**
    * Get history of rule changes
+   * GET {{base_url}}administration/platform-rules/history/
    */
   getHistory: async (): Promise<RuleHistoryItem[]> => {
-    return [...localHistory];
+    try {
+      const response = await publicApi.get("", {
+        params: { path: "administration/platform-rules/history/" },
+        skipToast: true,
+      } as any);
+
+      const data = response.data;
+      let list: any[] = [];
+
+      if (data && Array.isArray(data.results)) {
+        list = data.results;
+      } else if (data && Array.isArray(data.history)) {
+        list = data.history;
+      } else if (Array.isArray(data)) {
+        list = data;
+      }
+
+      if (list.length > 0) {
+        return list.map((item: any, idx: number) => {
+          const rawDateTime =
+            item.date_and_time ||
+            item.date_time ||
+            item.updated_at ||
+            item.updatedAt ||
+            item.created_at ||
+            item.timestamp ||
+            item.date ||
+            "";
+
+          let formattedDate = rawDateTime;
+          if (rawDateTime && !item.date_and_time) {
+            try {
+              const d = new Date(rawDateTime);
+              if (!isNaN(d.getTime())) {
+                formattedDate = d.toLocaleString("en-GB", {
+                  day: "2-digit",
+                  month: "short",
+                  year: "numeric",
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+              }
+            } catch {
+              // keep as is
+            }
+          }
+
+          // Build dynamic change summary if not explicitly provided
+          let description =
+            item.change_description ||
+            item.changeDescription ||
+            item.description ||
+            item.action ||
+            item.summary ||
+            "";
+
+          if (!description) {
+            const summaryParts: string[] = [];
+            if (item.driver_no_show_fee_amount !== undefined) {
+              summaryParts.push(`Driver No-Show Fee: ${item.driver_no_show_fee_amount}`);
+            }
+            if (item.passenger_no_show_fee_amount !== undefined) {
+              summaryParts.push(`Passenger No-Show Fee: ${item.passenger_no_show_fee_amount}`);
+            }
+            if (item.platform_commission_percentage !== undefined) {
+              summaryParts.push(`Commission: ${item.platform_commission_percentage}%`);
+            }
+            if (item.cancellation_fee_amount !== undefined) {
+              summaryParts.push(`Cancellation Fee: ${item.cancellation_fee_amount}`);
+            }
+            if (item.sedan_capacity !== undefined) {
+              summaryParts.push(`Sedan: ${item.sedan_capacity}`);
+            }
+            if (item.suv_capacity !== undefined) {
+              summaryParts.push(`SUV: ${item.suv_capacity}`);
+            }
+            if (item.minivan_capacity !== undefined) {
+              summaryParts.push(`Minivan: ${item.minivan_capacity}`);
+            }
+            if (item.hatchback_capacity !== undefined) {
+              summaryParts.push(`Hatchback: ${item.hatchback_capacity}`);
+            }
+            if (item.min_advance_booking !== undefined) {
+              summaryParts.push(`Min Advance: ${item.min_advance_booking}`);
+            }
+            if (item.max_advance_booking !== undefined) {
+              summaryParts.push(`Max Advance: ${item.max_advance_booking}`);
+            }
+            if (item.auto_cancel_when_no_passengers_booked !== undefined) {
+              summaryParts.push(`Auto-cancel: ${item.auto_cancel_when_no_passengers_booked ? "Enabled" : "Disabled"}`);
+            }
+            description = summaryParts.length > 0 ? summaryParts.join(", ") : "Platform rule updated";
+          }
+
+          return {
+            id: item.id ? String(item.id) : `hist-${idx + 1}`,
+            section:
+              item.category ||
+              item.section ||
+              item.rule_section ||
+              item.module ||
+              "Platform Settings",
+            changeDescription: description,
+            updatedBy:
+              item.updated_by ||
+              item.updated_by_name ||
+              item.updatedBy ||
+              item.modified_by ||
+              item.user_name ||
+              item.user ||
+              item.admin ||
+              "Admin",
+            updatedAt: formattedDate || "—",
+            date_and_time: item.date_and_time || formattedDate || "—",
+            driver_no_show_fee_amount:
+              item.driver_no_show_fee_amount !== undefined
+                ? String(item.driver_no_show_fee_amount)
+                : undefined,
+            status: item.status || "Applied",
+            previousValue: item.previous_value || item.previousValue,
+            newValue: item.new_value || item.newValue,
+            raw: item,
+          };
+        });
+      }
+
+      return [];
+    } catch (err) {
+      console.error(
+        "Failed to fetch platform rules history from administration/platform-rules/history/:",
+        err
+      );
+      return [];
+    }
   },
 };
