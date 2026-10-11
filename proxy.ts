@@ -4,6 +4,11 @@ import type { NextRequest } from 'next/server';
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
+  // Never intercept API routes with page auth redirects
+  if (pathname.startsWith('/admin/api')) {
+    return NextResponse.next();
+  }
+
   // We only care about /admin routes
   if (pathname.startsWith('/admin')) {
     const token = request.cookies.get('accessToken')?.value;
@@ -30,6 +35,6 @@ export function proxy(request: NextRequest) {
 }
 
 export const config = {
-  // Apply to /admin and all its subpaths
-  matcher: ['/admin/:path*'],
+  // Apply to /admin subpaths, excluding /admin/api and static Next.js assets
+  matcher: ['/admin/((?!api|_next/static|_next/image|favicon.ico).*)'],
 };
