@@ -7,6 +7,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { AdminRole } from "@/types/admin";
 import ConfirmActionModal from "./ConfirmActionModal";
 import EditProfileModal from "./EditProfileModal";
+import RezarvaLogo from "./RezarvaLogo";
 import { accountsService } from "@/services/accounts-service";
 import styles from "./AdminSidebar.module.css";
 
@@ -600,15 +601,8 @@ export default function AdminSidebar() {
       >
         {/* Logo */}
         <div className={styles.logo}>
-          <Link href="/admin" className={styles.logoLink}>
-            <Image
-              src="/REZARVA.svg"
-              alt="REZARVA Logo"
-              width={130}
-              height={26}
-              priority
-              style={{ width: "auto", height: "26px" }}
-            />
+          <Link href="/admin" className={styles.logoLink} aria-label="REZARVA Home">
+            <RezarvaLogo width={130} height={26} />
           </Link>
         </div>
 

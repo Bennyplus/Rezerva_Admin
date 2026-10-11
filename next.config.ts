@@ -26,6 +26,22 @@ const nextConfig: import('next').NextConfig = {
         source: '/admin/api/:path*',
         destination: '/api/:path*',
       },
+      {
+        source: '/admin/REZARVA.svg',
+        destination: '/REZARVA.svg',
+      },
+      {
+        source: '/admin/logo.svg',
+        destination: '/logo.svg',
+      },
+      {
+        source: '/admin/images/:path*',
+        destination: '/images/:path*',
+      },
+      {
+        source: '/admin/icons/:path*',
+        destination: '/icons/:path*',
+      },
     ];
   },
 };

@@ -2,9 +2,9 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { accountsService } from "@/services/accounts-service";
+import RezarvaLogo from "@/components/admin/RezarvaLogo";
 import styles from "./login.module.css";
 
 export default function AdminLoginPage() {
@@ -55,15 +55,8 @@ export default function AdminLoginPage() {
         <div className={styles.card}>
           {/* Logo */}
           <div className={styles.logoArea}>
-            <Link href="/admin" className={styles.logoLink}>
-              <Image
-                src="/REZARVA.svg"
-                alt="REZARVA Logo"
-                width={220}
-                height={36}
-                priority
-                style={{ width: "auto", height: "36px" }}
-              />
+            <Link href="/admin" className={styles.logoLink} aria-label="REZARVA Home">
+              <RezarvaLogo width={220} height={36} />
             </Link>
           </div>
 
