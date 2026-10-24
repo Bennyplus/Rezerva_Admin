@@ -21,3 +21,9 @@
   background: #f8f9fa;
   color: #111111;
 }
+
+.optionActive {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+}

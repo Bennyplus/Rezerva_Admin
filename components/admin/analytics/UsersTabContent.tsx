@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, useRef } from "react";
 import Image from "next/image";
 import AnalyticsEmptyState from "./AnalyticsEmptyState";
 import Pagination from "@/components/admin/Pagination";
@@ -12,56 +12,71 @@ interface UsersTabContentProps {
   isLoading?: boolean;
 }
 
+function checkIsVerified(u: AdminUserItem | any): boolean {
+  if (!u) return false;
+  const val = u.is_verified ?? u.verification_status ?? u.verificationStatus ?? u.status;
+  if (val === true || val === 1 || val === "1") return true;
+  if (typeof val === "string") {
+    const s = val.trim().toLowerCase();
+    return s === "verified" || s === "true" || s === "active";
+  }
+  return false;
+}
+
 export default function UsersTabContent({ users = [] }: UsersTabContentProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<"All" | "Verified" | "Not Verified">("All");
-  const [sortBy, setSortBy] = useState<"newest" | "oldest" | "trips" | "rating">("newest");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<number | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
+  const sortWrapRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleGlobalClick = () => {
-      setOpenMenuId(null);
-      setIsFilterOpen(false);
-      setIsSortOpen(false);
+    const handleClickOutside = (e: MouseEvent) => {
+      if (sortWrapRef.current && !sortWrapRef.current.contains(e.target as Node)) {
+        setIsSortOpen(false);
+      }
+      const target = e.target as HTMLElement;
+      if (!target.closest(`.${styles.kebabWrapper}`)) {
+        setOpenMenuId(null);
+      }
     };
-    document.addEventListener("click", handleGlobalClick);
-    return () => document.removeEventListener("click", handleGlobalClick);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   const filteredUsers = useMemo(() => {
     const query = searchQuery.toLowerCase().trim();
-    const result = [...(users || [])].filter((u) => {
+    return [...(users || [])].filter((u) => {
       const matchQuery =
         !query ||
         u.full_name?.toLowerCase().includes(query) ||
         u.email?.toLowerCase().includes(query) ||
         u.phone_number?.toLowerCase().includes(query) ||
         u.referral_code?.toLowerCase().includes(query);
-      const matchStatus = statusFilter === "All" || u.is_verified === statusFilter;
+      const isV = checkIsVerified(u);
+      const matchStatus =
+        statusFilter === "All" ||
+        (statusFilter === "Verified" ? isV : !isV);
       return matchQuery && matchStatus;
     });
-
-    if (sortBy === "newest") {
-      result.sort((a, b) => new Date(b.date_joined).getTime() - new Date(a.date_joined).getTime());
-    } else if (sortBy === "oldest") {
-      result.sort((a, b) => new Date(a.date_joined).getTime() - new Date(b.date_joined).getTime());
-    } else if (sortBy === "trips") {
-      result.sort((a, b) => (b.total_trips ?? 0) - (a.total_trips ?? 0));
-    } else if (sortBy === "rating") {
-      result.sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
-    }
-    return result;
-  }, [users, searchQuery, statusFilter, sortBy]);
+  }, [users, searchQuery, statusFilter]);
 
   const itemsPerPage = 8;
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage) || 1;
-  const paginatedUsers = filteredUsers.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+  const paginatedUsers = filteredUsers.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage,
+  );
 
   if (!users || users.length === 0) {
-    return <AnalyticsEmptyState title="No Users Data" subtitle="No users data is available for now" />;
+    return (
+      <AnalyticsEmptyState
+        title="No Users Data"
+        subtitle="No users data is available for now"
+      />
+    );
   }
 
   return (
@@ -82,53 +97,38 @@ export default function UsersTabContent({ users = [] }: UsersTabContentProps) {
           />
         </div>
 
-        <div className={styles.toolBtnWrap} onClick={(e) => e.stopPropagation()}>
+        <div
+          ref={sortWrapRef}
+          className={styles.toolBtnWrap}
+        >
           <button
             type="button"
             className={`${styles.toolBtn} ${statusFilter !== "All" ? styles.toolBtnActive : ""}`}
-            onClick={() => { setIsFilterOpen((v) => !v); setIsSortOpen(false); }}
-          >
-            <FilterIcon />
-            {statusFilter === "All" ? "Filter" : statusFilter}
-          </button>
-          {isFilterOpen && (
-            <div className={styles.popover}>
-              {(["All", "Verified", "Not Verified"] as const).map((status) => (
-                <button
-                  key={status}
-                  type="button"
-                  className={`${styles.popoverItem} ${statusFilter === status ? styles.popoverItemActive : ""}`}
-                  onClick={() => { setStatusFilter(status); setIsFilterOpen(false); setCurrentPage(1); }}
-                >
-                  {status}
-                </button>
-              ))}
-            </div>
-          )}
-        </div>
-
-        <div className={styles.toolBtnWrap} onClick={(e) => e.stopPropagation()}>
-          <button
-            type="button"
-            className={styles.toolBtn}
-            onClick={() => { setIsSortOpen((v) => !v); setIsFilterOpen(false); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsSortOpen((prev) => !prev);
+            }}
           >
             <SortIcon />
-            Sort By
+            {statusFilter === "All" ? "Sort By" : statusFilter}
           </button>
           {isSortOpen && (
             <div className={styles.popover}>
               {[
-                { label: "Newest Joined", val: "newest" },
-                { label: "Oldest Joined", val: "oldest" },
-                { label: "Most Trips", val: "trips" },
-                { label: "Highest Rating", val: "rating" },
+                { label: "Default", val: "All" },
+                { label: "Verified", val: "Verified" },
+                { label: "Not Verified", val: "Not Verified" },
               ].map((opt) => (
                 <button
                   key={opt.val}
                   type="button"
-                  className={`${styles.popoverItem} ${sortBy === opt.val ? styles.popoverItemActive : ""}`}
-                  onClick={() => { setSortBy(opt.val as any); setIsSortOpen(false); }}
+                  className={`${styles.popoverItem} ${statusFilter === opt.val ? styles.popoverItemActive : ""}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setStatusFilter(opt.val as any);
+                    setIsSortOpen(false);
+                    setCurrentPage(1);
+                  }}
                 >
                   {opt.label}
                 </button>
@@ -156,7 +156,7 @@ export default function UsersTabContent({ users = [] }: UsersTabContentProps) {
           </thead>
           <tbody>
             {paginatedUsers.map((u) => {
-              const isVerified = u.is_verified === "Verified";
+              const isVerified = checkIsVerified(u);
               const initials = u.full_name?.split(" ").map((n) => n[0]).slice(0, 2).join("").toUpperCase() || "U";
               return (
                 <tr key={u.id}>
@@ -186,26 +186,39 @@ export default function UsersTabContent({ users = [] }: UsersTabContentProps) {
                   <td>
                     <span className={isVerified ? styles.badgeVerified : styles.badgeUnverified}>
                       <span className={styles.statusDot} />
-                      {u.is_verified || "Not Verified"}
+                      {isVerified ? "Verified" : "Not Verified"}
                     </span>
                   </td>
                   <td>{formatDate(u.date_joined)}</td>
                   <td className={styles.actionsCol}>
-                    <div className={styles.kebabWrapper} onClick={(e) => e.stopPropagation()}>
+                    <div
+                      className={styles.kebabWrapper}
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <button
                         type="button"
                         className={styles.moreBtn}
                         aria-label="Actions"
-                        onClick={() => setOpenMenuId(openMenuId === u.id ? null : u.id)}
+                        onClick={() =>
+                          setOpenMenuId(openMenuId === u.id ? null : u.id)
+                        }
                       >
                         <MoreVerticalIcon />
                       </button>
                       {openMenuId === u.id && (
                         <div className={styles.kebabMenu}>
-                          <button type="button" className={styles.kebabMenuItem} onClick={() => setOpenMenuId(null)}>
+                          <button
+                            type="button"
+                            className={styles.kebabMenuItem}
+                            onClick={() => setOpenMenuId(null)}
+                          >
                             View Details
                           </button>
-                          <button type="button" className={styles.kebabMenuItem} onClick={() => setOpenMenuId(null)}>
+                          <button
+                            type="button"
+                            className={styles.kebabMenuItem}
+                            onClick={() => setOpenMenuId(null)}
+                          >
                             Export User
                           </button>
                         </div>
@@ -242,7 +255,11 @@ export default function UsersTabContent({ users = [] }: UsersTabContentProps) {
 function formatDate(dateStr: string) {
   if (!dateStr) return "-";
   try {
-    return new Date(dateStr).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    return new Date(dateStr).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
   } catch {
     return dateStr;
   }

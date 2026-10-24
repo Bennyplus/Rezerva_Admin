@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import StatCard from "@/components/admin/StatCard";
 import Pagination from "@/components/admin/Pagination";
 import Spinner from "@/components/admin/Spinner";
@@ -14,6 +14,13 @@ import {
   ApiTrip,
 } from "@/services/rides-service";
 import styles from "./rides.module.css";
+
+const STATUS_OPTIONS = [
+  { label: "Default", val: "All" },
+  { label: "Completed", val: "Completed" },
+  { label: "Cancelled", val: "Cancelled" },
+  { label: "Upcoming", val: "Upcoming" },
+];
 
 function formatTime(timeStr?: string) {
   if (!timeStr) return "—";
@@ -73,8 +80,10 @@ export default function RidesPage() {
 
   // Search & Filters
   const [searchQuery, setSearchQuery] = useState("");
-  const [sortOption, setSortOption] = useState<string>("default");
+  const [statusFilter, setStatusFilter] = useState<string>("All");
+  const [isSortOpen, setIsSortOpen] = useState(false);
   const [openMenuIdx, setOpenMenuIdx] = useState<number | null>(null);
+  const sortWrapRef = useRef<HTMLDivElement>(null);
 
   // Pagination state
   const [currentPage, setCurrentPage] = useState(1);
@@ -115,32 +124,39 @@ export default function RidesPage() {
     loadData();
   }, [loadData]);
 
-  // Close kebab menu on click outside
+  // Close kebab menu and sort popover on click outside
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      const target = e.target as HTMLElement | null;
-      if (target?.closest(`.${styles.actionMenuWrapper}`)) {
-        return;
+      if (sortWrapRef.current && !sortWrapRef.current.contains(e.target as Node)) {
+        setIsSortOpen(false);
       }
-      setOpenMenuIdx(null);
+      const target = e.target as HTMLElement | null;
+      if (!target?.closest(`.${styles.actionMenuWrapper}`)) {
+        setOpenMenuIdx(null);
+      }
     }
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   // Filter & Search Logic
   const filteredRides = useMemo(() => {
+    const q = searchQuery.trim().toLowerCase();
     return rides.filter((ride) => {
-      if (!searchQuery.trim()) return true;
-      const q = searchQuery.toLowerCase();
-      return (
+      const matchesSearch =
+        !q ||
         ride.driver.toLowerCase().includes(q) ||
         ride.origin.toLowerCase().includes(q) ||
         ride.destination.toLowerCase().includes(q) ||
-        ride.status.toLowerCase().includes(q)
-      );
+        ride.status.toLowerCase().includes(q);
+
+      const matchesStatus =
+        statusFilter === "All" ||
+        ride.status.toLowerCase() === statusFilter.toLowerCase();
+
+      return matchesSearch && matchesStatus;
     });
-  }, [rides, searchQuery]);
+  }, [rides, searchQuery, statusFilter]);
 
   // Pagination
   const totalPages = Math.max(
@@ -280,15 +296,38 @@ export default function RidesPage() {
                     />
                   </div>
 
-                  <button type="button" className={styles.toolBtn}>
-                    <FilterIcon />
-                    Filter
-                  </button>
-
-                  <button type="button" className={styles.toolBtn}>
-                    <SortIcon />
-                    Sort By
-                  </button>
+                  <div ref={sortWrapRef} className={styles.toolBtnWrap}>
+                    <button
+                      type="button"
+                      className={`${styles.toolBtn} ${statusFilter !== "All" ? styles.toolBtnActive : ""}`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setIsSortOpen((v) => !v);
+                      }}
+                    >
+                      <SortIcon />
+                      {statusFilter === "All" ? "Sort By" : statusFilter}
+                    </button>
+                    {isSortOpen && (
+                      <div className={styles.popover}>
+                        {STATUS_OPTIONS.map((opt) => (
+                          <button
+                            key={opt.val}
+                            type="button"
+                            className={`${styles.popoverItem} ${statusFilter.toLowerCase() === opt.val.toLowerCase() ? styles.popoverItemActive : ""}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setStatusFilter(opt.val);
+                              setIsSortOpen(false);
+                              setCurrentPage(1);
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -416,6 +455,13 @@ export default function RidesPage() {
                           </td>
                         </tr>
                       ))}
+                      {paginatedRides.length === 0 && (
+                        <tr>
+                          <td colSpan={8} style={{ textAlign: "center", padding: "40px", color: "#6B7280" }}>
+                            No rides found matching your search or filters.
+                          </td>
+                        </tr>
+                      )}
                     </tbody>
                   </table>
                 </div>

@@ -163,6 +163,32 @@ export interface PassengersListResponse {
   results: AdminPassengerItem[];
 }
 
+export interface FinanceSummaryResponse {
+  range: AnalyticsRange;
+  gross_revenue: MetricValue;
+  commission_earned: MetricValue;
+  total_refunds: MetricValue;
+  driver_payouts: MetricValue;
+}
+
+export interface AdminFinanceItem {
+  id?: number | string;
+  period: string;
+  revenue: number | string;
+  commission: number | string;
+  refund: number | string;
+  payout: number | string;
+  taxes: number | string;
+}
+
+export interface FinanceListResponse {
+  range?: AnalyticsRange;
+  count?: number;
+  next?: string | null;
+  previous?: string | null;
+  results?: AdminFinanceItem[];
+}
+
 export const analyticsService = {
   getOverviewSummary: async (period: string = "this_year"): Promise<OverviewSummaryResponse> => {
     const res = await publicApi.get("", { params: { path: "administration/overview/summary/", period } });
@@ -213,7 +239,7 @@ export const analyticsService = {
     return res.data;
   },
   getTripsSummary: async (period: string = "this_month"): Promise<TripsSummaryResponse> => {
-    const res = await publicApi.get("", { params: { path: "administration/trips/summary/", period } });
+    const res = await publicApi.get("", { params: { path: "administration/insights/trips/summary/", period } });
     return res.data;
   },
   getTripsList: async (params?: Record<string, any>): Promise<AdminTripItem[]> => {
@@ -234,6 +260,14 @@ export const analyticsService = {
   },
   getPassengersList: async (params?: Record<string, any>): Promise<PassengersListResponse> => {
     const res = await publicApi.get("", { params: { path: "administration/insights/passengers/", ...params } });
+    return res.data;
+  },
+  getFinanceSummary: async (period: string = "this_month"): Promise<FinanceSummaryResponse> => {
+    const res = await publicApi.get("", { params: { path: "administration/insights/finance/summary/", period } });
+    return res.data;
+  },
+  getFinanceList: async (params?: Record<string, any>): Promise<AdminFinanceItem[] | FinanceListResponse> => {
+    const res = await publicApi.get("", { params: { path: "administration/insights/finance/", ...params } });
     return res.data;
   },
   exportReportanalytics: async (format: string = "pdf") => {

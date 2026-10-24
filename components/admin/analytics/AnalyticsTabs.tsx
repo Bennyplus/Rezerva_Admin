@@ -59,6 +59,7 @@ export default function AnalyticsTabs({
         })}
       </ul>
 
+      {/* ── Toolbar: Today Filter & Export (Commented out) ──
       {showToolbar && (
         <div className={styles.toolbarRight}>
           <button
@@ -79,6 +80,7 @@ export default function AnalyticsTabs({
           </button>
         </div>
       )}
+      */}
     </div>
   );
 }

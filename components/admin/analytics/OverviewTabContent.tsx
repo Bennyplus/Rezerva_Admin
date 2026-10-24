@@ -47,23 +47,23 @@ export default function OverviewTabContent({
 }: OverviewTabContentProps) {
   return (
     <div className={styles.grid2x2}>
-      {/* Row 1 (Screenshot 2 & 3) */}
+      {/* Row 1  */}
       <MonthlyPayoutsChart payoutsData={payoutsData} />
       <RevenueTrendChart trendData={revenueTrendData} />
 
-      {/* Row 2 (Screenshot 3) */}
+      {/* Row 2 */}
       <CommissionTrendChart commissionData={commissionTrendData} />
       <UserGrowthChart userGrowthData={userGrowthData} />
 
-      {/* Row 3 (Screenshot 3 & 4) */}
+      {/* Row 3 */}
       <ActiveVsNewUsersChart activeVsNewData={activeVsNewData} />
       <RetentionRateChart retentionData={retentionData} />
 
-      {/* Row 4 (Screenshot 5) */}
+      {/* Row 4 */}
       <ChurnRateChart churnData={churnData} />
       <AverageOccupancyCard occupancyData={occupancyData} />
 
-      {/* Row 5 (Screenshot 5) */}
+      {/* Row 5 */}
       <PopularDestinationsCard destinationsData={popularDestinationsData} />
     </div>
   );

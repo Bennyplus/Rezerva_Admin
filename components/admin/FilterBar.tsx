@@ -10,6 +10,7 @@ interface FilterBarProps {
   hideSort?: boolean;
   filterDropdown?: React.ReactNode;
   sortDropdown?: React.ReactNode;
+  sortLabel?: string;
   onFilterClick?: () => void;
 }
 
@@ -21,6 +22,7 @@ export default function FilterBar({
   hideSort = false,
   filterDropdown,
   sortDropdown,
+  sortLabel,
   onFilterClick,
 }: FilterBarProps) {
   const [internalSearch, setInternalSearch] = React.useState("");
@@ -100,7 +102,7 @@ export default function FilterBar({
       {!hideSort && sortDropdown && (
         <div className={styles.popoverWrapper} ref={sortRef}>
           <button 
-            className={styles.toolBtn} 
+            className={`${styles.toolBtn} ${sortLabel && sortLabel !== "Sort By" && sortLabel !== "Default" && sortLabel !== "All" ? styles.toolBtnActive : ""}`} 
             onClick={() => setActiveDropdown(prev => prev === 'sort' ? null : 'sort')}
           >
             <Image
@@ -109,7 +111,7 @@ export default function FilterBar({
               width={16}
               height={16}
             />
-            Sort By
+            {sortLabel && sortLabel !== "Default" && sortLabel !== "All" ? sortLabel : "Sort By"}
           </button>
           {activeDropdown === 'sort' && sortDropdown && (
             <div className={styles.dropdownContainer}>

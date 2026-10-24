@@ -10,6 +10,7 @@ import UsersTabContent from "@/components/admin/analytics/UsersTabContent";
 import TripsTabContent from "@/components/admin/analytics/TripsTabContent";
 import DriversTabContent from "@/components/admin/analytics/DriversTabContent";
 import PassengersTabContent from "@/components/admin/analytics/PassengersTabContent";
+import FinanceTabContent from "@/components/admin/analytics/FinanceTabContent";
 import {
   analyticsService,
   OverviewSummaryResponse,
@@ -30,6 +31,8 @@ import {
   AdminDriverItem,
   PassengersSummaryResponse,
   AdminPassengerItem,
+  FinanceSummaryResponse,
+  AdminFinanceItem,
 } from "@/services/analytics-services";
 import styles from "./analytics.module.css";
 
@@ -60,6 +63,8 @@ export default function AnalyticsPage() {
   const [driversList, setDriversList] = useState<AdminDriverItem[]>([]);
   const [passengersSummary, setPassengersSummary] = useState<PassengersSummaryResponse | null>(null);
   const [passengersList, setPassengersList] = useState<AdminPassengerItem[]>([]);
+  const [financeSummary, setFinanceSummary] = useState<FinanceSummaryResponse | null>(null);
+  const [financeList, setFinanceList] = useState<AdminFinanceItem[]>([]);
 
   const fetchAnalyticsData = useCallback(async () => {
     setIsLoading(true);
@@ -69,6 +74,7 @@ export default function AnalyticsPage() {
         activeVsNewRes, retentionRes, churnRes, popularDestRes, occupancyRes,
         usersSummaryRes, usersListRes, tripsSummaryRes, tripsListRes,
         driversSummaryRes, driversListRes, passengersSummaryRes, passengersListRes,
+        financeSummaryRes, financeListRes,
       ] = await Promise.allSettled([
         analyticsService.getOverviewSummary("this_year"),
         analyticsService.getRevenueTrend("this_month"),
@@ -88,6 +94,8 @@ export default function AnalyticsPage() {
         analyticsService.getDriversList(),
         analyticsService.getPassengersSummary("this_month"),
         analyticsService.getPassengersList(),
+        analyticsService.getFinanceSummary("this_month"),
+        analyticsService.getFinanceList(),
       ]);
 
       const summary = summaryRes.status === "fulfilled" ? summaryRes.value : null;
@@ -126,6 +134,11 @@ export default function AnalyticsPage() {
         const p = passengersListRes.value;
         setPassengersList(Array.isArray(p) ? p : (p as any).results || []);
       }
+      if (financeSummaryRes.status === "fulfilled") setFinanceSummary(financeSummaryRes.value);
+      if (financeListRes.status === "fulfilled") {
+        const f = financeListRes.value;
+        setFinanceList(Array.isArray(f) ? f : (f as any).results || []);
+      }
 
       const hasBackendData = Boolean(
         (summary && ((summary.active_users?.value ?? 0) > 0 || (summary.platform_revenue?.value ?? 0) > 0 || (summary.completed_trips?.value ?? 0) > 0 || (summary.total_bookings?.value ?? 0) > 0)) ||
@@ -163,7 +176,8 @@ export default function AnalyticsPage() {
       <AnalyticsTabs
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        showToolbar={activeTab === "Overview" && hasData}
+        /* showToolbar={activeTab === "Overview" && hasData} -- Today filter & Export toolbar commented out */
+        showToolbar={false}
         selectedTimeframe={selectedTimeframe}
         onTimeframeChange={setSelectedTimeframe}
         onExport={handleExport}
@@ -177,6 +191,13 @@ export default function AnalyticsPage() {
             <StatCard label="Platform Revenue" value={platformRevenueVal} id="stat-platform-revenue" />
             <StatCard label="Completed Trips" value={completedTripsVal} id="stat-completed-trips" />
             <StatCard label="Total Bookings" value={totalBookingsVal} id="stat-total-bookings" />
+          </>
+        ) : activeTab === "Finance" ? (
+          <>
+            <StatCard label="Gross Revenue" value={financeSummary?.gross_revenue?.value ? `$${financeSummary.gross_revenue.value.toLocaleString()}` : (financeSummary?.gross_revenue?.value ?? 0)} growth={financeSummary?.gross_revenue?.change_pct != null ? `${financeSummary.gross_revenue.change_pct}%` : undefined} isPositive={(financeSummary?.gross_revenue?.change_pct ?? 0) >= 0} id="stat-gross-revenue" />
+            <StatCard label="Commission Earned" value={financeSummary?.commission_earned?.value ? `$${financeSummary.commission_earned.value.toLocaleString()}` : (financeSummary?.commission_earned?.value ?? 0)} growth={financeSummary?.commission_earned?.change_pct != null ? `${financeSummary.commission_earned.change_pct}%` : undefined} isPositive={(financeSummary?.commission_earned?.change_pct ?? 0) >= 0} id="stat-commission-earned" />
+            <StatCard label="Total Refunds" value={financeSummary?.total_refunds?.value ? `$${financeSummary.total_refunds.value.toLocaleString()}` : (financeSummary?.total_refunds?.value ?? 0)} growth={financeSummary?.total_refunds?.change_pct != null ? `${financeSummary.total_refunds.change_pct}%` : undefined} isPositive={(financeSummary?.total_refunds?.change_pct ?? 0) >= 0} id="stat-total-refunds" />
+            <StatCard label="Driver Payouts" value={financeSummary?.driver_payouts?.value ? `$${financeSummary.driver_payouts.value.toLocaleString()}` : (financeSummary?.driver_payouts?.value ?? 0)} growth={financeSummary?.driver_payouts?.change_pct != null ? `${financeSummary.driver_payouts.change_pct}%` : undefined} isPositive={(financeSummary?.driver_payouts?.change_pct ?? 0) >= 0} id="stat-driver-payouts" />
           </>
         ) : activeTab === "Users" ? (
           <>
@@ -233,6 +254,8 @@ export default function AnalyticsPage() {
         )
       ) : activeTab === "Users" ? (
         <UsersTabContent users={usersList} isLoading={isLoading} />
+      ) : activeTab === "Finance" ? (
+        <FinanceTabContent financeItems={financeList} isLoading={isLoading} />
       ) : activeTab === "Trips" ? (
         <TripsTabContent trips={tripsList} isLoading={isLoading} />
       ) : activeTab === "Drivers" ? (
@@ -240,7 +263,7 @@ export default function AnalyticsPage() {
       ) : activeTab === "Passengers" ? (
         <PassengersTabContent passengers={passengersList} isLoading={isLoading} />
       ) : (
-        <AnalyticsEmptyState title={`No ${activeTab} Data`} subtitle={`No ${activeTab.toLowerCase()} data is available for now`} />
+        <AnalyticsEmptyState title={`No ${activeTab as string} Data`} subtitle={`No ${(activeTab as string).toLowerCase()} data is available for now`} />
       )}
     </div>
   );

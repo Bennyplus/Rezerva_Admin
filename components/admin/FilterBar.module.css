@@ -59,6 +59,12 @@
   background: var(--admin-content-bg, #F6F8FA);
 }
 
+.toolBtnActive {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
 .popoverWrapper {
   position: relative;
   display: inline-block;
