@@ -54,6 +54,18 @@ export interface Driver {
   };
 }
 
+export interface PendingDriverItem {
+  id: string;
+  name: string;
+  driverCode: string;
+  phone: string;
+  email: string;
+  status: "Under Review" | "Pending" | "Verified" | "Rejected";
+  avatar?: string;
+  licenseNumber?: string;
+  raw?: any;
+}
+
 export const driversService = {
   getDrivers: async (): Promise<Driver[]> => {
     try {
@@ -70,6 +82,26 @@ export const driversService = {
       return raw.map((item: any) => mapDriver(item));
     } catch (error) {
       console.error('Failed to get drivers:', error);
+      throw error;
+    }
+  },
+
+  getPendingDrivers: async (): Promise<PendingDriverItem[]> => {
+    try {
+      const response = await publicApi.get('', {
+        params: {
+          path: 'administration/users/',
+          user_type: 'DRIVER',
+          status: 'pending',
+        },
+      });
+      const raw =
+        response?.data?.results ||
+        response?.data?.data ||
+        (Array.isArray(response?.data) ? response.data : []);
+      return raw.map((item: any, idx: number) => mapPendingDriver(item, idx));
+    } catch (error) {
+      console.error('Failed to get pending drivers:', error);
       throw error;
     }
   },
@@ -355,3 +387,62 @@ function mapDriver(item: any): Driver {
     },
   };
 }
+
+export function mapPendingDriver(item: any, idx: number): PendingDriverItem {
+  const profile = item?.profile || {};
+  const statusRaw = (
+    item?.status ||
+    profile?.status ||
+    item?.verification_status ||
+    item?.account_status ||
+    "Pending"
+  ).toString();
+
+  let status: "Under Review" | "Pending" | "Verified" | "Rejected" = "Pending";
+  const sLower = statusRaw.toLowerCase();
+  if (sLower.includes("review")) {
+    status = "Under Review";
+  } else if (
+    sLower.includes("verif") ||
+    item?.is_verified === true ||
+    item?.is_verified === "Verified"
+  ) {
+    status = "Verified";
+  } else if (
+    sLower.includes("reject") ||
+    sLower.includes("fail") ||
+    sLower.includes("suspend")
+  ) {
+    status = "Rejected";
+  } else {
+    status = "Pending";
+  }
+
+  const dialCode = profile?.dial_code ? `${profile.dial_code} ` : "";
+  const rawPhone =
+    profile?.phone_number || item?.phone_number || item?.phone || "N/A";
+  const phone = rawPhone.startsWith("+")
+    ? rawPhone
+    : `${dialCode}${rawPhone}`.trim();
+
+  return {
+    id: String(item.id ?? profile.user ?? `pend-${idx + 1}`),
+    name: profile.full_name || item.full_name || item.name || "N/A",
+    driverCode:
+      profile.referral_code ||
+      item.referral_code ||
+      item.driver_code ||
+      `DRI-ID01-${item.id ?? idx + 1}`,
+    phone: phone || "N/A",
+    email: profile.email || item.email || "N/A",
+    status,
+    avatar:
+      profile.profile_picture ||
+      item.profile_picture ||
+      item.avatar ||
+      "/images/admin/profile-Avatar.svg",
+    licenseNumber: profile.license_number || item.license_number || "N/A",
+    raw: item,
+  };
+}
+

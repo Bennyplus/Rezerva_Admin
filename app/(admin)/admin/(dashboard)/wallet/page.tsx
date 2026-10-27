@@ -6,7 +6,7 @@ import Pagination from "@/components/admin/Pagination";
 import WalletDetailView, {
   WalletDetailData,
 } from "@/components/admin/WalletDetailView";
-import { walletService, ApiWallet } from "@/services/wallet-service";
+import { walletService, ApiWallet, WalletSummary } from "@/services/wallet-service";
 import styles from "./wallet.module.css";
 
 type CustomerWallet = WalletDetailData;
@@ -58,6 +58,7 @@ export default function WalletPage() {
 
   // Data & API states
   const [wallets, setWallets] = useState<CustomerWallet[]>([]);
+  const [summary, setSummary] = useState<WalletSummary | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -72,11 +73,26 @@ export default function WalletPage() {
     setIsLoading(true);
     setError(null);
     try {
-      const data = await walletService.getWallets();
-      if (Array.isArray(data) && data.length > 0) {
-        setWallets(data.map(mapApiToWallet));
+      const [walletsRes, summaryRes] = await Promise.allSettled([
+        walletService.getWallets(),
+        walletService.getSummary(),
+      ]);
+
+      if (walletsRes.status === "fulfilled") {
+        const data = walletsRes.value;
+        if (Array.isArray(data) && data.length > 0) {
+          setWallets(data.map(mapApiToWallet));
+        } else {
+          setWallets([]);
+        }
       } else {
-        setWallets([]);
+        console.error("Failed to load wallets from API:", walletsRes.reason);
+      }
+
+      if (summaryRes.status === "fulfilled") {
+        setSummary(summaryRes.value);
+      } else {
+        console.error("Failed to load wallet summary from API:", summaryRes.reason);
       }
     } catch (err: any) {
       console.error("Failed to load wallets from API:", err);
@@ -114,6 +130,16 @@ export default function WalletPage() {
 
   // Dynamic stats calculation
   const totalBalance = wallets.reduce((acc, w) => acc + w.availableBalance, 0);
+
+  const formatStatValue = (val?: string | number) => {
+    if (val === undefined || val === null) return "0.00";
+    const num = typeof val === "number" ? val : parseFloat(val);
+    if (isNaN(num)) return String(val);
+    return num.toLocaleString("en-US", {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
 
   const filteredWallets = wallets.filter((w) => {
     if (!searchQuery) return true;
@@ -159,6 +185,7 @@ export default function WalletPage() {
               setWallets((prev) =>
                 prev.map((w) => (w.id === selectedWallet.id ? updated : w)),
               );
+              walletService.getSummary().then(setSummary).catch(() => {});
             } catch (e) {
               console.error("Credit API error:", e);
               throw e;
@@ -181,6 +208,7 @@ export default function WalletPage() {
               setWallets((prev) =>
                 prev.map((w) => (w.id === selectedWallet.id ? updated : w)),
               );
+              walletService.getSummary().then(setSummary).catch(() => {});
             } catch (e) {
               console.error("Debit API error:", e);
               throw e;
@@ -208,6 +236,7 @@ export default function WalletPage() {
               setWallets((prev) =>
                 prev.map((w) => (w.id === selectedWallet.id ? updated : w)),
               );
+              walletService.getSummary().then(setSummary).catch(() => {});
             } catch (e) {
               console.error("Freeze API error:", e);
               throw e;
@@ -224,15 +253,24 @@ export default function WalletPage() {
       <div className={styles.statsGrid}>
         <StatCard
           label="Total Balance"
-          value={totalBalance.toLocaleString("en-US", {
-            minimumFractionDigits: 0,
-            maximumFractionDigits: 2,
-          })}
+          value={formatStatValue(summary?.total_balance ?? totalBalance)}
           id="stat-total-balance"
         />
-        <StatCard label="Pending Balance" value={0} id="stat-pending-balance" />
-        <StatCard label="Deposits" value={0} id="stat-deposits" />
-        <StatCard label="Withdrawals" value={0} id="stat-withdrawals" />
+        <StatCard
+          label="Pending Balance"
+          value={formatStatValue(summary?.pending_balance ?? 0)}
+          id="stat-pending-balance"
+        />
+        <StatCard
+          label="Deposits"
+          value={formatStatValue(summary?.deposits ?? 0)}
+          id="stat-deposits"
+        />
+        <StatCard
+          label="Withdrawals"
+          value={formatStatValue(summary?.withdrawals ?? 0)}
+          id="stat-withdrawals"
+        />
       </div>
 
       {/* ── Tabs Navigation ── */}

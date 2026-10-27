@@ -148,6 +148,10 @@ export default function FilterDropdown({ tabs, onClose = () => { }, onApply, ini
   const [selectedValues, setSelectedValues] = useState<Record<string, string[]>>(initialFilters);
 
   useEffect(() => {
+    setSelectedValues(initialFilters || {});
+  }, [initialFilters]);
+
+  useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
         onClose();
@@ -172,10 +176,7 @@ export default function FilterDropdown({ tabs, onClose = () => { }, onApply, ini
   };
 
   const handleClear = () => {
-    setSelectedValues(prev => ({
-      ...prev,
-      [activeTab]: []
-    }));
+    setSelectedValues({});
   };
 
   const handleApply = () => {

@@ -12,7 +12,25 @@ export interface ApiWallet {
   username?: string;
 }
 
+export interface WalletSummary {
+  total_balance: string;
+  pending_balance: string;
+  deposits: string;
+  withdrawals: string;
+}
+
 export const walletService = {
+  /**
+   * Fetch wallet insights summary
+   * GET administration/insights/wallets/summary/
+   */
+  getSummary: async (): Promise<WalletSummary> => {
+    const response = await publicApi.get("", {
+      params: { path: "administration/insights/wallets/summary/" },
+    });
+    return response.data;
+  },
+
   /**
    * List Wallet (Customer & Driver)
    * GET administration/wallet/

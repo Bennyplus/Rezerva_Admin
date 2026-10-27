@@ -10,13 +10,69 @@ interface EmergencyIncidentsTableProps {
   onSelectIncident: (incident: EmergencyIncident) => void;
 }
 
+type SortOption =
+  | "default"
+  | "newest"
+  | "oldest"
+  | "priority"
+  | "priority_low"
+  | "status";
+
+const SORT_OPTIONS: { label: string; val: SortOption }[] = [
+  { label: "Default", val: "default" },
+  { label: "Newest First", val: "newest" },
+  { label: "Oldest First", val: "oldest" },
+];
+
+function parseTimestamp(val: any): number {
+  if (!val) return 0;
+  if (typeof val === "number") return val;
+  if (typeof val !== "string") return 0;
+
+  const trimmed = val.trim();
+  if (!trimmed) return 0;
+
+  // 1. Try standard Date.parse (works for ISO strings like "2026-09-22T16:59:32.624Z")
+  let time = Date.parse(trimmed);
+  if (!isNaN(time)) return time;
+
+  // 2. Fix missing space before AM/PM: e.g. "11 May 2026 11:34AM" -> "11 May 2026 11:34 AM"
+  const withAmPmSpace = trimmed.replace(
+    /(\d{1,2}:\d{2}(?::\d{2})?)\s*([ap]m)/i,
+    "$1 $2",
+  );
+  time = Date.parse(withAmPmSpace);
+  if (!isNaN(time)) return time;
+
+  // 3. Handle "DD/MM/YYYY" or "DD-MM-YYYY" formats
+  const dmyMatch = trimmed.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{4})(.*)$/);
+  if (dmyMatch) {
+    const [, day, month, year, rest] = dmyMatch;
+    const isoLike = `${year}-${month.padStart(2, "0")}-${day.padStart(2, "0")}${rest || ""}`;
+    time = Date.parse(isoLike);
+    if (!isNaN(time)) return time;
+  }
+
+  return 0;
+}
+
+function getPriorityWeight(priority?: string): number {
+  if (!priority) return 0;
+  const p = priority.toString().trim().toLowerCase();
+  if (p === "critical" || p === "urgent") return 4;
+  if (p === "high") return 3;
+  if (p === "medium") return 2;
+  if (p === "low") return 1;
+  return 0;
+}
+
 export default function EmergencyIncidentsTable({
   incidents = [],
   onSelectIncident,
 }: EmergencyIncidentsTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [priorityFilter, setPriorityFilter] = useState<string>("All");
-  const [sortBy, setSortBy] = useState<"default" | "newest" | "priority">("default");
+  const [sortBy, setSortBy] = useState<SortOption>("default");
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isSortOpen, setIsSortOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | number | null>(null);
@@ -41,17 +97,71 @@ export default function EmergencyIncidentsTable({
         item.sosId?.toLowerCase().includes(query) ||
         item.triggeredBy?.toLowerCase().includes(query) ||
         item.location?.toLowerCase().includes(query) ||
-        item.userType?.toLowerCase().includes(query);
-      const matchPriority = priorityFilter === "All" || item.priority === priorityFilter;
+        item.userType?.toLowerCase().includes(query) ||
+        item.priority?.toLowerCase().includes(query) ||
+        item.status?.toLowerCase().includes(query);
+
+      const matchPriority =
+        priorityFilter === "All" ||
+        (item.priority &&
+          item.priority.toString().toLowerCase() ===
+            priorityFilter.toLowerCase());
+
       return matchQuery && matchPriority;
     });
 
     if (sortBy === "priority") {
-      const priorityOrder: Record<string, number> = { High: 3, Medium: 2, Low: 1 };
-      result.sort((a, b) => (priorityOrder[b.priority] || 0) - (priorityOrder[a.priority] || 0));
+      result.sort((a, b) => {
+        const diff =
+          getPriorityWeight(b.priority) - getPriorityWeight(a.priority);
+        if (diff !== 0) return diff;
+        return parseTimestamp(b.timestamp) - parseTimestamp(a.timestamp);
+      });
+    } else if (sortBy === "priority_low") {
+      result.sort((a, b) => {
+        const diff =
+          getPriorityWeight(a.priority) - getPriorityWeight(b.priority);
+        if (diff !== 0) return diff;
+        return parseTimestamp(b.timestamp) - parseTimestamp(a.timestamp);
+      });
     } else if (sortBy === "newest") {
-      result.sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime());
+      result.sort((a, b) => {
+        const timeA = parseTimestamp(a.timestamp);
+        const timeB = parseTimestamp(b.timestamp);
+        if (timeA && timeB && timeA !== timeB) {
+          return timeB - timeA;
+        }
+        const idA =
+          typeof a.id === "number"
+            ? a.id
+            : parseInt(String(a.id).replace(/\D/g, ""), 10) || 0;
+        const idB =
+          typeof b.id === "number"
+            ? b.id
+            : parseInt(String(b.id).replace(/\D/g, ""), 10) || 0;
+        return idB - idA;
+      });
+    } else if (sortBy === "oldest") {
+      result.sort((a, b) => {
+        const timeA = parseTimestamp(a.timestamp);
+        const timeB = parseTimestamp(b.timestamp);
+        if (timeA && timeB && timeA !== timeB) {
+          return timeA - timeB;
+        }
+        const idA =
+          typeof a.id === "number"
+            ? a.id
+            : parseInt(String(a.id).replace(/\D/g, ""), 10) || 0;
+        const idB =
+          typeof b.id === "number"
+            ? b.id
+            : parseInt(String(b.id).replace(/\D/g, ""), 10) || 0;
+        return idA - idB;
+      });
+    } else if (sortBy === "status") {
+      result.sort((a, b) => (a.status || "").localeCompare(b.status || ""));
     }
+
     return result;
   }, [incidents, searchQuery, priorityFilter, sortBy]);
 
@@ -59,8 +169,11 @@ export default function EmergencyIncidentsTable({
   const totalPages = Math.ceil(filteredIncidents.length / itemsPerPage) || 1;
   const paginatedIncidents = filteredIncidents.slice(
     (currentPage - 1) * itemsPerPage,
-    currentPage * itemsPerPage
+    currentPage * itemsPerPage,
   );
+
+  const activeSortLabel =
+    SORT_OPTIONS.find((opt) => opt.val === sortBy)?.label || "Sort by";
 
   return (
     <div className={styles.container}>
@@ -72,19 +185,29 @@ export default function EmergencyIncidentsTable({
             type="text"
             placeholder="Search..."
             value={searchQuery}
-            onChange={(e) => { setSearchQuery(e.target.value); setCurrentPage(1); }}
+            onChange={(e) => {
+              setSearchQuery(e.target.value);
+              setCurrentPage(1);
+            }}
             className={styles.searchInput}
           />
         </div>
 
-        <div className={styles.toolBtnWrap} onClick={(e) => e.stopPropagation()}>
+        {/* ── Filter Button ── */}
+        <div
+          className={styles.toolBtnWrap}
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             type="button"
             className={`${styles.toolBtn} ${priorityFilter !== "All" ? styles.toolBtnActive : ""}`}
-            onClick={() => { setIsFilterOpen((v) => !v); setIsSortOpen(false); }}
+            onClick={() => {
+              setIsFilterOpen((v) => !v);
+              setIsSortOpen(false);
+            }}
           >
             <FilterIcon />
-            {priorityFilter === "All" ? "Filter" : priorityFilter}
+            {priorityFilter === "All" ? "Filter" : `${priorityFilter} Priority`}
           </button>
           {isFilterOpen && (
             <div className={styles.popover}>
@@ -93,7 +216,11 @@ export default function EmergencyIncidentsTable({
                   key={p}
                   type="button"
                   className={`${styles.popoverItem} ${priorityFilter === p ? styles.popoverItemActive : ""}`}
-                  onClick={() => { setPriorityFilter(p); setIsFilterOpen(false); setCurrentPage(1); }}
+                  onClick={() => {
+                    setPriorityFilter(p);
+                    setIsFilterOpen(false);
+                    setCurrentPage(1);
+                  }}
                 >
                   {p === "All" ? "All Priorities" : `${p} Priority`}
                 </button>
@@ -102,27 +229,34 @@ export default function EmergencyIncidentsTable({
           )}
         </div>
 
-        <div className={styles.toolBtnWrap} onClick={(e) => e.stopPropagation()}>
+        {/* ── Sort Button ── */}
+        <div
+          className={styles.toolBtnWrap}
+          onClick={(e) => e.stopPropagation()}
+        >
           <button
             type="button"
-            className={styles.toolBtn}
-            onClick={() => { setIsSortOpen((v) => !v); setIsFilterOpen(false); }}
+            className={`${styles.toolBtn} ${sortBy !== "default" ? styles.toolBtnActive : ""}`}
+            onClick={() => {
+              setIsSortOpen((v) => !v);
+              setIsFilterOpen(false);
+            }}
           >
             <SortIcon />
-            Sort by
+            {sortBy === "default" ? "Sort by" : activeSortLabel}
           </button>
           {isSortOpen && (
             <div className={styles.popover}>
-              {[
-                { label: "Default", val: "default" },
-                { label: "Newest First", val: "newest" },
-                { label: "Highest Priority", val: "priority" },
-              ].map((opt) => (
+              {SORT_OPTIONS.map((opt) => (
                 <button
                   key={opt.val}
                   type="button"
                   className={`${styles.popoverItem} ${sortBy === opt.val ? styles.popoverItemActive : ""}`}
-                  onClick={() => { setSortBy(opt.val as any); setIsSortOpen(false); }}
+                  onClick={() => {
+                    setSortBy(opt.val);
+                    setIsSortOpen(false);
+                    setCurrentPage(1);
+                  }}
                 >
                   {opt.label}
                 </button>
@@ -149,12 +283,22 @@ export default function EmergencyIncidentsTable({
           </thead>
           <tbody>
             {paginatedIncidents.map((row) => {
-              const priorityClass =
-                row.priority === "High"
-                  ? styles.priorityHigh
-                  : row.priority === "Medium"
+              const pLower = (row.priority || "").toString().toLowerCase();
+              const isHigh =
+                pLower === "high" ||
+                pLower === "critical" ||
+                pLower === "urgent";
+              const isMed = pLower === "medium";
+              const priorityClass = isHigh
+                ? styles.priorityHigh
+                : isMed
                   ? styles.priorityMedium
                   : styles.priorityLow;
+              const flagColor = isHigh
+                ? "#DC2626"
+                : isMed
+                  ? "#EA580C"
+                  : "#2563EB";
 
               return (
                 <tr key={row.id} onClick={() => onSelectIncident(row)}>
@@ -164,7 +308,7 @@ export default function EmergencyIncidentsTable({
                   <td>{row.userType || "—"}</td>
                   <td>
                     <span className={priorityClass}>
-                      <FlagIcon fill={row.priority === "High" ? "#DC2626" : row.priority === "Medium" ? "#EA580C" : "#2563EB"} />
+                      <FlagIcon fill={flagColor} />
                       {row.priority || "Low"}
                     </span>
                   </td>
@@ -188,7 +332,9 @@ export default function EmergencyIncidentsTable({
                         aria-label="Actions"
                         onClick={(e) => {
                           e.stopPropagation();
-                          setOpenMenuId((prev) => (prev === row.id ? null : row.id));
+                          setOpenMenuId((prev) =>
+                            prev === row.id ? null : row.id,
+                          );
                         }}
                       >
                         <MoreVerticalIcon />
@@ -243,17 +389,88 @@ export default function EmergencyIncidentsTable({
 }
 
 function SearchIcon() {
-  return (<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="#868C98" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><circle cx={11} cy={11} r={8} /><line x1={21} y1={21} x2={16.65} y2={16.65} /></svg>);
+  return (
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#868C98"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <circle cx={11} cy={11} r={8} />
+      <line x1={21} y1={21} x2={16.65} y2={16.65} />
+    </svg>
+  );
 }
 function FilterIcon() {
-  return (<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><line x1={4} y1={6} x2={20} y2={6} /><line x1={7} y1={12} x2={17} y2={12} /><line x1={10} y1={18} x2={14} y2={18} /></svg>);
+  return (
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <line x1={4} y1={6} x2={20} y2={6} />
+      <line x1={7} y1={12} x2={17} y2={12} />
+      <line x1={10} y1={18} x2={14} y2={18} />
+    </svg>
+  );
 }
 function SortIcon() {
-  return (<svg width={16} height={16} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M7 3v14" /><path d="M3 7l4-4 4 4" /><path d="M17 21V7" /><path d="M21 17l-4 4-4-4" /></svg>);
+  return (
+    <svg
+      width={16}
+      height={16}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <path d="M7 3v14" />
+      <path d="M3 7l4-4 4 4" />
+      <path d="M17 21V7" />
+      <path d="M21 17l-4 4-4-4" />
+    </svg>
+  );
 }
 function FlagIcon({ fill = "#2563EB" }: { fill?: string }) {
-  return (<svg width={14} height={14} viewBox="0 0 24 24" fill={fill} stroke={fill} strokeWidth={1}><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" /><line x1="4" y1="22" x2="4" y2="15" /></svg>);
+  return (
+    <svg
+      width={14}
+      height={14}
+      viewBox="0 0 24 24"
+      fill={fill}
+      stroke={fill}
+      strokeWidth={1}
+    >
+      <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z" />
+      <line x1="4" y1="22" x2="4" y2="15" />
+    </svg>
+  );
 }
 function MoreVerticalIcon() {
-  return (<svg width={18} height={18} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round"><circle cx={12} cy={5} r={1} /><circle cx={12} cy={12} r={1} /><circle cx={12} cy={19} r={1} /></svg>);
+  return (
+    <svg
+      width={18}
+      height={18}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={2}
+      strokeLinecap="round"
+    >
+      <circle cx={12} cy={5} r={1} />
+      <circle cx={12} cy={12} r={1} />
+      <circle cx={12} cy={19} r={1} />
+    </svg>
+  );
 }

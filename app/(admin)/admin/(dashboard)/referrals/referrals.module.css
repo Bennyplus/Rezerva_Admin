@@ -102,6 +102,10 @@
   color: #868c98;
 }
 
+.toolBtnWrap {
+  position: relative;
+}
+
 .toolBtn {
   display: flex;
   align-items: center;
@@ -115,13 +119,59 @@
   font-weight: 500;
   color: #525866;
   cursor: pointer;
-  transition: background 0.15s ease, border-color 0.15s ease;
+  transition: all 0.15s ease;
 }
 
 .toolBtn:hover {
   background: #f9fafb;
   border-color: #d1d5db;
 }
+
+.toolBtnActive {
+  background: #eff6ff;
+  border-color: #2563eb;
+  color: #2563eb;
+}
+
+/* ─── Dropdown Popovers ─── */
+.popover {
+  position: absolute;
+  top: calc(100% + 6px);
+  left: 0;
+  background: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  min-width: 160px;
+  z-index: 60;
+  padding: 6px 0;
+  border: 1px solid #e2e4e9;
+}
+
+.popoverItem {
+  display: block;
+  width: 100%;
+  padding: 8px 14px;
+  background: transparent;
+  border: none;
+  font-size: 13px;
+  font-weight: 500;
+  color: #374151;
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s ease;
+}
+
+.popoverItem:hover {
+  background: #f6f8fa;
+  color: #111827;
+}
+
+.popoverItemActive {
+  background: #eff6ff;
+  color: #2563eb;
+  font-weight: 600;
+}
+
 
 /* ─── Table Card & Table (Screenshot 2) ─── */
 .tableCard {
@@ -133,7 +183,7 @@
 }
 
 .tableWrap {
-  overflow-x: auto;
+  
   border-radius: 8px;
 }
 

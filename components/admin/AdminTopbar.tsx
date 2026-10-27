@@ -100,6 +100,11 @@ const PAGE_META: Record<string, { title: string; subtitle: string }> = {
     title: "Support Center",
     subtitle: "Manage customer support requests, reports, and complaints",
   },
+  "/admin/content": {
+    title: "Content Management",
+    subtitle:
+      "Manage platform content, legal pages, and in-app resources from one place.",
+  },
 };
 
 export default function AdminTopbar() {

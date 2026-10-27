@@ -155,11 +155,38 @@
   background: #F9FAFB;
 }
 
+.toolBtnActive {
+  border-color: #111111;
+  background: #F4F5F7;
+  color: #111111;
+  font-weight: 600;
+}
+
+.clearFilterBtn {
+  font-size: 13px;
+  color: #667085;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-decoration: underline;
+  padding: 0 4px;
+  font-family: inherit;
+}
+
+.clearFilterBtn:hover {
+  color: #111111;
+}
+
 .dropdownContainer {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   left: 0;
+  background: #ffffff;
+  border: 1px solid #E2E4E9;
+  border-radius: 12px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
   z-index: 100;
+  overflow: hidden;
 }
 
 /* ─── Table ─── */

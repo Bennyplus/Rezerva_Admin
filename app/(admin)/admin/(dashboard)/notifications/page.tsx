@@ -15,6 +15,31 @@ import SortDropdown from "@/components/admin/SortDropdown";
 import MoreIcon from "@/components/admin/icons/MoreIcon";
 import styles from "./notifications.module.css";
 
+const NOTIFICATION_FILTER_TABS = [
+  {
+    id: "statuses",
+    label: "Status",
+    options: ["Sent", "Draft", "Scheduled", "Active", "Inactive"],
+  },
+  {
+    id: "channels",
+    label: "Channel",
+    options: ["Email", "SMS", "Push", "In-App", "All Channels"],
+  },
+  {
+    id: "recipients",
+    label: "Recipients",
+    options: ["All Users", "All Vendors", "All Admins", "Specific Users"],
+  },
+];
+
+const NOTIFICATION_SORT_OPTIONS = [
+  { label: "Newest to Oldest", value: "date_desc" },
+  { label: "Oldest to Newest", value: "date_asc" },
+  { label: "Title A to Z", value: "title_asc" },
+  { label: "Title Z to A", value: "title_desc" },
+];
+
 export default function NotificationsPage() {
   const [isEmpty, setIsEmpty] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -85,9 +110,17 @@ export default function NotificationsPage() {
     setSelectedNotificationId(id);
   };
 
+  const totalActiveFilters =
+    (activeFilters.statuses?.length || 0) +
+    (activeFilters.channels?.length || 0) +
+    (activeFilters.recipients?.length || 0);
+
+  const activeSortLabel =
+    NOTIFICATION_SORT_OPTIONS.find((s) => s.value === sortOption)?.label || "Sort By";
+
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchQuery]);
+  }, [searchQuery, activeFilters, sortOption]);
 
   useEffect(() => {
     fetchNotifications();
@@ -98,42 +131,78 @@ export default function NotificationsPage() {
     let result = [...notificationlist];
 
     if (searchQuery) {
-      const q = searchQuery.toLowerCase();
+      const q = searchQuery.toLowerCase().trim();
       result = result.filter(
         (notif) =>
-          notif?.title?.toLowerCase().includes(q) ||
-          notif?.delivery_channel?.toLowerCase().includes(q),
+          (notif?.title || "").toLowerCase().includes(q) ||
+          (notif?.delivery_channel || notif?.channel || "")
+            .toLowerCase()
+            .includes(q) ||
+          (notif?.recipient_type || notif?.recipients || "")
+            .toLowerCase()
+            .includes(q) ||
+          (notif?.status || "").toLowerCase().includes(q),
       );
     }
 
-    if (activeFilters.statuses.length > 0) {
-      result = result.filter((notif) =>
-        activeFilters.statuses.includes(notif?.status),
-      );
+    if (activeFilters.statuses && activeFilters.statuses.length > 0) {
+      const selectedStatuses = activeFilters.statuses.map((s) => s.toLowerCase());
+      result = result.filter((notif) => {
+        const notifStatus = (notif?.status || "").toLowerCase();
+        return selectedStatuses.includes(notifStatus);
+      });
     }
 
-    if (activeFilters.channels.length > 0) {
-      const channelsLower = activeFilters.channels.map((c) => c.toLowerCase());
-      result = result.filter((notif) =>
-        channelsLower.includes(notif?.delivery_channel?.toLowerCase()),
+    if (activeFilters.channels && activeFilters.channels.length > 0) {
+      const channelsLower = activeFilters.channels.map((c) =>
+        c === "All Channels" ? "all" : c.toLowerCase().replace(/[\s-]+/g, "_"),
       );
+      result = result.filter((notif) => {
+        const ch = (notif?.delivery_channel || notif?.channel || "")
+          .toLowerCase()
+          .replace(/[\s-]+/g, "_");
+        return channelsLower.some(
+          (f) =>
+            f === "all" ||
+            ch === "all" ||
+            ch === f ||
+            ch.includes(f) ||
+            f.includes(ch),
+        );
+      });
+    }
+
+    if (activeFilters.recipients && activeFilters.recipients.length > 0) {
+      const recLower = activeFilters.recipients.map((r) =>
+        r === "Specific Users" ? "specific" : r.toLowerCase().replace(/[\s-]+/g, "_"),
+      );
+      result = result.filter((notif) => {
+        const rec = (notif?.recipient_type || notif?.recipients || "")
+          .toLowerCase()
+          .replace(/[\s-]+/g, "_");
+        return recLower.some(
+          (f) => rec === f || rec.includes(f) || f.includes(rec),
+        );
+      });
     }
 
     result.sort((a, b) => {
-      if (sortOption === "title_asc")
+      if (sortOption === "title_asc") {
         return (a?.title || "").localeCompare(b?.title || "");
-      if (sortOption === "title_desc")
+      }
+      if (sortOption === "title_desc") {
         return (b?.title || "").localeCompare(a?.title || "");
-      if (sortOption === "date_asc")
-        return (
-          new Date(a?.created_at || 0).getTime() -
-          new Date(b?.created_at || 0).getTime()
-        );
-      if (sortOption === "date_desc")
-        return (
-          new Date(b?.created_at || 0).getTime() -
-          new Date(a?.created_at || 0).getTime()
-        );
+      }
+      if (sortOption === "date_asc") {
+        const dateA = new Date(a?.created_at || a?.createdOn || 0).getTime();
+        const dateB = new Date(b?.created_at || b?.createdOn || 0).getTime();
+        return (isNaN(dateA) ? 0 : dateA) - (isNaN(dateB) ? 0 : dateB);
+      }
+      if (sortOption === "date_desc") {
+        const dateA = new Date(a?.created_at || a?.createdOn || 0).getTime();
+        const dateB = new Date(b?.created_at || b?.createdOn || 0).getTime();
+        return (isNaN(dateB) ? 0 : dateB) - (isNaN(dateA) ? 0 : dateA);
+      }
       return 0;
     });
 
@@ -269,43 +338,31 @@ export default function NotificationsPage() {
               <FilterBar
                 searchValue={searchQuery}
                 onSearchChange={setSearchQuery}
+                isFilterActive={totalActiveFilters > 0}
+                filterCount={totalActiveFilters}
+                sortLabel={activeSortLabel}
                 filterDropdown={
                   <FilterDropdown
-                    tabs={[
-                      {
-                        id: "statuses",
-                        label: "Status",
-                        options: ["Active", "Inactive"],
-                      },
-                      {
-                        id: "channels",
-                        label: "Channel",
-                        options: ["Push", "Email", "In-App"],
-                      },
-                      {
-                        id: "recipients",
-                        label: "Recipients",
-                        options: ["All", "Drivers", "Customers"],
-                      },
-                    ]}
-                    onApply={(filters) =>
+                    initialFilters={activeFilters}
+                    tabs={NOTIFICATION_FILTER_TABS}
+                    onApply={(filters) => {
                       setActiveFilters({
                         statuses: filters.statuses || [],
                         channels: filters.channels || [],
                         recipients: filters.recipients || [],
-                      })
-                    }
+                      });
+                      setCurrentPage(1);
+                    }}
                   />
                 }
                 sortDropdown={
                   <SortDropdown
-                    options={[
-                      { label: "Newest to Oldest", value: "date_desc" },
-                      { label: "Oldest to Newest", value: "date_asc" },
-                      { label: "Title A to Z", value: "title_asc" },
-                      { label: "Title Z to A", value: "title_desc" },
-                    ]}
-                    onSortSelect={setSortOption}
+                    options={NOTIFICATION_SORT_OPTIONS}
+                    selectedOption={sortOption}
+                    onSortSelect={(val) => {
+                      setSortOption(val);
+                      setCurrentPage(1);
+                    }}
                   />
                 }
               />
@@ -342,68 +399,97 @@ export default function NotificationsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredAndSortedList.map((notif) => (
-                    <tr key={notif?.id}>
-                      <td className={styles.checkCol}>
-                        <input
-                          type="checkbox"
-                          className={styles.checkbox}
-                          aria-label={`Select notification ${notif?.title}`}
-                        />
-                      </td>
-                      <td>{notif?.title}</td>
-                      <td style={{ textTransform: "capitalize" }}>
-                        {notif?.delivery_channel}
-                      </td>
-                      <td>{notif?.recipient_count}</td>
-                      <td>
-                        <span
-                          className={styles.statusBadge}
-                          data-status={notif?.status}
-                        >
-                          <span className={styles.statusDot} />
-                          {notif?.status}
-                        </span>
-                      </td>
-                      <td>{notif?.created_at?.slice(0, 10)}</td>
-                      <td>
-                        <div style={{ position: "relative" }}>
-                          <button
-                            className={styles.moreBtn}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              toggleDropdown(notif?.id);
-                            }}
-                          >
-                            <MoreIcon />
-                          </button>
-                          {activeDropdown === notif.id && (
-                            <div className={styles.dropdown}>
-                              <button
-                                className={styles.dropdownItem}
-                                onClick={() => handleViewDetails(notif.id)}
-                              >
-                                View Details
-                              </button>
-                              <button
-                                className={styles.dropdownItem}
-                                onClick={() => handleSendNotification(notif.id)}
-                              >
-                                Send / Publish
-                              </button>
-                            </div>
-                          )}
-                        </div>
+                  {filteredAndSortedList.length === 0 ? (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        style={{
+                          textAlign: "center",
+                          padding: "48px 16px",
+                          color: "#6B7280",
+                          fontSize: "14px",
+                        }}
+                      >
+                        No notifications found matching your search or filters.
                       </td>
                     </tr>
-                  ))}
+                  ) : (
+                    filteredAndSortedList.map((notif) => (
+                      <tr key={notif?.id}>
+                        <td className={styles.checkCol}>
+                          <input
+                            type="checkbox"
+                            className={styles.checkbox}
+                            aria-label={`Select notification ${notif?.title}`}
+                          />
+                        </td>
+                        <td>{notif?.title}</td>
+                        <td style={{ textTransform: "capitalize" }}>
+                          {notif?.delivery_channel || notif?.channel || "-"}
+                        </td>
+                        <td>
+                          {notif?.recipient_count ??
+                            notif?.recipients ??
+                            notif?.recipient_type ??
+                            "-"}
+                        </td>
+                        <td>
+                          <span
+                            className={styles.statusBadge}
+                            data-status={notif?.status?.toLowerCase()}
+                          >
+                            <span className={styles.statusDot} />
+                            {notif?.status}
+                          </span>
+                        </td>
+                        <td>
+                          {(notif?.created_at
+                            ? notif.created_at.slice(0, 10)
+                            : notif?.createdOn) || "-"}
+                        </td>
+                        <td>
+                          <div style={{ position: "relative" }}>
+                            <button
+                              className={styles.moreBtn}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                toggleDropdown(notif?.id);
+                              }}
+                            >
+                              <MoreIcon />
+                            </button>
+                            {activeDropdown === notif.id && (
+                              <div className={styles.dropdown}>
+                                <button
+                                  className={styles.dropdownItem}
+                                  onClick={() => handleViewDetails(notif.id)}
+                                >
+                                  View Details
+                                </button>
+                                <button
+                                  className={styles.dropdownItem}
+                                  onClick={() => handleSendNotification(notif.id)}
+                                >
+                                  Send / Publish
+                                </button>
+                              </div>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
                 </tbody>
               </table>
             </div>
 
             <Pagination
               currentPage={currentPage}
-              totalPages={Math.ceil(totalCount / 10) || 1}
+              totalPages={
+                searchQuery || totalActiveFilters > 0
+                  ? Math.max(1, Math.ceil(filteredAndSortedList.length / 10))
+                  : Math.max(1, Math.ceil(totalCount / 10))
+              }
               resultsPerPage={10}
               onPageChange={setCurrentPage}
               variant="table"

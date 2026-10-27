@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import Pagination from "@/components/admin/Pagination";
 import SuspendDriverModal from "@/components/admin/SuspendDriverModal";
@@ -10,120 +10,104 @@ import SortDropdown from "@/components/admin/SortDropdown";
 import AddDriverModal from "@/components/admin/AddDriverModal";
 import Spinner from "@/components/admin/Spinner";
 import MoreIcon from "@/components/admin/icons/MoreIcon";
-import { type Driver, driversService } from "@/services/drivers-service";
+import {
+  type Driver,
+  type PendingDriverItem,
+  driversService,
+} from "@/services/drivers-service";
 import styles from "./drivers.module.css";
 
 type TabType = "pending" | "drivers";
 
-export interface PendingDriverItem {
-  id: string;
-  name: string;
-  driverCode: string;
-  phone: string;
-  email: string;
-  status: "Under Review" | "Pending" | "Verified" | "Rejected";
-  avatar?: string;
-  licenseNumber?: string;
-}
-
-const INITIAL_PENDING_DRIVERS: PendingDriverItem[] = [
-  {
-    id: "pend-1",
-    name: "Bessie Cooper",
-    driverCode: "DRI-ID01-123",
-    phone: "(252) 555-0126",
-    email: "sara.cruz@example.com",
-    status: "Under Review",
-    avatar: "/images/reliableandsecure-female.png",
-  },
-  {
-    id: "pend-2",
-    name: "Jacob Jones",
-    driverCode: "DRI-ID01-123",
-    phone: "(205) 555-0100",
-    email: "alma.lawson@example.com",
-    status: "Pending",
-    avatar: "/images/man-img.png",
-  },
-  {
-    id: "pend-3",
-    name: "Courtney Henry",
-    driverCode: "DRI-ID01-123",
-    phone: "(307) 555-0133",
-    email: "michael.mitc@example.com",
-    status: "Verified",
-    avatar: "/images/man-img.png",
-  },
-  {
-    id: "pend-4",
-    name: "Jerome Bell",
-    driverCode: "DRI-ID01-123",
-    phone: "(603) 555-0123",
-    email: "willie.jennings@example.com",
-    status: "Rejected",
-    avatar: "/images/reliableandsecure-female.png",
-  },
-  {
-    id: "pend-5",
-    name: "Dianne Russell",
-    driverCode: "DRI-ID01-123",
-    phone: "(319) 555-0115",
-    email: "kenzi.lawson@example.com",
-    status: "Pending",
-    avatar: "/images/man-img.png",
-  },
-  {
-    id: "pend-6",
-    name: "Cameron Williamson",
-    driverCode: "DRI-ID01-123",
-    phone: "(201) 555-0124",
-    email: "debbie.baker@example.com",
-    status: "Rejected",
-    avatar: "/images/man-img.png",
-  },
-];
-
 export default function DriversPage() {
   const [activeTab, setActiveTab] = useState<TabType>("pending");
   const [drivers, setDrivers] = useState<Driver[]>([]);
-  const [pendingDrivers, setPendingDrivers] = useState<PendingDriverItem[]>(INITIAL_PENDING_DRIVERS);
+  const [pendingDrivers, setPendingDrivers] = useState<PendingDriverItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDriverId, setSelectedDriverId] = useState<string | null>(null);
-  const [suspendTarget, setSuspendTarget] = useState<Driver | PendingDriverItem | null>(null);
+  const [suspendTarget, setSuspendTarget] = useState<
+    Driver | PendingDriverItem | null
+  >(null);
   const [openKebab, setOpenKebab] = useState<string | null>(null);
   const [sortOption, setSortOption] = useState<string>("Name A to Z");
-  const [activeDriverFilters, setActiveDriverFilters] = useState<{ status: string[] }>({ status: [] });
+  const [driverFilters, setDriverFilters] = useState<{
+    status: string[];
+    availability?: string[];
+    licenseStatus?: string[];
+  }>({ status: [] });
+  const [pendingFilters, setPendingFilters] = useState<{
+    status: string[];
+  }>({ status: [] });
 
-  const [activeDropdown, setActiveDropdown] = useState<"filter" | "sort" | null>(null);
+  const [activeDropdown, setActiveDropdown] = useState<
+    "filter" | "sort" | null
+  >(null);
   const [isAddDriverOpen, setIsAddDriverOpen] = useState(false);
 
-  const fetchDrivers = async () => {
+  const filterWrapRef = useRef<HTMLDivElement>(null);
+  const sortWrapRef = useRef<HTMLDivElement>(null);
+
+  const loadDriversData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await driversService.getDrivers();
-      setDrivers(data);
+      const [driversData, pendingData] = await Promise.allSettled([
+        driversService.getDrivers(),
+        driversService.getPendingDrivers(),
+      ]);
+
+      if (driversData.status === "fulfilled") {
+        setDrivers(driversData.value);
+      } else {
+        console.error("Failed to fetch drivers:", driversData.reason);
+      }
+
+      if (pendingData.status === "fulfilled") {
+        setPendingDrivers(pendingData.value);
+      } else {
+        console.error("Failed to fetch pending drivers:", pendingData.reason);
+      }
     } catch (error) {
-      console.error("Failed to fetch drivers:", error);
+      console.error("Failed to fetch drivers data:", error);
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
-    fetchDrivers();
-  }, []);
+    loadDriversData();
+  }, [loadDriversData]);
 
   // Close menus on outside click
   useEffect(() => {
-    const handleGlobalClick = () => {
-      setOpenKebab(null);
-      setActiveDropdown(null);
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+
+      if (
+        activeDropdown === "filter" &&
+        filterWrapRef.current &&
+        !filterWrapRef.current.contains(target)
+      ) {
+        setActiveDropdown(null);
+      }
+
+      if (
+        activeDropdown === "sort" &&
+        sortWrapRef.current &&
+        !sortWrapRef.current.contains(target)
+      ) {
+        setActiveDropdown(null);
+      }
+
+      if (!target?.closest(`.${styles.kebabWrap}`)) {
+        setOpenKebab(null);
+      }
     };
-    window.addEventListener("click", handleGlobalClick);
-    return () => window.removeEventListener("click", handleGlobalClick);
-  }, []);
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [activeDropdown]);
 
   /* ─── Filter & Sort for Active Tab ─── */
   const filteredDrivers = (() => {
@@ -134,14 +118,30 @@ export default function DriversPage() {
       d.phone.includes(searchQuery)
     );
 
-    if (activeDriverFilters.status && activeDriverFilters.status.length > 0) {
-      result = result.filter((d) => activeDriverFilters.status.includes(d.status));
+    if (driverFilters.status && driverFilters.status.length > 0) {
+      result = result.filter((d) => driverFilters.status.includes(d.status));
+    }
+    const availFilters = driverFilters.availability;
+    if (availFilters && availFilters.length > 0) {
+      result = result.filter((d) => availFilters.includes(d.availability));
+    }
+    const licFilters = driverFilters.licenseStatus;
+    if (licFilters && licFilters.length > 0) {
+      result = result.filter((d) => licFilters.includes(d.licenseStatus));
     }
 
     if (sortOption === "Name A to Z") {
       result.sort((a, b) => a.name.localeCompare(b.name));
     } else if (sortOption === "Name Z to A") {
       result.sort((a, b) => b.name.localeCompare(a.name));
+    } else if (sortOption === "Total Trips (High to Low)") {
+      result.sort((a, b) => (b.totalTrips || 0) - (a.totalTrips || 0));
+    } else if (sortOption === "Total Trips (Low to High)") {
+      result.sort((a, b) => (a.totalTrips || 0) - (b.totalTrips || 0));
+    } else if (sortOption === "Rating (High to Low)") {
+      result.sort((a, b) => (b.rating || 0) - (a.rating || 0));
+    } else if (sortOption === "Rating (Low to High)") {
+      result.sort((a, b) => (a.rating || 0) - (b.rating || 0));
     }
 
     return result;
@@ -155,8 +155,8 @@ export default function DriversPage() {
       d.phone.includes(searchQuery)
     );
 
-    if (activeDriverFilters.status && activeDriverFilters.status.length > 0) {
-      result = result.filter((d) => activeDriverFilters.status.includes(d.status));
+    if (pendingFilters.status && pendingFilters.status.length > 0) {
+      result = result.filter((d) => pendingFilters.status.includes(d.status));
     }
 
     if (sortOption === "Name A to Z") {
@@ -201,9 +201,27 @@ export default function DriversPage() {
         )
       );
       setSuspendTarget(null);
+      loadDriversData();
     } catch (error) {
       console.error("Failed to suspend user:", error);
       throw error;
+    }
+  };
+
+  /* ─── Verify handler ─── */
+  const handleVerifyDriver = async (driverId: string) => {
+    setOpenKebab(null);
+    setPendingDrivers((prev) =>
+      prev.map((d) =>
+        d.id === driverId ? { ...d, status: "Verified" as const } : d
+      )
+    );
+    try {
+      await driversService.verifyDriver(driverId);
+      loadDriversData();
+    } catch (error) {
+      console.error("Failed to verify driver:", error);
+      loadDriversData();
     }
   };
 
@@ -306,6 +324,7 @@ export default function DriversPage() {
           onClick={() => {
             setActiveTab("pending");
             setCurrentPage(1);
+            setActiveDropdown(null);
           }}
           id="tab-pending-drivers"
         >
@@ -316,6 +335,7 @@ export default function DriversPage() {
           onClick={() => {
             setActiveTab("drivers");
             setCurrentPage(1);
+            setActiveDropdown(null);
           }}
           id="tab-drivers"
         >
@@ -343,34 +363,87 @@ export default function DriversPage() {
           <div className={styles.actionsWrap}>
             {/* Filter Popover */}
             <div
+              ref={filterWrapRef}
               className={styles.popoverWrapper}
-              onClick={(e) => e.stopPropagation()}
             >
               <button
-                className={styles.toolBtn}
+                type="button"
+                className={`${styles.toolBtn} ${
+                  (activeTab === "pending"
+                    ? pendingFilters.status.length
+                    : (driverFilters.status?.length || 0) +
+                      (driverFilters.availability?.length || 0) +
+                      (driverFilters.licenseStatus?.length || 0)) > 0
+                    ? styles.toolBtnActive
+                    : ""
+                }`}
+                onMouseDown={(e) => e.stopPropagation()}
                 onClick={() =>
                   setActiveDropdown((prev) => (prev === "filter" ? null : "filter"))
                 }
                 id="filter-btn"
               >
                 <FilterIcon />
-                Filter
+                {(activeTab === "pending"
+                  ? pendingFilters.status.length
+                  : (driverFilters.status?.length || 0) +
+                    (driverFilters.availability?.length || 0) +
+                    (driverFilters.licenseStatus?.length || 0)) > 0
+                  ? `Filter (${
+                      activeTab === "pending"
+                        ? pendingFilters.status.length
+                        : (driverFilters.status?.length || 0) +
+                          (driverFilters.availability?.length || 0) +
+                          (driverFilters.licenseStatus?.length || 0)
+                    })`
+                  : "Filter"}
               </button>
               {activeDropdown === "filter" && (
                 <div className={styles.dropdownContainer}>
                   <FilterDropdown
-                    tabs={[
-                      {
-                        id: "status",
-                        label: "Status",
-                        options:
-                          activeTab === "pending"
-                            ? ["Under Review", "Pending", "Verified", "Rejected"]
-                            : ["Active", "Inactive", "Suspended", "Deactivated"],
-                      },
-                    ]}
+                    tabs={
+                      activeTab === "pending"
+                        ? [
+                            {
+                              id: "status",
+                              label: "Status",
+                              options: ["Under Review", "Pending", "Verified", "Rejected"],
+                            },
+                          ]
+                        : [
+                            {
+                              id: "status",
+                              label: "Account Status",
+                              options: ["Active", "Inactive", "Suspended", "Deactivated"],
+                            },
+                            {
+                              id: "availability",
+                              label: "Availability",
+                              options: ["Available", "On Trip", "Offline"],
+                            },
+                            {
+                              id: "licenseStatus",
+                              label: "License Status",
+                              options: ["Valid", "Expired"],
+                            },
+                          ]
+                    }
+                    initialFilters={
+                      activeTab === "pending"
+                        ? pendingFilters
+                        : (driverFilters as Record<string, string[]>)
+                    }
                     onApply={(filters) => {
-                      setActiveDriverFilters({ status: filters.status || [] });
+                      if (activeTab === "pending") {
+                        setPendingFilters({ status: filters.status || [] });
+                      } else {
+                        setDriverFilters({
+                          status: filters.status || [],
+                          availability: filters.availability || [],
+                          licenseStatus: filters.licenseStatus || [],
+                        });
+                      }
+                      setCurrentPage(1);
                       setActiveDropdown(null);
                     }}
                     onClose={() => setActiveDropdown(null)}
@@ -381,28 +454,45 @@ export default function DriversPage() {
 
             {/* Sort By Popover */}
             <div
+              ref={sortWrapRef}
               className={styles.popoverWrapper}
-              onClick={(e) => e.stopPropagation()}
             >
               <button
-                className={styles.toolBtn}
+                type="button"
+                className={`${styles.toolBtn} ${sortOption && sortOption !== "Default" && sortOption !== "Name A to Z" ? styles.toolBtnActive : ""}`}
+                onMouseDown={(e) => e.stopPropagation()}
                 onClick={() =>
                   setActiveDropdown((prev) => (prev === "sort" ? null : "sort"))
                 }
                 id="sort-btn"
               >
                 <SortIcon />
-                Sort by
+                {sortOption && sortOption !== "Default" ? sortOption : "Sort by"}
               </button>
               {activeDropdown === "sort" && (
                 <div className={styles.dropdownContainer}>
                   <SortDropdown
-                    options={[
-                      { label: "Name A to Z", value: "Name A to Z" },
-                      { label: "Name Z to A", value: "Name Z to A" },
-                    ]}
+                    options={
+                      activeTab === "pending"
+                        ? [
+                            { label: "Default", value: "Default" },
+                            { label: "Name A to Z", value: "Name A to Z" },
+                            { label: "Name Z to A", value: "Name Z to A" },
+                          ]
+                        : [
+                            { label: "Default", value: "Default" },
+                            { label: "Name A to Z", value: "Name A to Z" },
+                            { label: "Name Z to A", value: "Name Z to A" },
+                            { label: "Total Trips (High to Low)", value: "Total Trips (High to Low)" },
+                            { label: "Total Trips (Low to High)", value: "Total Trips (Low to High)" },
+                            { label: "Rating (High to Low)", value: "Rating (High to Low)" },
+                            { label: "Rating (Low to High)", value: "Rating (Low to High)" },
+                          ]
+                    }
+                    selectedOption={sortOption}
                     onSortSelect={(val) => {
                       setSortOption(val);
+                      setCurrentPage(1);
                       setActiveDropdown(null);
                     }}
                     onClose={() => setActiveDropdown(null)}
@@ -410,6 +500,27 @@ export default function DriversPage() {
                 </div>
               )}
             </div>
+
+            {(activeTab === "pending"
+              ? pendingFilters.status.length > 0
+              : (driverFilters.status?.length || 0) +
+                  (driverFilters.availability?.length || 0) +
+                  (driverFilters.licenseStatus?.length || 0) > 0) && (
+              <button
+                type="button"
+                className={styles.clearFilterBtn}
+                onClick={() => {
+                  if (activeTab === "pending") {
+                    setPendingFilters({ status: [] });
+                  } else {
+                    setDriverFilters({ status: [] });
+                  }
+                  setCurrentPage(1);
+                }}
+              >
+                Clear filters
+              </button>
+            )}
           </div>
         </div>
 
@@ -521,16 +632,7 @@ export default function DriversPage() {
                             </button>
                             <button
                               className={styles.kebabItem}
-                              onClick={() => {
-                                setOpenKebab(null);
-                                setPendingDrivers((prev) =>
-                                  prev.map((d) =>
-                                    d.id === driver.id
-                                      ? { ...d, status: "Verified" as const }
-                                      : d
-                                  )
-                                );
-                              }}
+                              onClick={() => handleVerifyDriver(driver.id)}
                             >
                               Verify Driver
                             </button>

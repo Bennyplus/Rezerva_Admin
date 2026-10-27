@@ -13,7 +13,9 @@ interface ReportDetailViewProps {
   onContactReportedUser?: () => void;
   onEscalate?: () => void;
   onCloseTicket?: () => void;
+  onResolveTicket?: () => void;
 }
+
 
 function getString(val: any, fallback = "—"): string {
   if (!val) return fallback;
@@ -31,6 +33,7 @@ export default function ReportDetailView({
   onContactReportedUser,
   onEscalate,
   onCloseTicket,
+  onResolveTicket,
 }: ReportDetailViewProps) {
   const [isStatusOpen, setIsStatusOpen] = useState(false);
   const [copiedField, setCopiedField] = useState<string | null>(null);
@@ -281,7 +284,7 @@ export default function ReportDetailView({
               <button
                 type="button"
                 className={styles.actionBtn}
-                onClick={() => onContactReporter?.() || alert("Opening contact reporter...")}
+                onClick={() => onContactReporter?.()}
               >
                 <span>Contact Reporter</span>
                 <ChevronRightIcon />
@@ -289,7 +292,7 @@ export default function ReportDetailView({
               <button
                 type="button"
                 className={styles.actionBtn}
-                onClick={() => onContactReportedUser?.() || alert("Opening contact reported user...")}
+                onClick={() => onContactReportedUser?.()}
               >
                 <span>Contact Reported User</span>
                 <ChevronRightIcon />
@@ -297,7 +300,7 @@ export default function ReportDetailView({
               <button
                 type="button"
                 className={styles.actionBtn}
-                onClick={() => onEscalate?.() || alert("Case escalated.")}
+                onClick={() => onEscalate?.()}
               >
                 <span>Escalate</span>
                 <ChevronRightIcon />
@@ -305,7 +308,15 @@ export default function ReportDetailView({
               <button
                 type="button"
                 className={styles.actionBtn}
-                onClick={() => onCloseTicket?.() || alert("Ticket closed.")}
+                onClick={() => onResolveTicket?.()}
+              >
+                <span>Resolve Ticket</span>
+                <ChevronRightIcon />
+              </button>
+              <button
+                type="button"
+                className={styles.actionBtn}
+                onClick={() => onCloseTicket?.()}
               >
                 <span>Close Ticket</span>
                 <ChevronRightIcon />

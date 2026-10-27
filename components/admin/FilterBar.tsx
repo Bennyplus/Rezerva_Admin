@@ -1,6 +1,6 @@
-import React from 'react';
-import Image from 'next/image';
-import styles from './FilterBar.module.css';
+import React from "react";
+import Image from "next/image";
+import styles from "./FilterBar.module.css";
 
 interface FilterBarProps {
   searchPlaceholder?: string;
@@ -11,6 +11,8 @@ interface FilterBarProps {
   filterDropdown?: React.ReactNode;
   sortDropdown?: React.ReactNode;
   sortLabel?: string;
+  isFilterActive?: boolean;
+  filterCount?: number;
   onFilterClick?: () => void;
 }
 
@@ -23,29 +25,42 @@ export default function FilterBar({
   filterDropdown,
   sortDropdown,
   sortLabel,
+  isFilterActive = false,
+  filterCount = 0,
   onFilterClick,
 }: FilterBarProps) {
   const [internalSearch, setInternalSearch] = React.useState("");
-  const [activeDropdown, setActiveDropdown] = React.useState<'filter' | 'sort' | null>(null);
-  
+  const [activeDropdown, setActiveDropdown] = React.useState<
+    "filter" | "sort" | null
+  >(null);
+
   const filterRef = React.useRef<HTMLDivElement>(null);
   const sortRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (activeDropdown === 'filter' && filterRef.current && !filterRef.current.contains(e.target as Node)) {
+      if (
+        activeDropdown === "filter" &&
+        filterRef.current &&
+        !filterRef.current.contains(e.target as Node)
+      ) {
         setActiveDropdown(null);
       }
-      if (activeDropdown === 'sort' && sortRef.current && !sortRef.current.contains(e.target as Node)) {
+      if (
+        activeDropdown === "sort" &&
+        sortRef.current &&
+        !sortRef.current.contains(e.target as Node)
+      ) {
         setActiveDropdown(null);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, [activeDropdown]);
-  
-  const currentSearch = searchValue !== undefined ? searchValue : internalSearch;
-  
+
+  const currentSearch =
+    searchValue !== undefined ? searchValue : internalSearch;
+
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
     setInternalSearch(val);
@@ -74,13 +89,15 @@ export default function FilterBar({
       </div>
       {!hideFilter && filterDropdown && (
         <div className={styles.popoverWrapper} ref={filterRef}>
-          <button 
-            className={styles.toolBtn} 
+          <button
+            className={`${styles.toolBtn} ${isFilterActive ? styles.toolBtnActive : ""}`}
             onClick={() => {
               if (onFilterClick) {
                 onFilterClick();
               } else {
-                setActiveDropdown(prev => prev === 'filter' ? null : 'filter');
+                setActiveDropdown((prev) =>
+                  prev === "filter" ? null : "filter",
+                );
               }
             }}
           >
@@ -90,20 +107,29 @@ export default function FilterBar({
               width={16}
               height={16}
             />
-            Filter
+            {filterCount && filterCount > 0
+              ? `Filter (${filterCount})`
+              : "Filter"}
           </button>
-          {activeDropdown === 'filter' && filterDropdown && (
+          {activeDropdown === "filter" && filterDropdown && (
             <div className={styles.dropdownContainer}>
-              {React.isValidElement(filterDropdown) ? React.cloneElement(filterDropdown as React.ReactElement<any>, { onClose: () => setActiveDropdown(null) }) : filterDropdown}
+              {React.isValidElement(filterDropdown)
+                ? React.cloneElement(
+                    filterDropdown as React.ReactElement<any>,
+                    { onClose: () => setActiveDropdown(null) },
+                  )
+                : filterDropdown}
             </div>
           )}
         </div>
       )}
       {!hideSort && sortDropdown && (
         <div className={styles.popoverWrapper} ref={sortRef}>
-          <button 
-            className={`${styles.toolBtn} ${sortLabel && sortLabel !== "Sort By" && sortLabel !== "Default" && sortLabel !== "All" ? styles.toolBtnActive : ""}`} 
-            onClick={() => setActiveDropdown(prev => prev === 'sort' ? null : 'sort')}
+          <button
+            className={`${styles.toolBtn} ${sortLabel && sortLabel !== "Sort By" && sortLabel !== "Default" && sortLabel !== "All" ? styles.toolBtnActive : ""}`}
+            onClick={() =>
+              setActiveDropdown((prev) => (prev === "sort" ? null : "sort"))
+            }
           >
             <Image
               src="/images/admin/sidebar-icons/sort.svg"
@@ -111,11 +137,17 @@ export default function FilterBar({
               width={16}
               height={16}
             />
-            {sortLabel && sortLabel !== "Default" && sortLabel !== "All" ? sortLabel : "Sort By"}
+            {sortLabel && sortLabel !== "Default" && sortLabel !== "All"
+              ? sortLabel
+              : "Sort By"}
           </button>
-          {activeDropdown === 'sort' && sortDropdown && (
+          {activeDropdown === "sort" && sortDropdown && (
             <div className={styles.dropdownContainer}>
-              {React.isValidElement(sortDropdown) ? React.cloneElement(sortDropdown as React.ReactElement<any>, { onClose: () => setActiveDropdown(null) }) : sortDropdown}
+              {React.isValidElement(sortDropdown)
+                ? React.cloneElement(sortDropdown as React.ReactElement<any>, {
+                    onClose: () => setActiveDropdown(null),
+                  })
+                : sortDropdown}
             </div>
           )}
         </div>

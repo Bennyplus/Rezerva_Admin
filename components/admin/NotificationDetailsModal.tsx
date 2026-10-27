@@ -50,6 +50,10 @@ export default function NotificationDetailsModal({ onClose, notificationId }: No
     switch (type.toLowerCase()) {
       case "all_users":
         return "All Users";
+      case "all_vendors":
+        return "All Vendors";
+      case "all_admins":
+        return "All Admins";
       case "drivers":
         return "Drivers";
       case "customers":
@@ -63,14 +67,18 @@ export default function NotificationDetailsModal({ onClose, notificationId }: No
   };
 
   const formatChannel = (channel?: string) => {
-    if (!channel) return "Email Notification";
+    if (!channel) return "Email";
     switch (channel.toLowerCase()) {
       case "email":
-        return "Email Notification";
+        return "Email";
+      case "sms":
+        return "SMS";
       case "push":
         return "Push Notification";
       case "in_app":
-        return "In-App Notification";
+        return "In-App";
+      case "all":
+        return "All Channels";
       default:
         return channel.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
     }

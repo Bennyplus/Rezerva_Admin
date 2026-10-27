@@ -9,14 +9,61 @@ import {
   reportsService,
   ReportTicket,
   ReportsSummary,
+  BackendSafetyReportItem,
 } from "@/services/reports-service";
 import styles from "./reports.module.css";
 
 function extractStr(val: any): string {
   if (!val) return "";
   if (typeof val === "string") return val;
+  if (typeof val === "number") return String(val);
   if (typeof val === "object") return val.name || val.location || val.address || "";
   return String(val);
+}
+
+/** Normalise severity/priority label from backend to our union */
+function normalizePriority(severity?: string): "Low" | "Medium" | "High" {
+  const s = (severity || "").toUpperCase();
+  if (s === "CRITICAL" || s === "HIGH") return "High";
+  if (s === "MEDIUM" || s === "MODERATE") return "Medium";
+  return "Low";
+}
+
+/** Normalise status string from backend */
+function normalizeStatus(
+  status?: string,
+): "Under Review" | "Closed" | "Resolved" | "Active Investigation" | "SUBMITTED" | "OPEN" | "CLOSED" | "" {
+  const s = (status || "").toUpperCase();
+  if (s === "SUBMITTED" || s === "OPEN") return s as any;
+  if (s === "CLOSED" || s === "RESOLVED") return s as any;
+  if (s === "UNDER_REVIEW" || s === "UNDER REVIEW") return "Under Review";
+  if (s === "ACTIVE_INVESTIGATION" || s === "ACTIVE INVESTIGATION") return "Active Investigation";
+  return (status as any) || "";
+}
+
+function normalizeReport(item: BackendSafetyReportItem, idx: number): ReportTicket {
+  return {
+    id: item.id ?? idx + 1,
+    reportId: extractStr(item.report_id || item.code) || `#RP-${String(idx + 1).padStart(3, "0")}`,
+    date: extractStr(item.created_at || item.date || item.timestamp),
+    category: extractStr(item.report_type || item.category || "General"),
+    userType: (item.user_type as any) || "",
+    priority: normalizePriority(item.severity || item.priority),
+    reportedUser: extractStr(item.reported_user || item.reported_user_name || item.user) || "—",
+    status: normalizeStatus(item.status),
+    victim: extractStr(item.reporter_name || item.victim),
+    bookingId: extractStr(item.booking_id || item.booking),
+    pickUp: extractStr(item.pickup || item.pick_up),
+    dropOff: extractStr(item.dropoff || item.drop_off),
+    trip: extractStr(item.trip),
+    tripStatus: extractStr(item.trip_status || ""),
+    driverId: extractStr(item.driver_id),
+    passengerId: extractStr(item.passenger_id),
+    description: extractStr(item.description),
+    resolutionNotes: extractStr(item.resolution_notes),
+    timeline: Array.isArray(item.timeline) ? item.timeline : undefined,
+    raw: item,
+  };
 }
 
 export default function ReportsPage() {
@@ -33,40 +80,26 @@ export default function ReportsPage() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      const data = await reportsService.getDashboard();
-      if (data?.stats) {
+      // Fire both requests in parallel
+      const [summaryData, reportsData] = await Promise.allSettled([
+        reportsService.getSummary(),
+        reportsService.getReports(1),
+      ]);
+
+      // ── Stats ──
+      if (summaryData.status === "fulfilled") {
+        const s = summaryData.value;
         setSummary({
-          openReports: data.stats.open_reports ?? data.stats.open_report ?? 0,
-          highPriorityCases: data.stats.high_priority_cases ?? 0,
-          activeInvestigations: data.stats.active_investigations ?? 0,
-          suspendedUsers: data.stats.suspended_users ?? 0,
+          openReports: s.open_report ?? 0,
+          highPriorityCases: s.high_priority_cases ?? 0,
+          activeInvestigations: s.active_reports ?? 0,
+          suspendedUsers: s.suspended_users ?? 0,
         });
       }
 
-      const list = data?.reports || data?.results || data?.tickets || (Array.isArray(data) ? data : []);
-      if (Array.isArray(list)) {
-        const normalized: ReportTicket[] = list.map((item: any, idx: number) => ({
-          id: item.id || idx + 1,
-          reportId: item.report_id || item.code || `#RP-${String(idx + 1).padStart(3, "0")}`,
-          date: extractStr(item.date || item.timestamp || item.created_at),
-          category: extractStr(item.category || "General"),
-          userType: (item.user_type as any) || "Driver",
-          priority: (item.priority as any) || "Low",
-          reportedUser: extractStr(item.reported_user || item.reported_user_name || item.user),
-          status: (item.status as any) || "Under Review",
-          victim: extractStr(item.victim || item.reporter_name),
-          bookingId: extractStr(item.booking_id || item.booking),
-          pickUp: extractStr(item.pickup || item.pick_up),
-          dropOff: extractStr(item.dropoff || item.drop_off),
-          trip: extractStr(item.trip || "One-Time"),
-          tripStatus: extractStr(item.trip_status || "Completed"),
-          driverId: extractStr(item.driver_id),
-          passengerId: extractStr(item.passenger_id),
-          description: extractStr(item.description),
-          resolutionNotes: extractStr(item.resolution_notes),
-          timeline: Array.isArray(item.timeline) ? item.timeline : undefined,
-          raw: item,
-        }));
+      // ── Reports list ──
+      if (reportsData.status === "fulfilled") {
+        const normalized = reportsData.value.results.map(normalizeReport);
         setReports(normalized);
       }
     } catch (err) {
@@ -90,7 +123,7 @@ export default function ReportsPage() {
             if (!prev) return prev;
             return {
               ...prev,
-              victim: extractStr(detail.victim || detail.reporter_name || prev.victim),
+              victim: extractStr(detail.reporter_name || detail.victim || prev.victim),
               bookingId: extractStr(detail.booking_id || prev.bookingId),
               pickUp: extractStr(detail.pickup || detail.pick_up || prev.pickUp),
               dropOff: extractStr(detail.dropoff || detail.drop_off || prev.dropOff),
@@ -111,35 +144,96 @@ export default function ReportsPage() {
     }
   };
 
-  const handleUpdateStatus = async (reportOrStatus: ReportTicket | string, newStatus?: string) => {
-    const reportToUpdate = typeof reportOrStatus === "string" ? selectedReport : reportOrStatus;
-    const statusVal = typeof reportOrStatus === "string" ? reportOrStatus : (newStatus || "Resolved");
-    
-    if (!reportToUpdate) return;
-
-    // Optimistic update
+  const handleClose = async (report: ReportTicket) => {
     setReports((prev) =>
-      prev.map((r) => (r.id === reportToUpdate.id ? { ...r, status: statusVal as any } : r))
+      prev.map((r) => (r.id === report.id ? { ...r, status: "Closed" } : r))
     );
-    if (selectedReport && selectedReport.id === reportToUpdate.id) {
-      setSelectedReport((prev) => (prev ? { ...prev, status: statusVal as any } : null));
+    if (selectedReport && selectedReport.id === report.id) {
+      setSelectedReport((prev) => (prev ? { ...prev, status: "Closed" } : null));
     }
-
     try {
-      await reportsService.updateReportStatus(reportToUpdate.id, statusVal);
+      await reportsService.closeReport(report.id);
+      fetchData();
     } catch (e) {
-      console.error("Failed to update report status:", e);
+      console.error("Failed to close report:", e);
+      fetchData();
+    }
+  };
+
+  const handleResolve = async (report: ReportTicket) => {
+    setReports((prev) =>
+      prev.map((r) => (r.id === report.id ? { ...r, status: "Resolved" } : r))
+    );
+    if (selectedReport && selectedReport.id === report.id) {
+      setSelectedReport((prev) => (prev ? { ...prev, status: "Resolved" } : null));
+    }
+    try {
+      await reportsService.resolveReport(report.id);
+      fetchData();
+    } catch (e) {
+      console.error("Failed to resolve report:", e);
+      fetchData();
     }
   };
 
   const handleEscalate = async (report: ReportTicket) => {
     setReports((prev) =>
-      prev.map((r) => (r.id === report.id ? { ...r, priority: "High" } : r))
+      prev.map((r) => (r.id === report.id ? { ...r, priority: "High" } : r)),
     );
+    if (selectedReport && selectedReport.id === report.id) {
+      setSelectedReport((prev) => (prev ? { ...prev, priority: "High" } : null));
+    }
     try {
       await reportsService.escalateReport(report.id);
+      fetchData();
     } catch (e) {
       console.error("Failed to escalate report:", e);
+      fetchData();
+    }
+  };
+
+  const handleUpdateStatus = async (
+    reportOrStatus: ReportTicket | string,
+    newStatus?: string,
+  ) => {
+    const reportToUpdate =
+      typeof reportOrStatus === "string" ? selectedReport : reportOrStatus;
+    const statusVal =
+      typeof reportOrStatus === "string"
+        ? reportOrStatus
+        : newStatus || "Resolved";
+
+    if (!reportToUpdate) return;
+
+    const s = statusVal.toLowerCase();
+    if (s.includes("close")) {
+      return await handleClose(reportToUpdate);
+    }
+    if (s.includes("resolve")) {
+      return await handleResolve(reportToUpdate);
+    }
+    if (s.includes("escalat")) {
+      return await handleEscalate(reportToUpdate);
+    }
+
+    // Generic fallback for any other status
+    setReports((prev) =>
+      prev.map((r) =>
+        r.id === reportToUpdate.id ? { ...r, status: statusVal as any } : r,
+      ),
+    );
+    if (selectedReport && selectedReport.id === reportToUpdate.id) {
+      setSelectedReport((prev) =>
+        prev ? { ...prev, status: statusVal as any } : null,
+      );
+    }
+
+    try {
+      await reportsService.updateReportStatus(reportToUpdate.id, statusVal);
+      fetchData();
+    } catch (e) {
+      console.error("Failed to update report status:", e);
+      fetchData();
     }
   };
 
@@ -151,7 +245,8 @@ export default function ReportsPage() {
           onBack={() => setSelectedReport(null)}
           onUpdateStatus={(st) => handleUpdateStatus(selectedReport, st)}
           onEscalate={() => handleEscalate(selectedReport)}
-          onCloseTicket={() => handleUpdateStatus(selectedReport, "Closed")}
+          onCloseTicket={() => handleClose(selectedReport)}
+          onResolveTicket={() => handleResolve(selectedReport)}
         />
       </div>
     );
@@ -193,7 +288,9 @@ export default function ReportsPage() {
         /* Screen 1: Inactive State (No Data) */
         <div className={styles.emptyCard}>
           <h2 className={styles.emptyTitle}>No report tickets available</h2>
-          <p className={styles.emptySubtitle}>Support requests and reports will appear here</p>
+          <p className={styles.emptySubtitle}>
+            Support requests and reports will appear here
+          </p>
         </div>
       ) : (
         /* Screen 2: Table View */
@@ -202,6 +299,8 @@ export default function ReportsPage() {
           onSelectReport={handleSelectReport}
           onUpdateStatus={(r, s) => handleUpdateStatus(r, s)}
           onEscalate={handleEscalate}
+          onClose={handleClose}
+          onResolve={handleResolve}
         />
       )}
     </div>

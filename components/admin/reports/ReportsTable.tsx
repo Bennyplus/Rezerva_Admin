@@ -10,6 +10,8 @@ interface ReportsTableProps {
   onSelectReport: (report: ReportTicket) => void;
   onUpdateStatus?: (report: ReportTicket, status: string) => void;
   onEscalate?: (report: ReportTicket) => void;
+  onResolve?: (report: ReportTicket) => void;
+  onClose?: (report: ReportTicket) => void;
 }
 
 export default function ReportsTable({
@@ -17,6 +19,8 @@ export default function ReportsTable({
   onSelectReport,
   onUpdateStatus,
   onEscalate,
+  onResolve,
+  onClose,
 }: ReportsTableProps) {
   const [searchQuery, setSearchQuery] = useState("");
   const [priorityFilter, setPriorityFilter] = useState<string>("All");
@@ -192,7 +196,11 @@ export default function ReportsTable({
                             className={styles.kebabMenuItem}
                             onClick={() => {
                               setOpenMenuId(null);
-                              onUpdateStatus?.(row, "Resolved");
+                              if (onResolve) {
+                                onResolve(row);
+                              } else {
+                                onUpdateStatus?.(row, "Resolved");
+                              }
                             }}
                           >
                             Resolve Ticket
@@ -202,7 +210,11 @@ export default function ReportsTable({
                             className={styles.kebabMenuItem}
                             onClick={() => {
                               setOpenMenuId(null);
-                              onUpdateStatus?.(row, "Closed");
+                              if (onClose) {
+                                onClose(row);
+                              } else {
+                                onUpdateStatus?.(row, "Closed");
+                              }
                             }}
                           >
                             Close Ticket

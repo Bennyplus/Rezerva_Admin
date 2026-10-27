@@ -1,15 +1,12 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import StatCard from "@/components/admin/StatCard";
 import Pagination from "@/components/admin/Pagination";
 import Spinner from "@/components/admin/Spinner";
 import ViewReferralModal from "@/components/admin/ViewReferralModal";
 import { useToast } from "@/lib/toast-context";
-import {
-  referralsService,
-  AdminReferral,
-} from "@/services/referrals-service";
+import { referralsService, AdminReferral } from "@/services/referrals-service";
 import styles from "./referrals.module.css";
 
 export default function ReferralsPage() {
@@ -19,8 +16,16 @@ export default function ReferralsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [statusFilter, setStatusFilter] = useState<
+    "All" | "Successful" | "Failed"
+  >("All");
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [openMenuId, setOpenMenuId] = useState<string | number | null>(null);
-  const [viewingReferral, setViewingReferral] = useState<AdminReferral | null>(null);
+  const [viewingReferral, setViewingReferral] = useState<AdminReferral | null>(
+    null,
+  );
+
+  const filterWrapRef = useRef<HTMLDivElement>(null);
 
   const fetchReferrals = useCallback(async () => {
     setIsLoading(true);
@@ -43,16 +48,20 @@ export default function ReferralsPage() {
     fetchReferrals();
   }, [fetchReferrals]);
 
-  // Click outside listener for kebab menu
+  // Click outside listener for kebab menu and filter popover
   useEffect(() => {
-    const handleClickOutside = () => {
-      if (openMenuId !== null) {
+    const handleClickOutside = (e: MouseEvent) => {
+      const target = e.target as HTMLElement | null;
+      if (filterWrapRef.current && !filterWrapRef.current.contains(target)) {
+        setIsFilterOpen(false);
+      }
+      if (!target?.closest(`.${styles.actionsWrapper}`)) {
         setOpenMenuId(null);
       }
     };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, [openMenuId]);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   // Kebab Menu Handlers
   const handleViewReferral = (item: AdminReferral) => {
@@ -103,14 +112,23 @@ export default function ReferralsPage() {
 
   // Stat metrics
   const totalReferrals = referrals.length;
-  const successfulReferrals = referrals.filter((r) => r.status === "Successful").length;
+  const successfulReferrals = referrals.filter(
+    (r) => r.status === "Successful",
+  ).length;
   const rewardsPaid = 0; // matching Screenshot 2 stat card value
-  const flaggedReferrals = referrals.filter((r) => r.fraudFlag === "Yes").length;
+  const flaggedReferrals = referrals.filter(
+    (r) => r.fraudFlag === "Yes",
+  ).length;
 
   // Filtered & paginated results
   const filteredReferrals = referrals.filter((it) => {
+    const matchesStatus =
+      statusFilter === "All" ||
+      it.status.toLowerCase() === statusFilter.toLowerCase();
+    if (!matchesStatus) return false;
+
     if (!searchQuery) return true;
-    const q = searchQuery.toLowerCase();
+    const q = searchQuery.toLowerCase().trim();
     return (
       it.referralId.toLowerCase().includes(q) ||
       it.referrer.toLowerCase().includes(q) ||
@@ -121,7 +139,10 @@ export default function ReferralsPage() {
   });
 
   const resultsPerPage = 9;
-  const totalPages = Math.max(1, Math.ceil(filteredReferrals.length / resultsPerPage));
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredReferrals.length / resultsPerPage),
+  );
   const paginatedReferrals = filteredReferrals.slice(
     (currentPage - 1) * resultsPerPage,
     currentPage * resultsPerPage,
@@ -187,15 +208,41 @@ export default function ReferralsPage() {
                 />
               </div>
 
-              <button type="button" className={styles.toolBtn}>
-                <FilterIcon />
-                Filter
-              </button>
-
-              <button type="button" className={styles.toolBtn}>
-                <SortIcon />
-                Sort by
-              </button>
+              <div
+                ref={filterWrapRef}
+                className={styles.toolBtnWrap}
+              >
+                <button
+                  type="button"
+                  className={`${styles.toolBtn} ${statusFilter !== "All" ? styles.toolBtnActive : ""}`}
+                  onClick={() => setIsFilterOpen((v) => !v)}
+                >
+                  <FilterIcon />
+                  {statusFilter === "All" ? "Filter" : statusFilter}
+                </button>
+                {isFilterOpen && (
+                  <div className={styles.popover}>
+                    {[
+                      { label: "All Statuses", val: "All" },
+                      { label: "Successful", val: "Successful" },
+                      { label: "Failed", val: "Failed" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.val}
+                        type="button"
+                        className={`${styles.popoverItem} ${statusFilter === opt.val ? styles.popoverItemActive : ""}`}
+                        onClick={() => {
+                          setStatusFilter(opt.val as any);
+                          setIsFilterOpen(false);
+                          setCurrentPage(1);
+                        }}
+                      >
+                        {opt.label}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -228,9 +275,7 @@ export default function ReferralsPage() {
                       </td>
 
                       {/* Referred User */}
-                      <td style={{ color: "#111827" }}>
-                        {item.referredUser}
-                      </td>
+                      <td style={{ color: "#111827" }}>{item.referredUser}</td>
 
                       {/* Reward */}
                       <td style={{ color: "#111827", fontWeight: 500 }}>
@@ -238,9 +283,7 @@ export default function ReferralsPage() {
                       </td>
 
                       {/* Fraud Flag */}
-                      <td style={{ color: "#111827" }}>
-                        {item.fraudFlag}
-                      </td>
+                      <td style={{ color: "#111827" }}>{item.fraudFlag}</td>
 
                       {/* Status */}
                       <td>
